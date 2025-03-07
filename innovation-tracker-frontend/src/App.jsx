@@ -8,6 +8,7 @@ import CreateRoute from "./component/util/CreateRoute.jsx";
 
 import Container from "./component/backbone/Container";
 import Header from "./component/backbone/Header";
+import Header2 from "./component/backbone/Header2.jsx";
 import SideBar from "./component/backbone/SideBar";
 
 import Login from "./component/page/login/Index";
@@ -19,15 +20,16 @@ export default function App() {
   const [listRoute, setListRoute] = useState([]);
   const isLogoutPage = window.location.pathname.includes("logout");
   const cookie = Cookies.get("activeUser");
-
+  let userInfo = "";
   if (isLogoutPage) return <Logout />;
-  else if (!cookie) return <Login />;
+  // else if (!cookie) return <Login />;
   else {
-    const userInfo = JSON.parse(decryptId(cookie));
+    // console.log(cookie);
+    if (cookie) userInfo = JSON.parse(decryptId(cookie));
 
     useEffect(() => {
       const getMenu = async () => {
-        const menu = await CreateMenu(userInfo.role);
+        const menu = await CreateMenu(userInfo.role || "ROL01");
         const route = CreateRoute.filter((routeItem) => {
           const pathExistsInMenu = menu.some((menuItem) => {
             if (menuItem.link.replace(ROOT_LINK, "") === routeItem.path) {
@@ -61,7 +63,7 @@ export default function App() {
       <>
         {listRoute.length > 0 && (
           <>
-            <Header displayName={userInfo.nama} roleName={userInfo.peran} />
+            <Header2 displayName={userInfo.nama} roleName={userInfo.peran} />
             <div style={{ marginTop: "70px" }}></div>
             <div className="d-flex flex-row">
               <SideBar listMenu={listMenu} />

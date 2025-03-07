@@ -69,6 +69,22 @@ dialog::backdrop {
   pointer-events: none;
 }
 
+.bg-p {
+  background-color: #eef9ff;
+}
+
+@media (min-width: 768px) {
+  .nav-mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-dekstop {
+    display: none;
+  }
+}
+
 @media only screen and (max-width: 1280px) {
   .sidebarMenu {
     display: none;
