@@ -12,23 +12,10 @@ const CreateMenu = async (role) => {
     let lastHeadkey = "";
     const transformedMenu = [
       {
-        head: "Logout",
-        headkey: "logout",
-        link: ROOT_LINK + "/logout",
-        sub: [],
-      },
-      {
-        head: "Beranda",
-        headkey: "beranda",
+        head: "HOME",
+        headkey: "home",
         link: ROOT_LINK + "/",
         sub: [],
-      },
-      {
-        head: "Notifikasi",
-        headkey: "notifikasi",
-        link: ROOT_LINK + "/notifikasi",
-        sub: [],
-        isHidden: true,
       },
     ];
 

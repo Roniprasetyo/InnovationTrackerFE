@@ -8,8 +8,8 @@ import CreateRoute from "./component/util/CreateRoute.jsx";
 
 import Container from "./component/backbone/Container";
 import Header from "./component/backbone/Header";
-import Header2 from "./component/backbone/Header2.jsx";
 import SideBar from "./component/backbone/SideBar";
+import Footer from "./component/backbone/Footer.jsx";
 
 import Login from "./component/page/login/Index";
 import Logout from "./component/page/logout/Index";
@@ -18,13 +18,13 @@ import NotFound from "./component/page/not-found/Index";
 export default function App() {
   const [listMenu, setListMenu] = useState([]);
   const [listRoute, setListRoute] = useState([]);
+  const isLoginPage = window.location.pathname.includes("login");
   const isLogoutPage = window.location.pathname.includes("logout");
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (isLogoutPage) return <Logout />;
-  // else if (!cookie) return <Login />;
+  else if (!cookie) return <Login />;
   else {
-    // console.log(cookie);
     if (cookie) userInfo = JSON.parse(decryptId(cookie));
 
     useEffect(() => {
@@ -47,10 +47,16 @@ export default function App() {
           return pathExistsInMenu;
         });
 
-        route.push({
-          path: "/*",
-          element: <NotFound />,
-        });
+        route.push(
+          {
+            path: "/login",
+            element: <Login />,
+          },
+          {
+            path: "/*",
+            element: <NotFound />,
+          }
+        );
 
         setListMenu(menu);
         setListRoute(route);
@@ -63,18 +69,22 @@ export default function App() {
       <>
         {listRoute.length > 0 && (
           <>
-            <Header2 displayName={userInfo.nama} roleName={userInfo.peran} />
-            <div style={{ marginTop: "70px" }}></div>
-            <div className="d-flex flex-row">
-              <SideBar listMenu={listMenu} />
-              <Container>
-                <RouterProvider
-                  router={createBrowserRouter(listRoute, {
-                    basename: BASE_ROUTE,
-                  })}
-                />
-              </Container>
-            </div>
+            {!isLoginPage && (
+              <Header
+                displayName={userInfo.nama}
+                roleName={userInfo.peran}
+                listMenu={listMenu}
+              />
+            )}
+
+            <main role="main">
+              <RouterProvider
+                router={createBrowserRouter(listRoute, {
+                  basename: BASE_ROUTE,
+                })}
+              />
+            </main>
+            {!isLoginPage && <Footer />}
           </>
         )}
       </>

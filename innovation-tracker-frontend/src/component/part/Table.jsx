@@ -195,7 +195,10 @@ export default function Table({
                 ) {
                   colCount++;
                   return (
-                    <th key={"Header" + index} className="text-center">
+                    <th
+                      key={"Header" + index}
+                      className="text-center"
+                    >
                       {value}
                     </th>
                   );

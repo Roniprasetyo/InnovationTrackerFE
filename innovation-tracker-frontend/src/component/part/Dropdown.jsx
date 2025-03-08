@@ -18,10 +18,10 @@ const DropDown = forwardRef(function DropDown(
 
   switch (type) {
     case "pilih":
-      placeholder = <option value="">{"-- Pilih " + label + " --"}</option>;
+      placeholder = <option value="">{"-- Select " + label + " --"}</option>;
       break;
     case "semua":
-      placeholder = <option value="">-- Semua --</option>;
+      placeholder = <option value="">-- All --</option>;
       break;
     default:
       break;
@@ -47,6 +47,7 @@ const DropDown = forwardRef(function DropDown(
           name={forInput}
           ref={ref}
           disabled={isDisabled}
+          style={{ borderRadius: "16px" }}
           {...props}
         >
           {placeholder}

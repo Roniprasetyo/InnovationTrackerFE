@@ -1,7 +1,9 @@
 import { lazy } from "react";
 
 const Beranda = lazy(() => import("../page/beranda/Root"));
+const Login = lazy(() => import("../page/login/Index"));
 const Notifikasi = lazy(() => import("../page/notifikasi/Root"));
+const MasterSetting = lazy(() => import("../page/master-setting/Root"));
 const MasterPelanggan = lazy(() => import("../page/master-pelanggan/Root"));
 const MasterProduk = lazy(() => import("../page/master-produk/Root"));
 const MasterProses = lazy(() => import("../page/master-proses/Root"));
@@ -23,6 +25,14 @@ const routeList = [
   {
     path: "/",
     element: <Beranda />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/setting",
+    element: <MasterSetting />,
   },
   {
     path: "/notifikasi",

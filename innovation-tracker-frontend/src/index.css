@@ -73,6 +73,15 @@ dialog::backdrop {
   background-color: #eef9ff;
 }
 
+.nav-link:hover,
+.dropdown-item:hover {
+  font-weight: bold;
+}
+
+.color-primary {
+  color: rgb(0, 89, 171);
+}
+
 @media (min-width: 768px) {
   .nav-mobile {
     display: none;

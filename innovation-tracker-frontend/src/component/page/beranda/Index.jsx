@@ -57,147 +57,71 @@ export default function BerandaIndex() {
 
   return (
     <>
-      {isError.error && (
-        <div className="flex-fill">
-          <Alert type="danger" message={isError.message} />
-        </div>
-      )}
-      <div className="card">
-        <div className="card-header bg-primary text-white p-4">
-          <span className="lead fw-medium">
-            Selamat Datang di Innovation Tracker
-          </span>
-        </div>
-        <div className="card-body lead p-4">
-          Innovation Tracker ini akan membantu Anda dalam mengelola
-          inovasi anda.
-          <br />
-          Mari mulai dengan mengeksplorasi fitur-fitur yang ada dengan mengakses
-          menu yang tersedia.
+      <div>
+        <div className="carousel slide">
+          <div className="carousel-indicators">
+            <button
+              type="button"
+              data-bs-target=""
+              aria-label="Slide 1"
+              className="active"
+              aria-current="true"
+            ></button>
+          </div>
+          <div className="carousel-inner">
+            <div className="active carousel-item">
+              <img
+                sizes="(max-width: 575px) 100vw, (max-width: 767px) 50vw, (max-width: 991px) 33vw, 25vw"
+                loading="lazy"
+                className="d-block w-100 rounded blur-load blur-load-loaded"
+                src="https://api.polytechnic.astra.ac.id:2906/operational_api/Uploads/MOB_2024626102616Web Training.jpg"
+                alt="Slide 0"
+              />
+            </div>
+          </div>
+          <a
+            className="carousel-control-prev"
+            role="button"
+            tabindex="0"
+            href="#"
+          >
+            <span
+              aria-hidden="true"
+              className="carousel-control-prev-icon"
+            ></span>
+            <span className="visually-hidden">Previous</span>
+          </a>
+          <a
+            className="carousel-control-next"
+            role="button"
+            tabindex="0"
+            href="#"
+          >
+            <span
+              aria-hidden="true"
+              className="carousel-control-next-icon"
+            ></span>
+            <span className="visually-hidden">Next</span>
+          </a>
         </div>
       </div>
-      <div className="row mx-0 my-2">
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Total Permintaan Pelanggan</div>
-              <div className="h1">
-                {formDataRef.current.countTotalPermintaan}
+      <div className="container p-3">
+        {isError.error && (
+          <div className="flex-fill">
+            <Alert type="danger" message={isError.message} />
+          </div>
+        )}
+        <div class="my-3">
+          <div class="mb-4 color-primary text-center">
+            <div className="d-flex gap-3 justify-content-center">
+              <h2 class="display-1 fw-bold">WELCOME</h2>
+              <div className="d-flex align-items-end mb-2">
+                <h2 class="display-5 fw-medium align-items-end text-start">
+                  TO ASTRATECH
+                </h2>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-dark-subtle bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Terlambat (In Progress)</div>
-              <div className="h1">{formDataRef.current.countTerlambat}</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-danger bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Batal</div>
-              <div className="h1">{formDataRef.current.countBatal}</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-dark-subtle bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Selesai (In Progress)</div>
-              <div className="h1">{formDataRef.current.countSelesai}</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-12">
-          <div className="pt-3">
-            <hr />
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">
-                Menunggu Analisa Engineering/PPIC
-              </div>
-              <div className="h1">
-                {formDataRef.current.countMenungguAnalisa}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Belum Dibuat RAK</div>
-              <div className="h1">
-                {formDataRef.current.countBelumDibuatRAK}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Belum Dibuat Penawaran</div>
-              <div className="h1">
-                {formDataRef.current.countBelumDibuatPenawaran}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Dalam Proses Negosiasi</div>
-              <div className="h1">
-                {formDataRef.current.countDalamProsesNegosiasi}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Belum Dibuat SPK</div>
-              <div className="h1">
-                {formDataRef.current.countBelumDibuatSPK}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">Dalam Proses Produksi</div>
-              <div className="h1">
-                {formDataRef.current.countDalamProsesProduksi}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-dark-subtle bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">
-                Dalam Proses QC (In Progress)
-              </div>
-              <div className="h1">{formDataRef.current.countDalamProsesQC}</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3">
-          <div className="card mt-3 border-0">
-            <div className="card-body bg-dark-subtle bg-gradient rounded-2 text-white">
-              <div className="lead fw-medium">
-                Dalam Proses Delivery (In Progress)
-              </div>
-              <div className="h1">
-                {formDataRef.current.countDalamProsesDelivery}
-              </div>
-            </div>
+            <div className="display-4 fw-medium">INNOVATION LIBRARY</div>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ export default function Filter({ children }) {
     <>
       <Button
         iconName="apps-sort"
-        classType="primary dropdown-toggle px-4 border-start"
+        classType="primary dropdown-toggle px-3 border-start"
         title="Saring atau Urutkan Data"
         data-bs-toggle="dropdown"
         data-bs-auto-close="outside"

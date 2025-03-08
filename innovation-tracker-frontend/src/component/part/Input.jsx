@@ -35,6 +35,7 @@ const Input = forwardRef(function Input(
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
+              style={{ borderRadius: "16px" }}
               {...props}
             ></textarea>
           )}
@@ -47,6 +48,7 @@ const Input = forwardRef(function Input(
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
+              style={{ borderRadius: "16px" }}
               {...props}
             />
           )}
@@ -63,6 +65,7 @@ const Input = forwardRef(function Input(
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
+              style={{ borderRadius: "16px" }}
               {...props}
             ></textarea>
           )}
@@ -75,6 +78,7 @@ const Input = forwardRef(function Input(
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
+              style={{ borderRadius: "16px" }}
               {...props}
             />
           )}

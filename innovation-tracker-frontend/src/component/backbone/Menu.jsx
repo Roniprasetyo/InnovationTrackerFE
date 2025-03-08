@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import Icon from "../part/Icon";
+import { Link } from "react-router-dom";
 
 let active_menu;
 // let active_collapse;
@@ -39,71 +40,58 @@ export default function Menu({ listMenu }) {
   }, [listMenu]);
 
   return (
-    <nav>
-      {listMenu.map((menu) => {
+    <>
+      {listMenu.map((menu, index) => {
         if (activeURL === menu["link"]) setActiveMenu(menu["head"]);
         if (!menu.isHidden) {
           return (
-            <div key={"#menucollapse" + menu["headkey"]}>
-              <a
-                className="text-decoration-none text-black fw-bold"
-                data-bs-toggle={menu["link"] === "#" ? "collapse" : ""}
-                href={
-                  menu["link"] === "#"
-                    ? "#menucollapse" + menu["headkey"]
-                    : menu["link"]
-                }
-              >
-                <div
+            <li
+              key={index}
+              className={`nav-item ${menu.sub.length > 0 ? "dropdown" : ""}`}
+            >
+              {menu.sub.length > 0 ? (
+                <>
+                  <a
+                    className="nav-link dropdown-toggle"
+                    href="#"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style={{ color: "white" }}
+                  >
+                    {menu.head}
+                  </a>
+                  <ul className="dropdown-menu">
+                    {menu.sub.map((subItem, subIndex) => (
+                      <li key={subIndex}>
+                        <a
+                          className={
+                            "dropdown-item " +
+                            (activeURL === subItem.link ? "active" : "")
+                          }
+                          href={subItem.link}
+                        >
+                          {subItem.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <a
                   className={
-                    "w-100 px-4 py-2 d-flex" +
-                    (activeURL === menu["link"] ? " bg-primary text-white" : "")
+                    "nav-link " + (activeURL === menu.link ? "active fw-bold" : "")
                   }
+                  style={{ color: "white" }}
+                  href={menu.link}
                 >
-                  <Icon
-                    type="Bold"
-                    name={checkIcon(menu["head"])}
-                    cssClass="me-2"
-                    style={{ marginTop: "2px" }}
-                  />
-                  <span>{menu["head"]}</span>
-                </div>
-              </a>
-              <div
-                className="collapse show"
-                id={"menucollapse" + menu["headkey"]}
-              >
-                {menu["sub"].map((sub) => {
-                  if (activeURL === sub["link"]) {
-                    setActiveMenu(menu["head"] + " - " + sub["title"]);
-                    //setActiveCollapse("menucollapse" + menu["headkey"]);
-                  }
-                  return (
-                    <a
-                      className="text-decoration-none text-black"
-                      href={sub["link"]}
-                      key={"#menucollapse" + menu["headkey"] + sub["link"]}
-                    >
-                      <div
-                        className={
-                          "w-100 pe-4 py-1 d-flex fw-medium" +
-                          (activeURL === sub["link"]
-                            ? " bg-primary text-white"
-                            : "")
-                        }
-                        style={{ paddingLeft: "45px" }}
-                      >
-                        <Icon name="minus-small" cssClass="me-2 mt-1" />
-                        <span>{sub["title"]}</span>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
+                  {menu.head}
+                </a>
+              )}
+            </li>
           );
         }
       })}
-    </nav>
+    </>
   );
 }

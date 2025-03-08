@@ -9,13 +9,14 @@ import {
 } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import { encryptId } from "../../util/Encryptor";
-import logo from "../../../assets/IMG_Logo.png";
+import logo from "../../../assets/Logo-blue.png";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
 import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Modal from "../../part/Modal";
+import Building from "../../../assets/elements/bangunan.png";
 
 export default function Login() {
   const [errors, setErrors] = useState({});
@@ -119,7 +120,7 @@ export default function Login() {
             agent: navigator.userAgent,
             application: APPLICATION_ID,
           });
-
+          console.log("sampe sini");
           if (data === "ERROR")
             throw new Error("Terjadi kesalahan: Gagal memilih peran pengguna.");
           else {
@@ -155,7 +156,14 @@ export default function Login() {
   if (Cookies.get("activeUser")) window.location.href = "/";
   else {
     return (
-      <>
+      <div
+        style={{
+          background:
+            "linear-gradient(to bottom, #2654a1, #2654a1, #4989c2, #42abdc)",
+          height: "100vh",
+          width: "100%",
+        }}
+      >
         {isLoading && <Loading />}
         {isError.error && (
           <div className="flex-fill m-3">
@@ -188,13 +196,13 @@ export default function Login() {
           >
             <div
               className="card w-50"
-              style={{ minWidth: "360px", maxWidth: "500px" }}
+              style={{ minWidth: "360px", maxWidth: "600px" }}
             >
               <div className="card-body p-4 text-center">
                 <img
                   src={logo}
                   alt="Logo AstraTech"
-                  className="w-100 px-4 py-4"
+                  className="w-75 px-4 py-4"
                 />
                 <p className="lead fw-medium fs-5 text-nowrap">
                   {APPLICATION_NAME.toUpperCase()}
@@ -231,11 +239,26 @@ export default function Login() {
               </div>
             </div>
           </div>
-          <div className="fixed-bottom p-3 text-center bg-white">
+
+          {/* <div className="fixed-bottom p-3 text-center bg-white">
             Copyright &copy; 2024 - PSI Politeknik Astra
-          </div>
+          </div> */}
         </form>
-      </>
+        <img
+          sizes="(max-width: 575px) 100vw, (max-width: 767px) 50vw, (max-width: 991px) 33vw, 25vw"
+          loading="lazy"
+          className="d-block w-100 rounded blur-load blur-load-loaded"
+          src={Building}
+          alt="Slide 0"
+          style={{
+            position: "absolute",
+            bottom: "0",
+            width: "100%",
+            left: "0",
+            zIndex: 1,
+          }}
+        />
+      </div>
     );
   }
 }
