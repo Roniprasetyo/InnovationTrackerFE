@@ -32,8 +32,8 @@ export default function Login() {
   const modalRef = useRef();
 
   const userSchema = object({
-    username: string().max(50, "maksimum 50 karakter").required("harus diisi"),
-    password: string().required("harus diisi"),
+    username: string().max(50, "maximum 50 characters").required("required"),
+    password: string().required("required"),
   });
 
   const handleInputChange = (e) => {
@@ -68,10 +68,9 @@ export default function Login() {
           formDataRef.current
         );
 
-        if (data === "ERROR")
-          throw new Error("Terjadi kesalahan: Gagal melakukan autentikasi.");
+        if (data === "ERROR") throw new Error("Error: Failed to authenticate.");
         else if (data.Status && data.Status === "LOGIN FAILED")
-          throw new Error("Nama akun atau kata sandi salah.");
+          throw new Error("Wrong username or password.");
         else {
           setListRole(data);
           modalRef.current.open();
@@ -98,7 +97,7 @@ export default function Login() {
       );
 
       if (ipAddress === "ERROR")
-        throw new Error("Terjadi kesalahan: Gagal mendapatkan alamat IP.");
+        throw new Error("Error: Failed to get IP address.");
       else {
         const token = await UseFetch(API_LINK + "Utilities/CreateJWTToken", {
           username: formDataRef.current.username,
@@ -107,9 +106,7 @@ export default function Login() {
         });
 
         if (token === "ERROR")
-          throw new Error(
-            "Terjadi kesalahan: Gagal mendapatkan token autentikasi."
-          );
+          throw new Error("Error: Filed to get authentication token.");
         else {
           localStorage.setItem("jwtToken", token.Token);
 
@@ -122,7 +119,7 @@ export default function Login() {
           });
           console.log("sampe sini");
           if (data === "ERROR")
-            throw new Error("Terjadi kesalahan: Gagal memilih peran pengguna.");
+            throw new Error("Error: Failed to select role.");
           else {
             const userInfo = {
               username: formDataRef.current.username,
@@ -166,8 +163,12 @@ export default function Login() {
       >
         {isLoading && <Loading />}
         {isError.error && (
-          <div className="flex-fill m-3">
-            <Alert type="danger" message={isError.message} />
+          <div className="flex-fill ">
+            <Alert
+              type="danger"
+              message={isError.message}
+              handleClose={() => setIsError({ error: false, message: "" })}
+            />
           </div>
         )}
         <Modal title="Pilih Peran" ref={modalRef} size="small">
@@ -189,75 +190,67 @@ export default function Login() {
             })}
           </div>
         </Modal>
-        <form onSubmit={handleAdd}>
-          <div
-            className="container-fluid d-flex justify-content-center align-items-center"
-            style={{ height: "70vh" }}
-          >
-            <div
-              className="card w-50"
-              style={{ minWidth: "360px", maxWidth: "600px" }}
-            >
-              <div className="card-body p-4 text-center">
-                <img
-                  src={logo}
-                  alt="Logo AstraTech"
-                  className="w-75 px-4 py-4"
-                />
-                <p className="lead fw-medium fs-5 text-nowrap">
-                  {APPLICATION_NAME.toUpperCase()}
-                </p>
-                <div style={{ textAlign: "left" }}>
-                  <div className="py-2 px-1">
-                    <Input
-                      type="text"
-                      forInput="username"
-                      placeholder="Nama Akun"
-                      isRequired
-                      value={formDataRef.current.username}
-                      onChange={handleInputChange}
-                      errorMessage={errors.username}
-                    />
-                  </div>
-                  <div className="py-2 px-1">
-                    <Input
-                      type="password"
-                      forInput="password"
-                      placeholder="Kata Sandi"
-                      isRequired
-                      value={formDataRef.current.password}
-                      onChange={handleInputChange}
-                      errorMessage={errors.password}
-                    />
-                  </div>
-                  <Button
-                    classType="primary my-3 w-100"
-                    type="submit"
-                    label="MASUK"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* <div className="fixed-bottom p-3 text-center bg-white">
-            Copyright &copy; 2024 - PSI Politeknik Astra
-          </div> */}
-        </form>
         <img
           sizes="(max-width: 575px) 100vw, (max-width: 767px) 50vw, (max-width: 991px) 33vw, 25vw"
           loading="lazy"
           className="d-block w-100 rounded blur-load blur-load-loaded"
           src={Building}
-          alt="Slide 0"
+          alt="Building"
           style={{
             position: "absolute",
             bottom: "0",
             width: "100%",
             left: "0",
-            zIndex: 1,
+            zIndex: 0,
           }}
         />
+        <div
+          className="container-fluid d-flex justify-content-center align-items-center"
+          style={{ height: "70vh" }}
+        >
+          <div
+            className="card w-50"
+            style={{ minWidth: "360px", maxWidth: "600px" }}
+          >
+            <div className="card-body p-4 text-center">
+              <img src={logo} alt="Logo AstraTech" className="w-75 px-4 py-4" />
+              <p className="lead fw-medium fs-5 text-nowrap">
+                {APPLICATION_NAME.toUpperCase()}
+              </p>
+              <form onSubmit={handleAdd}>
+                <div className="py-2 px-1">
+                  <Input
+                    type="text"
+                    forInput="username"
+                    placeholder="Username"
+                    textAlign="center"
+                    isRequired
+                    value={formDataRef.current.username}
+                    onChange={handleInputChange}
+                    errorMessage={errors.username}
+                  />
+                </div>
+                <div className="py-2 px-1">
+                  <Input
+                    type="password"
+                    forInput="password"
+                    placeholder="Password"
+                    textAlign="center"
+                    isRequired
+                    value={formDataRef.current.password}
+                    onChange={handleInputChange}
+                    errorMessage={errors.password}
+                  />
+                </div>
+                <Button
+                  classType="primary my-3 w-100 fw-bold"
+                  type="submit"
+                  label="LOGIN"
+                />
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

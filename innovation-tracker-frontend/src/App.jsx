@@ -6,13 +6,12 @@ import { BASE_ROUTE, ROOT_LINK } from "./component/util/Constants";
 import CreateMenu from "./component/util/CreateMenu";
 import CreateRoute from "./component/util/CreateRoute.jsx";
 
-import Container from "./component/backbone/Container";
 import Header from "./component/backbone/Header";
-import SideBar from "./component/backbone/SideBar";
 import Footer from "./component/backbone/Footer.jsx";
 
 import Login from "./component/page/login/Index";
 import Logout from "./component/page/logout/Index";
+import QualityControlProject from "./component/page/quality-control-project/Root";
 import NotFound from "./component/page/not-found/Index";
 
 export default function App() {
@@ -51,6 +50,10 @@ export default function App() {
           {
             path: "/login",
             element: <Login />,
+          },
+          {
+            path: "/submission/qcp",
+            element: <QualityControlProject />,
           },
           {
             path: "/*",

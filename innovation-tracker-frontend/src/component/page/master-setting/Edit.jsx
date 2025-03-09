@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { object, string } from "yup";
+import { useRef, useState, useEffect } from "react";
+import { number, object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -16,21 +16,23 @@ const listTypeSetting = [
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MasterSettingEdit({ onChangePage }) {
+export default function MasterSettingEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
+    setId: "",
     setName: "",
     setType: "",
     setDesc: "",
   });
 
   const userSchema = object({
-    setName: string().max(100, "maksimum 100 karakter").required("harus diisi"),
+    setId: number(),
+    setName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
     setType: string().required("harus dipilih"),
-    setDesc: string(),
+    setDesc: string().max(100, "maksimum 100 karakter").required("harus diisi"),
   });
 
   useEffect(() => {
@@ -38,10 +40,9 @@ export default function MasterSettingEdit({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(
-          API_LINK + "MasterAlatMesin/GetDataAlatMesinById",
-          { id: withID }
-        );
+        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingById", {
+          id: withID,
+        });
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error(
@@ -90,7 +91,7 @@ export default function MasterSettingEdit({ onChangePage }) {
       setErrors({});
       try {
         const data = await UseFetch(
-          API_LINK + "MasterAlatMesin/CreateAlatMesin",
+          API_LINK + "MasterSetting/UpdateSetting",
           formDataRef.current
         );
 
@@ -113,8 +114,6 @@ export default function MasterSettingEdit({ onChangePage }) {
     } else window.scrollTo(0, 0);
   };
 
-  if (isLoading) return <Loading />;
-
   return (
     <>
       <div
@@ -136,55 +135,63 @@ export default function MasterSettingEdit({ onChangePage }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Master Setting
+          Update Data
         </h2>
       </div>
       <div className="mt-5">
         {isError.error && (
           <div className="flex-fill ">
-            <Alert type="danger" message={isError.message} />
+            <Alert
+              type="danger"
+              message={isError.message}
+              handleClose={() => setIsError({ error: false, message: "" })}
+            />
           </div>
         )}
-        <form onSubmit={handleAdd} style={{ minHeight: "50vh" }}>
-          <div className="card my-3">
+        <form onSubmit={handleAdd}>
+          <div className="card mb-5">
             <div className="card-header p-2">
               <h2 className="fw-bold text-center">Setting Form</h2>
             </div>
-            <div className="card-body">
-              <div className="row mt-4">
-                <div className="col-lg-6">
-                  <Input
-                    type="text"
-                    forInput="setName"
-                    label="Name"
-                    isRequired
-                    value={formDataRef.current.setName}
-                    onChange={handleInputChange}
-                    errorMessage={errors.setName}
-                  />
+            <div className="card-body p-4">
+              {isLoading ? (
+                <Loading />
+              ) : (
+                <div className="row mt-4">
+                  <div className="col-lg-6">
+                    <Input
+                      type="text"
+                      forInput="setName"
+                      label="Name"
+                      isRequired
+                      value={formDataRef.current.setName}
+                      onChange={handleInputChange}
+                      errorMessage={errors.setName}
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <DropDown
+                      forInput="setType"
+                      label="Type"
+                      arrData={listTypeSetting}
+                      isRequired
+                      value={formDataRef.current.setType}
+                      onChange={handleInputChange}
+                      errorMessage={errors.setType}
+                    />
+                  </div>
+                  <div className="col-lg-12">
+                    <Input
+                      type="textarea"
+                      forInput="setDesc"
+                      label="Description"
+                      value={formDataRef.current.setDesc}
+                      onChange={handleInputChange}
+                      errorMessage={errors.setDesc}
+                    />
+                  </div>
                 </div>
-                <div className="col-lg-6">
-                  <DropDown
-                    forInput="setType"
-                    label="Type"
-                    arrData={listTypeSetting}
-                    isRequired
-                    value={formDataRef.current.setType}
-                    onChange={handleInputChange}
-                    errorMessage={errors.setType}
-                  />
-                </div>
-                <div className="col-lg-12">
-                  <Input
-                    type="textarea"
-                    forInput="setDesc"
-                    label="Description"
-                    value={formDataRef.current.setDesc}
-                    onChange={handleInputChange}
-                    errorMessage={errors.setDesc}
-                  />
-                </div>
-              </div>
+              )}
               <div className="d-flex justify-content-between align-items-center">
                 <div className="flex-grow-1 m-2">
                   <Button

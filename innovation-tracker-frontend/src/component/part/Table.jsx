@@ -13,6 +13,7 @@ export default function Table({
   onUpload = () => {},
   onFinal = () => {},
   onPrint = () => {},
+  onRemove = () => {},
 }) {
   let colPosition;
   let colCount = 0;
@@ -113,6 +114,17 @@ export default function Table({
               onClick={() => onReject(id)}
             />
           );
+        case "Remove":
+          return (
+            <Icon
+              key={key + action}
+              name="cross"
+              type="Bold"
+              cssClass="btn px-1 py-0 text-danger"
+              title="Remove"
+              onClick={() => onRemove(id)}
+            />
+          );
         case "Sent":
           return (
             <Icon
@@ -195,10 +207,7 @@ export default function Table({
                 ) {
                   colCount++;
                   return (
-                    <th
-                      key={"Header" + index}
-                      className="text-center"
-                    >
+                    <th key={"Header" + index} className="text-center">
                       {value}
                     </th>
                   );

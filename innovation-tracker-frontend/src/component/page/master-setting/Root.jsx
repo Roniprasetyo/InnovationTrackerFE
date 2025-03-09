@@ -1,6 +1,8 @@
 import { useState } from "react";
 import MasterSettingIndex from "./Index";
 import MasterSettingAdd from "./Add";
+import MasterSettingDetail from "./Detail";
+import MasterSettingEdit from "./Edit";
 
 export default function MasterSetting() {
   const [pageMode, setPageMode] = useState("index");
@@ -12,6 +14,17 @@ export default function MasterSetting() {
         return <MasterSettingIndex onChangePage={handleSetPageMode} />;
       case "add":
         return <MasterSettingAdd onChangePage={handleSetPageMode} />;
+      case "edit":
+        return (
+          <MasterSettingEdit onChangePage={handleSetPageMode} withID={dataID} />
+        );
+      case "detail":
+        return (
+          <MasterSettingDetail
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
     }
   }
 

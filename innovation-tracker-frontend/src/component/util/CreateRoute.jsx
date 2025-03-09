@@ -3,6 +3,8 @@ import { lazy } from "react";
 const Beranda = lazy(() => import("../page/beranda/Root"));
 const Login = lazy(() => import("../page/login/Index"));
 const Notifikasi = lazy(() => import("../page/notifikasi/Root"));
+const Submission = lazy(() => import("../page/submission/Index"));
+const QualityControlProject = lazy(() => import("../page/quality-control-project/Root"));
 const MasterSetting = lazy(() => import("../page/master-setting/Root"));
 const MasterPelanggan = lazy(() => import("../page/master-pelanggan/Root"));
 const MasterProduk = lazy(() => import("../page/master-produk/Root"));
@@ -29,6 +31,14 @@ const routeList = [
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/submission",
+    element: <Submission />,
+  },
+  {
+    path: "/submission/qcp",
+    element: <QualityControlProject />,
   },
   {
     path: "/setting",

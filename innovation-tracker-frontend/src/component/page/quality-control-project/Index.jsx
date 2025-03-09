@@ -37,7 +37,7 @@ const dataFilterJenis = [
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MasterSettingIndex({ onChangePage }) {
+export default function QualityControlProjectIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
@@ -130,14 +130,18 @@ export default function MasterSettingIndex({ onChangePage }) {
     fetchData();
   }, [currentFilter]);
 
+  if (isLoading) return <Loading />;
+
   return (
     <>
       <div className="my-3">
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
-            <h2 className="display-1 fw-bold">Manage</h2>
+            <h2 className="display-1 fw-bold">Quality</h2>
             <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">Setting</h2>
+              <h2 className="display-5 fw-bold align-items-end">
+                Control Project
+              </h2>
             </div>
           </div>
         </div>
@@ -198,24 +202,20 @@ export default function MasterSettingIndex({ onChangePage }) {
         </div>
       </div>
       <div className="mt-3 mb-5">
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <div className="table-responsive">
-            <Table
-              data={currentData}
-              onToggle={handleSetStatus}
-              onDetail={onChangePage}
-              onEdit={onChangePage}
-            />
-            <Paging
-              pageSize={PAGE_SIZE}
-              pageCurrent={currentFilter.page}
-              totalData={currentData[0]["Count"]}
-              navigation={handleSetCurrentPage}
-            />
-          </div>
-        )}
+        <div className="table-responsive">
+          <Table
+            data={currentData}
+            onToggle={handleSetStatus}
+            onDetail={onChangePage}
+            onEdit={onChangePage}
+          />
+          <Paging
+            pageSize={PAGE_SIZE}
+            pageCurrent={currentFilter.page}
+            totalData={currentData[0]["Count"]}
+            navigation={handleSetCurrentPage}
+          />
+        </div>
       </div>
     </>
   );

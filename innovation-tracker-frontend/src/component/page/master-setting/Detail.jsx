@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
@@ -17,21 +17,16 @@ const listTypeSetting = [
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MasterSettingDetail({ onChangePage }) {
+export default function MasterSettingDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
+    setId: "",
     setName: "",
     setType: "",
     setDesc: "",
-  });
-
-  const userSchema = object({
-    setName: string().max(100, "maksimum 100 karakter").required("harus diisi"),
-    setType: string().required("harus dipilih"),
-    setDesc: string(),
   });
 
   useEffect(() => {
@@ -39,10 +34,9 @@ export default function MasterSettingDetail({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(
-          API_LINK + "MasterAlatMesin/GetDataAlatMesinById",
-          { id: withID }
-        );
+        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingById", {
+          id: withID,
+        });
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error(
@@ -66,56 +60,6 @@ export default function MasterSettingDetail({ onChangePage }) {
     fetchData();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    const validationError = validateInput(name, value, userSchema);
-    formDataRef.current[name] = value;
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
-  };
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-
-    const validationErrors = await validateAllInputs(
-      formDataRef.current,
-      userSchema,
-      setErrors
-    );
-
-    if (Object.values(validationErrors).every((error) => !error)) {
-      setIsLoading(true);
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setErrors({});
-      try {
-        const data = await UseFetch(
-          API_LINK + "MasterAlatMesin/CreateAlatMesin",
-          formDataRef.current
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to submit the data.");
-        } else {
-          SweetAlert("Success", "Data successfully submitted", "success");
-          onChangePage("index");
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
-      }
-    } else window.scrollTo(0, 0);
-  };
-
-  if (isLoading) return <Loading />;
-
   return (
     <>
       <div
@@ -137,22 +81,28 @@ export default function MasterSettingDetail({ onChangePage }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Master Setting
+          Detail Data
         </h2>
       </div>
-      <div className="mt-5">
+      <div className="mt-5 mb-5">
         {isError.error && (
           <div className="flex-fill ">
-            <Alert type="danger" message={isError.message} />
+            <Alert
+              type="danger"
+              message={isError.message}
+              handleClose={() => setIsError({ error: false, message: "" })}
+            />
           </div>
         )}
-        <form onSubmit={handleAdd} style={{ minHeight: "50vh" }}>
-          <div className="card my-3">
-            <div className="card-header p-2">
-              <h2 className="fw-bold text-center">Setting Form</h2>
-            </div>
-            <div className="card-body">
-              <div className="row mt-4">
+        <div className="card">
+          <div className="card-header p-2">
+            <h2 className="fw-bold text-center">Setting Detail</h2>
+          </div>
+          <div className="card-body p-4">
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <div className="row">
                 <div className="col-lg-6">
                   <Label
                     forLabel="setName"
@@ -175,9 +125,9 @@ export default function MasterSettingDetail({ onChangePage }) {
                   />
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        </form>
+        </div>
       </div>
     </>
   );

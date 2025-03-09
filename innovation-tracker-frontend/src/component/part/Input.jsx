@@ -8,6 +8,7 @@ const Input = forwardRef(function Input(
     placeholder = "",
     isRequired = false,
     isDisabled = false,
+    textAlign = "start",
     errorMessage,
     ...props
   },
@@ -17,7 +18,7 @@ const Input = forwardRef(function Input(
     <>
       {label !== "" && (
         <div className="mb-3">
-          <label htmlFor={forInput} className="form-label fw-bold">
+          <label htmlFor={forInput} className="form-label fw-bold ms-1">
             {label}
             {isRequired ? <span className="text-danger"> *</span> : ""}
             {errorMessage ? (
@@ -31,11 +32,10 @@ const Input = forwardRef(function Input(
               rows="5"
               id={forInput}
               name={forInput}
-              className="form-control"
+              className="form-control rounded-5 p-3"
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
-              style={{ borderRadius: "16px" }}
               {...props}
             ></textarea>
           )}
@@ -44,11 +44,10 @@ const Input = forwardRef(function Input(
               id={forInput}
               name={forInput}
               type={type}
-              className="form-control"
+              className={"form-control rounded-5 text-" + textAlign}
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
-              style={{ borderRadius: "16px" }}
               {...props}
             />
           )}
@@ -61,11 +60,10 @@ const Input = forwardRef(function Input(
               rows="5"
               id={forInput}
               name={forInput}
-              className="form-control"
+              className="form-control rounded-5 p-3"
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
-              style={{ borderRadius: "16px" }}
               {...props}
             ></textarea>
           )}
@@ -74,11 +72,10 @@ const Input = forwardRef(function Input(
               id={forInput}
               name={forInput}
               type={type}
-              className="form-control"
+              className={"form-control rounded-5 text-" + textAlign}
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
-              style={{ borderRadius: "16px" }}
               {...props}
             />
           )}

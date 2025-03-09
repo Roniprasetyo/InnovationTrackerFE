@@ -59,64 +59,35 @@ export default function BerandaIndex() {
     <>
       <div>
         <div className="carousel slide">
-          <div className="carousel-indicators">
-            <button
-              type="button"
-              data-bs-target=""
-              aria-label="Slide 1"
-              className="active"
-              aria-current="true"
-            ></button>
-          </div>
           <div className="carousel-inner">
             <div className="active carousel-item">
               <img
                 sizes="(max-width: 575px) 100vw, (max-width: 767px) 50vw, (max-width: 991px) 33vw, 25vw"
                 loading="lazy"
-                className="d-block w-100 rounded blur-load blur-load-loaded"
+                className="d-block w-100 blur-load blur-load-loaded"
                 src="https://api.polytechnic.astra.ac.id:2906/operational_api/Uploads/MOB_2024626102616Web Training.jpg"
                 alt="Slide 0"
               />
             </div>
           </div>
-          <a
-            className="carousel-control-prev"
-            role="button"
-            tabindex="0"
-            href="#"
-          >
-            <span
-              aria-hidden="true"
-              className="carousel-control-prev-icon"
-            ></span>
-            <span className="visually-hidden">Previous</span>
-          </a>
-          <a
-            className="carousel-control-next"
-            role="button"
-            tabindex="0"
-            href="#"
-          >
-            <span
-              aria-hidden="true"
-              className="carousel-control-next-icon"
-            ></span>
-            <span className="visually-hidden">Next</span>
-          </a>
         </div>
       </div>
       <div className="container p-3">
         {isError.error && (
-          <div className="flex-fill">
-            <Alert type="danger" message={isError.message} />
+          <div className="flex-fill ">
+            <Alert
+              type="danger"
+              message={isError.message}
+              handleClose={() => setIsError({ error: false, message: "" })}
+            />
           </div>
         )}
-        <div class="my-3">
-          <div class="mb-4 color-primary text-center">
+        <div className="my-3">
+          <div className="mb-4 color-primary text-center">
             <div className="d-flex gap-3 justify-content-center">
-              <h2 class="display-1 fw-bold">WELCOME</h2>
+              <h2 className="display-1 fw-bold">WELCOME</h2>
               <div className="d-flex align-items-end mb-2">
-                <h2 class="display-5 fw-medium align-items-end text-start">
+                <h2 className="display-5 fw-medium align-items-end text-start">
                   TO ASTRATECH
                 </h2>
               </div>

@@ -28,9 +28,9 @@ export default function MasterSettingAdd({ onChangePage }) {
   });
 
   const userSchema = object({
-    setName: string().max(100, "maksimum 100 karakter").required("harus diisi"),
+    setName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
     setType: string().required("harus dipilih"),
-    setDesc: string(),
+    setDesc: string().max(100, "maksimum 100 karakter").required("harus diisi"),
   });
 
   const handleInputChange = (e) => {
@@ -59,7 +59,7 @@ export default function MasterSettingAdd({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "MasterAlatMesin/CreateAlatMesin",
+          API_LINK + "MasterSetting/CreateSetting",
           formDataRef.current
         );
 
@@ -105,22 +105,26 @@ export default function MasterSettingAdd({ onChangePage }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Master Setting
+          Add Data
         </h2>
       </div>
       <div className="mt-5">
         {isError.error && (
           <div className="flex-fill ">
-            <Alert type="danger" message={isError.message} />
+            <Alert
+              type="danger"
+              message={isError.message}
+              handleClose={() => setIsError({ error: false, message: "" })}
+            />
           </div>
         )}
-        <form onSubmit={handleAdd} style={{ minHeight: "50vh" }}>
-          <div className="card my-3">
-            <div className="card-header p-2">
-              <h2 className="fw-bold text-center">Setting Form</h2>
+        <form onSubmit={handleAdd}>
+          <div className="card mb-5">
+            <div className="card-header py-3">
+              <h3 className="fw-bold text-center">SETTING FORM</h3>
             </div>
             <div className="card-body">
-              <div className="row mt-4">
+              <div className="row p-4">
                 <div className="col-lg-6">
                   <Input
                     type="text"
@@ -157,7 +161,7 @@ export default function MasterSettingAdd({ onChangePage }) {
               <div className="d-flex justify-content-between align-items-center">
                 <div className="flex-grow-1 m-2">
                   <Button
-                    classType="secondary me-2 px-4 py-2"
+                    classType="danger me-2 px-4 py-2"
                     label="CANCEL"
                     onClick={() => onChangePage("index")}
                     style={{ width: "100%", borderRadius: "16px" }}
