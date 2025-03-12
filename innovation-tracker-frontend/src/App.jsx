@@ -28,7 +28,7 @@ export default function App() {
 
     useEffect(() => {
       const getMenu = async () => {
-        const menu = await CreateMenu(userInfo.role || "ROL01");
+        const menu = await CreateMenu(userInfo.role);
         const route = CreateRoute.filter((routeItem) => {
           const pathExistsInMenu = menu.some((menuItem) => {
             if (menuItem.link.replace(ROOT_LINK, "") === routeItem.path) {

@@ -1,12 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
-import { validateAllInputs, validateInput } from "../../util/ValidateForm";
-import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
-import Button from "../../part/Button";
-import DropDown from "../../part/Dropdown";
-import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Label from "../../part/Label";
@@ -63,7 +57,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
   return (
     <>
       <div
-        className="row my-3 pt-5"
+        className="row my-3"
         style={{ display: "flex", alignItems: "center" }}
       >
         <h2
@@ -84,7 +78,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
           Detail Data
         </h2>
       </div>
-      <div className="mt-5 mb-5">
+      <div className="mt-3">
         {isError.error && (
           <div className="flex-fill ">
             <Alert
@@ -94,7 +88,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
             />
           </div>
         )}
-        <div className="card">
+        <div className="card mb-5">
           <div className="card-header p-2">
             <h2 className="fw-bold text-center">Setting Detail</h2>
           </div>

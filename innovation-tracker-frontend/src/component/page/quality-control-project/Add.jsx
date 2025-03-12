@@ -24,6 +24,11 @@ const inisialisasiData = [
   },
 ];
 
+const listPeriod = [
+  { Value: "2024", Text: "2024" },
+  { Value: "2025", Text: "2025" },
+];
+
 export default function QualityControlProjectAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -50,6 +55,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
 
   const formDataRef = useRef({
     setId: "",
+    perId: 2024,
     rciGroupName: "",
     rciTitle: "",
     rciProjBenefit: "",
@@ -150,7 +156,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       const formattedData = data.map((value) => ({
         ...value,
         Aksi: ["Remove"],
-        Alignment: ["center", "left", "center", "center"],
+        Alignment: ["center", "center", "center", "center"],
       }));
       setCurrentData(formattedData);
     } else {
@@ -171,7 +177,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           NPK,
           Count: prevData.length + 1,
           Aksi: ["Remove"],
-          Alignment: ["center", "left", "center", "center"],
+          Alignment: ["center", "center", "center", "center"],
         },
       ]);
     }
@@ -351,8 +357,9 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               type="text"
                               forInput="setName"
                               label="Prodi/UPT/Dep​"
+                              isDisabled
                               //   isRequired
-                              //   value={formDataRef.current.setName}
+                              value={"Manajemen Informatika"}
                               //   onChange={handleInputChange}
                               //   errorMessage={errors.setName}
                             />
@@ -362,8 +369,9 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               type="text"
                               forInput="setName"
                               label="Directorate"
+                              isDisabled
                               //   isRequired
-                              //   value={formDataRef.current.setName}
+                              value={"Manajemen Informatika"}
                               //   onChange={handleInputChange}
                               //   errorMessage={errors.setName}
                             />
@@ -428,6 +436,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       </div>
                     </div>
                   </div>
+                  <hr className="mb-3" />
                   <div className="col-lg-6">
                     <Input
                       type="text"
@@ -439,8 +448,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       errorMessage={errors.rciTitle}
                     />
                   </div>
-
-                  <div className="col-lg-6">
+                  <div className="col-lg-3">
                     <DropDown
                       forInput="setId"
                       label="Category"
@@ -449,6 +457,17 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       value={formDataRef.current.setId}
                       onChange={handleInputChange}
                       errorMessage={errors.setId}
+                    />
+                  </div>
+                  <div className="col-lg-3">
+                    <DropDown
+                      forInput="perId"
+                      label="Period"
+                      arrData={listPeriod}
+                      isDisabled
+                      value={formDataRef.current.perId}
+                      onChange={handleInputChange}
+                      errorMessage={errors.perId}
                     />
                   </div>
 

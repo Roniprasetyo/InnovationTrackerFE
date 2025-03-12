@@ -87,7 +87,7 @@ export default function MasterSettingAdd({ onChangePage }) {
   return (
     <>
       <div
-        className="row my-3 pt-5"
+        className="row my-3"
         style={{ display: "flex", alignItems: "center" }}
       >
         <h2
@@ -108,7 +108,7 @@ export default function MasterSettingAdd({ onChangePage }) {
           Add Data
         </h2>
       </div>
-      <div className="mt-5">
+      <div className="mt-3">
         {isError.error && (
           <div className="flex-fill ">
             <Alert

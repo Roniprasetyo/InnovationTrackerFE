@@ -82,6 +82,16 @@ dialog::backdrop {
   color: rgb(0, 89, 171);
 }
 
+.bg-main {
+  background-color: rgb(0, 89, 171);
+  color: white;
+}
+
+.bg-second {
+  background-color: #f1f6ff;
+  color: rgb(0, 89, 171);
+}
+
 @media (min-width: 768px) {
   .nav-mobile {
     display: none;

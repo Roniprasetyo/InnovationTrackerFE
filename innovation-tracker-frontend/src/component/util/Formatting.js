@@ -30,3 +30,8 @@ export const formatDate = (input, dateOnly = false) => {
     ? moment(input).format("DD MMMM yyyy")
     : moment(input).format("DD MMMM yyyy, HH:mm");
 };
+
+export const maxCharDisplayed = (text, maxLength = 50) => {
+  if (!text) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};

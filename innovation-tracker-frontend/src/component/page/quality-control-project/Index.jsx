@@ -10,6 +10,9 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import Corner from "../../../assets/elements/corner-blue.png";
+import { maxCharDisplayed } from "../../util/Formatting";
+import Icon from "../../part/Icon";
 
 const inisialisasiData = [
   {
@@ -19,6 +22,108 @@ const inisialisasiData = [
     Type: null,
     Status: null,
     Count: 0,
+  },
+];
+const inisialisasiDataQcp = [
+  {
+    Key: 1,
+    No: 1,
+    Title: "QCP Registration Title 1111111111111111111111111111111111111111111111111111111111111111",
+    Jenis: "Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Jono Doe",
+    Submitted: "2025-03-04",
+    Count: 10,
+  },
+  {
+    Key: 2,
+    No: 2,
+    Title: "QCP Registration Title 2",
+    Jenis: "Non Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Larissa Roger",
+    Submitted: "2025-03-01",
+    Count: 10,
+  },
+  {
+    Key: 3,
+    No: 3,
+    Title: "QCP Registration Title 3",
+    Jenis: "Non Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Juan Rafael",
+    Submitted: "2025-03-03",
+    Count: 10,
+  },
+  {
+    Key: 4,
+    No: 4,
+    Title: "QCP Registration Title 4",
+    Jenis: "Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Prowler Max",
+    Submitted: "2025-03-02",
+    Count: 10,
+  },
+  {
+    Key: 5,
+    No: 5,
+    Title: "QCP Registration Title 5",
+    Jenis: "Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Larissa Roger",
+    Submitted: "2025-03-05",
+    Count: 10,
+  },
+  {
+    Key: 6,
+    No: 6,
+    Title: "QCP Registration Title 6",
+    Jenis: "Non Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Larissa Roger",
+    Submitted: "2025-03-06",
+    Count: 10,
+  },
+  {
+    Key: 7,
+    No: 27,
+    Title: "QCP Registration Title 7",
+    Jenis: "Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Larissa Roger",
+    Submitted: "2025-03-06",
+    Count: 10,
+  },
+  {
+    Key: 8,
+    No: 8,
+    Title: "QCP Registration Title 8",
+    Jenis: "Non Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Larissa Roger",
+    Submitted: "2025-03-08",
+    Count: 10,
+  },
+  {
+    Key: 9,
+    No: 9,
+    Title: "QCP Registration Title 9",
+    Jenis: "Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Larissa Roger",
+    Submitted: "2025-03-09",
+    Count: 10,
+  },
+  {
+    Key: 10,
+    No: 10,
+    Title: "QCP Registration Title 10",
+    Jenis: "Non Teknik",
+    Case: "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti eu nostra litora duis auctor netus nascetur inceptos mus. Euismod ultrices lacus non cursus iaculis donec. Etiam netus mauris eros integer elementum. Vulputate montes ultricies sagittis dignissim conubia nascetur conubia. Suspendisse maecenas donec tempor vitae eu. Placerat eros ex fringilla mi iaculis dignissim aptent. Neque sodales orci libero fringilla sem sem molestie...",
+    Leader: "Larissa Roger",
+    Submitted: "2025-03-10",
+    Count: 10,
   },
 ];
 
@@ -159,6 +264,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
         <div className="input-group">
           <Button
             iconName="add"
+            label="Register"
             classType="success"
             onClick={() => onChangePage("add")}
           />
@@ -202,13 +308,45 @@ export default function QualityControlProjectIndex({ onChangePage }) {
         </div>
       </div>
       <div className="mt-3 mb-5">
-        <div className="table-responsive">
-          <Table
-            data={currentData}
-            onToggle={handleSetStatus}
-            onDetail={onChangePage}
-            onEdit={onChangePage}
-          />
+        <div className="mb-3">
+          {inisialisasiDataQcp.map((item, index) => (
+            <div className="shadow rounded-5 mb-3" key={index}>
+              <div className="row  p-4">
+                <div className="col-md-10 mb-3">
+                  <div className="d-flex">
+                    <h3 className="display-6 fw-bold color-primary">
+                      {maxCharDisplayed(item.Title, 50)}
+                    </h3>
+                    <div className="d-flex align-items-end mx-3 mb-3">
+                      <span className="badge rounded-pill text-bg-primary">
+                        {item.Jenis}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <p
+                      className="fs-6 fw-light"
+                      style={{ textAlign: "justify" }}
+                    >
+                      {maxCharDisplayed(item.Case, 400)}
+                    </p>
+                  </div>
+                  <div className="d-flex justify-content-between">
+                    <span>
+                      <strong>Leader & Facilitator: </strong>
+                      {item.Leader}
+                    </span>
+                    <strong>Submitted on: {item.Submitted}</strong>
+                  </div>
+                </div>
+                <div className="col-md-2 d-flex justify-content-center align-items-center">
+                  <button className="btn btn-light border border-primary rounded-5 w-75">
+                    Detail
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
           <Paging
             pageSize={PAGE_SIZE}
             pageCurrent={currentFilter.page}

@@ -54,12 +54,12 @@ export default function Header({ displayName, roleName, listMenu }) {
             <div className="container-fluid px-5">
               <div className="navbar-brand">
                 <img
-                  sizes="(max-width: 575px) 100vw, (max-width: 767px) 50vw, (max-width: 991px) 33vw, 25vw"
+                  sizes="(max-width: 575px) 100vw, (max-width: 767px) 50vw, (max-width: 991px) 33vw, 28vw"
                   loading="lazy"
                   src={logo}
                   className="blur-load"
                   alt="Logo Politeknik Astra"
-                  style={{ height: "45px" }}
+                  style={{ height: "48px" }}
                 />
               </div>
               <button
@@ -105,8 +105,8 @@ export default function Header({ displayName, roleName, listMenu }) {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <div className="row align-items-center">
-                    <div className="col-auto">
+                  <div className="d-flex align-items-center">
+                    <div className="">
                       <div className="dropdown">
                         <a
                           href="#"
@@ -156,7 +156,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                         </ul>
                       </div>
                     </div>
-                    <div className="col">
+                    <div className="">
                       <p className="text-start text-white ms-3 mt-2">
                         {displayName || "John Doe"} ({roleName || "Admin"})
                       </p>
@@ -170,7 +170,7 @@ export default function Header({ displayName, roleName, listMenu }) {
         <div className="nav-dekstop">
           <div id="toogleMenu" style={{ backgroundColor: "rgb(0, 89, 171)" }}>
             <nav className="navbar navbar-expand-lg">
-              <div className="d-flex justify-content-between align-items-center w-100 p-2">
+              <div className="container d-flex justify-content-between align-items-center">
                 <div className="navbar-brand">
                   <img
                     sizes="(max-width: 575px) 100vw, (max-width: 767px) 50vw, (max-width: 991px) 33vw, 25vw"
@@ -233,6 +233,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                         role="button"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
+                        style={{ textDecoration: "none" }}
                       >
                         <i
                           className="fi fi-rr-circle-user"

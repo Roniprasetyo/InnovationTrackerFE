@@ -64,41 +64,148 @@ export default function Submission() {
 
   return (
     <>
-      <div className="container">
-        <div className="row mb-5 mt-5">
-          <div className="col-lg-3">
-            <div className="card mt-3 border-0" style={{ cursor: "pointer" }}>
-              <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-                <div className="lead fw-medium">Suggestion System</div>
-                <div className="h1 fw-bold">(SS)</div>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-3">
-            <div className="card mt-3 border-0" style={{ cursor: "pointer" }}>
-              <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-                <div className="lead fw-medium">Quality Control Circle</div>
-                <div className="h1 fw-bold">(QCC)</div>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-3">
+      <div className="container mb-5">
+        <div className="p-3 mt-3">
+          <div className="row bg-second rounded-5 shadow-sm mb-3">
             <div
-              className="card mt-3 border-0"
+              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
               style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/qcp", { state: {} })}
             >
-              <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-                <div className="lead fw-medium">Quality Control Project</div>
-                <div className="h1 fw-bold">(QCP)</div>
+              <div className="mb-2 ms-3">
+                <div className="display-3 fw-bold">SS</div>
+                <div className="fw-medium">
+                  <i>(Suggestion System)</i>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-9">
+              <div className="p-4">
+                <p className="lead fw-medium">
+                  Suggestion System (SS) is an improvement or innovation that
+                  carried out by individuals within the scope of their work and
+                  the benefits of Instantly felt by changemakers
+                </p>
+                <div className="col-sm-4 bg-success rounded-5">
+                  <div
+                    className="d-flex align-items-center mx-3"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Icon name="download me-2 text-white" />
+                    <p className="fw-small text-white my-1">
+                      <small>
+                        <i>System Suggestion Requirements</i>
+                      </small>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div className="col-lg-3">
-            <div className="card mt-3 border-0" style={{ cursor: "pointer" }}>
-              <div className="card-body bg-primary bg-gradient rounded-2 text-white">
-                <div className="lead fw-medium">Value Chain Innovation</div>
-                <div className="h1 fw-bold">(VCI)</div>
+          <div className="row bg-second rounded-5 shadow-sm mb-3">
+            <div
+              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
+              style={{ cursor: "pointer" }}
+            >
+              <div className="mb-2 ms-3">
+                <div className="display-3 fw-bold">QCC</div>
+                <div className="fw-medium">
+                  <i>(Quality Control Circle)</i>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-9">
+              <div className="p-4">
+                <p className="lead fw-medium">
+                  Quality Control Circle (QCC) is a group innovation within the
+                  Study Program/UPT/Unit, where the target project is relate
+                  with the KPIs of each Study Program/UPT/Unit.
+                </p>
+                <div className="col-sm-4 bg-success rounded-5">
+                  <div
+                    className="d-flex align-items-center mx-3"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Icon name="download me-2 text-white" />
+                    <p className="fw-small text-white my-1">
+                      <small>
+                        <i>Quality Control Circle Requirements</i>
+                      </small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row bg-second rounded-5 shadow-sm mb-3">
+            <div
+              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate("/submission/qcp")}
+            >
+              <div className="mb-2 ms-3">
+                <div className="display-3 fw-bold">QCP</div>
+                <div className="fw-medium">
+                  <i>(Quality Control Project)</i>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-9">
+              <div className="p-4">
+                <p className="lead fw-medium">
+                  Quality Control Project (QCP) is an innovation that is a group
+                  across Study Programs/UPTs/Units where the project target is
+                  in accordance with the KPIs of each WaDir.
+                </p>
+                <div className="col-sm-4 bg-success rounded-5">
+                  <div
+                    className="d-flex align-items-center mx-3"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Icon name="download me-2 text-white" />
+                    <p className="fw-small text-white my-1">
+                      <small>
+                        <i>Quality Control Project Requirements</i>
+                      </small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row bg-second rounded-5 shadow-sm mb-3">
+            <div
+              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
+              style={{ cursor: "pointer" }}
+            >
+              <div className="mb-2 ms-3">
+                <div className="display-3 fw-bold">VCI</div>
+                <div className="fw-medium">
+                  <i>(Value Chain Innovation)</i>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-9">
+              <div className="p-4">
+                <p className="lead fw-medium">
+                  Value Chain Innovation (VCI) is an innovation that crosses
+                  ASTRA companies/business units that has an impact on
+                  increasing tangible value in each ASTRA business unit,
+                  including ASTRA Polytechnic as an educational institution that
+                  is part of ASTRA's business unit
+                </p>
+                <div className="col-sm-4 bg-success rounded-5">
+                  <div
+                    className="d-flex align-items-center mx-3"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Icon name="download me-2 text-white" />
+                    <p className="fw-small text-white my-1">
+                      <small>
+                        <i>Value Chain Innovation Requirements</i>
+                      </small>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
