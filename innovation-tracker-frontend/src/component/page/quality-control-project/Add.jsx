@@ -13,6 +13,7 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
+import DropDownSearch from "../../part/DropDownSearch";
 
 const inisialisasiData = [
   {
@@ -377,25 +378,31 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
+                            <DropDownSearch
+                              // arrData={Object.values(listDosen)}
+                              forInput="facilitator"
                               label="Facilitator"
-                              //   isRequired
-                              //   value={formDataRef.current.setName}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                              isRequired
+                              // value={author}
+                              // onChange={(selected) => {
+                              //   console.log("Selected penulis:", selected);
+                              //   updateAuthor(index, selected);
+                              // }}
+                              // errorMessage={errors.penulis}
                             />
                           </div>
                           <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
+                            <DropDownSearch
+                              // arrData={Object.values(listDosen)}
+                              forInput="leader"
                               label="Leader"
-                              //   isRequired
-                              //   value={formDataRef.current.setName}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                              isRequired
+                              // value={author}
+                              // onChange={(selected) => {
+                              //   console.log("Selected penulis:", selected);
+                              //   updateAuthor(index, selected);
+                              // }}
+                              // errorMessage={errors.penulis}
                             />
                           </div>
                         </div>
