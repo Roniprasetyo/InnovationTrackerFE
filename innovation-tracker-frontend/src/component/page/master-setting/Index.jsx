@@ -115,7 +115,7 @@ export default function MasterSettingIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            Aksi: ["Toggle", "Detail", "Edit"],
+            Action: ["Toggle", "Detail", "Edit"],
             Alignment: ["center", "left", "center", "center", "center"],
           }));
           setCurrentData(formattedData);
@@ -161,6 +161,7 @@ export default function MasterSettingIndex({ onChangePage }) {
           <Input
             ref={searchQuery}
             forInput="pencarianSetting"
+            isRound
             placeholder="Search"
           />
           <Button

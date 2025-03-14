@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, FILE_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -17,6 +17,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
+import { decodeHtml, formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -31,7 +32,7 @@ const listPeriod = [
   { Value: "2025", Text: "2025" },
 ];
 
-export default function QualityControlProjectAdd({ onChangePage }) {
+export default function QualityControlProjectEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -61,6 +62,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   };
 
   const formDataRef = useRef({
+    rciId: "",
     setId: "",
     perId: 2025,
     rciGroupName: "",
@@ -93,6 +95,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   const goalFileRef = useRef(null);
 
   const userSchema = object({
+    rciId: number().required("required"),
     setId: number().required("required"),
     perId: number().nullable(),
     rciGroupName: string()
@@ -112,14 +115,15 @@ export default function QualityControlProjectAdd({ onChangePage }) {
     rciProblemFile: string().nullable(),
     rciGoal: string().required("required"),
     rciGoalFile: string().nullable(),
-    rciScope: string().max(200, "maximum 200 characters").required("required"),
+    rciScope: string().required("required"),
     rciStartDate: date()
       .min(new Date(), "start date must be after today")
       .typeError("invalid date")
       .required("required"),
     rciEndDate: date()
-      .typeError("Invalid date format")
-      .required("Start date is required"),
+      .min(new Date(), "start date must be after today")
+      .typeError("invalid date")
+      .required("required"),
     rciQuality: string().max(100, "maximum 100 characters").nullable(),
     rciCost: number().nullable(),
     rciSafety: string().max(100, "maximum 100 characters").nullable(),
@@ -188,6 +192,87 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           message: error.message,
         }));
         setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          {
+            id: withID,
+          }
+        );
+
+        if (data === "ERROR" || data.length === 0) {
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
+          );
+        } else {
+          formDataRef.current = {
+            rciId: data["Key"],
+            setId: data["CategoryId"],
+            perId: data["Period"],
+            rciGroupName: data["Group Name"],
+            rciTitle: data["Project Title"],
+            rciProjBenefit: data["Project Benefit"],
+            rciCase: decodeHtml(data["Case"]),
+            rciCaseFile: data["CaseFile"],
+            rciProblem: decodeHtml(data["Problem"]),
+            rciProblemFile: data["ProblemFile"],
+            rciGoal: decodeHtml(data["Goal"]),
+            rciGoalFile: data["GoalFile"],
+            rciScope: decodeHtml(data["Scope"]),
+            rciStartDate: data["Start Date"].split("T")[0],
+            rciEndDate: data["End Date"].split("T")[0],
+            rciQuality: data["Quality"],
+            rciCost: data["Cost"],
+            rciDelivery: data["Delivery"],
+            rciSafety: data["Safety"],
+            rciMoral: data["Moral"],
+            rciFacil: data["member"].find(
+              (item) => item.Position === "Facilitator"
+            ).Npk,
+            rciLeader: data["member"].find((item) => item.Position === "Leader")
+              .Npk,
+          };
+          const members = data["member"].filter(
+            (item) => item.Position === "Member"
+          );
+          const memberCount = members.length || 0;
+          setCurrentData(
+            members?.map((item, index) => ({
+              Key: item.Npk,
+              No: index + 1,
+              Name: item.Npk + " - " + item.Name,
+              Count: memberCount,
+              Action: ["Remove"],
+              Alignment: Array(4).fill("center"),
+            })) || []
+          );
+          setCheckedStates({
+            rciQuality: data["Quality"] ? true : false,
+            rciCost: data["Cost"] ? true : false,
+            rciDelivery: data["Delivery"] ? true : false,
+            rciSafety: data["Safety"] ? true : false,
+            rciMoral: data["Moral"] ? true : false,
+          });
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
       } finally {
         setIsLoading(false);
       }
@@ -296,6 +381,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
     ];
 
+    console.log(newMemData);
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
@@ -306,7 +392,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
     delete formDataRef.current.rciLeader;
 
     const body = { ...formDataRef.current, member: newMemData };
-    console.log(body);
+    console.log(Object.values(validationErrors).every((error) => !error));
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -340,7 +426,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/CreateRencanaQCP",
+          API_LINK + "RencanaCircle/UpdateRencanaQCP",
           body
         );
 
@@ -351,6 +437,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           onChangePage("index");
         }
       } catch (error) {
+        console.log(error);
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
           ...prevError,
@@ -580,6 +667,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       forInput="rciCaseFile"
                       label="Bussiness Case Document (.pdf)"
                       formatFile=".pdf"
+                      hasExisting={formDataRef.current.rciCaseFile}
                       ref={bussinessCaseFileRef}
                       onChange={() =>
                         handleFileChange(bussinessCaseFileRef, "pdf")
@@ -601,6 +689,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       forInput="rciProblemFile"
                       label="Problem Statement​ Document (.pdf)"
                       formatFile=".pdf"
+                      hasExisting={formDataRef.current.rciProblemFile}
                       ref={problemFileRef}
                       onChange={() => handleFileChange(problemFileRef, "pdf")}
                       errorMessage={errors.rciProblemFile}
@@ -620,6 +709,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       forInput="goalFileRef"
                       label="Goal Statement​ Document (.pdf)"
                       formatFile=".pdf"
+                      hasExisting={formDataRef.current.rciGoalFile}
                       ref={goalFileRef}
                       onChange={() => handleFileChange(goalFileRef, "pdf")}
                       errorMessage={errors.goalFileRef}
@@ -726,9 +816,8 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       <input
                         className="form-check-input mb-2 me-2"
                         type="checkbox"
-                        isDisabled={!checkedStates.rciMoral}
+                        checked={checkedStates.rciMoral}
                         onChange={() => handleCheckboxChange("rciMoral")}
-                        id="flexCheckChecked"
                       />
                       <Input
                         type="text"

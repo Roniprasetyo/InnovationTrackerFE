@@ -1,6 +1,8 @@
 import { useState } from "react";
 import QualityControlProjectIndex from "./Index";
 import QualityControlProjectAdd from "./Add";
+import QualityControlProjectEdit from "./Edit";
+import QualityControlProjectDetail from "./Detail";
 
 export default function QualityControlProject() {
   const [pageMode, setPageMode] = useState("index");
@@ -12,6 +14,20 @@ export default function QualityControlProject() {
         return <QualityControlProjectIndex onChangePage={handleSetPageMode} />;
       case "add":
         return <QualityControlProjectAdd onChangePage={handleSetPageMode} />;
+      case "edit":
+        return (
+          <QualityControlProjectEdit
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+      case "detail":
+        return (
+          <QualityControlProjectDetail
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
     }
   }
 

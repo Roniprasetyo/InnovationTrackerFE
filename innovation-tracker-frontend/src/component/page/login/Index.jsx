@@ -88,7 +88,7 @@ export default function Login() {
     } else window.scrollTo(0, 0);
   };
 
-  async function handleLoginWithRole(role, nama, peran) {
+  async function handleLoginWithRole(role, nama, peran, npk) {
     try {
       const ipAddress = await UseFetch(
         "https://api.ipify.org/?format=json",
@@ -126,6 +126,7 @@ export default function Login() {
               role: role,
               nama: nama,
               peran: peran,
+              npk: npk,
               lastLogin: data[1]
                 ? data[1].lastLogin
                 : new Date().toISOString().split("T")[0] +
@@ -181,7 +182,7 @@ export default function Login() {
                   className="list-group-item list-group-item-action"
                   aria-current="true"
                   onClick={() =>
-                    handleLoginWithRole(value.RoleID, value.Nama, value.Role)
+                    handleLoginWithRole(value.RoleID, value.Nama, value.Role, value.Npk)
                   }
                 >
                   Login sebagai {value.Role}

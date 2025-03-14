@@ -8,6 +8,7 @@ const Input = forwardRef(function Input(
     placeholder = "",
     isRequired = false,
     isDisabled = false,
+    isRound = false,
     textAlign = "start",
     errorMessage,
     ...props
@@ -44,7 +45,11 @@ const Input = forwardRef(function Input(
               id={forInput}
               name={forInput}
               type={type}
-              className={"form-control rounded-5 text-" + textAlign}
+              className={
+                isRound
+                  ? "form-control text-" + textAlign
+                  : "form-control rounded-5 text-" + textAlign
+              }
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
@@ -72,7 +77,11 @@ const Input = forwardRef(function Input(
               id={forInput}
               name={forInput}
               type={type}
-              className={"form-control rounded-5 text-" + textAlign}
+              className={
+                isRound
+                  ? "form-control text-" + textAlign
+                  : "form-control rounded-5 text-" + textAlign
+              }
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}

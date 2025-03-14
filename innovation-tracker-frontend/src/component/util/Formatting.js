@@ -1,5 +1,5 @@
 import moment from "moment";
-import "moment/dist/locale/id";
+import "moment/dist/locale/en-gb";
 
 export const separator = (input) => {
   let parsedInput = parseFloat(input.toString().replace(/\./g, ""));
@@ -34,4 +34,10 @@ export const formatDate = (input, dateOnly = false) => {
 export const maxCharDisplayed = (text, maxLength = 50) => {
   if (!text) return "";
   return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};
+
+export const decodeHtml = (html) => {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
 };
