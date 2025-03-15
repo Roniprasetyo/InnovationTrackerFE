@@ -32,7 +32,7 @@ function CalendarView() {
   return (
     <div className='row'>
       <div className='d-flex'>
-        <div className="card rounded-0" style={{backgroundColor:'#03045e'}}>
+        <div className="card rounded-0" style={{backgroundColor:'#03045e', width:'500px'}}>
           <div className="h5 d-flex justify-content-center text-white">CREATIVE CONNECT</div>
           <div className="row">
             <div className="d-flex">

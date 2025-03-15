@@ -4,6 +4,7 @@ import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import CalendarView from "../../part/CalendarView";
+import NewsListView from "../../part/NewsListView";
 
 export default function BerandaIndex() {
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -87,16 +88,21 @@ export default function BerandaIndex() {
           <div className="d-flex justify-content-between container-sm my-3">
             <div className="mb-4 color-primary text-left">
               <div className="d-flex gap-3 justify-content-left">
-                <h2 className="display-3 fw-bold">WELCOME</h2>
+                <h2 className="display-5 fw-bold">WELCOME</h2>
                 <div className="d-flex align-items-end mb-2">
-                  <h2 className="display-6 fw-medium align-items-end text-start">
+                  <h2 className="display-10 fw-medium align-items-end text-start">
                     TO ASTRATECH
                   </h2>
                 </div>
               </div>
-              <div className="display-4 fw-medium">INNOVATION LIBRARY</div>
+              <div className="display-6 fw-medium">INNOVATION LIBRARY</div>
             </div>
-            <CalendarView />
+            {/* <div className="d-flex">
+              <div className="row gap-3"> */}
+                <NewsListView />
+                <CalendarView />
+              {/* </div>
+            </div> */}
           </div>
         </div>
       </div>
