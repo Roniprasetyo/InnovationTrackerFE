@@ -33,7 +33,7 @@ const listPeriod = [
   { Value: "2025", Text: "2025" },
 ];
 
-export default function QualityControlProjectEdit({ onChangePage, withID }) {
+export default function QualityControlCircleEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));

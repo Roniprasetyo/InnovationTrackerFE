@@ -10,12 +10,7 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import {
-  decodeHtml,
-  formatDate,
-  maxCharDisplayed,
-  separator,
-} from "../../util/Formatting";
+import { formatDate, maxCharDisplayed, separator } from "../../util/Formatting";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 
@@ -58,7 +53,7 @@ const dataFilterJenis = [
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function QualityControlProjectIndex({ onChangePage }) {
+export default function QualityControlCircleIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -173,17 +168,14 @@ export default function QualityControlProjectIndex({ onChangePage }) {
         } else {
           const role = userInfo.role.slice(0, 5);
           const filteredData = data.filter((item) =>
-            item["Category"].includes("QCP")
+            item["Category"].includes("QCC")
           );
           if (filteredData.length > 0) {
             const formattedData = filteredData.map((value) => ({
               Key: value.Key,
               No: value.No,
               "Circle Name": value["Team Name"],
-              "Project Title": decodeHtml(value["Project Title"]).replace(
-                /<\/?[^>]+(>|$)/g,
-                ""
-              ),
+              "Project Title": value["Project Title"],
               Category: value["Category"],
               "Project Benefit": separator(value["Project Benefit"]),
               "Start Date": formatDate(value["Start Date"], true),
@@ -191,15 +183,15 @@ export default function QualityControlProjectIndex({ onChangePage }) {
               Period: value["Period"],
               Status: value["Status"],
               Count: value["Count"],
-              Action: 
-              // ["Detail", "Edit", "Submit"],
-              role === "ROL01" && value["Status"] === "Waiting Approval"
-                ? ["Detail", "Reject", "Approve"]
-                : role === "ROL01" &&
-                  value["Status"] === "Draft" &&
-                  value["Creaby"] === userInfo.username
-                ? ["Detail", "Edit", "Submit"]
-                : ["Detail"],
+              Action:
+                ["Detail", "Edit", "Submit"],
+                // role === "ROL01" && value["Status"] === "Waiting Approval"
+                //   ? ["Detail", "Reject", "Approve"]
+                //   : role === "ROL01" &&
+                //     value["Status"] === "Draft" &&
+                //     value["Creaby"] === userInfo.username
+                //   ? ["Detail", "Edit", "Submit"]
+                //   : ["Detail"],
               Alignment: [
                 "center",
                 "left",
@@ -238,7 +230,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
             <h2 className="display-1 fw-bold">Quality</h2>
             <div className="d-flex align-items-end mb-2">
               <h2 className="display-5 fw-bold align-items-end">
-                Control Project
+                Control Circle
               </h2>
             </div>
           </div>

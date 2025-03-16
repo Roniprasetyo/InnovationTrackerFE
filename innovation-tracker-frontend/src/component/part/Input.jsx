@@ -1,4 +1,5 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
+import { separator } from "../util/Formatting";
 
 const Input = forwardRef(function Input(
   {
@@ -19,7 +20,7 @@ const Input = forwardRef(function Input(
     <>
       {label !== "" && (
         <div className="mb-3">
-          <label htmlFor={forInput} className="form-label fw-bold ms-1">
+          <label htmlFor={forInput} className="form-label fw-bold ms-1 mb-1">
             {label}
             {isRequired ? <span className="text-danger"> *</span> : ""}
             {errorMessage ? (

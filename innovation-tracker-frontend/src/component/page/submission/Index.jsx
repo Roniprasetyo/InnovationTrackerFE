@@ -85,6 +85,7 @@ export default function Submission() {
                   carried out by individuals within the scope of their work and
                   the benefits of Instantly felt by changemakers
                 </p>
+                <div className="row">
                 <div className="col-sm-4 bg-success rounded-5">
                   <div
                     className="d-flex align-items-center mx-3"
@@ -98,6 +99,10 @@ export default function Submission() {
                     </p>
                   </div>
                 </div>
+                <div className="col-sm-3">
+                  <button className="btn btn-primary fw-bold rounded-5">Register</button>
+                </div>
+                </div>
               </div>
             </div>
           </div>
@@ -105,6 +110,7 @@ export default function Submission() {
             <div
               className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
               style={{ cursor: "pointer" }}
+              onClick={() => navigate("/submission/qcc")}
             >
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">QCC</div>

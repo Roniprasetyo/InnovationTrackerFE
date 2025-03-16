@@ -1,29 +1,29 @@
 import { useState } from "react";
-import QualityControlProjectIndex from "./Index";
-import QualityControlProjectAdd from "./Add";
-import QualityControlProjectEdit from "./Edit";
-import QualityControlProjectDetail from "./Detail";
+import QualityControlCircleIndex from "./Index";
+import QualityControlCircleAdd from "./Add";
+import QualityControlCircleEdit from "./Edit";
+import QualityControlCircleDetail from "./Detail";
 
-export default function QualityControlProject() {
+export default function QualityControlCircle() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <QualityControlProjectIndex onChangePage={handleSetPageMode} />;
+        return <QualityControlCircleIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <QualityControlProjectAdd onChangePage={handleSetPageMode} />;
+        return <QualityControlCircleAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <QualityControlProjectEdit
+          <QualityControlCircleEdit
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
       case "detail":
         return (
-          <QualityControlProjectDetail
+          <QualityControlCircleDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />

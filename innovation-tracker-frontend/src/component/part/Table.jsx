@@ -236,7 +236,7 @@ export default function Table({
                     className={
                       value["Status"] &&
                       (value["Status"] === "Draft" ||
-                        value["Status"] === "Revisi" ||
+                        value["Status"] === "Revision" ||
                         value["Status"] === "Belum Dikonversi" ||
                         value["Status"] === "Belum Dibuat Penjadwalan")
                         ? "fw-bold"
@@ -272,8 +272,8 @@ export default function Table({
                 );
               })}
             {data[0].Count === 0 && (
-              <tr>
-                <td colSpan={colCount}>Tidak ada data.</td>
+              <tr className="text-center">
+                <td colSpan={colCount}>No data available.</td>
               </tr>
             )}
           </tbody>

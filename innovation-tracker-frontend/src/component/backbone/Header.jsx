@@ -159,6 +159,15 @@ export default function Header({ displayName, roleName, listMenu }) {
                     <div className="">
                       <p className="text-start text-white ms-3 mt-2">
                         {displayName || "John Doe"} ({roleName || "Admin"})
+                        <span
+                          className="badge rounded-pill bg-danger ms-2"
+                          style={{
+                            fontSize: ".8em",
+                            position: "absolute",
+                          }}
+                        >
+                          {countNotifikasi}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -239,6 +248,15 @@ export default function Header({ displayName, roleName, listMenu }) {
                           className="fi fi-rr-circle-user"
                           style={{ color: "white", fontSize: "32px" }}
                         ></i>
+                        <span
+                          className="badge rounded-pill bg-danger "
+                          style={{
+                            fontSize: ".8em",
+                            position: "absolute",
+                          }}
+                        >
+                          {countNotifikasi}
+                        </span>
                       </a>
                       <ul
                         className="dropdown-menu dropdown-menu-end"

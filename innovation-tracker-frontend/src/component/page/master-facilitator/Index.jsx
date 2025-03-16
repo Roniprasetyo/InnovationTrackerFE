@@ -10,45 +10,74 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import { formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
     Key: null,
     No: null,
-    StartDate: null,
-    EndDate: null,
+    Name: null,
+    Role: null,
+    Period: null,
     Status: null,
     Count: 0,
   },
 ];
 
-// const dataFilterSort = [
-//   { Value: "[Name] asc", Text: "Name [↑]" },
-//   { Value: "[Name] desc", Text: "Name [↓]" },
-// ];
-
-const dataFilterStatus = [
-  { Value: "Aktif", Text: "Aktif" },
-  { Value: "Tidak Aktif", Text: "Tidak Aktif" },
+const dataFilterSort = [
+  { Value: "[Name] asc", Text: "Name [↑]" },
+  { Value: "[Name] desc", Text: "Name [↓]" },
+  { Value: "[Period] asc", Text: "Period [↑]" },
+  { Value: "[Period] desc", Text: "Period [↓]" },
 ];
 
-export default function MasterPeriodIndex({ onChangePage }) {
+export default function MasterFacilitatorIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [listPeriod, setListPeriod] = useState([]);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[StartDate] asc",
-    status: "Aktif",
+    sort: "[Period] asc",
+    period: "",
   });
 
   const searchQuery = useRef();
-//   const searchFilterSort = useRef();
-  const searchFilterStatus = useRef();
+  const searchFilterSort = useRef();
+  const searchFilterPeriod = useRef();
 
-  // Set current page
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterPeriod/GetListPeriod",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          setListPeriod(data);
+          const selected = data.find(
+            (item) => item.Text === new Date().getFullYear()
+          );
+          window.scrollTo(0, 0);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListPeriod({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
     setCurrentFilter((prevFilter) => {
@@ -59,7 +88,6 @@ export default function MasterPeriodIndex({ onChangePage }) {
     });
   }
 
-  // Handle search filter
   function handleSearch() {
     setIsLoading(true);
     setCurrentFilter((prevFilter) => {
@@ -67,40 +95,35 @@ export default function MasterPeriodIndex({ onChangePage }) {
         ...prevFilter,
         page: 1,
         query: searchQuery.current.value,
-        // sort: searchFilterSort.current.value,
-        status: searchFilterStatus.current.value,
+        sort: searchFilterSort.current.value,
+        period: searchFilterPeriod.current.value,
       };
     });
   }
 
-  // Handle status toggle
-  function handleSetStatus(id) {
+  function handleDelete(id) {
     setIsLoading(true);
     setIsError(false);
-    UseFetch(API_LINK + "MasterPeriod/SetStatusPeriod", {
-      idPeriod: id,
+    UseFetch(API_LINK + "MasterFacilitator/DeleteFacilitator", {
+      idFacilitator: id,
     })
       .then((data) => {
         if (data === "ERROR" || data.length === 0) setIsError(true);
         else {
-          SweetAlert(
-            "Sukses",
-            "Status data berhasil diubah menjadi " + data[0].Status,
-            "success"
-          );
+          SweetAlert("Success", "Data successfully deleted", "success");
           handleSetCurrentPage(currentFilter.page);
         }
       })
       .then(() => setIsLoading(false));
   }
 
-  // Fetch data with current filters
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
+
       try {
         const data = await UseFetch(
-          API_LINK + "MasterPeriod/GetPeriod",
+          API_LINK + "MasterFacilitator/GetFacilitator",
           currentFilter
         );
 
@@ -111,14 +134,19 @@ export default function MasterPeriodIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            StartDate: formatDate(value.StartDate, true),
-            EndDate: formatDate(value.EndDate, true),
-            Action: ["Toggle", "Edit"],
-            Alignment: ["center", "center", "center", "center", "center"],
+            Action: ["Delete", "Detail", "Edit"],
+            Alignment: [
+              "center",
+              "left",
+              "center",
+              "center",
+              "center",
+              "center",
+            ],
           }));
           setCurrentData(formattedData);
         }
-      } catch (error) {
+      } catch {
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -135,7 +163,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
           <div className="d-flex gap-3 justify-content-center">
             <h2 className="display-1 fw-bold">Manage</h2>
             <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">Period</h2>
+              <h2 className="display-5 fw-bold align-items-end">Facilitator</h2>
             </div>
           </div>
         </div>
@@ -158,7 +186,8 @@ export default function MasterPeriodIndex({ onChangePage }) {
           />
           <Input
             ref={searchQuery}
-            forInput="pencarianPeriod"
+            forInput="pencarianFacilitator"
+            isRound
             placeholder="Search"
           />
           <Button
@@ -168,21 +197,21 @@ export default function MasterPeriodIndex({ onChangePage }) {
             onClick={handleSearch}
           />
           <Filter>
-            {/* <DropDown
+            <DropDown
               ref={searchFilterSort}
               forInput="ddUrut"
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
               defaultValue="[Nama Alat/Mesin] asc"
-            /> */}
+            />
             <DropDown
-              ref={searchFilterStatus}
+              ref={searchFilterPeriod}
               forInput="ddStatus"
-              label="Status"
-              type="none"
-              arrData={dataFilterStatus}
-              defaultValue="Aktif"
+              label="Period"
+              type="semua"
+              arrData={listPeriod}
+              defaultValue=""
             />
           </Filter>
         </div>
@@ -194,7 +223,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
           <div className="table-responsive">
             <Table
               data={currentData}
-              onToggle={handleSetStatus}
+              onDelete={handleDelete}
               onDetail={onChangePage}
               onEdit={onChangePage}
             />

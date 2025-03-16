@@ -106,7 +106,7 @@ export default function Login() {
         });
 
         if (token === "ERROR")
-          throw new Error("Error: Filed to get authentication token.");
+          throw new Error("Error: Failed to get authentication token.");
         else {
           localStorage.setItem("jwtToken", token.Token);
 
@@ -172,7 +172,7 @@ export default function Login() {
             />
           </div>
         )}
-        <Modal title="Pilih Peran" ref={modalRef} size="small">
+        <Modal title="Select Role" ref={modalRef} size="small">
           <div className="list-group">
             {listRole.map((value, index) => {
               return (
@@ -185,7 +185,7 @@ export default function Login() {
                     handleLoginWithRole(value.RoleID, value.Nama, value.Role, value.Npk)
                   }
                 >
-                  Login sebagai {value.Role}
+                  Login as {value.Role}
                 </button>
               );
             })}

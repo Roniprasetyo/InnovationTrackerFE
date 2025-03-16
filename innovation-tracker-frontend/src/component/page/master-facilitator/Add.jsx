@@ -5,46 +5,56 @@ import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
+import DropDown from "../../part/Dropdown";
 import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
+import SearchDropdown from "../../part/SearchDropdown";
 
-export default function MasterPeriodEdit({ onChangePage, withID }) {
+const listTypeFacilitator = [
+  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+];
+
+export default function MasterFacilitatorAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listPeriod, setListPeriod] = useState([]);
 
   const formDataRef = useRef({
-    perId: "",
-    perAwal: "",
-    perAkhir: "",
+    kryID: "",
+    perID: "",
+    role: "",
   });
 
   const userSchema = object({
-    perId: number(),
-    perAwal: string().required("Harus dipilih"),
-    perAkhir: string().required("Harus dipilih"),
+    kryID: string().required("required"),
+    perID: string().required("required"),
+    role: string().max(100, "maximum 100 characters").required("required"),
   });
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
       try {
-        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-          id: withID,
-        });
+        const data = await UseFetch(
+          API_LINK + "MasterPeriod/GetListPeriod",
+          {}
+        );
 
-        if (data === "ERROR" || data.length === 0) {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data periode.");
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
         } else {
-          formDataRef.current = {
-            ...formDataRef.current,
-            perId: data[0].perId,
-            perAwal: data[0].perAwal.split("T")[0],
-            perAkhir: data[0].perAkhir.split("T")[0],
-          };
+          setListPeriod(data);
+          const selected = data.find(
+            (item) => item.Text === new Date().getFullYear()
+          );
+          formDataRef.current.perID = selected.Value;
+          window.scrollTo(0, 0);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -53,13 +63,44 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
+        setListPeriod({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetListKaryawan",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListEmployee(data);
+          window.scrollTo(0, 0);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [withID]);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,7 +112,7 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
     }));
   };
 
-  const handleUpdate = async (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
 
     const validationErrors = await validateAllInputs(
@@ -84,16 +125,17 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
+
       try {
         const data = await UseFetch(
-          API_LINK + "MasterPeriod/UpdatePeriod",
+          API_LINK + "MasterFacilitator/CreateFacilitator",
           formDataRef.current
         );
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to submit the data.");
         } else {
-          SweetAlert("Success", "Data successfully updated", "success");
+          SweetAlert("Success", "Data successfully submitted", "success");
           onChangePage("index");
         }
       } catch (error) {
@@ -108,6 +150,8 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
       }
     } else window.scrollTo(0, 0);
   };
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
@@ -130,7 +174,7 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Update Data
+          Add Data
         </h2>
       </div>
       <div className="mt-3">
@@ -143,44 +187,53 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
             />
           </div>
         )}
-        <form onSubmit={handleUpdate}>
+        <form onSubmit={handleAdd}>
           <div className="card mb-5">
-            <div className="card-header p-2">
-              <h2 className="fw-bold text-center">Setting Form</h2>
+            <div className="card-header py-3">
+              <h3 className="fw-bold text-center">FACILITATOR FORM</h3>
             </div>
-            <div className="card-body p-4">
-              {isLoading ? (
-                <Loading />
-              ) : (
-                <div className="row mt-4">
-                  <div className="col-lg-6">
-                    <Input
-                      type="date"
-                      forInput="perAwal"
-                      label="Activity Start Date"
-                      isRequired
-                      value={formDataRef.current.perAwal}
-                      onChange={handleInputChange}
-                      errorMessage={errors.perAwal}
-                    />
-                  </div>
-                  <div className="col-lg-6">
-                    <Input
-                      type="date"
-                      forInput="perAkhir"
-                      label="Activity End Date"
-                      isRequired
-                      value={formDataRef.current.perAkhir}
-                      onChange={handleInputChange}
-                      errorMessage={errors.perAkhir}
-                    />
-                  </div>
+            <div className="card-body">
+              <div className="row p-4">
+                <div className="col-lg-4">
+                  <SearchDropdown
+                    forInput="kryID"
+                    label="Employee"
+                    placeHolder="Employee"
+                    arrData={listEmployee}
+                    isRequired
+                    isRound
+                    value={formDataRef.current.kryID}
+                    onChange={handleInputChange}
+                    errorMessage={errors.kryID}
+                  />
                 </div>
-              )}
+                <div className="col-lg-4">
+                  <DropDown
+                    forInput="perID"
+                    label="Period"
+                    arrData={listPeriod}
+                    isRequired
+                    value={formDataRef.current.perID}
+                    onChange={handleInputChange}
+                    errorMessage={errors.perID}
+                  />
+                </div>
+                <div className="col-lg-4">
+                  <Input
+                    type="text"
+                    forInput="role"
+                    label="Role"
+                    isRequired
+                    value={formDataRef.current.role}
+                    onChange={handleInputChange}
+                    errorMessage={errors.role}
+                  />
+                </div>
+              </div>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="flex-grow-1 m-2">
                   <Button
-                    classType="secondary me-2 px-4 py-2"
+                    classType="danger me-2 px-4 py-2"
                     label="CANCEL"
                     onClick={() => onChangePage("index")}
                     style={{ width: "100%", borderRadius: "16px" }}
@@ -190,7 +243,7 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
                   <Button
                     classType="primary ms-2 px-4 py-2"
                     type="submit"
-                    label="UPDATE"
+                    label="SUBMIT"
                     style={{ width: "100%", borderRadius: "16px" }}
                   />
                 </div>

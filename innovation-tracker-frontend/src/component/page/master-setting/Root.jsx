@@ -37,5 +37,5 @@ export default function MasterSetting() {
     setPageMode(mode);
   }
 
-  return <div className="container">{getPageMode()}</div>;
+  return <div className="container min-vh-100">{getPageMode()}</div>;
 }

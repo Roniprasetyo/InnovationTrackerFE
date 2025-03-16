@@ -27,8 +27,8 @@ export const clearSeparator = (input) => {
 
 export const formatDate = (input, dateOnly = false) => {
   return dateOnly
-    ? moment(input).format("DD MMMM yyyy")
-    : moment(input).format("DD MMMM yyyy, HH:mm");
+    ? moment(input).format("DD MMM yyyy")
+    : moment(input).format("DD MMM yyyy, HH:mm");
 };
 
 export const maxCharDisplayed = (text, maxLength = 50) => {

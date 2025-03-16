@@ -12,6 +12,7 @@ import Footer from "./component/backbone/Footer.jsx";
 import Login from "./component/page/login/Index";
 import Logout from "./component/page/logout/Index";
 import QualityControlProject from "./component/page/quality-control-project/Root";
+import QualityControlCircle from "./component/page/quality-control-circle/Root";
 import NotFound from "./component/page/not-found/Index";
 
 export default function App() {
@@ -22,7 +23,6 @@ export default function App() {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (isLogoutPage) return <Logout />;
-  else if (!cookie) return <Login />;
   else {
     if (cookie) userInfo = JSON.parse(decryptId(cookie));
 
@@ -54,6 +54,10 @@ export default function App() {
           {
             path: "/submission/qcp",
             element: <QualityControlProject />,
+          },
+          {
+            path: "/submission/qcc",
+            element: <QualityControlCircle />,
           },
           {
             path: "/*",
