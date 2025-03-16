@@ -86,7 +86,7 @@ export default function BerandaIndex() {
         )}
         <div className="row">
           <div className="d-flex justify-content-between container-sm my-3">
-            <div className="mb-4 color-primary text-left">
+            <div className="mb-4 color-primary align-items-center justify-content-center text-left">
               <div className="d-flex gap-3 justify-content-left">
                 <h2 className="display-5 fw-bold">WELCOME</h2>
                 <div className="d-flex align-items-end mb-2">
@@ -97,12 +97,12 @@ export default function BerandaIndex() {
               </div>
               <div className="display-6 fw-medium">INNOVATION LIBRARY</div>
             </div>
-            {/* <div className="d-flex">
-              <div className="row gap-3"> */}
+            <div className="row">
+              <div className="d-flex gap-4">
                 <NewsListView />
                 <CalendarView />
-              {/* </div>
-            </div> */}
+              </div>
+            </div>
           </div>
         </div>
       </div>

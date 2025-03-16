@@ -8,7 +8,7 @@ function CalendarView() {
     const newsData = {
         "2025-03-15": "Berita tentang React.js dirilis!",
         "2025-03-20": "Event besar di dunia teknologi!",
-        "2025-03-25": "Update terbaru tentang AI!"
+        "2025-03-25": "Update terbaru tentang AI!",
     };
 
     const formatDate = (date) => {
@@ -32,7 +32,7 @@ function CalendarView() {
   return (
     <div className='row'>
       <div className='d-flex'>
-        <div className="card rounded-0" style={{backgroundColor:'#03045e', width:'500px'}}>
+        <div className="card rounded-0" style={{backgroundColor:'#03045e', width:'500px', height: '470px'}}>
           <div className="h5 d-flex justify-content-center text-white">CREATIVE CONNECT</div>
           <div className="row">
             <div className="d-flex">
@@ -42,7 +42,7 @@ function CalendarView() {
                 <h7>{formatDate(date)} : {newsData[date.toISOString().split("T")[0]] || "Tidak ada berita."}</h7>
               </div>
               <div className="card-body">
-                <h6 className="text-uppercase">Task</h6>
+                <h6 className="text-uppercase text-white">Task</h6>
                 <div className="d-flex flex-column gap-3">
                   {/* Item 1 */}
                   <div className="d-flex border-start border-danger border-4 ps-3">

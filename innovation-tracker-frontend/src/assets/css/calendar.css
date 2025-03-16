@@ -63,6 +63,7 @@
   
   .react-calendar__month-view__weekdays {
     text-align: center;
+    text-decoration: underline dotted;
     text-transform: uppercase;
     font: inherit;
     font-size: 0.75em;

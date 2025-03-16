@@ -10,7 +10,8 @@ function NewsListView() {
                 </div>
             </div>
             <div className='card rounded-0 border border-danger border-4'>
-                <div className='card-body'>
+                <div className='card-body' style={{height:'390px'}}>
+
                 </div>
             </div>
         </div>
