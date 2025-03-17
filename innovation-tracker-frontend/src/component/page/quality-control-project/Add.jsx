@@ -13,11 +13,7 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
-import SearchDropdown from "../../part/SearchDropdown";
-import { decryptId } from "../../util/Encryptor";
-import UploadFile from "../../util/UploadFile";
-import Cookies from "js-cookie";
-import { clearSeparator, separator } from "../../util/Formatting";
+import DropDownSearch from "../../part/DropDownSearch";
 
 const inisialisasiData = [
   {
@@ -543,30 +539,31 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <SearchDropdown
-                              forInput="rciFacil"
+                            <DropDownSearch
+                              // arrData={Object.values(listDosen)}
+                              forInput="facilitator"
                               label="Facilitator"
-                              placeHolder="Facilitator"
-                              arrData={listFacil}
                               isRequired
-                              isRound
-                              value={formDataRef.current.rciFacil}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciFacil}
+                              // value={author}
+                              // onChange={(selected) => {
+                              //   console.log("Selected penulis:", selected);
+                              //   updateAuthor(index, selected);
+                              // }}
+                              // errorMessage={errors.penulis}
                             />
                           </div>
                           <div className="col-md-6">
-                            <SearchDropdown
-                              forInput="rciLeader"
+                            <DropDownSearch
+                              // arrData={Object.values(listDosen)}
+                              forInput="leader"
                               label="Leader"
-                              placeHolder="Leader"
-                              arrData={listEmployee}
                               isRequired
-                              isDisabled
-                              isRound
-                              value={formDataRef.current.rciLeader}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciLeader}
+                              // value={author}
+                              // onChange={(selected) => {
+                              //   console.log("Selected penulis:", selected);
+                              //   updateAuthor(index, selected);
+                              // }}
+                              // errorMessage={errors.penulis}
                             />
                           </div>
                         </div>

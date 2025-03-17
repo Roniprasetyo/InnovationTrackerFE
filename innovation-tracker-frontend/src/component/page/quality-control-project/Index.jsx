@@ -10,14 +10,8 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import {
-  decodeHtml,
-  formatDate,
-  maxCharDisplayed,
-  separator,
-} from "../../util/Formatting";
-import { decryptId } from "../../util/Encryptor";
-import Cookies from "js-cookie";
+import { maxCharDisplayed } from "../../util/Formatting";
+import Icon from "../../part/Icon";
 
 const inisialisasiData = [
   {

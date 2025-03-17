@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef } from "react";
+  import React, { forwardRef, useEffect, useRef } from "react";
 import Select from "react-select";
 import "select2/dist/css/select2.css";
 import "select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css";
@@ -13,22 +13,23 @@ const DropDownSearch = forwardRef(function DropDownSearch(
     showLabel = true,
     onChange,
     value,
-    placeholder = "-- Choose --",
+    placeholder = "Pilih...",
     ...props
   },
   ref
 ) {
+
   const [selectedValue, setSelectedValue] = React.useState("");
-  const Options = arrData.map((item) => ({
-    value: item.Value,
-    label: item.Text,
-  }));
+  // const Options = arrData.map((item) => ({
+  //   value: item.Value,
+  //   label: item.Text,
+  // }));
 
   // console.log("Options in DropDownSearch:", Options);
 
   const handleChange = (selectedOption) => {
     // console.log("Selected option from dropdown:", selectedOption);
-
+    
     setSelectedValue(selectedOption ? selectedOption.value : "");
     onChange && onChange(selectedOption ? selectedOption.value : "");
   };
@@ -40,33 +41,31 @@ const DropDownSearch = forwardRef(function DropDownSearch(
   // console.log("VALUE NYA ", selectedValue);
 
   return (
-    <>
-      <div className="mb-3">
-        {showLabel && (
-          <label className="form-label fw-bold">
-            {label}
-            {isRequired && <span className="text-danger"> *</span>}
-            {errorMessage && (
-              <span className="fw-normal text-danger"> {errorMessage}</span>
-            )}
-          </label>
-        )}
+    <div className="mb-3">
+      {showLabel && (
+        <label className="form-label fw-bold">
+          {label}
+          {isRequired && <span className="text-danger"> *</span>}
+          {errorMessage && (
+            <span className="fw-normal text-danger"> {errorMessage}</span>
+          )}
+        </label>
+      )}
+      <div style={{width:'85vh'}}>
         <Select
           ref={ref}
-          options={Options}
+          // options={Options}
           isDisabled={isDisabled}
           placeholder={placeholder}
-          value={Options.find(
-            (option) => Number(option.value) === Number(selectedValue)
-          )}
+          // value={Options.find((option) => Number(option.value) === Number(selectedValue))}
           onChange={handleChange}
           isClearable
-          className="basic-single rounded-5"
+          className="basic-single"
           classNamePrefix="select"
           {...props}
         />
       </div>
-    </>
+    </div>
   );
 });
 
