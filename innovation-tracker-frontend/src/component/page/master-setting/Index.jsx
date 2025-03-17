@@ -78,24 +78,31 @@ export default function MasterSettingIndex({ onChangePage }) {
     });
   }
 
-  function handleSetStatus(id) {
-    setIsLoading(true);
+  async function handleDelete(id) {
     setIsError(false);
-    UseFetch(API_LINK + "MasterSetting/SetStatusSetting", {
-      idSetting: id,
-    })
-      .then((data) => {
-        if (data === "ERROR" || data.length === 0) setIsError(true);
-        else {
-          SweetAlert(
-            "Sukses",
-            "Status data alat/mesin berhasil diubah menjadi " + data[0].Status,
-            "success"
-          );
-          handleSetCurrentPage(currentFilter.page);
-        }
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to delete this data?.",
+      "warning",
+      "DELETE",
+      null,
+      "",
+      true
+    );
+
+    if (confirm) {
+      UseFetch(API_LINK + "MasterSetting/SetStatusSetting", {
+        idSetting: id,
       })
-      .then(() => setIsLoading(false));
+        .then((data) => {
+          if (data === "ERROR" || data.length === 0) setIsError(true);
+          else {
+            SweetAlert("Success", "Data successfully deleted", "success");
+            handleSetCurrentPage(currentFilter.page);
+          }
+        })
+        .then(() => setIsLoading(false));
+    }
   }
 
   useEffect(() => {
@@ -115,7 +122,7 @@ export default function MasterSettingIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            Action: ["Toggle", "Detail", "Edit"],
+            Action: ["Delete", "Detail", "Edit"],
             Alignment: ["center", "left", "center", "center", "center"],
           }));
           setCurrentData(formattedData);
@@ -205,7 +212,7 @@ export default function MasterSettingIndex({ onChangePage }) {
           <div className="table-responsive">
             <Table
               data={currentData}
-              onToggle={handleSetStatus}
+              onDelete={handleDelete}
               onDetail={onChangePage}
               onEdit={onChangePage}
             />

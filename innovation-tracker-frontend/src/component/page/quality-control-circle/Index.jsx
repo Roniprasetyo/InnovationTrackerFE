@@ -10,7 +10,12 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import { formatDate, maxCharDisplayed, separator } from "../../util/Formatting";
+import {
+  decodeHtml,
+  formatDate,
+  maxCharDisplayed,
+  separator,
+} from "../../util/Formatting";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 
@@ -28,10 +33,10 @@ const inisialisasiData = [
 const dataFilterSort = [
   { Value: "[Team Name] asc", Text: "Team Name [↑]" },
   { Value: "[Team Name] desc", Text: "Team Name [↓]" },
-  { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
-  { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
-  { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
-  { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
+  { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
+  { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
+  { Value: "[Circle Benefit] asc", Text: "[Circle Benefit] [↑]" },
+  { Value: "[Circle Benefit] desc", Text: "[Circle Benefit] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
@@ -66,7 +71,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
     query: "",
     sort: "[Team Name] asc",
     status: "",
-    jenis: "",
+    jenis: "QCC",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -167,48 +172,43 @@ export default function QualityControlCircleIndex({ onChangePage }) {
           setCurrentData(inisialisasiData);
         } else {
           const role = userInfo.role.slice(0, 5);
-          const filteredData = data.filter((item) =>
-            item["Category"].includes("QCC")
-          );
-          if (filteredData.length > 0) {
-            const formattedData = filteredData.map((value) => ({
-              Key: value.Key,
-              No: value.No,
-              "Circle Name": value["Team Name"],
-              "Project Title": value["Project Title"],
-              Category: value["Category"],
-              "Project Benefit": separator(value["Project Benefit"]),
-              "Start Date": formatDate(value["Start Date"], true),
-              "End Date": formatDate(value["End Date"], true),
-              Period: value["Period"],
-              Status: value["Status"],
-              Count: value["Count"],
-              Action:
-                ["Detail", "Edit", "Submit"],
-                // role === "ROL01" && value["Status"] === "Waiting Approval"
-                //   ? ["Detail", "Reject", "Approve"]
-                //   : role === "ROL01" &&
-                //     value["Status"] === "Draft" &&
-                //     value["Creaby"] === userInfo.username
-                //   ? ["Detail", "Edit", "Submit"]
-                //   : ["Detail"],
-              Alignment: [
-                "center",
-                "left",
-                "left",
-                "left",
-                "right",
-                "center",
-                "center",
-                "center",
-                "center",
-                "center",
-              ],
-            }));
-            setCurrentData(formattedData);
-          } else {
-            setCurrentData(inisialisasiData);
-          }
+          const formattedData = data.map((value, index) => ({
+            Key: value.Key,
+            No: index + 1,
+            "Circle Name": maxCharDisplayed(value["Team Name"], 30),
+            "Project Title": maxCharDisplayed(
+              decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
+              50
+            ),
+            Category: value["Category"],
+            "Project Benefit": separator(value["Project Benefit"]),
+            "Start Date": formatDate(value["Start Date"], true),
+            "End Date": formatDate(value["End Date"], true),
+            Period: value["Period"],
+            Status: value["Status"],
+            Count: value["Count"],
+            Action:
+              role === "ROL03" &&
+              value["Status"] === "Draft" &&
+              value["Creaby"] === userInfo.username
+                ? ["Detail", "Edit", "Submit"]
+                : role === "ROL01" && value["Status"] === "Waiting Approval"
+                ? ["Detail", "Reject", "Approve"]
+                : ["Detail"],
+            Alignment: [
+              "center",
+              "left",
+              "left",
+              "left",
+              "right",
+              "center",
+              "center",
+              "center",
+              "center",
+              "center",
+            ],
+          }));
+          setCurrentData(formattedData);
         }
       } catch {
         setIsError(true);
@@ -272,15 +272,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Nama Alat/Mesin] asc"
-            />
-            <DropDown
-              ref={searchFilterJenis}
-              forInput="ddJenis"
-              label="Type"
-              type="semua"
-              arrData={dataFilterJenis}
-              defaultValue=""
+              defaultValue="[Team Name] asc"
             />
             <DropDown
               ref={searchFilterStatus}
@@ -288,7 +280,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               label="Status"
               type="semua"
               arrData={dataFilterStatus}
-              defaultValue="Aktif"
+              defaultValue="Draft"
             />
           </Filter>
         </div>

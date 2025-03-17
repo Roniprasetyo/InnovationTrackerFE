@@ -43,8 +43,6 @@ const dataFilterSort = [
   { Value: "[End Date] desc", Text: "[End Date] [↓]" },
   { Value: "[Period] asc", Text: "[Period] [↑]" },
   { Value: "[Period] desc", Text: "[Period] [↓]" },
-  { Value: "[Category] asc", Text: "[Category] [↑]" },
-  { Value: "[Category] desc", Text: "[Category] [↓]" },
 ];
 
 const dataFilterStatus = [
@@ -52,10 +50,6 @@ const dataFilterStatus = [
   { Value: "Approved", Text: "Approved" },
   { Value: "Revision", Text: "Revision" },
   { Value: "Rejected", Text: "Rejected" },
-];
-const dataFilterJenis = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
 export default function QualityControlProjectIndex({ onChangePage }) {
@@ -71,7 +65,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     query: "",
     sort: "[Team Name] asc",
     status: "",
-    jenis: "",
+    jenis: "QCP",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -79,7 +73,6 @@ export default function QualityControlProjectIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -100,29 +93,8 @@ export default function QualityControlProjectIndex({ onChangePage }) {
         query: searchQuery.current.value,
         sort: searchFilterSort.current.value,
         status: searchFilterStatus.current.value,
-        jenis: searchFilterJenis.current.value,
       };
     });
-  }
-
-  function handleSetStatus(id) {
-    setIsLoading(true);
-    setIsError(false);
-    UseFetch(API_LINK + "MasterSetting/SetStatusSetting", {
-      idSetting: id,
-    })
-      .then((data) => {
-        if (data === "ERROR" || data.length === 0) setIsError(true);
-        else {
-          SweetAlert(
-            "Sukses",
-            "Status data alat/mesin berhasil diubah menjadi " + data[0].Status,
-            "success"
-          );
-          handleSetCurrentPage(currentFilter.page);
-        }
-      })
-      .then(() => setIsLoading(false));
   }
 
   const handleSubmit = async (id) => {
@@ -172,51 +144,43 @@ export default function QualityControlProjectIndex({ onChangePage }) {
           setCurrentData(inisialisasiData);
         } else {
           const role = userInfo.role.slice(0, 5);
-          const filteredData = data.filter((item) =>
-            item["Category"].includes("QCP")
-          );
-          if (filteredData.length > 0) {
-            const formattedData = filteredData.map((value) => ({
-              Key: value.Key,
-              No: value.No,
-              "Circle Name": value["Team Name"],
-              "Project Title": decodeHtml(value["Project Title"]).replace(
-                /<\/?[^>]+(>|$)/g,
-                ""
-              ),
-              Category: value["Category"],
-              "Project Benefit": separator(value["Project Benefit"]),
-              "Start Date": formatDate(value["Start Date"], true),
-              "End Date": formatDate(value["End Date"], true),
-              Period: value["Period"],
-              Status: value["Status"],
-              Count: value["Count"],
-              Action: 
-              // ["Detail", "Edit", "Submit"],
-              role === "ROL01" && value["Status"] === "Waiting Approval"
-                ? ["Detail", "Reject", "Approve"]
-                : role === "ROL01" &&
-                  value["Status"] === "Draft" &&
-                  value["Creaby"] === userInfo.username
+          const formattedData = data.map((value, index) => ({
+            Key: value.Key,
+            No: index + 1,
+            "Circle Name": maxCharDisplayed(value["Team Name"], 30),
+            "Project Title": maxCharDisplayed(
+              decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
+              50
+            ),
+            "Innovation Category": value["Category"],
+            "Project Benefit": separator(value["Project Benefit"]),
+            "Start Date": formatDate(value["Start Date"], true),
+            "End Date": formatDate(value["End Date"], true),
+            Period: value["Period"],
+            Status: value["Status"],
+            Count: value["Count"],
+            Action:
+              role === "ROL03" &&
+              value["Status"] === "Draft" &&
+              value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
+                : role === "ROL01" && value["Status"] === "Waiting Approval"
+                ? ["Detail", "Reject", "Approve"]
                 : ["Detail"],
-              Alignment: [
-                "center",
-                "left",
-                "left",
-                "left",
-                "right",
-                "center",
-                "center",
-                "center",
-                "center",
-                "center",
-              ],
-            }));
-            setCurrentData(formattedData);
-          } else {
-            setCurrentData(inisialisasiData);
-          }
+            Alignment: [
+              "center",
+              "left",
+              "left",
+              "left",
+              "right",
+              "center",
+              "center",
+              "center",
+              "center",
+              "center",
+            ],
+          }));
+          setCurrentData(formattedData);
         }
       } catch {
         setIsError(true);
@@ -280,15 +244,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Nama Alat/Mesin] asc"
-            />
-            <DropDown
-              ref={searchFilterJenis}
-              forInput="ddJenis"
-              label="Type"
-              type="semua"
-              arrData={dataFilterJenis}
-              defaultValue=""
+              defaultValue="[Team Name] asc"
             />
             <DropDown
               ref={searchFilterStatus}
@@ -296,7 +252,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
               label="Status"
               type="semua"
               arrData={dataFilterStatus}
-              defaultValue="Aktif"
+              defaultValue="Draft"
             />
           </Filter>
         </div>

@@ -98,7 +98,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciGroupName: string()
       .max(50, "maximum 50 characters")
       .required("required"),
-    rciTitle: string().max(100, "maximum 100 characters").required("required"),
+    rciTitle: string().required("required"),
     rciProjBenefit: string()
       .max(100, "maximum 100 characters")
       .required("required"),
@@ -108,7 +108,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciProblemFile: string().nullable(),
     rciGoal: string().required("required"),
     rciGoalFile: string().nullable(),
-    rciScope: string().max(200, "maximum 200 characters").required("required"),
+    rciScope: string().required("required"),
     rciStartDate: date()
       .min(new Date(), "start date must be after today")
       .typeError("invalid date")
@@ -144,7 +144,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           setListCategory(data.filter((item) => item.Text.includes("QCC")));
-          window.scrollTo(0, 0);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -173,7 +172,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           setListImpCategory(data);
-          window.scrollTo(0, 0);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -206,7 +204,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
             (item) => item.Text === new Date().getFullYear()
           );
           formDataRef.current.perId = selected.Value;
-          window.scrollTo(0, 0);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -236,7 +233,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           setListFacil(data);
-          window.scrollTo(0, 0);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -270,7 +266,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           setListEmployee(data);
           const member = data.find((item) => item["Value"] === userInfo.npk);
           formDataRef.current.rciLeader = member.Value;
-          window.scrollTo(0, 0);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -498,7 +493,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">QCC REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -567,6 +562,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               placeHolder="Leader"
                               arrData={listEmployee}
                               isRequired
+                              isDisabled
                               isRound
                               value={formDataRef.current.rciLeader}
                               onChange={handleInputChange}
@@ -893,7 +889,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                 onChange={() =>
                                   handleCheckboxChange("rciMoral")
                                 }
-                                id="flexCheckChecked"
                               />
                               <div className="flex-grow-1">
                                 <Input

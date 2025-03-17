@@ -295,6 +295,9 @@ export default function Header({ displayName, roleName, listMenu }) {
                     </div>
                   ) : (
                     <a className="btn bg-white rounded-5 fw-bold" href="/login">
+                      <Icon
+                        name="enter me-1"
+                      />
                       LOGIN
                     </a>
                   )}

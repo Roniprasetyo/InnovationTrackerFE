@@ -31,9 +31,10 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
   const formDataRef = useRef({
     Key: "",
     Category: "",
+    CategoryImp: "",
     "Group Name": "",
     "Project Title": "",
-    "Project Benefit": null,
+    "Project Benefit": 0,
     Case: "",
     CaseFile: "",
     Problem: "",
@@ -66,9 +67,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
-          );
+          throw new Error("Error: Failed to get QCP data");
         } else {
           formDataRef.current = data;
           const members = data.member.filter(
@@ -141,181 +140,13 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">QCC REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
               <Loading />
             ) : (
               <div className="row">
-                <div className="col-lg-12">
-                  <div className="card mb-3">
-                    <div className="card-header">
-                      <h5 className="fw-medium">Project Description</h5>
-                    </div>
-                    <div className="card-body">
-                      <div className="row">
-                        <div className="col-lg-12">
-                          <Label
-                            title="Project Title"
-                            data={formDataRef.current["Project Title"]}
-                          />
-                        </div>
-                        <div className="col-lg-4">
-                          <Label
-                            title="Category"
-                            data={formDataRef.current.Category}
-                          />
-                        </div>
-                        <div className="col-lg-4">
-                          <Label
-                            title="Project Timeframe"
-                            data={
-                              formatDate(
-                                formDataRef.current["Start Date"].split("T")[0],
-                                true
-                              ) +
-                              " - " +
-                              formatDate(
-                                formDataRef.current["End Date"].split("T")[0],
-                                true
-                              )
-                            }
-                          />
-                        </div>
-                        <div className="col-lg-4">
-                          <Label
-                            title="Period"
-                            data={formDataRef.current["Period"]}
-                          />
-                        </div>
-                        <div className="col-lg-12">
-                          <Label
-                            title="Project Scope"
-                            data={decodeHtml(formDataRef.current["Scope"])}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-lg-12">
-                  <div className="card mb-3">
-                    <div className="card-header">
-                      <h5 className="fw-medium">Project Charter</h5>
-                    </div>
-                    <div className="card-body">
-                      <div className="row">
-                        <div className="col-lg-12 mb-4">
-                          <Label
-                            title="Bussiness Case"
-                            data={decodeHtml(formDataRef.current["Case"])}
-                          />
-                          {formDataRef.current["CaseFile"] && (
-                            <a
-                              href={FILE_LINK + formDataRef.current["CaseFile"]}
-                              className="text-decoration-none"
-                              target="_blank"
-                            >
-                              <sub>[Download File]</sub>
-                            </a>
-                          )}
-                        </div>
-                        <div className="col-lg-12 mb-4">
-                          <Label
-                            title="Problem Statement"
-                            data={decodeHtml(formDataRef.current["Problem"])}
-                          />
-                          {formDataRef.current["ProblemFile"] && (
-                            <a
-                              href={
-                                FILE_LINK + formDataRef.current["ProblemFile"]
-                              }
-                              className="text-decoration-none"
-                              target="_blank"
-                            >
-                              <sub>[Download File]</sub>
-                            </a>
-                          )}
-                        </div>
-                        <div className="col-lg-12 mb-4">
-                          <Label
-                            title="Goal Statement​"
-                            data={decodeHtml(formDataRef.current["Goal"])}
-                          />
-                          {formDataRef.current["GoalFile"] && (
-                            <a
-                              href={FILE_LINK + formDataRef.current["GoalFile"]}
-                              className="text-decoration-none"
-                              target="_blank"
-                            >
-                              <sub>[Download File]</sub>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-lg-12">
-                  <div className="card mb-3">
-                    <div className="card-header">
-                      <h5 className="fw-medium">Project Benefit</h5>
-                    </div>
-                    <div className="card-body">
-                      <div className="row">
-                        <div className="col-lg-12">
-                          <Label
-                            title="Project Benefit"
-                            data={separator(
-                              formDataRef.current["Project Benefit"]
-                            )}
-                          />
-                        </div>
-                        <div className="col-lg-6">
-                          <label className="form-label fw-bold">
-                            Tangible Benefit
-                          </label>
-                          <div className="d-flex align-items-center ms-2">
-                            <Label
-                              title="Quality"
-                              data={formDataRef.current["Quality"]}
-                            />
-                          </div>
-                          <div className="d-flex align-items-center ms-2">
-                            <Label
-                              title="Cost"
-                              data={separator(formDataRef.current["Cost"])}
-                            />
-                          </div>
-                          <div className="d-flex align-items-center ms-2">
-                            <Label
-                              title="Delivery"
-                              data={formDataRef.current["Delivery"]}
-                            />
-                          </div>
-                        </div>
-                        <div className="col-lg-6 p-3">
-                          <label className="form-label fw-bold">
-                            Intangible Benefit
-                          </label>
-                          <div className="d-flex align-items-center ms-2">
-                            <Label
-                              title="Safety"
-                              data={formDataRef.current["Safety"]}
-                            />
-                          </div>
-                          <div className="d-flex align-items-center ms-2">
-                            <Label
-                              title="Moral"
-                              data={formDataRef.current["Moral"]}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <div className="col-lg-12">
                   <div className="card mb-3">
                     <div className="card-header">
@@ -326,7 +157,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                         <div className="col-md-12">
                           <Label
                             title="Circle Name"
-                            data={formDataRef.current["Group Name"]}
+                            data={formDataRef.current["Group Name"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
@@ -367,10 +198,196 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                     </div>
                   </div>
                 </div>
+                <div className="col-lg-12">
+                  <div className="card mb-3">
+                    <div className="card-header">
+                      <h5 className="fw-medium">Project Description</h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <Label
+                            title="Project Title"
+                            data={decodeHtml(
+                              formDataRef.current["Project Title"] || "-"
+                            )}
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Innovation Category"
+                            data={formDataRef.current.Category || "-"}
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Improvement Category"
+                            data={formDataRef.current.CategoryImp || "-"}
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Project Timeframe"
+                            data={
+                              formatDate(
+                                formDataRef.current["Start Date"].split("T")[0],
+                                true
+                              ) +
+                                " - " +
+                                formatDate(
+                                  formDataRef.current["End Date"].split("T")[0],
+                                  true
+                                ) || "-"
+                            }
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Period"
+                            data={formDataRef.current["Period"] || "-"}
+                          />
+                        </div>
+                        <div className="col-lg-12">
+                          <Label
+                            title="Project Scope"
+                            data={decodeHtml(
+                              formDataRef.current["Scope"] || "-"
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-lg-12">
+                  <div className="card mb-3">
+                    <div className="card-header">
+                      <h5 className="fw-medium">Project Charter</h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-lg-12 mb-4">
+                          <Label
+                            title="Bussiness Case"
+                            data={decodeHtml(
+                              formDataRef.current["Case"] || "-"
+                            )}
+                          />
+                          {formDataRef.current["CaseFile"] && (
+                            <a
+                              href={FILE_LINK + formDataRef.current["CaseFile"]}
+                              className="text-decoration-none"
+                              target="_blank"
+                            >
+                              <sub>[Download File]</sub>
+                            </a>
+                          )}
+                        </div>
+                        <div className="col-lg-12 mb-4">
+                          <Label
+                            title="Problem Statement"
+                            data={decodeHtml(
+                              formDataRef.current["Problem"] || "-"
+                            )}
+                          />
+                          {formDataRef.current["ProblemFile"] && (
+                            <a
+                              href={
+                                FILE_LINK + formDataRef.current["ProblemFile"]
+                              }
+                              className="text-decoration-none"
+                              target="_blank"
+                            >
+                              <sub>[Download File]</sub>
+                            </a>
+                          )}
+                        </div>
+                        <div className="col-lg-12 mb-4">
+                          <Label
+                            title="Goal Statement​"
+                            data={decodeHtml(
+                              formDataRef.current["Goal"] || "-"
+                            )}
+                          />
+                          {formDataRef.current["GoalFile"] && (
+                            <a
+                              href={FILE_LINK + formDataRef.current["GoalFile"]}
+                              className="text-decoration-none"
+                              target="_blank"
+                            >
+                              <sub>[Download File]</sub>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-lg-12">
+                  <div className="card mb-3">
+                    <div className="card-header">
+                      <h5 className="fw-medium">Project Benefit</h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <Label
+                            title="Project Benefit"
+                            data={
+                              separator(
+                                formDataRef.current["Project Benefit"]
+                              ) || "-"
+                            }
+                          />
+                        </div>
+                        <div className="col-lg-6">
+                          <label className="form-label fw-bold">
+                            Tangible Benefit
+                          </label>
+                          <div className="d-flex align-items-center ms-2">
+                            <Label
+                              title="Quality"
+                              data={formDataRef.current["Quality"] || "-"}
+                            />
+                          </div>
+                          <div className="d-flex align-items-center ms-2">
+                            <Label
+                              title="Cost"
+                              data={formDataRef.current["Cost"] || "-"}
+                            />
+                          </div>
+                          <div className="d-flex align-items-center ms-2">
+                            <Label
+                              title="Delivery"
+                              data={formDataRef.current["Delivery"] || "-"}
+                            />
+                          </div>
+                        </div>
+                        <div className="col-lg-6 p-3">
+                          <label className="form-label fw-bold">
+                            Intangible Benefit
+                          </label>
+                          <div className="d-flex align-items-center ms-2">
+                            <Label
+                              title="Safety"
+                              data={formDataRef.current["Safety"] || "-"}
+                            />
+                          </div>
+                          <div className="d-flex align-items-center ms-2">
+                            <Label
+                              title="Moral"
+                              data={formDataRef.current["Moral"] || "-"}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>
                     Submitted by{" "}
-                    <strong>{formDataRef.current["Creaby"]}</strong>
+                    <strong>{formDataRef.current["Creaby"] || "-"}</strong>
                   </sub>
                 </div>
               </div>

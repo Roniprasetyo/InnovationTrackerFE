@@ -134,6 +134,8 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to submit the data.");
+        } else if (data[0].hasil === "EXIST") {
+          throw new Error("Data already exist.");
         } else {
           SweetAlert("Success", "Data successfully submitted", "success");
           onChangePage("index");
