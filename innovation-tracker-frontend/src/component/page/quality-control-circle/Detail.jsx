@@ -74,7 +74,6 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
             (item) => item.Position === "Member"
           );
           const memberCount = members.length || 0;
-          console.log(memberCount);
           memberCount > 0
             ? setCurrentData(
                 members?.map((item, index) => ({

@@ -7,6 +7,7 @@ const Submission = lazy(() => import("../page/submission/Index"));
 const QualityControlProject = lazy(() => import("../page/quality-control-project/Root"));
 const QualityControlCircle = lazy(() => import("../page/quality-control-circle/Root"));
 const MasterSetting = lazy(() => import("../page/master-setting/Root"));
+const MasterUser = lazy(() => import("../page/master-user/Root"));
 const MasterFacilitator = lazy(() => import("../page/master-facilitator/Root"));
 const MasterPelanggan = lazy(() => import("../page/master-pelanggan/Root"));
 const MasterProduk = lazy(() => import("../page/master-produk/Root"));
@@ -54,6 +55,10 @@ const routeList = [
   {
     path: "/facilitator",
     element: <MasterFacilitator />,
+  },
+  {
+    path: "/user",
+    element: <MasterUser />,
   },
   {
     path: "/notifikasi",
