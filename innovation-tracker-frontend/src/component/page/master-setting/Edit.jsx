@@ -14,6 +14,7 @@ import Icon from "../../part/Icon";
 const listTypeSetting = [
   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+  { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
 ];
 
 export default function MasterSettingEdit({ onChangePage, withID }) {

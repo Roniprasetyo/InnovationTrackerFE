@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { object, string } from "yup";
+import { useRef, useState, useEffect } from "react";
+import { number, object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -10,29 +10,88 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
+import SearchDropdown from "../../part/SearchDropdown";
 
-const listTypeSetting = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-  { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
-];
-
-export default function MasterSettingAdd({ onChangePage }) {
+export default function MasterUserAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
 
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listRole, setListRole] = useState([]);
+
   const formDataRef = useRef({
-    setName: "",
-    setType: "",
-    setDesc: "",
+    usrID: "",
+    rolID: "",
+    appID: "APP65",
   });
 
   const userSchema = object({
-    setName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
-    setType: string().required("harus dipilih"),
-    setDesc: string().max(100, "maksimum 100 karakter").required("harus diisi"),
+    usrID: string().required("required"),
+    rolID: string().required("required"),
+    appID: string().max(100, "maximum 100 characters").required("required"),
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterUser/GetListRole",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          setListRole(data);
+          window.scrollTo(0, 0);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListRole({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetListKaryawanUsername",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListEmployee(data);
+          window.scrollTo(0, 0);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -60,12 +119,14 @@ export default function MasterSettingAdd({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "MasterSetting/CreateSetting",
+          API_LINK + "MasterUser/CreateUser",
           formDataRef.current
         );
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to submit the data.");
+        } else if (data[0].hasil === "EXIST") {
+          throw new Error("Data already exist.");
         } else {
           SweetAlert("Success", "Data successfully submitted", "success");
           onChangePage("index");
@@ -122,40 +183,32 @@ export default function MasterSettingAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header py-3">
-              <h3 className="fw-bold text-center">SETTING FORM</h3>
+              <h3 className="fw-bold text-center">ROLE FORM</h3>
             </div>
             <div className="card-body">
               <div className="row p-4">
                 <div className="col-lg-6">
-                  <Input
-                    type="text"
-                    forInput="setName"
-                    label="Name"
+                  <SearchDropdown
+                    forInput="usrID"
+                    label="Employee"
+                    placeHolder="Employee"
+                    arrData={listEmployee}
                     isRequired
-                    value={formDataRef.current.setName}
+                    isRound
+                    value={formDataRef.current.usrID}
                     onChange={handleInputChange}
-                    errorMessage={errors.setName}
+                    errorMessage={errors.usrID}
                   />
                 </div>
                 <div className="col-lg-6">
                   <DropDown
-                    forInput="setType"
-                    label="Type"
-                    arrData={listTypeSetting}
+                    forInput="rolID"
+                    label="Role"
+                    arrData={listRole}
                     isRequired
-                    value={formDataRef.current.setType}
+                    value={formDataRef.current.rolID}
                     onChange={handleInputChange}
-                    errorMessage={errors.setType}
-                  />
-                </div>
-                <div className="col-lg-12">
-                  <Input
-                    type="textarea"
-                    forInput="setDesc"
-                    label="Description"
-                    value={formDataRef.current.setDesc}
-                    onChange={handleInputChange}
-                    errorMessage={errors.setDesc}
+                    errorMessage={errors.rolID}
                   />
                 </div>
               </div>
