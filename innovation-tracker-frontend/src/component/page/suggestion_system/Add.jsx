@@ -60,282 +60,161 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   };
 
   const formDataRef = useRef({
-    setId: "",
-    perId: "",
-    ssName: "",
-    rciGroupName: "",
-    rciTitle: "",
-    rciProjBenefit: "",
-    rciCase: "",
-    rciCaseFile: "",
-    rciProblem: "",
-    rciProblemFile: "",
-    rciGoal: "",
-    rciGoalFile: "",
-    rciScope: "",
-    rciStartDate: "",
-    rciEndDate: "",
-    rciQuality: "",
-    rciCost: "",
-    rciDelivery: "",
-    rciSafety: "",
-    rciMoral: "",
-    rciFacil: "",
-    rciLeader: "",
-    setId2: "",
+    kry_id: 12345,
+    sis_judul: "",
+    ino_category: "1",
+    know_category: "2",
+    sis_tanggalmulai: "",
+    sis_tanggalakhir: "",
+    per_id: "1",    
+    sis_ruanglingkup: "",
+    sis_kasus: "",
+    sis_kasusfile: "",
+    sis_masalah: "",
+    sis_masalahfile: "",
+    sis_tujuan: "",
+    sis_tujuanfile: "",
+    sis_kualitas: "",
+    sis_biaya: "",
+    sis_pengiriman: "",
+    sis_kemanan: "",
+    sis_moral: "",
   });
 
-  const memberDataRef = useRef({
-    rciMember: "",
-  });
+  // const knowledgeimprovment = [
+  //   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+  //   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+  //   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
+  // ];
+
+  // const listinnovationcategiry = [
+  //   { Value: "SS Technic", Text: "SS Technic" },
+  //   { Value: "SS Non Technic", Text: "SS Non Technic" },
+  // ];
+
+  // const periode = [
+  //   { Value: 2025, Text: 2025 },
+  // ];
 
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    setId: number().required("required"),
-    perId: number().nullable(),
-    ssName: string()
-    .max(50, "maximum 50 characters")
-    .required("required"),
-    rciGroupName: string()
-      .max(50, "maximum 50 characters")
-      .required("required"),
-    rciTitle: string().required("required"),
-    rciProjBenefit: string()
-      .max(100, "maximum 100 characters")
-      .required("required"),
-    rciCase: string().required("required"),
-    rciCaseFile: string().nullable(),
-    rciProblem: string().required("required"),
-    rciProblemFile: string().nullable(),
-    rciGoal: string().required("required"),
-    rciGoalFile: string().nullable(),
-    rciScope: string().required("required"),
-    rciStartDate: date()
+    kry_id: number().required("required"),
+    sis_judul: string().required("required"),
+    ino_category: string().required("required"),
+    know_category: string().required("required"),
+    sis_tanggalmulai: date()
       .min(new Date(), "start date must be after today")
       .typeError("invalid date")
       .required("required"),
-    rciEndDate: date()
+    sis_tanggalakhir: date()
       .min(new Date(), "start date must be after today")
       .typeError("Invalid date format")
       .required("Start date is required"),
-    rciQuality: string().max(100, "maximum 100 characters").nullable(),
-    rciCost: string().max(100, "maximum 100 characters").nullable(),
-    rciSafety: string().max(100, "maximum 100 characters").nullable(),
-    rciDelivery: string().max(100, "maximum 100 characters").nullable(),
-    rciMoral: string().max(100, "maximum 100 characters").nullable(),
-    rciLeader: string().required("required"),
-    rciFacil: string().required("required"),
-    setId2: number().required("required"),
+    per_id: number().required("required"),  
+    sis_ruanglingkup: string().required("required"),
+    sis_kasus: string().required("required"),
+    sis_kasusfile: string().nullable(),
+    sis_masalah: string().required("required"),
+    sis_masalahfile: string().nullable(),
+    sis_tujuan: string().required("required"),
+    sis_tujuanfile: string().nullable(),
+    sis_kualitas: string().nullable(),
+    sis_biaya: string().nullable(),
+    sis_kemanan: string().nullable(),
+    sis_pengiriman: string().nullable(),
+    sis_moral: string().nullable(),    
   });
 
-  const memberSchema = object({
-    rciMember: string().required("required"),
-  });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setIsError((prevError) => ({ ...prevError, error: false }));
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
+  //     try {
+  //       const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+  //         p1: "Kategori Keilmuan",
+  //       });
 
-      try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Kategori Keilmuan",
-        });
+  //       if (data === "ERROR") {
+  //         throw new Error("Error: Failed to get the category data.");
+  //       } else {
+  //         setListCategory(data.filter((item) => item.Text.includes("SS")));
+  //       }
+  //     } catch (error) {
+  //       window.scrollTo(0, 0);
+  //       setIsError((prevError) => ({
+  //         ...prevError,
+  //         error: true,
+  //         message: error.message,
+  //       }));
+  //       setListCategory({});
+  //     }
+  //   };
 
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCC")));
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      }
-    };
+  //   fetchData();
+  // }, []);
 
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setIsError((prevError) => ({ ...prevError, error: false }));
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
+  //     try {
+  //       const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+  //         p1: "Jenis Improvement",
+  //       });
 
-      try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Jenis Improvement",
-        });
+  //       if (data === "ERROR") {
+  //         throw new Error("Error: Failed to get the category data.");
+  //       } else {
+  //         setListImpCategory(data);
+  //       }
+  //     } catch (error) {
+  //       window.scrollTo(0, 0);
+  //       setIsError((prevError) => ({
+  //         ...prevError,
+  //         error: true,
+  //         message: error.message,
+  //       }));
+  //       setListImpCategory({});
+  //     }
+  //   };
 
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListImpCategory(data);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListImpCategory({});
-      }
-    };
+  //   fetchData();
+  // }, []);
 
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setIsError((prevError) => ({ ...prevError, error: false }));
+  //     try {
+  //       const data = await UseFetch(
+  //         API_LINK + "MasterPeriod/GetListPeriod",
+  //         {}
+  //       );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(
-          API_LINK + "MasterPeriod/GetListPeriod",
-          {}
-        );
+  //       if (data === "ERROR") {
+  //         throw new Error("Error: Failed to get the period data.");
+  //       } else {
+  //         setListPeriod(data);
+  //         const selected = data.find(
+  //           (item) => item.Text === new Date().getFullYear()
+  //         );
+  //         formDataRef.current.perId = selected.Value;
+  //       }
+  //     } catch (error) {
+  //       window.scrollTo(0, 0);
+  //       setIsError((prevError) => ({
+  //         ...prevError,
+  //         error: true,
+  //         message: error.message,
+  //       }));
+  //       setListPeriod({});
+  //     }
+  //   };
 
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the period data.");
-        } else {
-          setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perId = selected.Value;
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListPeriod({});
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
-      try {
-        const data = await UseFetch(
-          API_LINK + "MasterFacilitator/GetListFacilitator",
-          { p1: new Date().getFullYear() }
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListFacil(data);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListFacil({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
-          {}
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListEmployee(data);
-          const member = data.find((item) => item["Value"] === userInfo.npk);
-          formDataRef.current.rciLeader = member.Value;
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleAddMember = (id, Name) => {
-    if (currentData[0].Count === 0) {
-      const data = [
-        {
-          Key: id,
-          No: 1,
-          Name: Name,
-          Count: 1,
-        },
-      ];
-      const formattedData = data.map((value) => ({
-        ...value,
-        Action: ["Delete"],
-        Alignment: ["center", "left", "center", "center"],
-      }));
-      setCurrentData(formattedData);
-    } else {
-      if (currentData.some((member) => member.Key === id) === true) {
-        window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Member already exists!" });
-        return;
-      }
-      if (currentData.length === 6) {
-        window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Max member reached!" });
-        return;
-      }
-      setCurrentData((prevData) => [
-        ...prevData,
-        {
-          Key: id,
-          No: prevData.length + 1,
-          Name,
-          Count: prevData.length + 1,
-          Action: ["Delete"],
-          Alignment: ["center", "left", "center", "center"],
-        },
-      ]);
-    }
-    memberDataRef.current.rciMember = "";
-  };
-
-  const handleDelete = (id) => {
-    if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else
-      setCurrentData((prevData) =>
-        prevData.filter((member) => member.Key !== id)
-      );
-  };
+  //   fetchData();
+  // }, []);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
@@ -361,9 +240,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const validationError = validateInput(name, value, userSchema);
-    name === "rciProjBenefit"
-      ? (formDataRef.current[name] = separator(value))
-      : (formDataRef.current[name] = value);
+    formDataRef.current[name] = value;
     setErrors((prevErrors) => ({
       ...prevErrors,
       [validationError.name]: validationError.error,
@@ -382,28 +259,14 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-
-    const newMemData = [
-      { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
-      { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-      ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
-    ];
-
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
 
-    delete formDataRef.current.rciFacil;
-    delete formDataRef.current.rciLeader;
+    console.log(formDataRef.current)
 
-    const body = {
-      ...formDataRef.current,
-      rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
-      member: newMemData,
-    };
-    console.log(body);
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -414,31 +277,57 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (body["rciCaseFile"] = data.Hasil)
+            (data) => (formDataRef.current["sis_kasusfile"] = data.Hasil)
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-            (data) => (body["rciProblemFile"] = data.Hasil)
+            (data) => (formDataRef.current["sis_masalahfile"] = data.Hasil)
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-            (data) => (body["rciGoalFile"] = data.Hasil)
+            (data) => (formDataRef.current["sis_tujuanfile"] = data.Hasil)
           )
         );
       }
+
+    //   {
+    //     "kry_id": 12345,
+    //     "nama_kar": "Budiono Siregar",
+    //     "produptdep": "MI",
+    //     "direc": "ASTRA",
+    //     "sis_judul": "<p>title</p>",
+    //     "ino_category": "SS Non Technic",
+    //     "know_category": "Kategori Keilmuan",
+    //     "sis_tanggalmulai": "2025-03-19",
+    //     "sis_tanggalakhir": "2025-03-20",
+    //     "per_id": "2025",
+    //     "sis_ruanglingkup": "<p>we</p>",
+    //     "sis_kasus": "<p>eqw</p>",
+    //     "sis_kasusfile": "",
+    //     "sis_masalah": "<p>qewe</p>",
+    //     "sis_masalahfile": "",
+    //     "sis_tujuan": "<p>eqweq</p>",
+    //     "sis_tujuanfile": "",
+    //     "sis_kualitas": "a",
+    //     "sis_biaya": "b",
+    //     "sis_pengiriman": "c",
+    //     "sis_kemanan": "d",
+    //     "sis_moral": "e",
+    //     "activeUser": "asep"
+    // }
 
       try {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/CreateRencanaQCP",
-          body
+          API_LINK + "RencanaSS/CreateRencanaSS",
+          formDataRef.current
         );
 
         if (data === "ERROR") {
@@ -514,10 +403,10 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                           <div className="col-md-6">
                             <Input
                               type="text"
-                              forInput="ssName"
-                              label="Name"
+                              forInput="kry_id"
+                              label="NPK"
                               isDisabled
-                              value={"Manajemen Informatika"}
+                              value={"12345"}
                             //   onChange={handleInputChange}
                             //   errorMessage={errors.rciGroupName}
                             />
@@ -525,8 +414,20 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                           <div className="col-md-6">
                             <Input
                               type="text"
-                              forInput="setName"
-                              label="Prodi/UPT/Dep​"
+                              forInput="nama_kar"
+                              label="Name​"
+                              isDisabled
+                              //   isRequired
+                              value={"Budiono Siregar"}
+                              //   onChange={handleInputChange}
+                              //   errorMessage={errors.setName}
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <Input
+                              type="text"
+                              forInput="produptdep"
+                              label="Prodi/UPT/Dep"
                               isDisabled
                               //   isRequired
                               value={"Manajemen Informatika"}
@@ -537,7 +438,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                           <div className="col-md-6">
                             <Input
                               type="text"
-                              forInput="setName"
+                              forInput="direc"
                               label="Directorate"
                               isDisabled
                               //   isRequired
@@ -546,65 +447,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               //   errorMessage={errors.setName}
                             />
                           </div>
-                          <div className="col-md-6">
-                            <SearchDropdown
-                              forInput="rciFacil"
-                              label="Facilitator"
-                              placeHolder="Facilitator"
-                              arrData={listFacil}
-                              isRequired
-                              isRound
-                              value={formDataRef.current.rciFacil}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciFacil}
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <SearchDropdown
-                              forInput="rciLeader"
-                              label="Leader"
-                              placeHolder="Leader"
-                              arrData={listEmployee}
-                              isRequired
-                              isDisabled
-                              isRound
-                              value={formDataRef.current.rciLeader}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciLeader}
-                            />
-                          </div>
                         </div>
-                        <div className="flex-fill">
-                          <div className="input-group">
-                            <div className="flex-grow-1">
-                              <SearchDropdown
-                                forInput="rciMember"
-                                placeHolder="Member"
-                                arrData={listEmployee}
-                                isRequired
-                                value={memberDataRef.current.rciMember}
-                                onChange={handleInputMemberChange}
-                                errorMessage={errors.rciMember}
-                              />
-                            </div>
-                            <Button
-                              iconName="add"
-                              label="Add Member"
-                              classType="success"
-                              onClick={() =>
-                                handleAddMember(
-                                  memberDataRef.current.rciMember,
-                                  listEmployee.find(
-                                    (item) =>
-                                      item.Value ===
-                                      memberDataRef.current.rciMember
-                                  ).Text
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                        <Table data={currentData} onDelete={handleDelete} />
                       </div>
                     </div>
                   </div>
@@ -617,79 +460,80 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                         <div className="row">
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciTitle"
+                              forInput="sis_judul"
                               label="Title"
                               isRequired
-                              value={formDataRef.current.rciTitle}
+                              value={formDataRef.current.sis_judul}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciTitle}
+                              errorMessage={errors.sis_judul}
                             />
                           </div>
                           <div className="col-lg-6">
-                            <DropDown
-                              forInput="setId"
+                            {/* <DropDown
+                              forInput="ino_category"
                               label="Innovation Category"
-                              arrData={listCategory}
+                              arrData={li}
                               isRequired
-                              value={formDataRef.current.setId}
+                              value={formDataRef.current.ino_category}
                               onChange={handleInputChange}
-                              errorMessage={errors.setId}
-                            />
+                              errorMessage={errors.ino_category}
+                            /> */}
                           </div>
                           <div className="col-lg-6">
-                            <DropDown
-                              forInput="setId2"
-                              label="Improvement Category"
-                              arrData={listImpCategory}
+                            {/* <DropDown
+                              forInput="know_category"
+                              label="Knowledge Category"
+                              arrData={knowledgeimprovment}
                               isRequired
-                              value={formDataRef.current.setId2}
+                              value={formDataRef.current.know_category}
                               onChange={handleInputChange}
-                              errorMessage={errors.setId2}
-                            />
+                              errorMessage={errors.know_category}
+                            /> */}
                           </div>
                           <div className="col-lg-4">
                             <Input
                               type="date"
-                              forInput="rciStartDate"
+                              forInput="sis_tanggalmulai"
                               label="Start Date"
                               isRequired
-                              value={formDataRef.current.rciStartDate}
+                              value={formDataRef.current.sis_tanggalmulai}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciStartDate}
+                              errorMessage={errors.sis_tanggalmulai}
                             />
                           </div>
                           <div className="col-lg-4">
                             <Input
                               type="date"
-                              forInput="rciEndDate"
+                              forInput="sis_tanggalakhir"
                               label="End Date"
                               isRequired
-                              value={formDataRef.current.rciEndDate}
+                              value={formDataRef.current.sis_tanggalakhir}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciEndDate}
+                              errorMessage={errors.sis_tanggalakhir}
                             />
                           </div>
                           <div className="col-lg-4">
-                            <DropDown
-                              forInput="perId"
+                            {/* <DropDown
+                              forInput="per_id"
                               label="Period"
-                              arrData={listPeriod}
+                              arrData={periode}
                               isRequired
-                              isDisabled
-                              value={formDataRef.current.perId}
+                              // isDisabled
+                              value={formDataRef.current.per_id}
                               onChange={handleInputChange}
-                              errorMessage={errors.perId}
-                            />
+                              errorMessage={errors.per_id}
+                            /> */}
                           </div>
 
+                
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciScope"
+                              forInput="sis_ruanglingkup"
                               label="Project Scope"
                               isRequired
-                              value={formDataRef.current.rciScope}
+                              value={formDataRef.current.sis_ruanglingkup}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciScope}
+                              errorMessage={errors.sis_ruanglingkup}
                             />
                           </div>
                         </div>
@@ -705,68 +549,68 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                         <div className="row">
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciCase"
+                              forInput="sis_kasus"
                               label="Bussiness Case"
                               isRequired
-                              value={formDataRef.current.rciCase}
+                              value={formDataRef.current.sis_kasus}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciCase}
+                              errorMessage={errors.sis_kasus}
                             />
                           </div>
                           <div className="col-lg-4">
                             <FileUpload
-                              forInput="rciCaseFile"
+                              forInput="sis_kasusfile"
                               label="Bussiness Case Document (.pdf)"
                               formatFile=".pdf"
                               ref={bussinessCaseFileRef}
                               onChange={() =>
                                 handleFileChange(bussinessCaseFileRef, "pdf")
                               }
-                              errorMessage={errors.rciCaseFile}
+                              errorMessage={errors.sis_kasusfile}
                             />
                           </div>
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciProblem"
+                              forInput="sis_masalah"
                               label="Problem Statement​"
                               isRequired
-                              value={formDataRef.current.rciProblem}
+                              value={formDataRef.current.sis_masalah}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciProblem}
+                              errorMessage={errors.sis_masalah}
                             />
                           </div>
                           <div className="col-lg-4">
                             <FileUpload
-                              forInput="rciProblemFile"
+                              forInput="sis_masalahfile"
                               label="Problem Statement​ Document (.pdf)"
                               formatFile=".pdf"
                               ref={problemFileRef}
                               onChange={() =>
                                 handleFileChange(problemFileRef, "pdf")
                               }
-                              errorMessage={errors.rciProblemFile}
+                              errorMessage={errors.sis_masalahfile}
                             />
                           </div>
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciGoal"
+                              forInput="sis_tujuan"
                               label="Goal Statement​"
                               isRequired
-                              value={formDataRef.current.rciGoal}
+                              value={formDataRef.current.sis_tujuan}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciGoal}
+                              errorMessage={errors.sis_tujuan}
                             />
                           </div>
                           <div className="col-lg-4">
                             <FileUpload
-                              forInput="goalFileRef"
+                              forInput="sis_tujuanfile"
                               label="Goal Statement​ Document (.pdf)"
                               formatFile=".pdf"
                               ref={goalFileRef}
                               onChange={() =>
                                 handleFileChange(goalFileRef, "pdf")
                               }
-                              errorMessage={errors.goalFileRef}
+                              errorMessage={errors.sis_tujuanfile}
                             />
                           </div>
                         </div>
@@ -775,21 +619,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                   </div>
                   <div className="col-lg-12">
                     <div className="card mb-3">
-                      <div className="card-header">
-                        <h5 className="fw-medium">Project Benefit</h5>
-                      </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-lg-6">
-                            <Input
-                              type="text"
-                              forInput="rciProjBenefit"
-                              label="Project Benefit"
-                              value={formDataRef.current.rciProjBenefit}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciProjBenefit}
-                            />
-                          </div>
                           <div className="col-lg-12">
                             <label className="form-label fw-bold ms-1">
                               Tangible Benefit
@@ -806,13 +637,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciQuality"
+                                  forInput="sis_kualitas"
                                   label="Quality"
                                   isDisabled={!checkedStates.rciQuality}
                                   placeholder="Quality"
-                                  value={formDataRef.current.rciQuality}
+                                  value={formDataRef.current.sis_kualitas}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciQuality}
+                                  errorMessage={errors.sis_kualitas}
                                 />
                               </div>
                             </div>
@@ -826,13 +657,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciCost"
+                                  forInput="sis_biaya"
                                   label="Cost"
                                   isDisabled={!checkedStates.rciCost}
                                   placeholder="Cost"
-                                  value={formDataRef.current.rciCost}
+                                  value={formDataRef.current.sis_biaya}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciCost}
+                                  errorMessage={errors.sis_biaya}
                                 />
                               </div>
                             </div>
@@ -848,13 +679,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciDelivery"
+                                  forInput="sis_pengiriman"
                                   label="Delivery"
                                   placeholder="Delivery"
                                   isDisabled={!checkedStates.rciDelivery}
-                                  value={formDataRef.current.rciDelivery}
+                                  value={formDataRef.current.sis_pengiriman}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciDelivery}
+                                  errorMessage={errors.sis_pengiriman}
                                 />
                               </div>
                             </div>
@@ -875,13 +706,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciSafety"
+                                  forInput="sis_kemanan"
                                   label="Safety"
                                   isDisabled={!checkedStates.rciSafety}
                                   placeholder="Safety"
-                                  value={formDataRef.current.rciSafety}
+                                  value={formDataRef.current.sis_kemanan}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciSafety}
+                                  errorMessage={errors.sis_kemanan}
                                 />
                               </div>
                             </div>
@@ -898,12 +729,12 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                 <Input
                                   type="text"
                                   label="Moral"
-                                  forInput="rciMoral"
+                                  forInput="sis_moral"
                                   isDisabled={!checkedStates.rciMoral}
                                   placeholder="Moral"
-                                  value={formDataRef.current.rciMoral}
+                                  value={formDataRef.current.sis_moral}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciMoral}
+                                  errorMessage={errors.sis_moral}
                                 />
                               </div>
                             </div>
