@@ -115,12 +115,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciGoal: string().required("required"),
     rciGoalFile: string().nullable(),
     rciScope: string().required("required"),
-    rciStartDate: date()
-      .min(new Date(), "start date must be after today")
-      .typeError("invalid date")
-      .required("required"),
+    rciStartDate: date().typeError("invalid date").required("required"),
     rciEndDate: date()
-      .min(new Date(), "start date must be after today")
       .typeError("Invalid date format")
       .required("Start date is required"),
     rciQuality: string().max(200, "maximum 200 characters").nullable(),
@@ -140,7 +136,49 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        let filteredData;
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            filteredData = data.filter(
+              (item) => item.upt_bagian === userInfo.upt
+            );
+          });
+        setListEmployee(
+          filteredData.map((value) => ({
+            Value: value.npk,
+            Text: value.npk + " - " + value.nama,
+          }))
+        );
+        formDataRef.current.rciLeader = userInfo.npk;
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Innovation Category",
@@ -159,6 +197,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           message: error.message,
         }));
         setListCategory({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -168,7 +208,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
+      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Knowledge Category",
@@ -187,6 +227,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           message: error.message,
         }));
         setListImpCategory({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -196,6 +238,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -205,12 +248,12 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the period data.");
         } else {
-          setListPeriod({ data });
+          setListPeriod(data);
           const selected = data.find(
             (item) => item.Text === new Date().getFullYear()
           );
-          formDataRef.current.perId = 1;
-          setSelectedPeriod(1);
+          formDataRef.current.perId = selected.Value;
+          setSelectedPeriod(selected.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -220,6 +263,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           message: error.message,
         }));
         setListPeriod({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -262,48 +307,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       setIsLoading(true);
       try {
-        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setListEmployee(
-              data.map((value) => ({
-                Value: value.npk,
-                Text: value.npk + " - " + value.nama,
-              }))
-            );
-            const member = data.find((item) => item["npk"] === userInfo.npk);
-            formDataRef.current.rciLeader = member.npk;
-          })
-          .catch((err) => {
-            throw new Error("Failed to get user detail.");
-          });
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
-      try {
         const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
           p1: selectedPeriod,
         });
@@ -321,6 +324,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         }
       } catch (error) {
         window.scrollTo(0, 0);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -337,6 +342,23 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       setIsError({
         error: true,
         message: "Invalid member: Please select a member",
+      });
+      return;
+    }
+    if (id === userInfo.npk) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a leader",
+      });
+      return;
+    }
+    if (
+      formDataRef.current.rciFacil !== "" &&
+      id === formDataRef.current.rciFacil
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a facilitator",
       });
       return;
     }
@@ -447,7 +469,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
     ];
 
-    console.log(formDataRef.current)
+    console.log(formDataRef.current);
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
@@ -465,8 +487,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       }
       const sDate = new Date(formDataRef.current.rciStartDate);
       const eDate = new Date(formDataRef.current.rciEndDate);
-      const selectedStartDate = new Date(periodDataRef.current.startPeriod);
-      const selectedEndDate = new Date(periodDataRef.current.endPeriod);
+      const selectedStartPeriod = new Date(periodDataRef.current.startPeriod);
+      const selectedEndPeriod = new Date(periodDataRef.current.endPeriod);
 
       if (sDate >= eDate) {
         window.scrollTo(0, 0);
@@ -477,7 +499,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         return;
       }
 
-      if (sDate >= selectedStartDate && eDate <= selectedEndDate) {
+      if (eDate >= selectedEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
@@ -505,21 +527,21 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (body["rciCaseFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciCaseFile"] = data.Hasil)
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-            (data) => (body["rciProblemFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciProblemFile"] = data.Hasil)
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-            (data) => (body["rciGoalFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciGoalFile"] = data.Hasil)
           )
         );
       }
@@ -602,7 +624,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-12">
+                          <div className="col-md-6">
                             <Input
                               type="text"
                               forInput="rciGroupName"
@@ -620,15 +642,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               label="Prodi/UPT/Dep​"
                               isDisabled
                               value={userInfo.upt}
-                              />
-                          </div>
-                          <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
-                              label="Directorate"
-                              isDisabled
-                              value={userInfo.departemen}
                             />
                           </div>
                           <div className="col-md-6">
@@ -645,15 +658,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <SearchDropdown
+                            <Input
+                              type="text"
                               forInput="rciLeader"
                               label="Leader"
-                              placeHolder="Leader"
-                              arrData={listEmployee}
                               isRequired
                               isDisabled
-                              isRound
-                              value={formDataRef.current.rciLeader}
+                              value={userInfo.nama}
                               onChange={handleInputChange}
                               errorMessage={errors.rciLeader}
                             />

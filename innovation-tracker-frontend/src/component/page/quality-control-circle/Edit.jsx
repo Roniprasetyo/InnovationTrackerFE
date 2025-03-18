@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import { separator, clearSeparator } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
@@ -139,7 +139,50 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        let filteredData;
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            filteredData = data.filter(
+              (item) => item.upt_bagian === userInfo.upt
+            );
+          });
+        setListEmployee(
+          filteredData.map((value) => ({
+            Value: value.npk,
+            Text: value.npk + " - " + value.nama,
+          }))
+        );
+        console.log(filteredData);
+        // formDataRef.current.rciLeader = userInfo.npk;
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Innovation Category",
@@ -158,6 +201,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListCategory({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -167,7 +212,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
+      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Knowledge Category",
@@ -186,6 +231,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListImpCategory({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -195,6 +242,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -214,6 +262,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListPeriod({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -250,74 +300,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
 
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setListEmployee(
-              data.map((value) => ({
-                Value: value.npk,
-                Text: value.npk + " - " + value.nama,
-              }))
-            );
-            const member = data.find((item) => item["npk"] === userInfo.npk);
-            formDataRef.current.rciLeader = member.npk;
-          })
-          .catch((err) => {
-            throw new Error("Failed to get user detail.");
-          });
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setIsError((prevError) => ({ ...prevError, error: false }));
-  //     setIsLoading(true);
-  //     try {
-  //       const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-  //         p1: formDataRef.current.perId,
-  //       });
-
-  //       if (data === "ERROR") {
-  //         throw new Error("Error: Failed to get the period data.");
-  //       } else {
-  //         console.log(data);
-  //         periodDataRef.current = {
-  //           startPeriod: data[0].perAwal.split("T")[0],
-  //           endPeriod: data[0].perAkhir.split("T")[0],
-  //         };
-  //       }
-  //     } catch (error) {
-  //       window.scrollTo(0, 0);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [formDataRef.current.perId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -383,6 +365,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
             rciSafety: data["Safety"] ? true : false,
             rciMoral: data["Moral"] ? true : false,
           });
+          setSelectedPeriod(data["PeriodId"]);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -399,6 +382,36 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+          p1: selectedPeriod,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          console.log(data);
+          const sDate = data[0].perAwal.split("T")[0];
+          const eDate = data[0].perAkhir.split("T")[0];
+          periodDataRef.current = {
+            startPeriod: sDate,
+            endPeriod: eDate,
+          };
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [selectedPeriod]);
+
   const handleAddMember = (id, Name) => {
     if (
       id === null ||
@@ -409,6 +422,23 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       setIsError({
         error: true,
         message: "Invalid member: Please select a member",
+      });
+      return;
+    }
+    if (id === userInfo.npk) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a leader",
+      });
+      return;
+    }
+    if (
+      formDataRef.current.rciFacil !== "" &&
+      id === formDataRef.current.rciFacil
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a facilitator",
       });
       return;
     }
@@ -548,7 +578,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         return;
       }
 
-      if (sDate <= selectedStartPeriod || eDate >= selectedEndPeriod) {
+      if (eDate >= selectedEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
@@ -575,21 +605,21 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (body["rciCaseFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciCaseFile"] = data.Hasil)
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-            (data) => (body["rciProblemFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciProblemFile"] = data.Hasil)
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-            (data) => (body["rciGoalFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciGoalFile"] = data.Hasil)
           )
         );
       }
@@ -673,7 +703,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-12">
+                          <div className="col-md-6">
                             <Input
                               type="text"
                               forInput="rciGroupName"
@@ -691,15 +721,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               label="Prodi/UPT/Dep​"
                               isDisabled
                               value={userInfo.upt}
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
-                              label="Directorate"
-                              isDisabled
-                              value={userInfo.departemen}
                             />
                           </div>
                           <div className="col-md-6">

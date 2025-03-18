@@ -171,7 +171,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             No: index + 1,
             "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
-              decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
+              decodeHtml(decodeHtml(decodeHtml(value["Project Title"]))).replace(/<\/?[^>]+(>|$)/g, ""),
               50
             ),
             Category: value["Category"],
