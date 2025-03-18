@@ -6,20 +6,22 @@ import Alert from "../../part/Alert";
 import Label from "../../part/Label";
 import Icon from "../../part/Icon";
 
-const listTypeFacilitator = [
+const listTypeUser = [
   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MasterFacilitatorDetail({ onChangePage, withID }) {
+export default function MasterUserDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
+    Username: "",
     Name: "",
-    Period: "",
-    RoleName: "",
+    Role: "",
+    RoleID: "",
+    App: "",
   });
 
   useEffect(() => {
@@ -27,8 +29,10 @@ export default function MasterFacilitatorDetail({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterFacilitator/GetFacilitatorById", {
-          id: withID,
+        const data = await UseFetch(API_LINK + "MasterUser/GetUserById", {
+          user: withID.user,
+          role: withID.role,
+          app: withID.app,
         });
 
         if (data === "ERROR" || data.length === 0) {
@@ -51,7 +55,7 @@ export default function MasterFacilitatorDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [withID]);
 
   return (
     <>
@@ -89,32 +93,25 @@ export default function MasterFacilitatorDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header p-2">
-            <h2 className="fw-bold text-center">Facilitator Detail</h2>
+            <h2 className="fw-bold text-center">User Detail</h2>
           </div>
           <div className="card-body p-4">
             {isLoading ? (
               <Loading />
             ) : (
               <div className="row">
-                <div className="col-lg-4">
+                <div className="col-lg-6">
                   <Label
                     forLabel="setName"
                     title="Name"
                     data={formDataRef.current.Name}
                   />
                 </div>
-                <div className="col-lg-4">
+                <div className="col-lg-6">
                   <Label
-                    forLabel="setType"
-                    title="Period"
-                    data={formDataRef.current.Period}
-                  />
-                </div>
-                <div className="col-lg-4">
-                  <Label
-                    forLabel="setDesc"
+                    forLabel="Role"
                     title="Role"
-                    data={formDataRef.current.RoleName}
+                    data={formDataRef.current.Role}
                   />
                 </div>
               </div>

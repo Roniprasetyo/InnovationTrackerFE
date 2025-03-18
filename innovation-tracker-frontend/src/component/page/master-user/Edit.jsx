@@ -12,79 +12,45 @@ import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 import SearchDropdown from "../../part/SearchDropdown";
 
-const listTypeFacilitator = [
+const listTypeUser = [
   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MasterFacilitatorEdit({ onChangePage, withID }) {
+export default function MasterUserEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
 
   const [listEmployee, setListEmployee] = useState([]);
-  const [listPeriod, setListPeriod] = useState([]);
-  const [listCategory, setListCategory] = useState([]);
+  const [listRole, setListRole] = useState([]);
 
   const formDataRef = useRef({
-    Key: "",
-    kryID: "",
-    perID: "",
-    role: "",
+    usrID: "",
+    rolID: "",
+    appID: "APP65",
+  });
+  const prevDataRef = useRef({
+    prevusrID: "",
+    prevrolID: "",
   });
 
   const userSchema = object({
-    Key: string().required("required"),
-    kryID: string().required("required"),
-    perID: string().required("required"),
-    role: string().required("required"),
+    usrID: string().required("required"),
+    rolID: string().required("required"),
+    appID: string().max(100, "maximum 100 characters").required("required"),
   });
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Innovation Role Category",
-        });
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListCategory(data);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(
-          API_LINK + "MasterPeriod/GetListPeriod",
-          {}
-        );
+        const data = await UseFetch(API_LINK + "MasterUser/GetListRole", {});
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the period data.");
         } else {
-          setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perID = selected.Value;
+          setListRole(data);
           window.scrollTo(0, 0);
         }
       } catch (error) {
@@ -94,7 +60,7 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
+        setListRole({});
       }
     };
 
@@ -107,7 +73,7 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
       setIsLoading(true);
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
+          API_LINK + "RencanaCircle/GetListKaryawanUsername",
           {}
         );
 
@@ -138,21 +104,23 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(
-          API_LINK + "MasterFacilitator/GetFacilitatorById",
-          {
-            id: withID,
-          }
-        );
+        const data = await UseFetch(API_LINK + "MasterUser/GetUserById", {
+          user: withID.user,
+          role: withID.role,
+          app: withID.app,
+        });
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data periode.");
+          throw new Error("Error: Failed to get user data.");
         } else {
           formDataRef.current = {
-            Key: data[0].Key,
-            kryID: data[0].kryID,
-            perID: data[0].perID,
-            role: data[0].role,
+            usrID: data[0].Username,
+            rolID: data[0].RoleID,
+            appID: "APP65",
+          };
+          prevDataRef.current = {
+            prevusrID: data[0].Username,
+            prevrolID: data[0].RoleID,
           };
         }
       } catch (error) {
@@ -172,7 +140,6 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // console.log(value);
     const validationError = validateInput(name, value, userSchema);
     formDataRef.current[name] = value;
     setErrors((prevErrors) => ({
@@ -190,18 +157,16 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
       setErrors
     );
 
-    console.log(formDataRef.current);
-
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
 
       try {
-        const data = await UseFetch(
-          API_LINK + "MasterFacilitator/UpdateFacilitator",
-          formDataRef.current
-        );
+        const data = await UseFetch(API_LINK + "MasterUser/UpdateUser", {
+          ...formDataRef.current,
+          ...prevDataRef.current,
+        });
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to update the data.");
@@ -267,37 +232,26 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
               <div className="row p-4">
                 <div className="col-lg-4">
                   <SearchDropdown
-                    forInput="kryID"
+                    forInput="usrID"
                     label="Employee"
                     placeHolder="Employee"
                     arrData={listEmployee}
                     isRequired
                     isRound
-                    value={formDataRef.current.kryID}
+                    value={formDataRef.current.usrID}
                     onChange={handleInputChange}
-                    errorMessage={errors.kryID}
+                    errorMessage={errors.usrID}
                   />
                 </div>
                 <div className="col-lg-4">
                   <DropDown
-                    forInput="perID"
-                    label="Period"
-                    arrData={listPeriod}
-                    isRequired
-                    value={formDataRef.current.perID}
-                    onChange={handleInputChange}
-                    errorMessage={errors.perID}
-                  />
-                </div>
-                <div className="col-lg-4">
-                  <DropDown
-                    forInput="role"
+                    forInput="rolID"
                     label="Role"
-                    arrData={listCategory}
+                    arrData={listRole}
                     isRequired
-                    value={formDataRef.current.role}
+                    value={formDataRef.current.rolID}
                     onChange={handleInputChange}
-                    errorMessage={errors.role}
+                    errorMessage={errors.rolID}
                   />
                 </div>
               </div>

@@ -18,7 +18,7 @@ export default function Table({
   let colPosition;
   let colCount = 0;
 
-  function generateActionButton(columnName, value, key, id, status) {
+  function generateActionButton(columnName, value, key, id, status, rowValue) {
     if (columnName !== "Action") return value;
     const listButton = value.map((action) => {
       switch (action) {
@@ -77,7 +77,7 @@ export default function Table({
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
               title="Detail"
-              onClick={() => onDetail("detail", id)}
+              onClick={() => onDetail("detail", id, rowValue)}
             />
           );
         case "Edit":
@@ -88,7 +88,7 @@ export default function Table({
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
               title="Modify"
-              onClick={() => onEdit("edit", id)}
+              onClick={() => onEdit("edit", id, rowValue)}
             />
           );
         case "Approve":
@@ -262,7 +262,8 @@ export default function Table({
                               value[column],
                               "Action" + rowIndex + colIndex,
                               value["Key"],
-                              value["Status"]
+                              value["Status"],
+                              value
                             )}
                           </td>
                         );

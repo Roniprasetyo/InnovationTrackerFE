@@ -16,7 +16,8 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
-    Type: null,
+    Role: null,
+    Period: null,
     Status: null,
     Count: 0,
   },
@@ -25,19 +26,15 @@ const inisialisasiData = [
 const dataFilterSort = [
   { Value: "[Name] asc", Text: "Name [↑]" },
   { Value: "[Name] desc", Text: "Name [↓]" },
+  { Value: "[Role] asc", Text: "Role [↑]" },
+  { Value: "[Role] desc", Text: "Role [↓]" },
 ];
-
-const dataFilterStatus = [
+const dataStatus = [
   { Value: "Aktif", Text: "Aktif" },
   { Value: "Tidak Aktif", Text: "Tidak Aktif" },
 ];
 
-const dataFilterJenis = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-];
-
-export default function MasterSettingIndex({ onChangePage }) {
+export default function MasterUserIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
@@ -46,13 +43,11 @@ export default function MasterSettingIndex({ onChangePage }) {
     query: "",
     sort: "[Name] asc",
     status: "Aktif",
-    jenis: "",
   });
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -73,36 +68,24 @@ export default function MasterSettingIndex({ onChangePage }) {
         query: searchQuery.current.value,
         sort: searchFilterSort.current.value,
         status: searchFilterStatus.current.value,
-        jenis: searchFilterJenis.current.value,
       };
     });
   }
 
-  async function handleDelete(id) {
+  function handleDelete(id) {
+    setIsLoading(true);
     setIsError(false);
-    const confirm = await SweetAlert(
-      "Confirm",
-      "Are you sure you want to delete this data?.",
-      "warning",
-      "DELETE",
-      null,
-      "",
-      true
-    );
-
-    if (confirm) {
-      UseFetch(API_LINK + "MasterSetting/SetStatusSetting", {
-        idSetting: id,
+    UseFetch(API_LINK + "MasterUser/DeleteUser", {
+      idUser: id,
+    })
+      .then((data) => {
+        if (data === "ERROR" || data.length === 0) setIsError(true);
+        else {
+          SweetAlert("Success", "Data successfully deleted", "success");
+          handleSetCurrentPage(currentFilter.page);
+        }
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert("Success", "Data successfully deleted", "success");
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
-        .then(() => setIsLoading(false));
-    }
+      .then(() => setIsLoading(false));
   }
 
   useEffect(() => {
@@ -111,7 +94,7 @@ export default function MasterSettingIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "MasterSetting/GetSetting",
+          API_LINK + "MasterUser/GetUser",
           currentFilter
         );
 
@@ -123,7 +106,14 @@ export default function MasterSettingIndex({ onChangePage }) {
           const formattedData = data.map((value) => ({
             ...value,
             Action: ["Delete", "Detail", "Edit"],
-            Alignment: ["center", "left", "center", "center", "center"],
+            Alignment: [
+              "center",
+              "left",
+              "center",
+              "center",
+              "center",
+              "center",
+            ],
           }));
           setCurrentData(formattedData);
         }
@@ -144,7 +134,7 @@ export default function MasterSettingIndex({ onChangePage }) {
           <div className="d-flex gap-3 justify-content-center">
             <h2 className="display-1 fw-bold">Manage</h2>
             <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">Setting</h2>
+              <h2 className="display-5 fw-bold align-items-end">User</h2>
             </div>
           </div>
         </div>
@@ -167,7 +157,7 @@ export default function MasterSettingIndex({ onChangePage }) {
           />
           <Input
             ref={searchQuery}
-            forInput="pencarianSetting"
+            forInput="pencarianUser"
             isRound
             placeholder="Search"
           />
@@ -184,22 +174,14 @@ export default function MasterSettingIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Name] asc"
-            />
-            <DropDown
-              ref={searchFilterJenis}
-              forInput="ddJenis"
-              label="Type"
-              type="semua"
-              arrData={dataFilterJenis}
-              defaultValue=""
+              defaultValue="[Nama Alat/Mesin] asc"
             />
             <DropDown
               ref={searchFilterStatus}
               forInput="ddStatus"
               label="Status"
               type="none"
-              arrData={dataFilterStatus}
+              arrData={dataStatus}
               defaultValue="Aktif"
             />
           </Filter>
@@ -213,8 +195,20 @@ export default function MasterSettingIndex({ onChangePage }) {
             <Table
               data={currentData}
               onDelete={handleDelete}
-              onDetail={onChangePage}
-              onEdit={onChangePage}
+              onDetail={(value, id, rowValue) =>
+                onChangePage("detail", {
+                  user: rowValue.Name,
+                  role: rowValue.Role,
+                  app: rowValue.App,
+                })
+              }
+              onEdit={(value, id, rowValue) =>
+                onChangePage("edit", {
+                  user: rowValue.Name,
+                  role: rowValue.Role,
+                  app: rowValue.App,
+                })
+              }
             />
             <Paging
               pageSize={PAGE_SIZE}
