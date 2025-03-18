@@ -42,20 +42,27 @@ const Input = forwardRef(function Input(
             ></textarea>
           )}
           {type !== "textarea" && (
-            <input
-              id={forInput}
-              name={forInput}
-              type={type}
-              className={
-                isRound
-                  ? "form-control text-" + textAlign
-                  : "form-control rounded-5 text-" + textAlign
-              }
-              placeholder={placeholder}
-              ref={ref}
-              disabled={isDisabled}
-              {...props}
-            />
+            <>
+              <input
+                id={forInput}
+                name={forInput}
+                type={type}
+                className={
+                  isRound
+                    ? "form-control text-" + textAlign
+                    : "form-control rounded-5 text-" + textAlign
+                }
+                placeholder={placeholder}
+                ref={ref}
+                disabled={isDisabled}
+                {...props}
+              />
+              {type === "date" && placeholder !== "" && (
+                <small className="ms-2">
+                  <i> {placeholder}</i>
+                </small>
+              )}
+            </>
           )}
         </div>
       )}

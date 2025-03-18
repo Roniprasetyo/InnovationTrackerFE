@@ -30,6 +30,10 @@ export default function MasterUserEdit({ onChangePage, withID }) {
     rolID: "",
     appID: "APP65",
   });
+  const prevDataRef = useRef({
+    prevusrID: "",
+    prevrolID: "",
+  });
 
   const userSchema = object({
     usrID: string().required("required"),
@@ -107,14 +111,16 @@ export default function MasterUserEdit({ onChangePage, withID }) {
         });
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
-          );
+          throw new Error("Error: Failed to get user data.");
         } else {
           formDataRef.current = {
             usrID: data[0].Username,
             rolID: data[0].RoleID,
             appID: "APP65",
+          };
+          prevDataRef.current = {
+            prevusrID: data[0].Username,
+            prevrolID: data[0].RoleID,
           };
         }
       } catch (error) {
@@ -157,10 +163,10 @@ export default function MasterUserEdit({ onChangePage, withID }) {
       setErrors({});
 
       try {
-        const data = await UseFetch(
-          API_LINK + "MasterUser/UpdateUser",
-          formDataRef.current
-        );
+        const data = await UseFetch(API_LINK + "MasterUser/UpdateUser", {
+          ...formDataRef.current,
+          ...prevDataRef.current,
+        });
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to update the data.");

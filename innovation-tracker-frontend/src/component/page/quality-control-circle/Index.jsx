@@ -31,12 +31,10 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
-  { Value: "[Team Name] asc", Text: "Team Name [↑]" },
-  { Value: "[Team Name] desc", Text: "Team Name [↓]" },
-  { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
-  { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
-  { Value: "[Circle Benefit] asc", Text: "[Circle Benefit] [↑]" },
-  { Value: "[Circle Benefit] desc", Text: "[Circle Benefit] [↓]" },
+  { Value: "[Circle Name] asc", Text: "[Circle Name] [↑]" },
+  { Value: "[Circle Name] desc", Text: "[Circle Name] [↓]" },
+  { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
+  { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
@@ -49,13 +47,10 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
   { Value: "Revision", Text: "Revision" },
   { Value: "Rejected", Text: "Rejected" },
-];
-const dataFilterJenis = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
 export default function QualityControlCircleIndex({ onChangePage }) {
@@ -69,7 +64,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Team Name] asc",
+    sort: "[Category] asc",
     status: "",
     jenis: "QCC",
     role: userInfo.role,
@@ -79,7 +74,6 @@ export default function QualityControlCircleIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -100,7 +94,6 @@ export default function QualityControlCircleIndex({ onChangePage }) {
         query: searchQuery.current.value,
         sort: searchFilterSort.current.value,
         status: searchFilterStatus.current.value,
-        jenis: searchFilterJenis.current.value,
       };
     });
   }
@@ -172,10 +165,11 @@ export default function QualityControlCircleIndex({ onChangePage }) {
           setCurrentData(inisialisasiData);
         } else {
           const role = userInfo.role.slice(0, 5);
+          const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
             No: index + 1,
-            "Circle Name": maxCharDisplayed(value["Team Name"], 30),
+            "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
               50
@@ -192,7 +186,8 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
-                : role === "ROL01" && value["Status"] === "Waiting Approval"
+                : inorole === "Facilitator" &&
+                  value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
                 : ["Detail"],
             Alignment: [
@@ -272,7 +267,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Team Name] asc"
+              defaultValue="[Circle Name] asc"
             />
             <DropDown
               ref={searchFilterStatus}

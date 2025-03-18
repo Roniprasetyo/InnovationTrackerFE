@@ -24,6 +24,7 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
 
   const [listEmployee, setListEmployee] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -36,8 +37,36 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
     Key: string().required("required"),
     kryID: string().required("required"),
     perID: string().required("required"),
-    role: string().max(100, "maximum 100 characters").required("required"),
+    role: string().required("required"),
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Role Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,14 +138,22 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterFacilitator/GetFacilitatorById", {
-          id: withID,
-        });
+        const data = await UseFetch(
+          API_LINK + "MasterFacilitator/GetFacilitatorById",
+          {
+            id: withID,
+          }
+        );
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Terjadi kesalahan: Gagal mengambil data periode.");
         } else {
-          formDataRef.current = data[0];
+          formDataRef.current = {
+            Key: data[0].Key,
+            kryID: data[0].kryID,
+            perID: data[0].perID,
+            role: data[0].role,
+          };
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -135,6 +172,7 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    // console.log(value);
     const validationError = validateInput(name, value, userSchema);
     formDataRef.current[name] = value;
     setErrors((prevErrors) => ({
@@ -151,6 +189,8 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
       userSchema,
       setErrors
     );
+
+    console.log(formDataRef.current);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
@@ -250,10 +290,10 @@ export default function MasterFacilitatorEdit({ onChangePage, withID }) {
                   />
                 </div>
                 <div className="col-lg-4">
-                  <Input
-                    type="text"
+                  <DropDown
                     forInput="role"
                     label="Role"
+                    arrData={listCategory}
                     isRequired
                     value={formDataRef.current.role}
                     onChange={handleInputChange}

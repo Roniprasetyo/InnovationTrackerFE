@@ -12,11 +12,6 @@ import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 import SearchDropdown from "../../part/SearchDropdown";
 
-const listTypeFacilitator = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-];
-
 export default function MasterFacilitatorAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -24,6 +19,7 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
 
   const [listEmployee, setListEmployee] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
 
   const formDataRef = useRef({
     kryID: "",
@@ -36,6 +32,34 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
     perID: string().required("required"),
     role: string().max(100, "maximum 100 characters").required("required"),
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Role Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -221,10 +245,10 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
                   />
                 </div>
                 <div className="col-lg-4">
-                  <Input
-                    type="text"
+                  <DropDown
                     forInput="role"
                     label="Role"
+                    arrData={listCategory}
                     isRequired
                     value={formDataRef.current.role}
                     onChange={handleInputChange}

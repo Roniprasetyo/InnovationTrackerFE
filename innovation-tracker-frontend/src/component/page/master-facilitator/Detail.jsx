@@ -17,10 +17,9 @@ export default function MasterFacilitatorDetail({ onChangePage, withID }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
-    setId: "",
-    setName: "",
-    setType: "",
-    setDesc: "",
+    Name: "",
+    Period: "",
+    RoleName: "",
   });
 
   useEffect(() => {
@@ -97,25 +96,25 @@ export default function MasterFacilitatorDetail({ onChangePage, withID }) {
               <Loading />
             ) : (
               <div className="row">
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Label
                     forLabel="setName"
                     title="Name"
-                    data={formDataRef.current.setName}
+                    data={formDataRef.current.Name}
                   />
                 </div>
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Label
                     forLabel="setType"
-                    title="Type"
-                    data={formDataRef.current.setType}
+                    title="Period"
+                    data={formDataRef.current.Period}
                   />
                 </div>
-                <div className="col-lg-12">
+                <div className="col-lg-4">
                   <Label
                     forLabel="setDesc"
-                    title="Type"
-                    data={formDataRef.current.setDesc}
+                    title="Role"
+                    data={formDataRef.current.RoleName}
                   />
                 </div>
               </div>

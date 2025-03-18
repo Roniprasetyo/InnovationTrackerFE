@@ -23,6 +23,7 @@ import { decodeHtml, formatDate } from "../../util/Formatting";
 const inisialisasiData = [
   {
     Key: null,
+    No: null,
     Name: null,
     Count: 0,
   },
@@ -32,11 +33,11 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
-  console.log(userInfo);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [memberData, setCurrentData] = useState(inisialisasiData);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
 
   const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
@@ -90,14 +91,19 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciMember: "",
   });
 
+  const periodDataRef = useRef({
+    startPeriod: "",
+    endPeriod: "",
+  });
+
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    rciId: number().required("required"),
-    setId: number().required("required"),
-    perId: number().nullable(),
+    rciId: string().nullable(),
+    setId: string().nullable(),
+    perId: string().nullable(),
     rciGroupName: string()
       .max(100, "maximum 100 characters")
       .required("required"),
@@ -116,14 +122,14 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciEndDate: date()
       .typeError("Invalid date format")
       .required("Start date is required"),
-    rciQuality: string().max(100, "maximum 100 characters").nullable(),
-    rciCost: string().max(100, "maximum 100 characters").nullable(),
-    rciSafety: string().max(100, "maximum 100 characters").nullable(),
-    rciDelivery: string().max(100, "maximum 100 characters").nullable(),
-    rciMoral: string().max(100, "maximum 100 characters").nullable(),
+    rciQuality: string().max(200, "maximum 200 characters").nullable(),
+    rciCost: string().max(200, "maximum 200 characters").nullable(),
+    rciSafety: string().max(200, "maximum 200 characters").nullable(),
+    rciDelivery: string().max(200, "maximum 200 characters").nullable(),
+    rciMoral: string().max(200, "maximum 200 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    setId2: number().required("required"),
+    setId2: string().nullable(),
   });
 
   const memberSchema = object({
@@ -136,7 +142,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Kategori Keilmuan",
+          p1: "Innovation Category",
         });
 
         if (data === "ERROR") {
@@ -164,7 +170,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Jenis Improvement",
+          p1: "Knowledge Category",
         });
 
         if (data === "ERROR") {
@@ -221,11 +227,11 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       try {
         const data = await UseFetch(
           API_LINK + "MasterFacilitator/GetListFacilitator",
-          { p1: new Date().getFullYear() }
+          { p1: new Date().getFullYear(), p2: 8 }
         );
 
         if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the facilitator data.");
         } else {
           setListFacil(data);
         }
@@ -250,16 +256,27 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       setIsLoading(true);
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
-          {}
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListEmployee(data);
-        }
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setListEmployee(
+              data.map((value) => ({
+                Value: value.npk,
+                Text: value.npk + " - " + value.nama,
+              }))
+            );
+            const member = data.find((item) => item["npk"] === userInfo.npk);
+            formDataRef.current.rciLeader = member.npk;
+          })
+          .catch((err) => {
+            throw new Error("Failed to get user detail.");
+          });
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -276,6 +293,32 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     fetchData();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setIsError((prevError) => ({ ...prevError, error: false }));
+  //     setIsLoading(true);
+  //     try {
+  //       const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+  //         p1: formDataRef.current.perId,
+  //       });
+
+  //       if (data === "ERROR") {
+  //         throw new Error("Error: Failed to get the period data.");
+  //       } else {
+  //         console.log(data);
+  //         periodDataRef.current = {
+  //           startPeriod: data[0].perAwal.split("T")[0],
+  //           endPeriod: data[0].perAkhir.split("T")[0],
+  //         };
+  //       }
+  //     } catch (error) {
+  //       window.scrollTo(0, 0);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [formDataRef.current.perId]);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -289,9 +332,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
-          );
+          throw new Error("Error: Failed to get qcc data.");
         } else {
           formDataRef.current = {
             rciId: data["Key"],
@@ -359,7 +400,19 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   }, []);
 
   const handleAddMember = (id, Name) => {
-    if (currentData[0].Count === 0) {
+    if (
+      id === null ||
+      id === undefined ||
+      Name === null ||
+      Name === undefined
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Please select a member",
+      });
+      return;
+    }
+    if (memberData[0].Count === 0) {
       const data = [
         {
           Key: id,
@@ -375,14 +428,20 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       }));
       setCurrentData(formattedData);
     } else {
-      if (currentData.some((member) => member.Key === id) === true) {
+      if (memberData.some((member) => member.Key === id) === true) {
         window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Member already exists!" });
+        setIsError({
+          error: true,
+          message: "Invalid member: Member already exists!",
+        });
         return;
       }
-      if (currentData.length === 6) {
+      if (memberData.length === 6) {
         window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Max member reached!" });
+        setIsError({
+          error: true,
+          message: "Invalid member: Max member reached!",
+        });
         return;
       }
       setCurrentData((prevData) => [
@@ -401,7 +460,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   };
 
   const handleDelete = (id) => {
-    if (currentData.length === 1) setCurrentData(inisialisasiData);
+    if (memberData.length === 1) setCurrentData(inisialisasiData);
     else
       setCurrentData((prevData) =>
         prevData.filter((member) => member.Key !== id)
@@ -417,9 +476,9 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     const validationError = validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    if (fileSize / 1024576 > 10) error = "file is too large";
     else if (!extAllowed.split(",").includes(fileExt))
-      error = "format berkas tidak valid";
+      error = "invalid file format";
 
     if (error) ref.current.value = "";
 
@@ -457,26 +516,56 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     const newMemData = [
       { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
       { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-      ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
+      ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
     ];
 
-    console.log(newMemData);
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
 
-    delete formDataRef.current.rciFacil;
-    delete formDataRef.current.rciLeader;
-
-    const body = {
-      ...formDataRef.current,
-      rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
-      member: newMemData,
-    };
-    console.log(body);
     if (Object.values(validationErrors).every((error) => !error)) {
+      if (memberData.length < 2) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid member: Please add at least 2 members!",
+        });
+        return;
+      }
+      const sDate = new Date(formDataRef.current.rciStartDate);
+      const eDate = new Date(formDataRef.current.rciEndDate);
+      const selectedStartPeriod = new Date(periodDataRef.current.startPeriod);
+      const selectedEndPeriod = new Date(periodDataRef.current.endPeriod);
+
+      if (sDate >= eDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid date: The end date must be after the start date!",
+        });
+        return;
+      }
+
+      if (sDate <= selectedStartPeriod || eDate >= selectedEndPeriod) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message:
+            "Invalid date: Selected start date or end date outrange the selected period",
+        });
+        return;
+      }
+
+      formDataRef.current = {
+        ...formDataRef.current,
+        rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
+        member: newMemData,
+      };
+      delete formDataRef.current.rciFacil;
+      delete formDataRef.current.rciLeader;
+
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -510,7 +599,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
 
         const data = await UseFetch(
           API_LINK + "RencanaCircle/UpdateRencanaQCP",
-          body
+          formDataRef.current
         );
 
         if (data === "ERROR") {
@@ -601,10 +690,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="setName"
                               label="Prodi/UPT/Dep​"
                               isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                              value={userInfo.upt}
                             />
                           </div>
                           <div className="col-md-6">
@@ -613,10 +699,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="setName"
                               label="Directorate"
                               isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                              value={userInfo.departemen}
                             />
                           </div>
                           <div className="col-md-6">
@@ -677,7 +760,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             />
                           </div>
                         </div>
-                        <Table data={currentData} onDelete={handleDelete} />
+                        <Table data={memberData} onDelete={handleDelete} />
                       </div>
                     </div>
                   </div>
@@ -712,7 +795,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                           <div className="col-lg-6">
                             <DropDown
                               forInput="setId2"
-                              label="Improvement Category"
+                              label="Knowledge Category"
                               arrData={listImpCategory}
                               isRequired
                               value={formDataRef.current.setId2}
@@ -725,6 +808,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               type="date"
                               forInput="rciStartDate"
                               label="Start Date"
+                              placeholder={
+                                "Selected period starts on " +
+                                formatDate(
+                                  periodDataRef.current.startPeriod,
+                                  true
+                                )
+                              }
                               isRequired
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
@@ -736,6 +826,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               type="date"
                               forInput="rciEndDate"
                               label="End Date"
+                              placeholder={
+                                "Selected period ends on " +
+                                formatDate(
+                                  periodDataRef.current.endPeriod,
+                                  true
+                                )
+                              }
                               isRequired
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}

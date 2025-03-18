@@ -184,7 +184,7 @@ export default function MasterSettingIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Nama Alat/Mesin] asc"
+              defaultValue="[Name] asc"
             />
             <DropDown
               ref={searchFilterJenis}

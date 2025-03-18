@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -17,7 +17,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
-import { clearSeparator, separator } from "../../util/Formatting";
+import { clearSeparator, formatDate, separator } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -35,7 +35,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [memberData, setCurrentData] = useState(inisialisasiData);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
 
   const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
@@ -88,15 +89,20 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciMember: "",
   });
 
+  const periodDataRef = useRef({
+    startPeriod: "",
+    endPeriod: "",
+  });
+
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    setId: number().required("required"),
-    perId: number().nullable(),
+    setId: string().nullable(),
+    perId: string().nullable(),
     rciGroupName: string()
-      .max(50, "maximum 50 characters")
+      .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
     rciProjBenefit: string()
@@ -117,14 +123,14 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       .min(new Date(), "start date must be after today")
       .typeError("Invalid date format")
       .required("Start date is required"),
-    rciQuality: string().max(100, "maximum 100 characters").nullable(),
-    rciCost: string().max(100, "maximum 100 characters").nullable(),
-    rciSafety: string().max(100, "maximum 100 characters").nullable(),
-    rciDelivery: string().max(100, "maximum 100 characters").nullable(),
-    rciMoral: string().max(100, "maximum 100 characters").nullable(),
+    rciQuality: string().max(200, "maximum 200 characters").nullable(),
+    rciCost: string().max(200, "maximum 200 characters").nullable(),
+    rciSafety: string().max(200, "maximum 200 characters").nullable(),
+    rciDelivery: string().max(200, "maximum 200 characters").nullable(),
+    rciMoral: string().max(200, "maximum 200 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    setId2: number().required("required"),
+    setId2: string().nullable(),
   });
 
   const memberSchema = object({
@@ -137,7 +143,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Kategori Keilmuan",
+          p1: "Innovation Category",
         });
 
         if (data === "ERROR") {
@@ -165,7 +171,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Jenis Improvement",
+          p1: "Knowledge Category",
         });
 
         if (data === "ERROR") {
@@ -199,11 +205,12 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the period data.");
         } else {
-          setListPeriod(data);
+          setListPeriod({ data });
           const selected = data.find(
             (item) => item.Text === new Date().getFullYear()
           );
-          formDataRef.current.perId = selected.Value;
+          formDataRef.current.perId = 1;
+          setSelectedPeriod(1);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -226,11 +233,11 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       try {
         const data = await UseFetch(
           API_LINK + "MasterFacilitator/GetListFacilitator",
-          { p1: new Date().getFullYear() }
+          { p1: new Date().getFullYear(), p2: 8 }
         );
 
         if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the facilitator data.");
         } else {
           setListFacil(data);
         }
@@ -255,18 +262,27 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       setIsLoading(true);
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
-          {}
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListEmployee(data);
-          const member = data.find((item) => item["Value"] === userInfo.npk);
-          formDataRef.current.rciLeader = member.Value;
-        }
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setListEmployee(
+              data.map((value) => ({
+                Value: value.npk,
+                Text: value.npk + " - " + value.nama,
+              }))
+            );
+            const member = data.find((item) => item["npk"] === userInfo.npk);
+            formDataRef.current.rciLeader = member.npk;
+          })
+          .catch((err) => {
+            throw new Error("Failed to get user detail.");
+          });
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -283,8 +299,48 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+          p1: selectedPeriod,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          console.log(data);
+          const sDate = data[0].perAwal.split("T")[0];
+          const eDate = data[0].perAkhir.split("T")[0];
+          periodDataRef.current = {
+            startPeriod: sDate,
+            endPeriod: eDate,
+          };
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+      }
+    };
+
+    fetchData();
+  }, [selectedPeriod]);
+
   const handleAddMember = (id, Name) => {
-    if (currentData[0].Count === 0) {
+    if (
+      id === null ||
+      id === undefined ||
+      Name === null ||
+      Name === undefined
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Please select a member",
+      });
+      return;
+    }
+    if (memberData[0].Count === 0) {
       const data = [
         {
           Key: id,
@@ -300,14 +356,20 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       }));
       setCurrentData(formattedData);
     } else {
-      if (currentData.some((member) => member.Key === id) === true) {
+      if (memberData.some((member) => member.Key === id) === true) {
         window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Member already exists!" });
+        setIsError({
+          error: true,
+          message: "Invalid member: Member already exists!",
+        });
         return;
       }
-      if (currentData.length === 6) {
+      if (memberData.length === 6) {
         window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Max member reached!" });
+        setIsError({
+          error: true,
+          message: "Invalid member: Max member reached!",
+        });
         return;
       }
       setCurrentData((prevData) => [
@@ -326,7 +388,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   };
 
   const handleDelete = (id) => {
-    if (currentData.length === 1) setCurrentData(inisialisasiData);
+    if (memberData.length === 1) setCurrentData(inisialisasiData);
     else
       setCurrentData((prevData) =>
         prevData.filter((member) => member.Key !== id)
@@ -342,9 +404,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     const validationError = validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    if (fileSize / 1024576 > 10) error = "file is too large";
     else if (!extAllowed.split(",").includes(fileExt))
-      error = "format berkas tidak valid";
+      error = "invalid file format";
 
     if (error) ref.current.value = "";
 
@@ -382,25 +444,58 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     const newMemData = [
       { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
       { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-      ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
+      ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
     ];
 
+    console.log(formDataRef.current)
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
 
-    delete formDataRef.current.rciFacil;
-    delete formDataRef.current.rciLeader;
-
-    const body = {
-      ...formDataRef.current,
-      rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
-      member: newMemData,
-    };
-    console.log(body);
     if (Object.values(validationErrors).every((error) => !error)) {
+      if (memberData.length < 2) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid member: Please add at least 2 members!",
+        });
+        return;
+      }
+      const sDate = new Date(formDataRef.current.rciStartDate);
+      const eDate = new Date(formDataRef.current.rciEndDate);
+      const selectedStartDate = new Date(periodDataRef.current.startPeriod);
+      const selectedEndDate = new Date(periodDataRef.current.endPeriod);
+
+      if (sDate >= eDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid date: The end date must be after the start date!",
+        });
+        return;
+      }
+
+      if (sDate >= selectedStartDate && eDate <= selectedEndDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message:
+            "Invalid date: Selected start date or end date outrange the selected period",
+        });
+        return;
+      }
+
+      formDataRef.current = {
+        ...formDataRef.current,
+        rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
+        member: newMemData,
+      };
+      delete formDataRef.current.rciFacil;
+      delete formDataRef.current.rciLeader;
+
+      console.log(formDataRef.current);
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -434,7 +529,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
         const data = await UseFetch(
           API_LINK + "RencanaCircle/CreateRencanaQCP",
-          body
+          formDataRef.current
         );
 
         if (data === "ERROR") {
@@ -524,11 +619,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               forInput="setName"
                               label="Prodi/UPT/Dep​"
                               isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
-                            />
+                              value={userInfo.upt}
+                              />
                           </div>
                           <div className="col-md-6">
                             <Input
@@ -536,10 +628,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               forInput="setName"
                               label="Directorate"
                               isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                              value={userInfo.departemen}
                             />
                           </div>
                           <div className="col-md-6">
@@ -594,13 +683,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                     (item) =>
                                       item.Value ===
                                       memberDataRef.current.rciMember
-                                  ).Text
+                                  )?.Text
                                 )
                               }
                             />
                           </div>
                         </div>
-                        <Table data={currentData} onDelete={handleDelete} />
+                        <Table data={memberData} onDelete={handleDelete} />
                       </div>
                     </div>
                   </div>
@@ -635,7 +724,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                           <div className="col-lg-6">
                             <DropDown
                               forInput="setId2"
-                              label="Improvement Category"
+                              label="Knowledge Category"
                               arrData={listImpCategory}
                               isRequired
                               value={formDataRef.current.setId2}
@@ -648,6 +737,15 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               type="date"
                               forInput="rciStartDate"
                               label="Start Date"
+                              placeholder={
+                                periodDataRef.current.startPeriod
+                                  ? "Selected period starts on " +
+                                    formatDate(
+                                      periodDataRef.current.startPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               isRequired
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
@@ -659,6 +757,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               type="date"
                               forInput="rciEndDate"
                               label="End Date"
+                              placeholder={
+                                "Selected period ends on " +
+                                formatDate(
+                                  periodDataRef.current.endPeriod,
+                                  true
+                                )
+                              }
                               isRequired
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}
