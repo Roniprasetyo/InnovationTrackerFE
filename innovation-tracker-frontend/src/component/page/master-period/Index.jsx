@@ -10,7 +10,6 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import { formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -23,10 +22,10 @@ const inisialisasiData = [
   },
 ];
 
-// const dataFilterSort = [
-//   { Value: "[Name] asc", Text: "Name [↑]" },
-//   { Value: "[Name] desc", Text: "Name [↓]" },
-// ];
+const dataFilterSort = [
+  { Value: "[StartDate] asc", Text: "StartDate [↑]" },
+  { Value: "[EndDate] desc", Text: "EndDate [↓]" },
+];
 
 const dataFilterStatus = [
   { Value: "Aktif", Text: "Aktif" },
@@ -45,7 +44,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
   });
 
   const searchQuery = useRef();
-//   const searchFilterSort = useRef();
+  const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
 
   // Set current page
@@ -67,7 +66,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
         ...prevFilter,
         page: 1,
         query: searchQuery.current.value,
-        // sort: searchFilterSort.current.value,
+        sort: searchFilterSort.current.value,
         status: searchFilterStatus.current.value,
       };
     });
@@ -111,10 +110,10 @@ export default function MasterPeriodIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            StartDate: formatDate(value.StartDate, true),
-            EndDate: formatDate(value.EndDate, true),
-            Action: ["Toggle", "Edit"],
-            Alignment: ["center", "center", "center", "center", "center"],
+            StartDate: value.StartDate.split("T")[0],
+            EndDate: value.EndDate.split("T")[0],
+            Aksi: ["Toggle", "Edit"],
+            Alignment: ["center", "left", "center", "center"],
           }));
           setCurrentData(formattedData);
         }
@@ -168,14 +167,14 @@ export default function MasterPeriodIndex({ onChangePage }) {
             onClick={handleSearch}
           />
           <Filter>
-            {/* <DropDown
+            <DropDown
               ref={searchFilterSort}
               forInput="ddUrut"
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Nama Alat/Mesin] asc"
-            /> */}
+              defaultValue="[StartDate] asc"
+            />
             <DropDown
               ref={searchFilterStatus}
               forInput="ddStatus"

@@ -37,5 +37,5 @@ export default function MasterPeriod() {
     setPageMode(mode);
   }
 
-  return <div className="container min-vh-100">{getPageMode()}</div>;
+  return <div className="container">{getPageMode()}</div>;
 }
