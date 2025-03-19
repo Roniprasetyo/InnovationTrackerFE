@@ -1,4 +1,5 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
+import { separator } from "../util/Formatting";
 
 const Input = forwardRef(function Input(
   {
@@ -8,6 +9,7 @@ const Input = forwardRef(function Input(
     placeholder = "",
     isRequired = false,
     isDisabled = false,
+    isRound = false,
     textAlign = "start",
     errorMessage,
     ...props
@@ -18,7 +20,7 @@ const Input = forwardRef(function Input(
     <>
       {label !== "" && (
         <div className="mb-3">
-          <label htmlFor={forInput} className="form-label fw-bold ms-1">
+          <label htmlFor={forInput} className="form-label fw-bold ms-1 mb-1">
             {label}
             {isRequired ? <span className="text-danger"> *</span> : ""}
             {errorMessage ? (
@@ -40,16 +42,27 @@ const Input = forwardRef(function Input(
             ></textarea>
           )}
           {type !== "textarea" && (
-            <input
-              id={forInput}
-              name={forInput}
-              type={type}
-              className={"form-control rounded-5 text-" + textAlign}
-              placeholder={placeholder}
-              ref={ref}
-              disabled={isDisabled}
-              {...props}
-            />
+            <>
+              <input
+                id={forInput}
+                name={forInput}
+                type={type}
+                className={
+                  isRound
+                    ? "form-control text-" + textAlign
+                    : "form-control rounded-5 text-" + textAlign
+                }
+                placeholder={placeholder}
+                ref={ref}
+                disabled={isDisabled}
+                {...props}
+              />
+              {type === "date" && placeholder !== "" && (
+                <small className="ms-2">
+                  <i> {placeholder}</i>
+                </small>
+              )}
+            </>
           )}
         </div>
       )}
@@ -72,7 +85,11 @@ const Input = forwardRef(function Input(
               id={forInput}
               name={forInput}
               type={type}
-              className={"form-control rounded-5 text-" + textAlign}
+              className={
+                isRound
+                  ? "form-control text-" + textAlign
+                  : "form-control rounded-5 text-" + textAlign
+              }
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}

@@ -6,15 +6,20 @@ import Alert from "../../part/Alert";
 import Label from "../../part/Label";
 import Icon from "../../part/Icon";
 
-export default function MasterPeriodDetail({ onChangePage, withID }) {
+const listTypeFacilitator = [
+  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+];
+
+export default function MasterFacilitatorDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
-    perId: "",
-    perAwal: "",
-    perAkhir: "",
+    Name: "",
+    Period: "",
+    RoleName: "",
   });
 
   useEffect(() => {
@@ -22,16 +27,15 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+        const data = await UseFetch(API_LINK + "MasterFacilitator/GetFacilitatorById", {
           id: withID,
         });
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data periode."
+            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
           );
         } else {
-          // Mengisi form data dengan data yang diambil
           formDataRef.current = { ...formDataRef.current, ...data[0] };
         }
       } catch (error) {
@@ -47,7 +51,7 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, [withID]);
+  }, []);
 
   return (
     <>
@@ -85,25 +89,32 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header p-2">
-            <h2 className="fw-bold text-center">Period Detail</h2>
+            <h2 className="fw-bold text-center">Facilitator Detail</h2>
           </div>
           <div className="card-body p-4">
             {isLoading ? (
               <Loading />
             ) : (
               <div className="row">
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Label
-                    forLabel="perAwal"
-                    title="Activity Start Date"
-                    data={formDataRef.current.perAwal}
+                    forLabel="setName"
+                    title="Name"
+                    data={formDataRef.current.Name}
                   />
                 </div>
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Label
-                    forLabel="perAkhir"
-                    title="Activity End Date"
-                    data={formDataRef.current.perAkhir}
+                    forLabel="setType"
+                    title="Period"
+                    data={formDataRef.current.Period}
+                  />
+                </div>
+                <div className="col-lg-4">
+                  <Label
+                    forLabel="setDesc"
+                    title="Role"
+                    data={formDataRef.current.RoleName}
                   />
                 </div>
               </div>

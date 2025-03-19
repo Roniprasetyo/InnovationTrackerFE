@@ -16,7 +16,8 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
-    Type: null,
+    Role: null,
+    Period: null,
     Status: null,
     Count: 0,
   },
@@ -25,34 +26,57 @@ const inisialisasiData = [
 const dataFilterSort = [
   { Value: "[Name] asc", Text: "Name [↑]" },
   { Value: "[Name] desc", Text: "Name [↓]" },
+  { Value: "[Period] asc", Text: "Period [↑]" },
+  { Value: "[Period] desc", Text: "Period [↓]" },
 ];
 
-const dataFilterStatus = [
-  { Value: "Aktif", Text: "Aktif" },
-  { Value: "Tidak Aktif", Text: "Tidak Aktif" },
-];
-
-const dataFilterJenis = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-];
-
-export default function MasterSettingIndex({ onChangePage }) {
+export default function MasterFacilitatorIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [listPeriod, setListPeriod] = useState([]);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Name] asc",
-    status: "Aktif",
-    jenis: "",
+    sort: "[Period] asc",
+    period: "",
   });
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
-  const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
+  const searchFilterPeriod = useRef();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterPeriod/GetListPeriod",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          setListPeriod(data);
+          const selected = data.find(
+            (item) => item.Text === new Date().getFullYear()
+          );
+          window.scrollTo(0, 0);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListPeriod({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -72,37 +96,25 @@ export default function MasterSettingIndex({ onChangePage }) {
         page: 1,
         query: searchQuery.current.value,
         sort: searchFilterSort.current.value,
-        status: searchFilterStatus.current.value,
-        jenis: searchFilterJenis.current.value,
+        period: searchFilterPeriod.current.value,
       };
     });
   }
 
-  async function handleDelete(id) {
+  function handleDelete(id) {
+    setIsLoading(true);
     setIsError(false);
-    const confirm = await SweetAlert(
-      "Confirm",
-      "Are you sure you want to delete this data?.",
-      "warning",
-      "DELETE",
-      null,
-      "",
-      true
-    );
-
-    if (confirm) {
-      UseFetch(API_LINK + "MasterSetting/SetStatusSetting", {
-        idSetting: id,
+    UseFetch(API_LINK + "MasterFacilitator/DeleteFacilitator", {
+      idFacilitator: id,
+    })
+      .then((data) => {
+        if (data === "ERROR" || data.length === 0) setIsError(true);
+        else {
+          SweetAlert("Success", "Data successfully deleted", "success");
+          handleSetCurrentPage(currentFilter.page);
+        }
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert("Success", "Data successfully deleted", "success");
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
-        .then(() => setIsLoading(false));
-    }
+      .then(() => setIsLoading(false));
   }
 
   useEffect(() => {
@@ -111,7 +123,7 @@ export default function MasterSettingIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "MasterSetting/GetSetting",
+          API_LINK + "MasterFacilitator/GetFacilitator",
           currentFilter
         );
 
@@ -123,7 +135,14 @@ export default function MasterSettingIndex({ onChangePage }) {
           const formattedData = data.map((value) => ({
             ...value,
             Action: ["Delete", "Detail", "Edit"],
-            Alignment: ["center", "left", "center", "center", "center"],
+            Alignment: [
+              "center",
+              "left",
+              "center",
+              "center",
+              "center",
+              "center",
+            ],
           }));
           setCurrentData(formattedData);
         }
@@ -144,7 +163,7 @@ export default function MasterSettingIndex({ onChangePage }) {
           <div className="d-flex gap-3 justify-content-center">
             <h2 className="display-1 fw-bold">Manage</h2>
             <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">Setting</h2>
+              <h2 className="display-5 fw-bold align-items-end">Facilitator</h2>
             </div>
           </div>
         </div>
@@ -167,7 +186,7 @@ export default function MasterSettingIndex({ onChangePage }) {
           />
           <Input
             ref={searchQuery}
-            forInput="pencarianSetting"
+            forInput="pencarianFacilitator"
             isRound
             placeholder="Search"
           />
@@ -184,23 +203,15 @@ export default function MasterSettingIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Name] asc"
+              defaultValue="[Nama Alat/Mesin] asc"
             />
             <DropDown
-              ref={searchFilterJenis}
-              forInput="ddJenis"
-              label="Type"
-              type="semua"
-              arrData={dataFilterJenis}
-              defaultValue=""
-            />
-            <DropDown
-              ref={searchFilterStatus}
+              ref={searchFilterPeriod}
               forInput="ddStatus"
-              label="Status"
-              type="none"
-              arrData={dataFilterStatus}
-              defaultValue="Aktif"
+              label="Period"
+              type="semua"
+              arrData={listPeriod}
+              defaultValue=""
             />
           </Filter>
         </div>

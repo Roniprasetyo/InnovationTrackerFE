@@ -6,15 +6,22 @@ import Alert from "../../part/Alert";
 import Label from "../../part/Label";
 import Icon from "../../part/Icon";
 
-export default function MasterPeriodDetail({ onChangePage, withID }) {
+const listTypeUser = [
+  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+];
+
+export default function MasterUserDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
-    perId: "",
-    perAwal: "",
-    perAkhir: "",
+    Username: "",
+    Name: "",
+    Role: "",
+    RoleID: "",
+    App: "",
   });
 
   useEffect(() => {
@@ -22,16 +29,17 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-          id: withID,
+        const data = await UseFetch(API_LINK + "MasterUser/GetUserById", {
+          user: withID.user,
+          role: withID.role,
+          app: withID.app,
         });
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data periode."
+            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
           );
         } else {
-          // Mengisi form data dengan data yang diambil
           formDataRef.current = { ...formDataRef.current, ...data[0] };
         }
       } catch (error) {
@@ -85,7 +93,7 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header p-2">
-            <h2 className="fw-bold text-center">Period Detail</h2>
+            <h2 className="fw-bold text-center">User Detail</h2>
           </div>
           <div className="card-body p-4">
             {isLoading ? (
@@ -94,16 +102,16 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
               <div className="row">
                 <div className="col-lg-6">
                   <Label
-                    forLabel="perAwal"
-                    title="Activity Start Date"
-                    data={formDataRef.current.perAwal}
+                    forLabel="setName"
+                    title="Name"
+                    data={formDataRef.current.Name}
                   />
                 </div>
                 <div className="col-lg-6">
                   <Label
-                    forLabel="perAkhir"
-                    title="Activity End Date"
-                    data={formDataRef.current.perAkhir}
+                    forLabel="Role"
+                    title="Role"
+                    data={formDataRef.current.Role}
                   />
                 </div>
               </div>

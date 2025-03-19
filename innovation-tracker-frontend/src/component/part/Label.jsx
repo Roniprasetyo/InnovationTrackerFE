@@ -6,7 +6,10 @@ export default function Label({ title, data, forLabel }) {
           {title}
         </label>
         <br />
-        <span style={{ whiteSpace: "pre-wrap" }}>{data}</span>
+        <span
+          style={{ whiteSpace: "pre-wrap" }}
+          dangerouslySetInnerHTML={{ __html: data }}
+        ></span>
       </div>
     </>
   );

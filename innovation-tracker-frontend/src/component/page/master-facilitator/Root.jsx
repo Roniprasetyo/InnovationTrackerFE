@@ -1,29 +1,26 @@
 import { useState } from "react";
-import QualityControlProjectIndex from "./Index";
-import QualityControlProjectAdd from "./Add";
-import QualityControlProjectEdit from "./Edit";
-import QualityControlProjectDetail from "./Detail";
+import MasterFacilitatorIndex from "./Index";
+import MasterFacilitatorAdd from "./Add";
+import MasterFacilitatorDetail from "./Detail";
+import MasterFacilitatorEdit from "./Edit";
 
-export default function QualityControlProject() {
+export default function MasterFacilitator() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <QualityControlProjectIndex onChangePage={handleSetPageMode} />;
+        return <MasterFacilitatorIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <QualityControlProjectAdd onChangePage={handleSetPageMode} />;
+        return <MasterFacilitatorAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <QualityControlProjectEdit
-            onChangePage={handleSetPageMode}
-            withID={dataID}
-          />
+          <MasterFacilitatorEdit onChangePage={handleSetPageMode} withID={dataID} />
         );
       case "detail":
         return (
-          <QualityControlProjectDetail
+          <MasterFacilitatorDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />

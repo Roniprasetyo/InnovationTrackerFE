@@ -9,7 +9,7 @@ export default function Table({
   onEdit = () => {},
   onApprove = () => {},
   onReject = () => {},
-  onSent = () => {},
+  onSubmit = () => {},
   onUpload = () => {},
   onFinal = () => {},
   onPrint = () => {},
@@ -18,9 +18,8 @@ export default function Table({
   let colPosition;
   let colCount = 0;
 
-  function generateActionButton(columnName, value, key, id, status) {
-    if (columnName !== "Aksi") return value;
-
+  function generateActionButton(columnName, value, key, id, status, rowValue) {
+    if (columnName !== "Action") return value;
     const listButton = value.map((action) => {
       switch (action) {
         case "Toggle": {
@@ -31,7 +30,7 @@ export default function Table({
                 name="toggle-on"
                 type="Bold"
                 cssClass="btn px-1 py-0 text-primary"
-                title="Nonaktifkan"
+                title="Disable"
                 onClick={() => onToggle(id)}
               />
             );
@@ -42,7 +41,7 @@ export default function Table({
                 name="toggle-off"
                 type="Bold"
                 cssClass="btn px-1 py-0 text-secondary"
-                title="Aktifkan"
+                title="Enable"
                 onClick={() => onToggle(id)}
               />
             );
@@ -55,7 +54,7 @@ export default function Table({
               name="delete-document"
               type="Bold"
               cssClass="btn px-1 py-0 text-danger"
-              title="Batalkan"
+              title="Cancel"
               onClick={() => onCancel(id)}
             />
           );
@@ -66,7 +65,7 @@ export default function Table({
               name="trash"
               type="Bold"
               cssClass="btn px-1 py-0 text-danger"
-              title="Hapus"
+              title="Delete"
               onClick={() => onDelete(id)}
             />
           );
@@ -77,8 +76,8 @@ export default function Table({
               name="overview"
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
-              title="Lihat Detail"
-              onClick={() => onDetail("detail", id)}
+              title="Detail"
+              onClick={() => onDetail("detail", id, rowValue)}
             />
           );
         case "Edit":
@@ -88,8 +87,8 @@ export default function Table({
               name="edit"
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
-              title="Ubah"
-              onClick={() => onEdit("edit", id)}
+              title="Modify"
+              onClick={() => onEdit("edit", id, rowValue)}
             />
           );
         case "Approve":
@@ -99,7 +98,7 @@ export default function Table({
               name="check"
               type="Bold"
               cssClass="btn px-1 py-0 text-success"
-              title="Setujui Pengajuan"
+              title="Approve"
               onClick={() => onApprove(id)}
             />
           );
@@ -110,7 +109,7 @@ export default function Table({
               name="cross"
               type="Bold"
               cssClass="btn px-1 py-0 text-danger"
-              title="Tolak Pengajuan"
+              title="Reject"
               onClick={() => onReject(id)}
             />
           );
@@ -125,15 +124,15 @@ export default function Table({
               onClick={() => onRemove(id)}
             />
           );
-        case "Sent":
+        case "Submit":
           return (
             <Icon
               key={key + action}
               name="paper-plane"
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
-              title="Kirim"
-              onClick={() => onSent(id)}
+              title="Submit"
+              onClick={() => onSubmit(id)}
             />
           );
         case "Upload":
@@ -143,7 +142,7 @@ export default function Table({
               name="file-upload"
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
-              title="Unggah Berkas"
+              title="Upload File"
               onClick={() => onUpload(id)}
             />
           );
@@ -154,7 +153,7 @@ export default function Table({
               name="gavel"
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
-              title="Finalkan"
+              title="Finalize"
               onClick={() => onFinal(id)}
             />
           );
@@ -165,7 +164,7 @@ export default function Table({
               name="print"
               type="Bold"
               cssClass="btn px-1 py-0 text-primary"
-              title="Cetak"
+              title="Print"
               onClick={() => onPrint(id)}
             />
           );
@@ -212,6 +211,18 @@ export default function Table({
                     </th>
                   );
                 }
+                if (value === "No") {
+                  colCount++;
+                  return (
+                    <th
+                      key={"Header" + index}
+                      className="text-center"
+                      style={{ maxWidth: "3rem" }}
+                    >
+                      {value}
+                    </th>
+                  );
+                }
               })}
             </tr>
           </thead>
@@ -225,7 +236,7 @@ export default function Table({
                     className={
                       value["Status"] &&
                       (value["Status"] === "Draft" ||
-                        value["Status"] === "Revisi" ||
+                        value["Status"] === "Revision" ||
                         value["Status"] === "Belum Dikonversi" ||
                         value["Status"] === "Belum Dibuat Penjadwalan")
                         ? "fw-bold"
@@ -251,7 +262,8 @@ export default function Table({
                               value[column],
                               "Action" + rowIndex + colIndex,
                               value["Key"],
-                              value["Status"]
+                              value["Status"],
+                              value
                             )}
                           </td>
                         );
@@ -261,8 +273,8 @@ export default function Table({
                 );
               })}
             {data[0].Count === 0 && (
-              <tr>
-                <td colSpan={colCount}>Tidak ada data.</td>
+              <tr className="text-center">
+                <td colSpan={colCount}>No data available.</td>
               </tr>
             )}
           </tbody>

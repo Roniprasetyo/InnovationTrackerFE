@@ -5,7 +5,7 @@ const CreateMenu = async (role) => {
   try {
     const data = await UseFetch(API_LINK + "Utilities/GetListMenu", {
       username: "",
-      role: role,
+      role: role || "",
       application: APPLICATION_ID,
     });
 

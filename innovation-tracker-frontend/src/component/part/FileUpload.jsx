@@ -32,7 +32,7 @@ const FileUpload = forwardRef(function FileUpload(
         {!isDisabled && (
           <>
             <input
-              className="form-control"
+              className="form-control rounded-5"
               type="file"
               id={forInput}
               name={forInput}

@@ -10,47 +10,42 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
+import SearchDropdown from "../../part/SearchDropdown";
 
-const listTypeSetting = [
-  { Value: "Innovation Category", Text: "Innovation Category" },
-  { Value: "Knowledge Category", Text: "Knowledge Category" },
-  { Value: "Innovation Role Category", Text: "Innovation Role Category" },
-];
-
-export default function MasterSettingEdit({ onChangePage, withID }) {
+export default function MasterUserAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listRole, setListRole] = useState([]);
 
   const formDataRef = useRef({
-    setId: "",
-    setName: "",
-    setType: "",
-    setDesc: "",
+    usrID: "",
+    rolID: "",
+    appID: "APP65",
   });
 
   const userSchema = object({
-    setId: number(),
-    setName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
-    setType: string().required("harus dipilih"),
-    setDesc: string().max(100, "maksimum 100 karakter").required("harus diisi"),
+    usrID: string().required("required"),
+    rolID: string().required("required"),
+    appID: string().max(100, "maximum 100 characters").required("required"),
   });
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingById", {
-          id: withID,
-        });
+        const data = await UseFetch(
+          API_LINK + "MasterUser/GetListRole",
+          {}
+        );
 
-        if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
-          );
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
         } else {
-          formDataRef.current = { ...formDataRef.current, ...data[0] };
+          setListRole(data);
+          window.scrollTo(0, 0);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -59,6 +54,37 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
+        setListRole({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetListKaryawanUsername",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListEmployee(data);
+          window.scrollTo(0, 0);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
       } finally {
         setIsLoading(false);
       }
@@ -90,14 +116,17 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
+
       try {
         const data = await UseFetch(
-          API_LINK + "MasterSetting/UpdateSetting",
+          API_LINK + "MasterUser/CreateUser",
           formDataRef.current
         );
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to submit the data.");
+        } else if (data[0].hasil === "EXIST") {
+          throw new Error("Data already exist.");
         } else {
           SweetAlert("Success", "Data successfully submitted", "success");
           onChangePage("index");
@@ -114,6 +143,8 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
       }
     } else window.scrollTo(0, 0);
   };
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
@@ -136,7 +167,7 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Update Data
+          Add Data
         </h2>
       </div>
       <div className="mt-3">
@@ -151,52 +182,40 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
         )}
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
-            <div className="card-header p-2">
-              <h2 className="fw-bold text-center">Setting Form</h2>
+            <div className="card-header py-3">
+              <h3 className="fw-bold text-center">ROLE FORM</h3>
             </div>
-            <div className="card-body p-4">
-              {isLoading ? (
-                <Loading />
-              ) : (
-                <div className="row mt-4">
-                  <div className="col-lg-6">
-                    <Input
-                      type="text"
-                      forInput="setName"
-                      label="Name"
-                      isRequired
-                      value={formDataRef.current.setName}
-                      onChange={handleInputChange}
-                      errorMessage={errors.setName}
-                    />
-                  </div>
-                  <div className="col-lg-6">
-                    <DropDown
-                      forInput="setType"
-                      label="Type"
-                      arrData={listTypeSetting}
-                      isRequired
-                      value={formDataRef.current.setType}
-                      onChange={handleInputChange}
-                      errorMessage={errors.setType}
-                    />
-                  </div>
-                  <div className="col-lg-12">
-                    <Input
-                      type="textarea"
-                      forInput="setDesc"
-                      label="Description"
-                      value={formDataRef.current.setDesc}
-                      onChange={handleInputChange}
-                      errorMessage={errors.setDesc}
-                    />
-                  </div>
+            <div className="card-body">
+              <div className="row p-4">
+                <div className="col-lg-6">
+                  <SearchDropdown
+                    forInput="usrID"
+                    label="Employee"
+                    placeHolder="Employee"
+                    arrData={listEmployee}
+                    isRequired
+                    isRound
+                    value={formDataRef.current.usrID}
+                    onChange={handleInputChange}
+                    errorMessage={errors.usrID}
+                  />
                 </div>
-              )}
+                <div className="col-lg-6">
+                  <DropDown
+                    forInput="rolID"
+                    label="Role"
+                    arrData={listRole}
+                    isRequired
+                    value={formDataRef.current.rolID}
+                    onChange={handleInputChange}
+                    errorMessage={errors.rolID}
+                  />
+                </div>
+              </div>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="flex-grow-1 m-2">
                   <Button
-                    classType="secondary me-2 px-4 py-2"
+                    classType="danger me-2 px-4 py-2"
                     label="CANCEL"
                     onClick={() => onChangePage("index")}
                     style={{ width: "100%", borderRadius: "16px" }}

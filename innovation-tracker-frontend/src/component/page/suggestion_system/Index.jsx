@@ -31,28 +31,37 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
-  { Value: "[Team Name] asc", Text: "Team Name [↑]" },
-  { Value: "[Team Name] desc", Text: "Team Name [↓]" },
-  { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
-  { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
-  { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
-  { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
+  // { Value: "[Team Name] asc", Text: "Team Name [↑]" },
+  // { Value: "[Team Name] desc", Text: "Team Name [↓]" },
+  // { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
+  // { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
+  // { Value: "[Circle Benefit] asc", Text: "[Circle Benefit] [↑]" },
+  // { Value: "[Circle Benefit] desc", Text: "[Circle Benefit] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
   { Value: "[End Date] desc", Text: "[End Date] [↓]" },
   { Value: "[Period] asc", Text: "[Period] [↑]" },
   { Value: "[Period] desc", Text: "[Period] [↓]" },
+  { Value: "[Category] asc", Text: "[Category] [↑]" },
+  { Value: "[Category] desc", Text: "[Category] [↓]" },
 ];
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
   { Value: "Revision", Text: "Revision" },
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-export default function QualityControlProjectIndex({ onChangePage }) {
+// const dataFilterJenis = [
+//   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+//   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+//   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
+// ];
+
+export default function SystemSuggestionIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -63,9 +72,9 @@ export default function QualityControlProjectIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Team Name] asc",
+    sort: "[Start Date] asc",
     status: "",
-    jenis: "QCP",
+    jenis: "SS",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -73,6 +82,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
+  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -93,8 +103,29 @@ export default function QualityControlProjectIndex({ onChangePage }) {
         query: searchQuery.current.value,
         sort: searchFilterSort.current.value,
         status: searchFilterStatus.current.value,
+        jenis: searchFilterJenis.current.value,
       };
     });
+  }
+
+  function handleSetStatus(id) {
+    setIsLoading(true);
+    setIsError(false);
+    UseFetch(API_LINK + "MasterSetting/SetStatusSetting", {
+      idSetting: id,
+    })
+      .then((data) => {
+        if (data === "ERROR" || data.length === 0) setIsError(true);
+        else {
+          SweetAlert(
+            "Sukses",
+            "Status data alat/mesin berhasil diubah menjadi " + data[0].Status,
+            "success"
+          );
+          handleSetCurrentPage(currentFilter.page);
+        }
+      })
+      .then(() => setIsLoading(false));
   }
 
   const handleSubmit = async (id) => {
@@ -110,7 +141,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+      UseFetch(API_LINK + "RencanaSs/SentRencanaSs", {
         id: id,
       })
         .then((data) => {
@@ -134,8 +165,8 @@ export default function QualityControlProjectIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCP",
-          currentFilter
+          API_LINK + "RencanaSs/GetRencanaSS",
+          currentFilter 
         );
 
         if (data === "ERROR") {
@@ -147,12 +178,12 @@ export default function QualityControlProjectIndex({ onChangePage }) {
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
             No: index + 1,
-            "Circle Name": maxCharDisplayed(value["Team Name"], 30),
+            "Name": maxCharDisplayed(value["Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
               50
             ),
-            "Innovation Category": value["Category"],
+            Category: value["Category"],
             "Project Benefit": separator(value["Project Benefit"]),
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
@@ -199,10 +230,10 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       <div className="my-3">
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
-            <h2 className="display-1 fw-bold">Quality</h2>
+            <h2 className="display-1 fw-bold">Suggestion</h2>
             <div className="d-flex align-items-end mb-2">
               <h2 className="display-5 fw-bold align-items-end">
-                Control Project
+                System
               </h2>
             </div>
           </div>
