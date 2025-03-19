@@ -23,8 +23,13 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Name: null,
-    Type: null,
+    "Circle Name": null,
+    "Project Title": null,
+    Category: null,
+    "Project Benefit": null,
+    "Start Date": null,
+    "End Date": null,
+    Period: null,
     Status: null,
     Count: 0,
   },
@@ -279,12 +284,16 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          <Button
-            iconName="add"
-            label="Register"
-            classType="success"
-            onClick={() => onChangePage("add")}
-          />
+          {userInfo.role !== "ROL01" ? (
+            <Button
+              iconName="add"
+              label="Register"
+              classType="success"
+              onClick={() => onChangePage("add")}
+            />
+          ) : (
+            ""
+          )}
           <Input
             ref={searchQuery}
             forInput="pencarianSetting"

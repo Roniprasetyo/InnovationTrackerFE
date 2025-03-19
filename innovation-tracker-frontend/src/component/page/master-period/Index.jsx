@@ -10,6 +10,7 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import { formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -110,10 +111,10 @@ export default function MasterPeriodIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            StartDate: value.StartDate.split("T")[0],
-            EndDate: value.EndDate.split("T")[0],
-            Aksi: ["Toggle", "Edit"],
-            Alignment: ["center", "left", "center", "center"],
+            StartDate: formatDate(value.StartDate.split("T")[0], true),
+            EndDate: formatDate(value.EndDate.split("T")[0], true),
+            Action: ["Toggle", "Edit"],
+            Alignment: ["center", "center", "center", "center", "center"],
           }));
           setCurrentData(formattedData);
         }

@@ -29,22 +29,23 @@ const inisialisasiData = [
   },
 ];
 
-export default function QualityControlProjectEdit({ onChangePage, withID }) {
+export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  console.log(userInfo);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [listEmployeeFull, setListEmployeeFull] = useState([]);
 
-  const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
+  const [listEmployeeFull, setListEmployeeFull] = useState([]);
   const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
-  const [listImpCategory, setListImpCategory] = useState([]);
+  const [listCompany, setListCompany] = useState([]);
+  const [ListCompany2, setListCompany2] = useState([]);
 
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
@@ -52,6 +53,11 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciDelivery: false,
     rciSafety: false,
     rciMoral: false,
+  });
+
+  const periodDataRef = useRef({
+    startPeriod: "",
+    endPeriod: "",
   });
 
   const handleCheckboxChange = (key) => {
@@ -85,16 +91,12 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciMoral: "",
     rciFacil: "",
     rciLeader: "",
-    setId2: "",
+    rciPerusahaan1: "",
+    rciPerusahaan2: "",
   });
 
   const memberDataRef = useRef({
     rciMember: "",
-  });
-
-  const periodDataRef = useRef({
-    startPeriod: "",
-    endPeriod: "",
   });
 
   const bussinessCaseFileRef = useRef(null);
@@ -103,8 +105,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
 
   const userSchema = object({
     rciId: number().required("required"),
-    setId: string().required("required"),
-    perId: string().nullable(),
+    setId: number().required("required"),
+    perId: number().nullable(),
     rciGroupName: string()
       .max(100, "maximum 100 characters")
       .required("required"),
@@ -121,14 +123,15 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciEndDate: date()
       .typeError("Invalid date format")
       .required("Start date is required"),
-    rciQuality: string().max(200, "maximum 200 characters").nullable(),
-    rciCost: string().max(200, "maximum 200 characters").nullable(),
-    rciSafety: string().max(200, "maximum 200 characters").nullable(),
-    rciDelivery: string().max(200, "maximum 200 characters").nullable(),
-    rciMoral: string().max(200, "maximum 200 characters").nullable(),
+    rciQuality: string().max(100, "maximum 100 characters").nullable(),
+    rciCost: string().max(100, "maximum 100 characters").nullable(),
+    rciSafety: string().max(100, "maximum 100 characters").nullable(),
+    rciDelivery: string().max(100, "maximum 100 characters").nullable(),
+    rciMoral: string().max(100, "maximum 100 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    setId2: string().required("required"),
+    rciPerusahaan1: string().required("required"),
+    rciPerusahaan2: string(),
   });
 
   const memberSchema = object({
@@ -171,65 +174,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Innovation Category",
-        });
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCP")));
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Knowledge Category",
-        });
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListImpCategory(
-            data.map((item) => ({
-              ...item,
-              Text: decodeHtml(item.Text),
-            }))
-          );
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListImpCategory({});
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
           {}
@@ -239,6 +183,11 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
+          const selected = data.find(
+            (item) => item.Text === new Date().getFullYear()
+          );
+          formDataRef.current.perId = selected.Value;
+          setSelectedPeriod(selected.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -247,7 +196,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
+        setListPeriod([]);
       }
     };
 
@@ -275,7 +224,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListFacil({});
+        setListFacil([]);
       }
     };
 
@@ -287,14 +236,41 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaCircle/GetListPerusahaan"
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the company data.");
+        } else {
+          setListCompany(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCompany([]);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetRencanaVCIByIdforEdit",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get qcc data.");
+          throw new Error("Terjadi kesalahan: Gagal mengambil data VCI.");
         } else {
           formDataRef.current = {
             rciId: data["Key"],
@@ -322,7 +298,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
             ).Npk,
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
-            setId2: data["CategoryIdImp"],
+            rciPerusahaan1: data["Company 1"],
+            rciPerusahaan2: data["Company 2"] || "",
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -352,7 +329,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
             rciSafety: data["Safety"] ? true : false,
             rciMoral: data["Moral"] ? true : false,
           });
-          setSelectedPeriod(data["PeriodId"]);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -438,8 +414,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
-        Section:
-          listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
         Action: ["Delete"],
         Alignment: ["center", "left", "left", "center", "center"],
       }));
@@ -461,8 +435,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           Key: id,
           No: prevData.length + 1,
           Name: Name,
-          Section:
-            listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
           Count: prevData.length + 1,
           Action: ["Delete"],
           Alignment: ["center", "left", "left", "center", "center"],
@@ -532,7 +504,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
       setErrors
     );
 
-    console.log(formDataRef.current);
     if (Object.values(validationErrors).every((error) => !error)) {
       if (currentData.length < 2) {
         window.scrollTo(0, 0);
@@ -570,15 +541,15 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
         ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
       ];
+      delete formDataRef.current.rciFacil;
+      delete formDataRef.current.rciLeader;
 
-      formDataRef.current = {
+      const body = {
         ...formDataRef.current,
         rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
         member: newMemData,
       };
-      delete formDataRef.current.rciFacil;
-      delete formDataRef.current.rciLeader;
-
+      console.log(body);
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -588,21 +559,21 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (formDataRef.current["rciCaseFile"] = data.Hasil)
+            (data) => (body["rciCaseFile"] = data.Hasil)
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-            (data) => (formDataRef.current["rciProblemFile"] = data.Hasil)
+            (data) => (body["rciProblemFile"] = data.Hasil)
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-            (data) => (formDataRef.current["rciGoalFile"] = data.Hasil)
+            (data) => (body["rciGoalFile"] = data.Hasil)
           )
         );
       }
@@ -611,8 +582,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/UpdateRencanaQCP",
-          formDataRef.current
+          API_LINK + "RencanaCircle/UpdateRencanaVCI",
+          body
         );
 
         if (data === "ERROR") {
@@ -622,6 +593,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           onChangePage("index");
         }
       } catch (error) {
+        console.log(error);
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
           ...prevError,
@@ -671,7 +643,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">VCI REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -685,7 +657,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-6">
+                          <div className="col-md-12">
                             <Input
                               type="text"
                               forInput="rciGroupName"
@@ -697,12 +669,26 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
-                              label="Section"
-                              isDisabled
-                              value={userInfo.upt}
+                            <DropDown
+                              forInput="rciPerusahaan1"
+                              label="Company 1"
+                              type="pilih"
+                              arrData={listCompany}
+                              isRequired
+                              value={formDataRef.current.rciPerusahaan1}
+                              onChange={handleInputChange}
+                              errorMessage={errors.rciPerusahaan1}
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <DropDown
+                              forInput="rciPerusahaan2"
+                              label="Company 2"
+                              arrData={listCompany}
+                              type="pilih"
+                              value={formDataRef.current.rciPerusahaan2}
+                              onChange={handleInputChange}
+                              errorMessage={errors.rciPerusahaan2}
                             />
                           </div>
                           <div className="col-md-6">
@@ -782,30 +768,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               value={formDataRef.current.rciTitle}
                               onChange={handleInputChange}
                               errorMessage={errors.rciTitle}
-                            />
-                          </div>
-                          <div className="col-lg-6">
-                            <DropDown
-                              forInput="setId"
-                              label="Innovation Category"
-                              arrData={listCategory}
-                              isRequired
-                              value={formDataRef.current.setId}
-                              onChange={handleInputChange}
-                              errorMessage={errors.setId}
-                            />
-                          </div>
-                          <div className="col-lg-6">
-                            <SearchDropdown
-                              forInput="setId2"
-                              label="Knowledge Category"
-                              placeHolder="Knowledge Category"
-                              arrData={listImpCategory}
-                              isRequired
-                              isRound
-                              value={formDataRef.current.setId2}
-                              onChange={handleInputChange}
-                              errorMessage={errors.setId2}
                             />
                           </div>
                           <div className="col-lg-4">
@@ -972,7 +934,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   forInput="rciQuality"
                                   label="Quality"
                                   isDisabled={!checkedStates.rciQuality}
-                                  placeholder="Quality"
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
@@ -992,7 +953,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   forInput="rciCost"
                                   label="Cost"
                                   isDisabled={!checkedStates.rciCost}
-                                  placeholder="Cost"
                                   value={formDataRef.current.rciCost}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciCost}
@@ -1013,7 +973,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   type="text"
                                   forInput="rciDelivery"
                                   label="Delivery"
-                                  placeholder="Delivery"
                                   isDisabled={!checkedStates.rciDelivery}
                                   value={formDataRef.current.rciDelivery}
                                   onChange={handleInputChange}
@@ -1041,7 +1000,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   forInput="rciSafety"
                                   label="Safety"
                                   isDisabled={!checkedStates.rciSafety}
-                                  placeholder="Safety"
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
@@ -1063,7 +1021,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   forInput="rciMoral"
                                   label="Moral"
                                   isDisabled={!checkedStates.rciMoral}
-                                  placeholder="Moral"
                                   value={formDataRef.current.rciMoral}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciMoral}

@@ -73,7 +73,7 @@ export default function BerandaIndex() {
         </div>
       </div>
       <div className="container p-3">
-        {isError.error && (
+        {/* {isError.error && (
           <div className="flex-fill ">
             <Alert
               type="danger"
@@ -81,7 +81,7 @@ export default function BerandaIndex() {
               handleClose={() => setIsError({ error: false, message: "" })}
             />
           </div>
-        )}
+        )} */}
         <div className="container-sm my-3">
           <div className="mb-4 color-primary text-center">
             <div className="d-flex gap-3 justify-content-center">

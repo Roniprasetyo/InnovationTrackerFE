@@ -15,6 +15,7 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
+    Section: null,
     Count: 0,
   },
 ];
@@ -59,25 +60,22 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
-        let filteredData;
         const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
           },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setListEmployee(
-              data.map((value) => ({
-                npk: value.npk,
-                upt: value.upt_bagian,
-              }))
-            );
-          });
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            npk: value.npk,
+            upt: value.upt_bagian,
+          }))
+        );
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -85,9 +83,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListEmployee([]);
-      } finally {
-        setIsLoading(false);
+        setListEmployee({});
       }
     };
 
@@ -97,7 +93,6 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
       try {
         const data = await UseFetch(
           API_LINK + "RencanaCircle/GetRencanaQCPById",
@@ -120,11 +115,11 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                   Key: index,
                   No: index + 1,
                   Name: item.Name,
-                  Upt:
+                  Section:
                     listEmployee.find((value) => value.npk === item.Npk)?.upt ||
                     "",
                   Count: memberCount,
-                  Alignment: ["center", "left"],
+                  Alignment: ["center", "left", "left"],
                 }))
               )
             : setCurrentData(inisialisasiData);
@@ -203,7 +198,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                           />
                         </div>
                         <div className="col-md-6">
-                          <Label title="Prodi/UPT/Dep​" data={userInfo.upt} />
+                          <Label title="Section" data={userInfo.upt} />
                         </div>
                         <div className="col-md-6">
                           <Label
@@ -254,8 +249,10 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                         </div>
                         <div className="col-lg-3">
                           <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
+                            title="Knowledge Category"
+                            data={decodeHtml(
+                              formDataRef.current.CategoryImp || "-"
+                            )}
                           />
                         </div>
                         <div className="col-lg-3">
@@ -316,6 +313,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -335,7 +333,8 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
-                        <div className="col-lg-12 mb-4">
+                        <hr />
+                        <div className="col-lg-12 mb-3">
                           <Label
                             title="Goal Statement​"
                             data={decodeHtml(
@@ -365,7 +364,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                       <div className="row">
                         <div className="col-lg-12">
                           <Label
-                            title="Project Benefit"
+                            title="Project Benefit (Rp)"
                             data={
                               separator(
                                 formDataRef.current["Project Benefit"]

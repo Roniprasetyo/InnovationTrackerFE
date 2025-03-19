@@ -10,6 +10,7 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import { decodeHtml } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -122,6 +123,7 @@ export default function MasterSettingIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
+            Name: decodeHtml(value.Name),
             Action: ["Delete", "Detail", "Edit"],
             Alignment: ["center", "left", "center", "center", "center"],
           }));

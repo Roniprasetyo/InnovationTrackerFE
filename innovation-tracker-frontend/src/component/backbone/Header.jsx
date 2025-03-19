@@ -84,7 +84,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                 <ul className="navbar-nav">
                   <Menu listMenu={listMenu} />
                 </ul>
-                <div className="my-3">
+                {/* <div className="my-3">
                   <div className="flex-fill ">
                     <div className="input-group">
                       <input
@@ -103,7 +103,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="mb-3">
                   {isLoggedIn ? (
                     <div className="d-flex align-items-center">
@@ -125,7 +125,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                             className="dropdown-menu"
                             aria-labelledby="profileDropdown"
                           >
-                            <li>
+                            {/* <li>
                               <a className="dropdown-item" href="/profile">
                                 PROFILE
                               </a>
@@ -145,7 +145,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                             </li>
                             <li>
                               <hr className="dropdown-divider" />
-                            </li>
+                            </li> */}
                             <li>
                               <a
                                 className="dropdown-item text-danger"
@@ -220,7 +220,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                     <Menu listMenu={listMenu} />
                   </ul>
                 </div>
-                <div className="ms-4">
+                {/* <div className="ms-4">
                   <div className="flex-fill ">
                     <div className="input-group">
                       <input
@@ -239,7 +239,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="ms-3" style={{ marginRight: "2rem" }}>
                   {isLoggedIn ? (
                     <div className="dropdown mt-1">
@@ -269,7 +269,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                         className="dropdown-menu dropdown-menu-end"
                         aria-labelledby="profileDropdown"
                       >
-                        <li>
+                        {/* <li>
                           <a className="dropdown-item" href="/profile">
                             PROFILE
                           </a>
@@ -289,7 +289,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                         </li>
                         <li>
                           <hr className="dropdown-divider" />
-                        </li>
+                        </li> */}
                         <li>
                           <a
                             className="dropdown-item text-danger"
