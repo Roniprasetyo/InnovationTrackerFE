@@ -153,8 +153,8 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               50
             ),
             "Project Benefit": separator(value["Project Benefit"]),
-            "Company 1": value["Company 1"] ? value["Company 1"] : "Unknown", 
-            "Company 2": value["Company 2"] ? value["Company 2"] : "Unknown",
+            "Company 1": value["Company 1"] ? value["Company 1"] : "-", 
+            "Company 2": value["Company 2"] ? value["Company 2"] : "-",
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
             Period: value["Period"],

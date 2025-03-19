@@ -51,6 +51,8 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
   const [listPeriod, setListPeriod] = useState([]);
   const [listUpt, setListUpt] = useState([]);
   const [ListCompany, setListCompany] = useState([]);
+    const [listEmployeeFull, setListEmployeeFull] = useState([]);
+  
 
 
   const formDataRef = useRef({
@@ -114,7 +116,7 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     rciPerusahaan1: string().required("required"),
-    rciPerusahaan2: string().required("required"),
+    rciPerusahaan2: string().nullable(),
   });
 
   const memberSchema = object({
@@ -154,7 +156,7 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
             setListEmployee(
               data.map((value) => ({
                 Value: value.npk,
-                Text: value.npk + " - " + value.nama,
+                Text: value.npk + " - " + value.nama + " - " + value.upt_bagian,
               }))
             );
           });
@@ -316,6 +318,9 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
+        Section:
+          listEmployeeFull.find((item) => item.npk === value.Key)?.upt_bagian ||
+          "",
         Action: ["Delete"],
         Alignment: ["center", "left", "center", "center"],
       }));
@@ -337,6 +342,9 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
           Key: id,
           No: prevData.length + 1,
           Name,
+          Section:
+          listEmployeeFull.find((item) => item.npk === value.Key)?.upt_bagian ||
+          "",
           Count: prevData.length + 1,
           Action: ["Delete"],
           Alignment: ["center", "left", "center", "center"],
@@ -604,7 +612,6 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                               forInput="rciPerusahaan2"
                               label="Company 2"
                               arrData={ListCompany}
-                              isRequired
                               value={formDataRef.current.rciPerusahaan2}
                               onChange={handleInputChange}
                               errorMessage={errors.rciPerusahaan2}

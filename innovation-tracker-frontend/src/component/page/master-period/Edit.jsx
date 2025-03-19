@@ -42,8 +42,8 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
           // Format tanggal ke format yyyy-MM-dd
           const formattedData = {
             perId: data[0].perId,
-            perAwal: new Date(data[0].perAwal).toISOString().slice(0, 10), // yyyy-MM-dd
-            perAkhir: new Date(data[0].perAkhir).toISOString().slice(0, 10), // yyyy-MM-dd
+            perAwal: new Date(data[0].perAwal).toLocaleDateString("en-CA"), 
+            perAkhir: new Date(data[0].perAkhir).toLocaleDateString("en-CA"),
           };
 
           // Update formDataRef dengan data yang sudah diformat
