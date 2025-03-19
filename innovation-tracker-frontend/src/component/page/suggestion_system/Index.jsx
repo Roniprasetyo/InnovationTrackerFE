@@ -49,17 +49,19 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
   { Value: "Revision", Text: "Revision" },
   { Value: "Rejected", Text: "Rejected" },
 ];
-const dataFilterJenis = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-  { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
-];
 
-export default function QualityControlCircleIndex({ onChangePage }) {
+// const dataFilterJenis = [
+//   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+//   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+//   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
+// ];
+
+export default function SystemSuggestionIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -139,7 +141,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+      UseFetch(API_LINK + "RencanaSs/SentRencanaSs", {
         id: id,
       })
         .then((data) => {
@@ -163,8 +165,8 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaSS/GetRencanaSS",
-          currentFilter
+          API_LINK + "RencanaSs/GetRencanaSS",
+          currentFilter 
         );
 
         if (data === "ERROR") {

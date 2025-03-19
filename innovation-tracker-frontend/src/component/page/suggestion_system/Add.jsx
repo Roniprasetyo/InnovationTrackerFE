@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
+import { formatDate  } from "../../util/Formatting";  
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -28,7 +29,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function QualityControlCircleAdd({ onChangePage }) {
+export default function SuggestionSystemAdd({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -36,19 +37,18 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
 
   const [listCategory, setListCategory] = useState([]);
-  const [listEmployee, setListEmployee] = useState([]);
-  const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
 
   const [checkedStates, setCheckedStates] = useState({
-    rciQuality: false,
-    rciCost: false,
-    rciDelivery: false,
-    rciSafety: false,
-    rciMoral: false,
+    sisQuality: false,
+    sisCost: false,
+    sisDelivery: false,
+    sisSafety: false,
+    sisMoral: false,
   });
 
   const handleCheckboxChange = (key) => {
@@ -60,13 +60,12 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   };
 
   const formDataRef = useRef({
-    kry_id: 12345,
     sis_judul: "",
-    ino_category: "1",
-    know_category: "2",
+    ino_category: "",
+    know_category: "",
     sis_tanggalmulai: "",
     sis_tanggalakhir: "",
-    per_id: "1",    
+    per_id: "",    
     sis_ruanglingkup: "",
     sis_kasus: "",
     sis_kasusfile: "",
@@ -81,27 +80,16 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     sis_moral: "",
   });
 
-  // const knowledgeimprovment = [
-  //   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  //   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-  //   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
-  // ];
-
-  // const listinnovationcategiry = [
-  //   { Value: "SS Technic", Text: "SS Technic" },
-  //   { Value: "SS Non Technic", Text: "SS Non Technic" },
-  // ];
-
-  // const periode = [
-  //   { Value: 2025, Text: 2025 },
-  // ];
-
+    const periodDataRef = useRef({
+      startPeriod: "",
+      endPeriod: "",
+    });
+  
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    kry_id: number().required("required"),
     sis_judul: string().required("required"),
     ino_category: string().required("required"),
     know_category: string().required("required"),
@@ -128,93 +116,132 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     sis_moral: string().nullable(),    
   });
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setIsError((prevError) => ({ ...prevError, error: false }));
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      // setIsLoading(true);
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Category",
+        });
 
-  //     try {
-  //       const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-  //         p1: "Kategori Keilmuan",
-  //       });
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data.filter((item) => item.Text.includes("SS")));
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+      // finally{
+      //   setIsLoading (false);
+      // }
+    };
 
-  //       if (data === "ERROR") {
-  //         throw new Error("Error: Failed to get the category data.");
-  //       } else {
-  //         setListCategory(data.filter((item) => item.Text.includes("SS")));
-  //       }
-  //     } catch (error) {
-  //       window.scrollTo(0, 0);
-  //       setIsError((prevError) => ({
-  //         ...prevError,
-  //         error: true,
-  //         message: error.message,
-  //       }));
-  //       setListCategory({});
-  //     }
-  //   };
+    fetchData();
+  }, []);
 
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      // setIsLoading(true);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Knowledge Category",
+        });
 
-  //     try {
-  //       const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-  //         p1: "Jenis Improvement",
-  //       });
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListImpCategory(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListImpCategory({});
+        // setIsLoading(false);
+      }
+    };
 
-  //       if (data === "ERROR") {
-  //         throw new Error("Error: Failed to get the category data.");
-  //       } else {
-  //         setListImpCategory(data);
-  //       }
-  //     } catch (error) {
-  //       window.scrollTo(0, 0);
-  //       setIsError((prevError) => ({
-  //         ...prevError,
-  //         error: true,
-  //         message: error.message,
-  //       }));
-  //       setListImpCategory({});
-  //     }
-  //   };
+    fetchData();
+  }, []);
 
-  //   fetchData();
-  // }, []);
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        // setIsLoading(true);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setIsError((prevError) => ({ ...prevError, error: false }));
-  //     try {
-  //       const data = await UseFetch(
-  //         API_LINK + "MasterPeriod/GetListPeriod",
-  //         {}
-  //       );
+        try {
+          const data = await UseFetch(
+            API_LINK + "MasterPeriod/GetListPeriod",
+            {}
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the period data.");
+          } else {
+            setListPeriod({ data });
+            const selected = data.find(
+              (item) => item.Text === new Date().getFullYear()
+            );
+            formDataRef.current.per_id = 1;
+            setSelectedPeriod(1);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListPeriod({});
+          // setIsLoading(false);
 
-  //       if (data === "ERROR") {
-  //         throw new Error("Error: Failed to get the period data.");
-  //       } else {
-  //         setListPeriod(data);
-  //         const selected = data.find(
-  //           (item) => item.Text === new Date().getFullYear()
-  //         );
-  //         formDataRef.current.perId = selected.Value;
-  //       }
-  //     } catch (error) {
-  //       window.scrollTo(0, 0);
-  //       setIsError((prevError) => ({
-  //         ...prevError,
-  //         error: true,
-  //         message: error.message,
-  //       }));
-  //       setListPeriod({});
-  //     }
-  //   };
+        }
+      };
+  
+      fetchData();
+    }, []);
 
-  //   fetchData();
-  // }, []);
+      useEffect(() => {
+          const fetchData = async () => {
+            setIsError((prevError) => ({ ...prevError, error: false }));
+            // setIsLoading(true);
+            try {
+              const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+                p1: selectedPeriod,
+              });
+      
+              if (data === "ERROR") {
+                throw new Error("Error: Failed to get the period data.");
+              } else {
+                console.log(data);
+                const sDate = data[0].perAwal.split("T")[0];
+                const eDate = data[0].perAkhir.split("T")[0];
+                periodDataRef.current = {
+                  startPeriod: sDate,
+                  endPeriod: eDate,
+                };
+              }
+            } catch (error) {
+              window.scrollTo(0, 0);
+              // setIsLoading(false);
+            }
+          };
+      
+          fetchData();
+        }, [selectedPeriod]);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
@@ -247,16 +274,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     }));
   };
 
-  const handleInputMemberChange = (e) => {
-    const { name, value } = e.target;
-    const validationError = validateInput(name, value, memberSchema);
-    memberDataRef.current[name] = value;
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
-  };
-
   const handleAdd = async (e) => {
     e.preventDefault();
     const validationErrors = await validateAllInputs(
@@ -268,6 +285,31 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     console.log(formDataRef.current)
 
     if (Object.values(validationErrors).every((error) => !error)) {
+
+      const sDate = new Date(formDataRef.current.sis_tanggalmulai);
+      const eDate = new Date(formDataRef.current.sis_tanggalakhir);
+      const selectedStartDate = new Date(periodDataRef.current.startPeriod);
+      const selectedEndDate = new Date(periodDataRef.current.endPeriod);
+
+      if (sDate >= eDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid date: The end date must be after the start date!",
+        });
+        return;
+      }
+
+      if (eDate >= selectedEndDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message:
+            "Invalid date: Selected start date or end date outrange the selected period",
+        });
+        return;
+      }
+
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -323,7 +365,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     // }
 
       try {
-        await Promise.all(uploadPromises);
+        await Promise.all(uploadPromises);    
 
         const data = await UseFetch(
           API_LINK + "RencanaSS/CreateRencanaSS",
@@ -406,7 +448,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               forInput="kry_id"
                               label="NPK"
                               isDisabled
-                              value={"12345"}
+                              value={userInfo.npk}
                             //   onChange={handleInputChange}
                             //   errorMessage={errors.rciGroupName}
                             />
@@ -418,7 +460,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               label="Name​"
                               isDisabled
                               //   isRequired
-                              value={"Budiono Siregar"}
+                              value={userInfo.nama}
                               //   onChange={handleInputChange}
                               //   errorMessage={errors.setName}
                             />
@@ -430,19 +472,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               label="Prodi/UPT/Dep"
                               isDisabled
                               //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="direc"
-                              label="Directorate"
-                              isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
+                              value={userInfo.upt}
                               //   onChange={handleInputChange}
                               //   errorMessage={errors.setName}
                             />
@@ -469,60 +499,78 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-lg-6">
-                            {/* <DropDown
+                            <DropDown
                               forInput="ino_category"
                               label="Innovation Category"
-                              arrData={li}
+                              arrData={listCategory}
                               isRequired
                               value={formDataRef.current.ino_category}
                               onChange={handleInputChange}
                               errorMessage={errors.ino_category}
-                            /> */}
+                            />
                           </div>
                           <div className="col-lg-6">
-                            {/* <DropDown
+                            <DropDown
                               forInput="know_category"
                               label="Knowledge Category"
-                              arrData={knowledgeimprovment}
+                              arrData={listImpCategory}
                               isRequired
                               value={formDataRef.current.know_category}
                               onChange={handleInputChange}
                               errorMessage={errors.know_category}
-                            /> */}
-                          </div>
-                          <div className="col-lg-4">
-                            <Input
-                              type="date"
-                              forInput="sis_tanggalmulai"
-                              label="Start Date"
-                              isRequired
-                              value={formDataRef.current.sis_tanggalmulai}
-                              onChange={handleInputChange}
-                              errorMessage={errors.sis_tanggalmulai}
                             />
                           </div>
                           <div className="col-lg-4">
-                            <Input
-                              type="date"
-                              forInput="sis_tanggalakhir"
-                              label="End Date"
-                              isRequired
-                              value={formDataRef.current.sis_tanggalakhir}
-                              onChange={handleInputChange}
-                              errorMessage={errors.sis_tanggalakhir}
-                            />
+                          <Input
+                            type="date"
+                            forInput="sis_tanggalmulai"
+                            label="Start Date"
+                            placeholder={
+                            periodDataRef.current.startPeriod
+                            ? "Selected period starts on " +
+                            formatDate(
+                              periodDataRef.current.startPeriod,
+                                true
+                              )
+                            : ""
+                          }
+                          isRequired
+                          value={formDataRef.current.sis_tanggalmulai}
+                          onChange={handleInputChange}
+                          errorMessage={errors.sis_tanggalmulai}
+                          />
                           </div>
                           <div className="col-lg-4">
-                            {/* <DropDown
+                          <Input
+                            type="date"
+                            forInput="sis_tanggalakhir"
+                            label="Start Date"
+                            placeholder={
+                            periodDataRef.current.endPeriod
+                            ? "Selected period ends on " +
+                            formatDate(
+                              periodDataRef.current.endPeriod,
+                                true
+                              )
+                            : ""
+                          }
+                          isRequired
+                          value={formDataRef.current.sis_tanggalakhir}
+                          onChange={handleInputChange}
+                          errorMessage={errors.sis_tanggalakhir}
+                          />
+                          </div>
+                          <div className="col-lg-4">
+                            <DropDown
                               forInput="per_id"
                               label="Period"
-                              arrData={periode}
+                              arrData={listPeriod}
                               isRequired
-                              // isDisabled
+                              isDisabled
                               value={formDataRef.current.per_id}
                               onChange={handleInputChange}
                               errorMessage={errors.per_id}
-                            /> */}
+                            />
                           </div>
 
                 
@@ -629,9 +677,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciQuality}
+                                checked={checkedStates.sisQuality}
                                 onChange={() =>
-                                  handleCheckboxChange("rciQuality")
+                                  handleCheckboxChange("sisQuality")
                                 }
                               />
                               <div className="flex-grow-1">
@@ -639,7 +687,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   type="text"
                                   forInput="sis_kualitas"
                                   label="Quality"
-                                  isDisabled={!checkedStates.rciQuality}
+                                  isDisabled={!checkedStates.sisQuality}
                                   placeholder="Quality"
                                   value={formDataRef.current.sis_kualitas}
                                   onChange={handleInputChange}
@@ -651,15 +699,15 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciCost}
-                                onChange={() => handleCheckboxChange("rciCost")}
+                                checked={checkedStates.sisCost}
+                                onChange={() => handleCheckboxChange("sisCost")}
                               />
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
                                   forInput="sis_biaya"
                                   label="Cost"
-                                  isDisabled={!checkedStates.rciCost}
+                                  isDisabled={!checkedStates.sisCost}
                                   placeholder="Cost"
                                   value={formDataRef.current.sis_biaya}
                                   onChange={handleInputChange}
@@ -671,9 +719,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciDelivery}
+                                checked={checkedStates.sisDelivery}
                                 onChange={() =>
-                                  handleCheckboxChange("rciDelivery")
+                                  handleCheckboxChange("sisDelivery")
                                 }
                               />
                               <div className="flex-grow-1">
@@ -682,7 +730,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   forInput="sis_pengiriman"
                                   label="Delivery"
                                   placeholder="Delivery"
-                                  isDisabled={!checkedStates.rciDelivery}
+                                  isDisabled={!checkedStates.sisDelivery}
                                   value={formDataRef.current.sis_pengiriman}
                                   onChange={handleInputChange}
                                   errorMessage={errors.sis_pengiriman}
@@ -698,9 +746,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciSafety}
+                                checked={checkedStates.sisSafety}
                                 onChange={() =>
-                                  handleCheckboxChange("rciSafety")
+                                  handleCheckboxChange("sisSafety")
                                 }
                               />
                               <div className="flex-grow-1">
@@ -708,7 +756,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   type="text"
                                   forInput="sis_kemanan"
                                   label="Safety"
-                                  isDisabled={!checkedStates.rciSafety}
+                                  isDisabled={!checkedStates.sisSafety}
                                   placeholder="Safety"
                                   value={formDataRef.current.sis_kemanan}
                                   onChange={handleInputChange}
@@ -720,9 +768,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               <input
                                 className="form-check-input me-2"
                                 type="checkbox"
-                                isDisabled={checkedStates.rciMoral}
+                                isDisabled={checkedStates.sisMoral}
                                 onChange={() =>
-                                  handleCheckboxChange("rciMoral")
+                                  handleCheckboxChange("sisMoral")
                                 }
                               />
                               <div className="flex-grow-1">
@@ -730,7 +778,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   type="text"
                                   label="Moral"
                                   forInput="sis_moral"
-                                  isDisabled={!checkedStates.rciMoral}
+                                  isDisabled={!checkedStates.sisMoral}
                                   placeholder="Moral"
                                   value={formDataRef.current.sis_moral}
                                   onChange={handleInputChange}
