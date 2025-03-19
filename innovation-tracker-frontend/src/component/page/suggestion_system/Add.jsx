@@ -60,6 +60,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   };
 
   const formDataRef = useRef({
+    kry_id: userInfo.npk,
     sis_judul: "",
     ino_category: "",
     know_category: "",
@@ -90,6 +91,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   const goalFileRef = useRef(null);
 
   const userSchema = object({
+    kry_id: number().required("required"),
     sis_judul: string().required("required"),
     ino_category: string().required("required"),
     know_category: string().required("required"),
@@ -177,26 +179,24 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     fetchData();
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
       const fetchData = async () => {
         setIsError((prevError) => ({ ...prevError, error: false }));
-        // setIsLoading(true);
-
         try {
           const data = await UseFetch(
             API_LINK + "MasterPeriod/GetListPeriod",
             {}
           );
-  
+
           if (data === "ERROR") {
             throw new Error("Error: Failed to get the period data.");
           } else {
-            setListPeriod({ data });
+            setListPeriod(data);
             const selected = data.find(
               (item) => item.Text === new Date().getFullYear()
             );
-            formDataRef.current.per_id = 1;
-            setSelectedPeriod(1);
+            formDataRef.current.per_id = selected.Value;
+            setSelectedPeriod(selected.Value);
           }
         } catch (error) {
           window.scrollTo(0, 0);
@@ -205,43 +205,41 @@ export default function SuggestionSystemAdd({ onChangePage }) {
             error: true,
             message: error.message,
           }));
-          setListPeriod({});
-          // setIsLoading(false);
-
+          setListPeriod([]);
         }
       };
-  
+
       fetchData();
     }, []);
 
-      useEffect(() => {
-          const fetchData = async () => {
-            setIsError((prevError) => ({ ...prevError, error: false }));
-            // setIsLoading(true);
-            try {
-              const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-                p1: selectedPeriod,
-              });
-      
-              if (data === "ERROR") {
-                throw new Error("Error: Failed to get the period data.");
-              } else {
-                console.log(data);
-                const sDate = data[0].perAwal.split("T")[0];
-                const eDate = data[0].perAkhir.split("T")[0];
-                periodDataRef.current = {
-                  startPeriod: sDate,
-                  endPeriod: eDate,
-                };
-              }
-            } catch (error) {
-              window.scrollTo(0, 0);
-              // setIsLoading(false);
-            }
-          };
-      
-          fetchData();
-        }, [selectedPeriod]);
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        setIsLoading(true);
+        try {
+          const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+            p1: selectedPeriod,
+          });
+
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the period data.");
+          } else {
+            const sDate = data[0].perAwal.split("T")[0];
+            const eDate = data[0].perAkhir.split("T")[0];
+            periodDataRef.current = {
+              startPeriod: sDate,
+              endPeriod: eDate,
+            };
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchData();
+    }, [selectedPeriod]);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
@@ -281,6 +279,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       userSchema,
       setErrors
     );
+
+    // formDataRef.current.kry_id = userInfo.npk
 
     console.log(formDataRef.current)
 

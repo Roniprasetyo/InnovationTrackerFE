@@ -19,7 +19,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function QualityControlCircleDetail({ onChangePage, withID }) {
+export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -30,11 +30,11 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
 
   const formDataRef = useRef({
     Key: "",
+    NPK:"",
+    Period: "",
     Category: "",
     CategoryImp: "",
-    "Group Name": "",
     "Project Title": "",
-    "Project Benefit": 0,
     Case: "",
     CaseFile: "",
     Problem: "",
@@ -50,8 +50,6 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Safety: "",
     Moral: "",
     Status: "",
-    Creaby: "",
-    member: [{}],
   });
 
   useEffect(() => {
@@ -60,32 +58,17 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaSS/GetRencanaSSById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get QCP data");
+          throw new Error("Error: Failed to get SS data");
         } else {
-          formDataRef.current = data;
-          const members = data.member.filter(
-            (item) => item.Position === "Member"
-          );
-          const memberCount = members.length || 0;
-          console.log(memberCount);
-          memberCount > 0
-            ? setCurrentData(
-                members?.map((item, index) => ({
-                  Key: index,
-                  No: index + 1,
-                  Name: item.Name,
-                  Count: memberCount,
-                  Alignment: ["center", "left"],
-                }))
-              )
-            : setCurrentData(inisialisasiData);
+          console.log(data);
+          formDataRef.current = data[0];
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -100,7 +83,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [withID]);
 
   if (isLoading) return <Loading />;
 
@@ -140,7 +123,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCC REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">SS REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -150,51 +133,31 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                 <div className="col-lg-12">
                   <div className="card mb-3">
                     <div className="card-header">
-                      <h5 className="fw-medium">Team Member</h5>
+                      <h5 className="fw-medium">User Data</h5>
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-6">
                           <Label
-                            title="Circle Name"
-                            data={formDataRef.current["Group Name"] || "-"}
+                            title="NPK"
+                            data={formDataRef.current["NPK"] || "-"}
                           />
                         </div>
+
+                        <div className="col-md-6">
+                          <Label
+                            title="Name​"
+                            data={userInfo.nama}
+                          />
+                        </div>
+
                         <div className="col-md-6">
                           <Label
                             title="Prodi/UPT/Dep​"
-                            data="Manajemen Informatika"
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Directorate"
-                            data="Manajemen Informatika"
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Facilitator"
-                            data={
-                              formDataRef.current.member.find(
-                                (item) => item.Position === "Facilitator"
-                              )?.Name || "-"
-                            }
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Leader"
-                            data={
-                              formDataRef.current.member.find(
-                                (item) => item.Position === "Leader"
-                              )?.Name || "-"
-                            }
+                            data={userInfo.upt}
                           />
                         </div>
                       </div>
-                      <Label title="Team Member" />
-                      <Table data={currentData} />
                     </div>
                   </div>
                 </div>
@@ -325,21 +288,8 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                 </div>
                 <div className="col-lg-12">
                   <div className="card mb-3">
-                    <div className="card-header">
-                      <h5 className="fw-medium">Project Benefit</h5>
-                    </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-lg-12">
-                          <Label
-                            title="Project Benefit"
-                            data={
-                              separator(
-                                formDataRef.current["Project Benefit"]
-                              ) || "-"
-                            }
-                          />
-                        </div>
                         <div className="col-lg-6">
                           <label className="form-label fw-bold">
                             Tangible Benefit

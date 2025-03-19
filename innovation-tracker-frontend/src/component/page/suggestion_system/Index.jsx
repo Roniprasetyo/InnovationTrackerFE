@@ -35,8 +35,8 @@ const dataFilterSort = [
   // { Value: "[Team Name] desc", Text: "Team Name [↓]" },
   // { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
   // { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
-  // { Value: "[Circle Benefit] asc", Text: "[Circle Benefit] [↑]" },
-  // { Value: "[Circle Benefit] desc", Text: "[Circle Benefit] [↓]" },
+  { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
+  { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
@@ -61,7 +61,7 @@ const dataFilterStatus = [
 //   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
 // ];
 
-export default function SystemSuggestionIndex({ onChangePage }) {
+export default function SuggestionSytemIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -72,7 +72,7 @@ export default function SystemSuggestionIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Start Date] asc",
+    sort: "[Category] asc",
     status: "",
     jenis: "SS",
     role: userInfo.role,
@@ -108,26 +108,6 @@ export default function SystemSuggestionIndex({ onChangePage }) {
     });
   }
 
-  function handleSetStatus(id) {
-    setIsLoading(true);
-    setIsError(false);
-    UseFetch(API_LINK + "MasterSetting/SetStatusSetting", {
-      idSetting: id,
-    })
-      .then((data) => {
-        if (data === "ERROR" || data.length === 0) setIsError(true);
-        else {
-          SweetAlert(
-            "Sukses",
-            "Status data alat/mesin berhasil diubah menjadi " + data[0].Status,
-            "success"
-          );
-          handleSetCurrentPage(currentFilter.page);
-        }
-      })
-      .then(() => setIsLoading(false));
-  }
-
   const handleSubmit = async (id) => {
     setIsError(false);
     const confirm = await SweetAlert(
@@ -141,7 +121,7 @@ export default function SystemSuggestionIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaSs/SentRencanaSs", {
+      UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
         id: id,
       })
         .then((data) => {
@@ -159,32 +139,87 @@ export default function SystemSuggestionIndex({ onChangePage }) {
     }
   };
 
+  const handleApprove = async (id) => {
+      setIsError(false);
+      const confirm = await SweetAlert(
+        "Confirm",
+        "Are you sure you want to approve this submission?",
+        "warning",
+        "APPROVE",
+        null,
+        "",
+        true
+      );
+  
+      if (confirm) {
+        UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
+          id: id,
+          set: "Approved",
+        })
+          .then((data) => {
+            if (data === "ERROR" || data.length === 0) setIsError(true);
+            else {
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
+          .then(() => setIsLoading(false));
+      }
+    };
+
+    const handleReject = async (id) => {
+      setIsError(false);
+      const confirm = await SweetAlert(
+        "Confirm",
+        "Are you sure you want to reject this submission?",
+        "warning",
+        "REJECT",
+        null,
+        "",
+        true
+      );
+  
+      if (confirm) {
+        UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
+          id: id,
+          set: "Rejected",
+        })
+          .then((data) => {
+            if (data === "ERROR" || data.length === 0) setIsError(true);
+            else {
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
+          .then(() => setIsLoading(false));
+      }
+    };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaSs/GetRencanaSS",
+          API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter 
         );
 
         if (data === "ERROR") {
-          setIsError(true);
+          // setIsError(true);
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
           const role = userInfo.role.slice(0, 5);
+          const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
             No: index + 1,
-            "Name": maxCharDisplayed(value["Name"], 30),
             "Project Title": maxCharDisplayed(
-              decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
+              decodeHtml(
+                decodeHtml(decodeHtml(value["Project Title"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
               50
             ),
             Category: value["Category"],
-            "Project Benefit": separator(value["Project Benefit"]),
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
             Period: value["Period"],
@@ -195,7 +230,8 @@ export default function SystemSuggestionIndex({ onChangePage }) {
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
-                : role === "ROL01" && value["Status"] === "Waiting Approval"
+                : inorole === "Facilitator" &&
+                  value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
                 : ["Detail"],
             Alignment: [
@@ -222,6 +258,8 @@ export default function SystemSuggestionIndex({ onChangePage }) {
 
     fetchData();
   }, [currentFilter]);
+
+  console.log(currentData);
 
   if (isLoading) return <Loading />;
 
@@ -294,6 +332,8 @@ export default function SystemSuggestionIndex({ onChangePage }) {
             data={currentData}
             onDetail={onChangePage}
             onSubmit={handleSubmit}
+            onApprove={handleApprove}
+            onReject={handleReject}
             onEdit={onChangePage}
           />
           <Paging
