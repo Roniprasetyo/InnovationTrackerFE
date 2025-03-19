@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -27,6 +27,8 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+
+  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -57,6 +59,44 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        let filteredData;
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setListEmployee(
+              data.map((value) => ({
+                npk: value.npk,
+                upt: value.upt_bagian,
+              }))
+            );
+          });
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
         const data = await UseFetch(
@@ -80,6 +120,9 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                   Key: index,
                   No: index + 1,
                   Name: item.Name,
+                  Upt:
+                    listEmployee.find((value) => value.npk === item.Npk)?.upt ||
+                    "",
                   Count: memberCount,
                   Alignment: ["center", "left"],
                 }))
@@ -99,7 +142,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [listEmployee, withID]);
 
   if (isLoading) return <Loading />;
 
@@ -153,23 +196,14 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-6">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
-                          <Label
-                            title="Prodi/UPT/Dep​"
-                            data="Manajemen Informatika"
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Directorate"
-                            data="Manajemen Informatika"
-                          />
+                          <Label title="Prodi/UPT/Dep​" data={userInfo.upt} />
                         </div>
                         <div className="col-md-6">
                           <Label

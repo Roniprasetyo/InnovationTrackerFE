@@ -99,7 +99,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [withID]);
 
   if (isLoading) return <Loading />;
 
@@ -162,7 +162,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                         <div className="col-md-6">
                           <Label
                             title="Prodi/UPT/Dep​"
-                            data="Manajemen Informatika"
+                            data={userInfo.upt}
                           />
                         </div>
                         <div className="col-md-6">

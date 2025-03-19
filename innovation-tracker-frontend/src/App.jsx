@@ -15,6 +15,7 @@ import QualityControlProject from "./component/page/quality-control-project/Root
 import QualityControlCircle from "./component/page/quality-control-circle/Root";
 import NotFound from "./component/page/not-found/Index";
 import UnderConstruction from "./component/page/under-construction/Index";
+import SuggestionSystem from "./component/page/suggestion_system/Root.jsx";
 
 export default function App() {
   const [listMenu, setListMenu] = useState([]);
@@ -53,6 +54,10 @@ export default function App() {
             element: <Login />,
           },
           {
+            path: "/submission/ss",
+            element: <SuggestionSystem />,
+          },
+          {
             path: "/submission/qcp",
             element: <QualityControlProject />,
           },
@@ -60,6 +65,10 @@ export default function App() {
             path: "/submission/qcc",
             element: <QualityControlCircle />,
           },
+          // {
+          //   path: "/submission/vci",
+          //   element: <QualityControlCircle />,
+          // },
           {
             path: "/*",
             element: <UnderConstruction />,

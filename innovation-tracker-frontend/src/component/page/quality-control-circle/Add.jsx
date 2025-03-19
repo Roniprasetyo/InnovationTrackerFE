@@ -93,7 +93,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string().max(100, "maximum 100 characters"),
+    rciProjBenefit: string().max(13, "maximum 10 digits"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -136,6 +136,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
               (item) => item.upt_bagian === userInfo.upt
             );
           });
+        setListEmployeeFull(data);
         setListEmployee(
           filteredData.map((value) => ({
             Value: value.npk,
@@ -300,8 +301,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
     fetchData();
   }, [selectedPeriod]);
-
-  
 
   const handleCheckboxChange = (key) => {
     if (checkedStates[key]) formDataRef.current[key] = "";

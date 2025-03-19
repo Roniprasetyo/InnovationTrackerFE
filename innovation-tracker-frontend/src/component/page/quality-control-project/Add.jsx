@@ -48,6 +48,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
 
   const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
+  const [listEmployeeFull, setListEmployeeFull] = useState([]);
   const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
@@ -95,7 +96,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string().max(100, "maximum 100 characters"),
+    rciProjBenefit: string().max(13, "maximum 10 digits"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -144,17 +145,20 @@ export default function QualityControlProjectAdd({ onChangePage }) {
               (value, index, self) =>
                 index === self.findIndex((t) => t.Value === value.Value)
             );
-            const sortedData = unqFormatData.sort((a, b) => a.Value.localeCompare(b.Value));
+            const sortedData = unqFormatData.sort((a, b) =>
+              a.Value.localeCompare(b.Value)
+            );
             setListUpt(
               sortedData.map((value) => ({
                 Value: value.Value,
                 Text: value.Value,
               }))
             );
+            setListEmployeeFull(data);
             setListEmployee(
               data.map((value) => ({
                 Value: value.npk,
-                Text: value.npk + " - " + value.nama,
+                Text: value.npk + " - " + value.nama + " - " + value.upt_bagian,
               }))
             );
           });
@@ -187,7 +191,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCC")));
+          setListCategory(data.filter((item) => item.Text.includes("QCP")));
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -332,6 +336,35 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   }, [selectedPeriod]);
 
   const handleAddMember = (id, Name) => {
+    if (
+      id === null ||
+      id === undefined ||
+      Name === null ||
+      Name === undefined
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Please select a member",
+      });
+      return;
+    }
+    if (id === userInfo.npk) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a leader",
+      });
+      return;
+    }
+    if (
+      formDataRef.current.rciFacil !== "" &&
+      id === formDataRef.current.rciFacil
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a facilitator",
+      });
+      return;
+    }
     if (currentData[0].Count === 0) {
       const data = [
         {
@@ -343,8 +376,11 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
+        Upt:
+          listEmployeeFull.find((item) => item.npk === value.Key)?.upt_bagian ||
+          "",
         Action: ["Delete"],
-        Alignment: ["center", "left", "center", "center"],
+        Alignment: ["center", "left", "left", "center", "center"],
       }));
       setCurrentData(formattedData);
     } else {
@@ -364,9 +400,12 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           Key: id,
           No: prevData.length + 1,
           Name,
+          Upt:
+          listEmployeeFull.find((item) => item.npk === value.Key)?.upt_bagian ||
+          "",
           Count: prevData.length + 1,
           Action: ["Delete"],
-          Alignment: ["center", "left", "center", "center"],
+          Alignment: ["center", "left", "left", "center", "center"],
         },
       ]);
     }
@@ -447,16 +486,47 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       setErrors
     );
 
-    delete formDataRef.current.rciFacil;
-    delete formDataRef.current.rciLeader;
-
-    const body = {
-      ...formDataRef.current,
-      rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
-      member: newMemData,
-    };
-    console.log(body);
     if (Object.values(validationErrors).every((error) => !error)) {
+      if (currentData.length < 2) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid member: Please add at least 2 members!",
+        });
+        return;
+      }
+      const sDate = new Date(formDataRef.current.rciStartDate);
+      const eDate = new Date(formDataRef.current.rciEndDate);
+      const selectedStartPeriod = new Date(periodDataRef.current.startPeriod);
+      const selectedEndPeriod = new Date(periodDataRef.current.endPeriod);
+
+      if (sDate >= eDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid date: The end date must be after the start date!",
+        });
+        return;
+      }
+
+      if (eDate >= selectedEndPeriod) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message:
+            "Invalid date: Selected start date or end date outrange the selected period",
+        });
+        return;
+      }
+
+      formDataRef.current = {
+        ...formDataRef.current,
+        rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
+        member: newMemData,
+      };
+      delete formDataRef.current.rciFacil;
+      delete formDataRef.current.rciLeader;
+
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -466,21 +536,21 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (body["rciCaseFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciCaseFile"] = data.Hasil)
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-            (data) => (body["rciProblemFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciProblemFile"] = data.Hasil)
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-            (data) => (body["rciGoalFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciGoalFile"] = data.Hasil)
           )
         );
       }
@@ -490,7 +560,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
 
         const data = await UseFetch(
           API_LINK + "RencanaCircle/CreateRencanaQCP",
-          body
+          formDataRef.current
         );
 
         if (data === "ERROR") {
@@ -563,7 +633,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-12">
+                          <div className="col-md-6">
                             <Input
                               type="text"
                               forInput="rciGroupName"
@@ -581,17 +651,6 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               label="Prodi/UPT/Dep​"
                               isDisabled
                               value={userInfo.upt}
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <DropDown
-                              forInput="setId"
-                              label="Prodi/UPT/Dep​ Collaborator"
-                              arrData={listUpt}
-                              isRequired
-                              // value={formDataRef.current.setId}
-                              onChange={handleInputChange}
-                              // errorMessage={errors.setId}
                             />
                           </div>
                           <div className="col-md-6">

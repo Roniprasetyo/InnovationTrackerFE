@@ -108,7 +108,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string().max(100, "maximum 100 characters"),
+    rciProjBenefit: string().max(13, "maximum 10 digits"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -376,7 +376,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [withID]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -549,6 +549,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       userSchema,
       setErrors
     );
+
+    console.log(formDataRef.current);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       if (memberData.length < 2) {
