@@ -38,41 +38,75 @@ export default function MasterPeriodAdd({ onChangePage }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const validationErrors = await validateAllInputs(
-      formDataRef.current,
-      userSchema,
-      setErrors
-    );
+    const perAwalYear = new Date(formDataRef.current.perAwal).getFullYear();
+    const perAkhirYear = new Date(formDataRef.current.perAkhir).getFullYear();
 
-    if (Object.values(validationErrors).every((error) => !error)) {
-      setIsLoading(true);
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setErrors({});
-
-      try {
-        const data = await UseFetch(
-          API_LINK + "MasterPeriod/CreatePeriod",
-          formDataRef.current
+    // Jika tahun tidak sama, tampilkan SweetAlert
+    if (perAwalYear !== perAkhirYear) {
+        SweetAlert(
+            "ERROR",
+            "The Activity Start Date and Activity End Date must be in the same year.",
+            "error",
+            "OK"
         );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to submit the data.");
-        } else {
-          SweetAlert("Success", "Data successfully submitted", "success");
-          onChangePage("index");
+        return; // Menghentikan proses lebih lanjut
+    }
+  
+    // Display SweetAlert for confirmation before proceeding
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to submit this registration form? Once submitted, it will make the previous active period data inactive.",
+      "warning",
+      "SUBMIT",
+      null,
+      "",
+      true
+    );
+  
+    // If user confirms, proceed with validation and submission
+    if (confirm) {
+      const validationErrors = await validateAllInputs(
+        formDataRef.current,
+        userSchema,
+        setErrors
+      );
+  
+      if (Object.values(validationErrors).every((error) => !error)) {
+        setIsLoading(true);
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        setErrors({});
+  
+        try {
+          const data = await UseFetch(
+            API_LINK + "MasterPeriod/CreatePeriod",
+            formDataRef.current
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to submit the data.");
+          } else if (data[0].hasil === "EXIST") {
+            throw new Error("Data already exists.");
+          } else {
+            SweetAlert("Success", "Data successfully submitted", "success");
+            onChangePage("index");
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
-      }
-    } else window.scrollTo(0, 0);
+      } else window.scrollTo(0, 0);
+    } else {
+      // If user cancels, do nothing
+      console.log("Data submission cancelled.");
+    }
   };
+  
 
   if (isLoading) return <Loading />;
 

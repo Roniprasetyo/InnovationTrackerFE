@@ -15,17 +15,17 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    activityStartDate: null,
-    activityEndDate: null,
+    StartDate: null,
+    EndDate: null,
     Status: null,
     Count: 0,
   },
 ];
 
-// const dataFilterSort = [
-//   { Value: "[Name] asc", Text: "Name [↑]" },
-//   { Value: "[Name] desc", Text: "Name [↓]" },
-// ];
+const dataFilterSort = [
+  { Value: "[StartDate] asc", Text: "StartDate [↑]" },
+  { Value: "[EndDate] desc", Text: "EndDate [↓]" },
+];
 
 const dataFilterStatus = [
   { Value: "Aktif", Text: "Aktif" },
@@ -44,7 +44,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
   });
 
   const searchQuery = useRef();
-//   const searchFilterSort = useRef();
+  const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
 
   // Set current page
@@ -66,7 +66,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
         ...prevFilter,
         page: 1,
         query: searchQuery.current.value,
-        // sort: searchFilterSort.current.value,
+        sort: searchFilterSort.current.value,
         status: searchFilterStatus.current.value,
       };
     });
@@ -110,6 +110,8 @@ export default function MasterPeriodIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
+            StartDate: value.StartDate.split("T")[0],
+            EndDate: value.EndDate.split("T")[0],
             Aksi: ["Toggle", "Edit"],
             Alignment: ["center", "left", "center", "center"],
           }));
@@ -165,14 +167,14 @@ export default function MasterPeriodIndex({ onChangePage }) {
             onClick={handleSearch}
           />
           <Filter>
-            {/* <DropDown
+            <DropDown
               ref={searchFilterSort}
               forInput="ddUrut"
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Nama Alat/Mesin] asc"
-            /> */}
+              defaultValue="[StartDate] asc"
+            />
             <DropDown
               ref={searchFilterStatus}
               forInput="ddStatus"

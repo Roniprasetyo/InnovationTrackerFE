@@ -13,6 +13,7 @@ import Login from "./component/page/login/Index";
 import Logout from "./component/page/logout/Index";
 import QualityControlProject from "./component/page/quality-control-project/Root";
 import NotFound from "./component/page/not-found/Index";
+import ValueChainInnovation from "./component/page/value-chain-innovation/Root";
 
 export default function App() {
   const [listMenu, setListMenu] = useState([]);
@@ -54,6 +55,10 @@ export default function App() {
           {
             path: "/submission/qcp",
             element: <QualityControlProject />,
+          },
+          {
+            path: "/submission/vci",
+            element: <ValueChainInnovation />,
           },
           {
             path: "/*",

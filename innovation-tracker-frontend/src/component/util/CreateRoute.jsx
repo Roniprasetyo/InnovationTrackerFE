@@ -23,6 +23,7 @@ const SuratPerintahKerja = lazy(() =>
   import("../page/surat-perintah-kerja/Root")
 );
 const MasterPeriod = lazy(() => import("../page/master-period/Root"));
+const ValueChainInnovation = lazy(() => import("../page/value-chain-innovation/Root"));
 
 const routeList = [
   {
@@ -93,6 +94,10 @@ const routeList = [
     path: "/period",
     element: <MasterPeriod />,
   },
+  {
+    path: "/submission/vci",
+    element: <ValueChainInnovation />,
+  }
 ];
 
 export default routeList;
