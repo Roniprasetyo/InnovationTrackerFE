@@ -37,13 +37,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [memberData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-
-  const [listCategory, setListCategory] = useState([]);
-  const [listEmployee, setListEmployee] = useState([]);
-  const [listFacil, setListFacil] = useState([]);
-  const [listPeriod, setListPeriod] = useState([]);
-  const [listImpCategory, setListImpCategory] = useState([]);
-
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
     rciCost: false,
@@ -52,13 +45,11 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciMoral: false,
   });
 
-  const handleCheckboxChange = (key) => {
-    if (checkedStates[key]) formDataRef.current[key] = "";
-    setCheckedStates((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
-  };
+  const [listCategory, setListCategory] = useState([]);
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listFacil, setListFacil] = useState([]);
+  const [listPeriod, setListPeriod] = useState([]);
+  const [listImpCategory, setListImpCategory] = useState([]);
 
   const formDataRef = useRef({
     setId: "",
@@ -84,30 +75,25 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciLeader: "",
     setId2: "",
   });
-
   const memberDataRef = useRef({
     rciMember: "",
   });
-
   const periodDataRef = useRef({
     startPeriod: "",
     endPeriod: "",
   });
-
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    setId: string().nullable(),
+    setId: string().required("required"),
     perId: string().nullable(),
     rciGroupName: string()
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string()
-      .max(100, "maximum 100 characters")
-      .required("required"),
+    rciProjBenefit: string().max(100, "maximum 100 characters"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -126,9 +112,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciMoral: string().max(200, "maximum 200 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    setId2: string().nullable(),
+    setId2: string().required("required"),
   });
-
   const memberSchema = object({
     rciMember: string().required("required"),
   });
@@ -136,7 +121,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         let filteredData;
         const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
@@ -166,9 +150,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
+        setListEmployee([]);
       }
     };
 
@@ -178,7 +160,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Innovation Category",
@@ -196,9 +177,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
+        setListCategory([]);
       }
     };
 
@@ -208,7 +187,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Knowledge Category",
@@ -226,9 +204,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListImpCategory({});
-      } finally {
-        setIsLoading(false);
+        setListImpCategory([]);
       }
     };
 
@@ -238,7 +214,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -262,9 +237,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
-      } finally {
-        setIsLoading(false);
+        setListPeriod([]);
       }
     };
 
@@ -274,7 +247,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterFacilitator/GetListFacilitator",
@@ -293,9 +265,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListFacil({});
-      } finally {
-        setIsLoading(false);
+        setListFacil([]);
       }
     };
 
@@ -314,7 +284,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the period data.");
         } else {
-          console.log(data);
           const sDate = data[0].perAwal.split("T")[0];
           const eDate = data[0].perAkhir.split("T")[0];
           periodDataRef.current = {
@@ -331,6 +300,16 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
     fetchData();
   }, [selectedPeriod]);
+
+  
+
+  const handleCheckboxChange = (key) => {
+    if (checkedStates[key]) formDataRef.current[key] = "";
+    setCheckedStates((prevState) => ({
+      ...prevState,
+      [key]: !prevState[key],
+    }));
+  };
 
   const handleAddMember = (id, Name) => {
     if (
@@ -469,7 +448,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
     ];
 
-    console.log(formDataRef.current);
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
@@ -517,7 +495,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       delete formDataRef.current.rciFacil;
       delete formDataRef.current.rciLeader;
 
-      console.log(formDataRef.current);
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});

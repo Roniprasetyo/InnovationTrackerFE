@@ -153,7 +153,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-6">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
@@ -162,12 +162,6 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                         <div className="col-md-6">
                           <Label
                             title="Prodi/UPT/Dep​"
-                            data="Manajemen Informatika"
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Directorate"
                             data="Manajemen Informatika"
                           />
                         </div>

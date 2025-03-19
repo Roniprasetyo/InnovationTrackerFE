@@ -35,7 +35,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [memberData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
 
@@ -102,15 +102,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
 
   const userSchema = object({
     rciId: string().nullable(),
-    setId: string().nullable(),
+    setId: string().required("required"),
     perId: string().nullable(),
     rciGroupName: string()
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string()
-      .max(100, "maximum 100 characters")
-      .required("required"),
+    rciProjBenefit: string().max(100, "maximum 100 characters"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -129,7 +127,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciMoral: string().max(200, "maximum 200 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    setId2: string().nullable(),
+    setId2: string().required("required"),
   });
 
   const memberSchema = object({
@@ -161,8 +159,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
             Text: value.npk + " - " + value.nama,
           }))
         );
-        console.log(filteredData);
-        // formDataRef.current.rciLeader = userInfo.npk;
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -394,7 +390,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the period data.");
         } else {
-          console.log(data);
           const sDate = data[0].perAwal.split("T")[0];
           const eDate = data[0].perAkhir.split("T")[0];
           periodDataRef.current = {
@@ -639,7 +634,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           onChangePage("index");
         }
       } catch (error) {
-        console.log(error);
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
           ...prevError,

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -18,6 +18,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { clearSeparator, separator } from "../../util/Formatting";
+import { formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -34,15 +35,9 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
-
-  const [listCategory, setListCategory] = useState([]);
-  const [listEmployee, setListEmployee] = useState([]);
-  const [listFacil, setListFacil] = useState([]);
-  const [listPeriod, setListPeriod] = useState([]);
-  const [listImpCategory, setListImpCategory] = useState([]);
-
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
     rciCost: false,
@@ -51,13 +46,12 @@ export default function QualityControlProjectAdd({ onChangePage }) {
     rciMoral: false,
   });
 
-  const handleCheckboxChange = (key) => {
-    if (checkedStates[key]) formDataRef.current[key] = "";
-    setCheckedStates((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
-  };
+  const [listCategory, setListCategory] = useState([]);
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listFacil, setListFacil] = useState([]);
+  const [listPeriod, setListPeriod] = useState([]);
+  const [listImpCategory, setListImpCategory] = useState([]);
+  const [listUpt, setListUpt] = useState([]);
 
   const formDataRef = useRef({
     setId: "",
@@ -83,25 +77,25 @@ export default function QualityControlProjectAdd({ onChangePage }) {
     rciLeader: "",
     setId2: "",
   });
-
   const memberDataRef = useRef({
     rciMember: "",
   });
-
+  const periodDataRef = useRef({
+    startPeriod: "",
+    endPeriod: "",
+  });
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    setId: number().required("required"),
-    perId: number().nullable(),
+    setId: string().required("required"),
+    perId: string().nullable(),
     rciGroupName: string()
-      .max(50, "maximum 50 characters")
-      .required("required"),
-    rciTitle: string().required("required"),
-    rciProjBenefit: string()
       .max(100, "maximum 100 characters")
       .required("required"),
+    rciTitle: string().required("required"),
+    rciProjBenefit: string().max(100, "maximum 100 characters"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -109,22 +103,18 @@ export default function QualityControlProjectAdd({ onChangePage }) {
     rciGoal: string().required("required"),
     rciGoalFile: string().nullable(),
     rciScope: string().required("required"),
-    rciStartDate: date()
-      .min(new Date(), "start date must be after today")
-      .typeError("invalid date")
-      .required("required"),
+    rciStartDate: date().typeError("invalid date").required("required"),
     rciEndDate: date()
-      .min(new Date(), "start date must be after today")
       .typeError("Invalid date format")
       .required("Start date is required"),
-    rciQuality: string().max(100, "maximum 100 characters").nullable(),
-    rciCost: string().max(100, "maximum 100 characters").nullable(),
-    rciSafety: string().max(100, "maximum 100 characters").nullable(),
-    rciDelivery: string().max(100, "maximum 100 characters").nullable(),
-    rciMoral: string().max(100, "maximum 100 characters").nullable(),
+    rciQuality: string().max(200, "maximum 200 characters").nullable(),
+    rciCost: string().max(200, "maximum 200 characters").nullable(),
+    rciSafety: string().max(200, "maximum 200 characters").nullable(),
+    rciDelivery: string().max(200, "maximum 200 characters").nullable(),
+    rciMoral: string().max(200, "maximum 200 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    setId2: number().required("required"),
+    setId2: string().required("required"),
   });
 
   const memberSchema = object({
@@ -134,17 +124,41 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
+      setIsLoading(true);
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Kategori Keilmuan",
-        });
+        let filteredData;
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            const formatedData = data.map((item) => ({
+              Value: item.upt_bagian,
+            }));
 
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCP")));
-        }
+            const unqFormatData = formatedData.filter(
+              (value, index, self) =>
+                index === self.findIndex((t) => t.Value === value.Value)
+            );
+            const sortedData = unqFormatData.sort((a, b) => a.Value.localeCompare(b.Value));
+            setListUpt(
+              sortedData.map((value) => ({
+                Value: value.Value,
+                Text: value.Value,
+              }))
+            );
+            setListEmployee(
+              data.map((value) => ({
+                Value: value.npk,
+                Text: value.npk + " - " + value.nama,
+              }))
+            );
+          });
+        formDataRef.current.rciLeader = userInfo.npk;
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -152,7 +166,9 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
+        setListEmployee([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -162,10 +178,40 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
+      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Jenis Improvement",
+          p1: "Innovation Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data.filter((item) => item.Text.includes("QCC")));
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Knowledge Category",
         });
 
         if (data === "ERROR") {
@@ -180,7 +226,9 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListImpCategory({});
+        setListImpCategory([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -190,6 +238,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -204,6 +253,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
             (item) => item.Text === new Date().getFullYear()
           );
           formDataRef.current.perId = selected.Value;
+          setSelectedPeriod(selected.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -212,7 +262,9 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
+        setListPeriod([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -226,11 +278,11 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       try {
         const data = await UseFetch(
           API_LINK + "MasterFacilitator/GetListFacilitator",
-          { p1: new Date().getFullYear() }
+          { p1: new Date().getFullYear(), p2: 8 }
         );
 
         if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the facilitator data.");
         } else {
           setListFacil(data);
         }
@@ -241,7 +293,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListFacil({});
+        setListFacil([]);
       } finally {
         setIsLoading(false);
       }
@@ -255,33 +307,29 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       setIsLoading(true);
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
-          {}
-        );
+        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+          p1: selectedPeriod,
+        });
 
         if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the period data.");
         } else {
-          setListEmployee(data);
-          const member = data.find((item) => item["Value"] === userInfo.npk);
-          formDataRef.current.rciLeader = member.Value;
+          const sDate = data[0].perAwal.split("T")[0];
+          const eDate = data[0].perAkhir.split("T")[0];
+          periodDataRef.current = {
+            startPeriod: sDate,
+            endPeriod: eDate,
+          };
         }
       } catch (error) {
         window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [selectedPeriod]);
 
   const handleAddMember = (id, Name) => {
     if (currentData[0].Count === 0) {
@@ -323,6 +371,14 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       ]);
     }
     memberDataRef.current.rciMember = "";
+  };
+
+  const handleCheckboxChange = (key) => {
+    if (checkedStates[key]) formDataRef.current[key] = "";
+    setCheckedStates((prevState) => ({
+      ...prevState,
+      [key]: !prevState[key],
+    }));
   };
 
   const handleDelete = (id) => {
@@ -524,22 +580,18 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               forInput="setName"
                               label="Prodi/UPT/Dep​"
                               isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                              value={userInfo.upt}
                             />
                           </div>
                           <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
-                              label="Directorate"
-                              isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                            <DropDown
+                              forInput="setId"
+                              label="Prodi/UPT/Dep​ Collaborator"
+                              arrData={listUpt}
+                              isRequired
+                              // value={formDataRef.current.setId}
+                              onChange={handleInputChange}
+                              // errorMessage={errors.setId}
                             />
                           </div>
                           <div className="col-md-6">
@@ -556,15 +608,13 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <SearchDropdown
+                            <Input
+                              type="text"
                               forInput="rciLeader"
                               label="Leader"
-                              placeHolder="Leader"
-                              arrData={listEmployee}
                               isRequired
                               isDisabled
-                              isRound
-                              value={formDataRef.current.rciLeader}
+                              value={userInfo.nama}
                               onChange={handleInputChange}
                               errorMessage={errors.rciLeader}
                             />
@@ -594,7 +644,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                                     (item) =>
                                       item.Value ===
                                       memberDataRef.current.rciMember
-                                  ).Text
+                                  )?.Text
                                 )
                               }
                             />
@@ -635,7 +685,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                           <div className="col-lg-6">
                             <DropDown
                               forInput="setId2"
-                              label="Improvement Category"
+                              label="Knowledge Category"
                               arrData={listImpCategory}
                               isRequired
                               value={formDataRef.current.setId2}
@@ -648,6 +698,15 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               type="date"
                               forInput="rciStartDate"
                               label="Start Date"
+                              placeholder={
+                                periodDataRef.current.startPeriod
+                                  ? "Selected period starts on " +
+                                    formatDate(
+                                      periodDataRef.current.startPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               isRequired
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
@@ -659,6 +718,13 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               type="date"
                               forInput="rciEndDate"
                               label="End Date"
+                              placeholder={
+                                "Selected period ends on " +
+                                formatDate(
+                                  periodDataRef.current.endPeriod,
+                                  true
+                                )
+                              }
                               isRequired
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}
