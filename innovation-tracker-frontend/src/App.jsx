@@ -15,6 +15,7 @@ import QualityControlProject from "./component/page/quality-control-project/Root
 import QualityControlCircle from "./component/page/quality-control-circle/Root";
 import NotFound from "./component/page/not-found/Index";
 import UnderConstruction from "./component/page/under-construction/Index";
+import ValueChainInnovation from "./component/page/value-chain-innovation/Root.jsx";
 
 export default function App() {
   const [listMenu, setListMenu] = useState([]);
@@ -59,6 +60,10 @@ export default function App() {
           {
             path: "/submission/qcc",
             element: <QualityControlCircle />,
+          },
+          {
+            path: "/submission/vci",
+            element: <ValueChainInnovation />,
           },
           {
             path: "/*",

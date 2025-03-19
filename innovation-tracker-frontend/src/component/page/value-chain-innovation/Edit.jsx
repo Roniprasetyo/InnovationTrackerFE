@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import { separator, clearSeparator } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
@@ -37,12 +37,17 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  
 
-  const [listCategory, setListCategory] = useState([]);
+//   const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
   const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
-  const [listImpCategory, setListImpCategory] = useState([]);
+//   const [listImpCategory, setListImpCategory] = useState([]);
+  const [ListCompany1, setListCompany1] = useState([]);
+  const [ListCompany2, setListCompany2] = useState([]);
+
 
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
@@ -51,6 +56,11 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciSafety: false,
     rciMoral: false,
   });
+
+   const periodDataRef = useRef({
+      startPeriod: "",
+      endPeriod: "",
+    });
 
   const handleCheckboxChange = (key) => {
     if (checkedStates[key]) formDataRef.current[key] = "";
@@ -83,7 +93,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciMoral: "",
     rciFacil: "",
     rciLeader: "",
-    setId2: "",
+    rciPerusahaan1: "",
+    rciPerusahaan2: "",
   });
 
   const memberDataRef = useRef({
@@ -93,6 +104,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
+
 
   const userSchema = object({
     rciId: number().required("required"),
@@ -123,72 +135,19 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciMoral: string().max(100, "maximum 100 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    setId2: number().required("required"),
+    rciPerusahaan1: string().required("required"),
+    rciPerusahaan2: string().required("required"),
   });
 
   const memberSchema = object({
     rciMember: string().required("required"),
   });
 
+ 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
-      try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Kategori Keilmuan",
-        });
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCP")));
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-
-      try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Jenis Improvement",
-        });
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListImpCategory(data);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListImpCategory({});
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -199,6 +158,11 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
+          const selected = data.find(
+            (item) => item.Text === new Date().getFullYear()
+          );
+          formDataRef.current.perId = selected.Value;
+          setSelectedPeriod(selected.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -207,7 +171,9 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
+        setListPeriod([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -221,11 +187,11 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
       try {
         const data = await UseFetch(
           API_LINK + "MasterFacilitator/GetListFacilitator",
-          { p1: new Date().getFullYear() }
+          { p1: new Date().getFullYear(), p2: 8 }
         );
 
         if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the facilitator data.");
         } else {
           setListFacil(data);
         }
@@ -236,7 +202,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListFacil({});
+        setListFacil([]);
       } finally {
         setIsLoading(false);
       }
@@ -246,37 +212,72 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
-          {}
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListEmployee(data);
-          const member = data.find((item) => item["Value"] === userInfo.npk);
-          formDataRef.current.rciLeader = member.Value;
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        setIsLoading(true);
+        try {
+          let filteredData;
+          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              setListEmployee(
+                data.map((value) => ({
+                  Value: value.npk,
+                  Text: value.npk + " - " + value.nama,
+                }))
+              );
+            });
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListEmployee([]);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      };
+  
+      fetchData();
+    }, []);
 
-    fetchData();
-  }, []);
+    useEffect(() => {
+        const fetchData = async () => {
+          setIsError((prevError) => ({ ...prevError, error: false }));
+          setIsLoading(true);
+          try {
+            const data = await UseFetch(
+              API_LINK + 'RencanaCircle/GetListPerusahaan'
+            );
+      
+            if (data === 'ERROR') {
+              throw new Error('Error: Failed to get the company data.');
+            } else {
+              setListCompany1(data); 
+              setListCompany2(data); 
+            }
+          } catch (error) {
+            window.scrollTo(0, 0); 
+            setIsError((prevError) => ({
+              ...prevError,
+              error: true,
+              message: error.message,
+            }));
+            setListCompany1([]);  
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchData();
+  }, []);  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -284,7 +285,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaCircle/GetRencanaVCIByIdforEdit",
           {
             id: withID,
           }
@@ -292,7 +293,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
+            "Terjadi kesalahan: Gagal mengambil data VCI."
           );
         } else {
           formDataRef.current = {
@@ -321,7 +322,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
             ).Npk,
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
-            setId2: data["CategoryIdImp"],
+            rciPerusahaan1: data["Company 1"],
+            rciPerusahaan2: data["Company 2"],
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -344,6 +346,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
             rciSafety: data["Safety"] ? true : false,
             rciMoral: data["Moral"] ? true : false,
           });
+        //   document.getElementById("rciLeader").value = data["member"].find((item) => item.Position === "Leader")
+        //   .Npk;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -353,6 +357,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           message: error.message,
         }));
       } finally {
+        console.log(formDataRef.current);
         setIsLoading(false);
       }
     };
@@ -511,7 +516,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/UpdateRencanaQCP",
+          API_LINK + "RencanaCircle/UpdateRencanaVCI",
           body
         );
 
@@ -572,7 +577,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">VCI REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -598,27 +603,27 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
-                              label="Prodi/UPT/Dep​"
-                              isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                            <DropDown
+                              forInput="rciPerusahaan1"
+                              label="Company 1"
+                              type='pilih'
+                              arrData={ListCompany1}
+                              isRequired
+                              value={formDataRef.current.rciPerusahaan1}
+                              onChange={handleInputChange}
+                              errorMessage={errors.rciPerusahaan1}
                             />
                           </div>
                           <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="setName"
-                              label="Directorate"
-                              isDisabled
-                              //   isRequired
-                              value={"Manajemen Informatika"}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
+                            <DropDown
+                              forInput="rciPerusahaan2"
+                              label="Company 2"
+                              arrData={ListCompany2}
+                              type='pilih'
+                              isRequired
+                              value={formDataRef.current.rciPerusahaan2}
+                              onChange={handleInputChange}
+                              errorMessage={errors.rciPerusahaan2}
                             />
                           </div>
                           <div className="col-md-6">
@@ -635,7 +640,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <SearchDropdown
+                          <SearchDropdown
                               forInput="rciLeader"
                               label="Leader"
                               placeHolder="Leader"
@@ -700,29 +705,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciTitle}
                             />
                           </div>
-                          <div className="col-lg-6">
-                            <DropDown
-                              forInput="setId"
-                              label="Innovation Category"
-                              arrData={listCategory}
-                              isRequired
-                              value={formDataRef.current.setId}
-                              onChange={handleInputChange}
-                              errorMessage={errors.setId}
-                            />
-                          </div>
-                          <div className="col-lg-6">
-                            <DropDown
-                              forInput="setId2"
-                              label="Improvement Category"
-                              arrData={listImpCategory}
-                              isRequired
-                              value={formDataRef.current.setId2}
-                              onChange={handleInputChange}
-                              errorMessage={errors.setId2}
-                            />
-                          </div>
-                          <div className="col-lg-4">
+                            <div className="col-lg-4">
                             <Input
                               type="date"
                               forInput="rciStartDate"

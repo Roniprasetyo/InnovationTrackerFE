@@ -112,7 +112,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
             ...value,
             StartDate: value.StartDate.split("T")[0],
             EndDate: value.EndDate.split("T")[0],
-            Aksi: ["Toggle", "Edit"],
+            Action: ["Toggle", "Edit"],
             Alignment: ["center", "left", "center", "center"],
           }));
           setCurrentData(formattedData);

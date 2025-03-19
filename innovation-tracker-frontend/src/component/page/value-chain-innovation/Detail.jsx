@@ -31,7 +31,6 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
   const formDataRef = useRef({
     Key: "",
     Category: "",
-    CategoryImp: "",
     "Group Name": "",
     "Project Title": "",
     "Project Benefit": 0,
@@ -49,6 +48,8 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
     Delivery: "",
     Safety: "",
     Moral: "",
+    "Company 1": "",
+    "Company 2": "",
     Status: "",
     Creaby: "",
     member: [{}],
@@ -60,14 +61,14 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaCircle/GetRencanaVCIById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get QCP data");
+          throw new Error("Error: Failed to get VCI data");
         } else {
           formDataRef.current = data;
           const members = data.member.filter(
@@ -139,7 +140,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">VCI REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -161,14 +162,14 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                         </div>
                         <div className="col-md-6">
                           <Label
-                            title="Prodi/UPT/Dep​"
-                            data="Manajemen Informatika"
+                            title="Company 1​"
+                            data={formDataRef.current["Company 1"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
                           <Label
-                            title="Directorate"
-                            data="Manajemen Informatika"
+                            title="Company 2​"
+                            data={formDataRef.current["Company 2"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
@@ -210,18 +211,6 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                             data={decodeHtml(
                               formDataRef.current["Project Title"] || "-"
                             )}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Innovation Category"
-                            data={formDataRef.current.Category || "-"}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
                           />
                         </div>
                         <div className="col-lg-3">

@@ -63,9 +63,9 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Team Name] asc",
+    sort: "[Project Title] asc",
     status: "",
-    jenis: "QCP",
+    jenis: "VCI",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -134,7 +134,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCP",
+          API_LINK + "RencanaCircle/GetRencanaVCI",
           currentFilter
         );
 
@@ -147,13 +147,14 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
             No: index + 1,
-            "Circle Name": maxCharDisplayed(value["Team Name"], 30),
+            "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
               50
             ),
-            "Innovation Category": value["Category"],
             "Project Benefit": separator(value["Project Benefit"]),
+            "Company 1": value["Company 1"] ? value["Company 1"] : "Unknown", 
+            "Company 2": value["Company 2"] ? value["Company 2"] : "Unknown",
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
             Period: value["Period"],
