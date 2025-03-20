@@ -314,6 +314,9 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
+        Section:
+          listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
+        Count: prevData.length + 1,
         Action: ["Delete"],
         Alignment: ["center", "left", "left", "center", "center"],
       }));
