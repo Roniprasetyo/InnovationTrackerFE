@@ -33,7 +33,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
-  console.log(userInfo);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
@@ -414,6 +413,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
+        Section:
+          listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
         Action: ["Delete"],
         Alignment: ["center", "left", "left", "center", "center"],
       }));
@@ -435,6 +436,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           Key: id,
           No: prevData.length + 1,
           Name: Name,
+          Section:
+            listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
           Count: prevData.length + 1,
           Action: ["Delete"],
           Alignment: ["center", "left", "left", "center", "center"],
@@ -549,7 +552,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
         member: newMemData,
       };
-      console.log(body);
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -593,7 +595,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           onChangePage("index");
         }
       } catch (error) {
-        console.log(error);
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
           ...prevError,

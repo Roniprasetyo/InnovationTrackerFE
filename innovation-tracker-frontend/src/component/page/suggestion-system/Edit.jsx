@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
-import { formatDate  } from "../../util/Formatting";  
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
+import { separator, clearSeparator } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
@@ -18,26 +18,23 @@ import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
-import { clearSeparator, separator } from "../../util/Formatting";
+import { decodeHtml, formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
     Key: null,
-    No: null,
     Name: null,
     Count: 0,
   },
 ];
 
-export default function SuggestionSystemAdd({ onChangePage }) {
+export default function SuggestionSystemEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentData, setCurrentData] = useState(inisialisasiData);
-  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
@@ -60,12 +57,14 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   };
 
   const formDataRef = useRef({
+    sis_id: "",
+    kry_id: "",
     sis_judul: "",
     ino_category: "",
     know_category: "",
     sis_tanggalmulai: "",
     sis_tanggalakhir: "",
-    per_id: "",    
+    per_id: "",
     sis_ruanglingkup: "",
     sis_kasus: "",
     sis_kasusfile: "",
@@ -73,35 +72,33 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     sis_masalahfile: "",
     sis_tujuan: "",
     sis_tujuanfile: "",
-    sis_kualitas: "",
-    sis_biaya: "",
-    sis_pengiriman: "",
-    sis_kemanan: "",
-    sis_moral: "",
+    sisQuality: "",
+    sisCost: "",
+    sisDelivery: "",
+    sisSafety: "",
+    sisMoral: "",
   });
 
-    const periodDataRef = useRef({
-      startPeriod: "",
-      endPeriod: "",
-    });
-  
+  const periodDataRef = useRef({
+    startPeriod: "",
+    endPeriod: "",
+  });
+
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
+    sis_id: number().required("required"),
+    kry_id: number().required("required"),
     sis_judul: string().required("required"),
     ino_category: string().required("required"),
     know_category: string().required("required"),
-    sis_tanggalmulai: date()
-      .min(new Date(), "start date must be after today")
-      .typeError("invalid date")
-      .required("required"),
+    sis_tanggalmulai: date().typeError("invalid date").required("required"),
     sis_tanggalakhir: date()
-      .min(new Date(), "start date must be after today")
       .typeError("Invalid date format")
       .required("Start date is required"),
-    per_id: number().required("required"),  
+    per_id: number().required("required"),
     sis_ruanglingkup: string().required("required"),
     sis_kasus: string().required("required"),
     sis_kasusfile: string().nullable(),
@@ -109,17 +106,16 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     sis_masalahfile: string().nullable(),
     sis_tujuan: string().required("required"),
     sis_tujuanfile: string().nullable(),
-    sis_kualitas: string().nullable(),
-    sis_biaya: string().nullable(),
-    sis_kemanan: string().nullable(),
-    sis_pengiriman: string().nullable(),
-    sis_moral: string().nullable(),    
+    sisQuality: string().max(200, "maximum 200 characters").nullable(),
+    sisCost: string().max(200, "maximum 200 characters").nullable(),
+    sisSafety: string().max(200, "maximum 200 characters").nullable(),
+    sisDelivery: string().max(200, "maximum 200 characters").nullable(),
+    sisMoral: string().max(200, "maximum 200 characters").nullable(),
   });
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      // setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Innovation Category",
@@ -139,9 +135,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }));
         setListCategory({});
       }
-      // finally{
-      //   setIsLoading (false);
-      // }
     };
 
     fetchData();
@@ -150,8 +143,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      // setIsLoading(true);
-
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Knowledge Category",
@@ -170,78 +161,99 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           message: error.message,
         }));
         setListImpCategory({});
-        // setIsLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-    useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        // setIsLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterPeriod/GetListPeriod",
+          {}
+        );
 
-        try {
-          const data = await UseFetch(
-            API_LINK + "MasterPeriod/GetListPeriod",
-            {}
-          );
-  
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the period data.");
-          } else {
-            setListPeriod({ data });
-            const selected = data.find(
-              (item) => item.Text === new Date().getFullYear()
-            );
-            formDataRef.current.per_id = 1;
-            setSelectedPeriod(1);
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListPeriod({});
-          // setIsLoading(false);
-
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          setListPeriod(data);
         }
-      };
-  
-      fetchData();
-    }, []);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListPeriod({});
+      }
+    };
 
-      useEffect(() => {
-          const fetchData = async () => {
-            setIsError((prevError) => ({ ...prevError, error: false }));
-            // setIsLoading(true);
-            try {
-              const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-                p1: selectedPeriod,
-              });
-      
-              if (data === "ERROR") {
-                throw new Error("Error: Failed to get the period data.");
-              } else {
-                console.log(data);
-                const sDate = data[0].perAwal.split("T")[0];
-                const eDate = data[0].perAkhir.split("T")[0];
-                periodDataRef.current = {
-                  startPeriod: sDate,
-                  endPeriod: eDate,
-                };
-              }
-            } catch (error) {
-              window.scrollTo(0, 0);
-              // setIsLoading(false);
-            }
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSById", {
+          id: withID,
+        });
+
+        if (data === "ERROR" || data.length === 0) {
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
+          );
+        } else {
+          formDataRef.current = {
+            sis_id: data[0]["Key"],
+            kry_id: data[0]["NPK"],
+            per_id: data[0]["PeriodId"],
+            ino_category: data[0]["CategoryId"],
+            know_category: data[0]["CategoryIdImp"],
+            sis_judul: decodeHtml(data[0]["Project Title"]),
+            sis_kasus: decodeHtml(data[0]["Case"]),
+            sis_kasusfile: data[0]["CaseFile"],
+            sis_masalah: decodeHtml(data[0]["Problem"]),
+            sis_masalahfile: data[0]["ProblemFile"],
+            sis_tujuan: decodeHtml(data[0]["Goal"]),
+            sis_tujuanfile: data[0]["GoalFile"],
+            sis_ruanglingkup: decodeHtml(data[0]["Scope"]),
+            sis_tanggalmulai: data[0]["Start Date"].split("T")[0],
+            sis_tanggalakhir: data[0]["End Date"].split("T")[0],
+            sisQuality: data[0]["Quality"],
+            sisCost: data[0]["Cost"],
+            sisDelivery: data[0]["Delivery"],
+            sisSafety: data[0]["Safety"],
+            sisMoral: data[0]["Moral"],
           };
-      
-          fetchData();
-        }, [selectedPeriod]);
+
+          setCheckedStates({
+            sisQuality: data[0]["Quality"] ? true : false,
+            sisCost: data[0]["Cost"] ? true : false,
+            sisDelivery: data[0]["Delivery"] ? true : false,
+            sisSafety: data[0]["Safety"] ? true : false,
+            sisMoral: data[0]["Moral"] ? true : false,
+          });
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [withID]);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
@@ -276,40 +288,14 @@ export default function SuggestionSystemAdd({ onChangePage }) {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
 
-    console.log(formDataRef.current)
-
     if (Object.values(validationErrors).every((error) => !error)) {
-
-      const sDate = new Date(formDataRef.current.sis_tanggalmulai);
-      const eDate = new Date(formDataRef.current.sis_tanggalakhir);
-      const selectedStartDate = new Date(periodDataRef.current.startPeriod);
-      const selectedEndDate = new Date(periodDataRef.current.endPeriod);
-
-      if (sDate >= eDate) {
-        window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message: "Invalid date: The end date must be after the start date!",
-        });
-        return;
-      }
-
-      if (eDate >= selectedEndDate) {
-        window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message:
-            "Invalid date: Selected start date or end date outrange the selected period",
-        });
-        return;
-      }
-
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -338,37 +324,11 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         );
       }
 
-    //   {
-    //     "kry_id": 12345,
-    //     "nama_kar": "Budiono Siregar",
-    //     "produptdep": "MI",
-    //     "direc": "ASTRA",
-    //     "sis_judul": "<p>title</p>",
-    //     "ino_category": "SS Non Technic",
-    //     "know_category": "Kategori Keilmuan",
-    //     "sis_tanggalmulai": "2025-03-19",
-    //     "sis_tanggalakhir": "2025-03-20",
-    //     "per_id": "2025",
-    //     "sis_ruanglingkup": "<p>we</p>",
-    //     "sis_kasus": "<p>eqw</p>",
-    //     "sis_kasusfile": "",
-    //     "sis_masalah": "<p>qewe</p>",
-    //     "sis_masalahfile": "",
-    //     "sis_tujuan": "<p>eqweq</p>",
-    //     "sis_tujuanfile": "",
-    //     "sis_kualitas": "a",
-    //     "sis_biaya": "b",
-    //     "sis_pengiriman": "c",
-    //     "sis_kemanan": "d",
-    //     "sis_moral": "e",
-    //     "activeUser": "asep"
-    // }
-
       try {
-        await Promise.all(uploadPromises);    
+        await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaSS/CreateRencanaSS",
+          API_LINK + "RencanaSS/UpdateRencanaSS",
           formDataRef.current
         );
 
@@ -412,7 +372,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Add Data
+          Update Data
         </h2>
       </div>
       <div className="mt-3">
@@ -442,39 +402,33 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-6">
+                          <div className="col-md-4">
                             <Input
                               type="text"
                               forInput="kry_id"
                               label="NPK"
                               isDisabled
-                              value={userInfo.npk}
-                            //   onChange={handleInputChange}
-                            //   errorMessage={errors.rciGroupName}
+                              value={formDataRef.current.kry_id}
+                              onChange={handleInputChange}
+                              errorMessage={errors.kry_id}
                             />
                           </div>
-                          <div className="col-md-6">
+                          <div className="col-md-4">
                             <Input
                               type="text"
                               forInput="nama_kar"
                               label="Name​"
                               isDisabled
-                              //   isRequired
                               value={userInfo.nama}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
                             />
                           </div>
-                          <div className="col-md-6">
+                          <div className="col-md-4">
                             <Input
                               type="text"
                               forInput="produptdep"
-                              label="Prodi/UPT/Dep"
+                              label="Section"
                               isDisabled
-                              //   isRequired
                               value={userInfo.upt}
-                              //   onChange={handleInputChange}
-                              //   errorMessage={errors.setName}
                             />
                           </div>
                         </div>
@@ -521,44 +475,44 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-lg-4">
-                          <Input
-                            type="date"
-                            forInput="sis_tanggalmulai"
-                            label="Start Date"
-                            placeholder={
-                            periodDataRef.current.startPeriod
-                            ? "Selected period starts on " +
-                            formatDate(
-                              periodDataRef.current.startPeriod,
-                                true
-                              )
-                            : ""
-                          }
-                          isRequired
-                          value={formDataRef.current.sis_tanggalmulai}
-                          onChange={handleInputChange}
-                          errorMessage={errors.sis_tanggalmulai}
-                          />
+                            <Input
+                              type="date"
+                              forInput="sis_tanggalmulai"
+                              label="Start Date"
+                              placeholder={
+                                periodDataRef.current.startPeriod
+                                  ? "Innovation period starts on " +
+                                    formatDate(
+                                      periodDataRef.current.startPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
+                              isRequired
+                              value={formDataRef.current.sis_tanggalmulai}
+                              onChange={handleInputChange}
+                              errorMessage={errors.sis_tanggalmulai}
+                            />
                           </div>
                           <div className="col-lg-4">
-                          <Input
-                            type="date"
-                            forInput="sis_tanggalakhir"
-                            label="Start Date"
-                            placeholder={
-                            periodDataRef.current.endPeriod
-                            ? "Selected period ends on " +
-                            formatDate(
-                              periodDataRef.current.endPeriod,
-                                true
-                              )
-                            : ""
-                          }
-                          isRequired
-                          value={formDataRef.current.sis_tanggalakhir}
-                          onChange={handleInputChange}
-                          errorMessage={errors.sis_tanggalakhir}
-                          />
+                            <Input
+                              type="date"
+                              forInput="sis_tanggalakhir"
+                              label="End Date"
+                              placeholder={
+                                periodDataRef.current.endPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.endPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
+                              isRequired
+                              value={formDataRef.current.sis_tanggalakhir}
+                              onChange={handleInputChange}
+                              errorMessage={errors.sis_tanggalakhir}
+                            />
                           </div>
                           <div className="col-lg-4">
                             <DropDown
@@ -573,7 +527,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                             />
                           </div>
 
-                
                           <div className="col-lg-12">
                             <TextArea
                               forInput="sis_ruanglingkup"
@@ -605,7 +558,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               errorMessage={errors.sis_kasus}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="sis_kasusfile"
                               label="Bussiness Case Document (.pdf)"
@@ -614,9 +567,11 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               onChange={() =>
                                 handleFileChange(bussinessCaseFileRef, "pdf")
                               }
+                              hasExisting={formDataRef.current.CaseFile}
                               errorMessage={errors.sis_kasusfile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="sis_masalah"
@@ -627,7 +582,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               errorMessage={errors.sis_masalah}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="sis_masalahfile"
                               label="Problem Statement​ Document (.pdf)"
@@ -636,9 +591,11 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               onChange={() =>
                                 handleFileChange(problemFileRef, "pdf")
                               }
+                              hasExisting={formDataRef.current.ProblemFile}
                               errorMessage={errors.sis_masalahfile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="sis_tujuan"
@@ -658,6 +615,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               onChange={() =>
                                 handleFileChange(goalFileRef, "pdf")
                               }
+                              hasExisting={formDataRef.current.GoalFile}
                               errorMessage={errors.sis_tujuanfile}
                             />
                           </div>
@@ -685,13 +643,12 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="sis_kualitas"
+                                  forInput="sisQuality"
                                   label="Quality"
                                   isDisabled={!checkedStates.sisQuality}
-                                  placeholder="Quality"
-                                  value={formDataRef.current.sis_kualitas}
+                                  value={formDataRef.current.sisQuality}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.sis_kualitas}
+                                  errorMessage={errors.sisQuality}
                                 />
                               </div>
                             </div>
@@ -705,13 +662,12 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="sis_biaya"
+                                  forInput="sisCost"
                                   label="Cost"
                                   isDisabled={!checkedStates.sisCost}
-                                  placeholder="Cost"
-                                  value={formDataRef.current.sis_biaya}
+                                  value={formDataRef.current.sisCost}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.sis_biaya}
+                                  errorMessage={errors.sisCost}
                                 />
                               </div>
                             </div>
@@ -727,13 +683,12 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="sis_pengiriman"
+                                  forInput="sisDelivery"
                                   label="Delivery"
-                                  placeholder="Delivery"
                                   isDisabled={!checkedStates.sisDelivery}
-                                  value={formDataRef.current.sis_pengiriman}
+                                  value={formDataRef.current.sisDelivery}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.sis_pengiriman}
+                                  errorMessage={errors.sisDelivery}
                                 />
                               </div>
                             </div>
@@ -754,21 +709,20 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="sis_kemanan"
+                                  forInput="sisSafety"
                                   label="Safety"
                                   isDisabled={!checkedStates.sisSafety}
-                                  placeholder="Safety"
-                                  value={formDataRef.current.sis_kemanan}
+                                  value={formDataRef.current.sisSafety}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.sis_kemanan}
+                                  errorMessage={errors.sisSafety}
                                 />
                               </div>
                             </div>
                             <div className="d-flex align-items-center">
                               <input
-                                className="form-check-input me-2"
+                                className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                isDisabled={checkedStates.sisMoral}
+                                checked={checkedStates.sisMoral}
                                 onChange={() =>
                                   handleCheckboxChange("sisMoral")
                                 }
@@ -777,12 +731,11 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                                 <Input
                                   type="text"
                                   label="Moral"
-                                  forInput="sis_moral"
+                                  forInput="sisMoral"
                                   isDisabled={!checkedStates.sisMoral}
-                                  placeholder="Moral"
-                                  value={formDataRef.current.sis_moral}
+                                  value={formDataRef.current.sisMoral}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.sis_moral}
+                                  errorMessage={errors.sisMoral}
                                 />
                               </div>
                             </div>

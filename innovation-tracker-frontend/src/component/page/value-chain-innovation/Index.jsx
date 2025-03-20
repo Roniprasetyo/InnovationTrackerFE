@@ -206,7 +206,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
-            No: index + 1,
+            No: value["No"],
             "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
@@ -282,7 +282,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role !== "ROL01" ? (
+          {userInfo.role.slice(0, 5) !== "ROL01" ? (
             <Button
               iconName="add"
               label="Register"
@@ -318,7 +318,11 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               forInput="ddStatus"
               label="Status"
               type="semua"
-              arrData={dataFilterStatus}
+              arrData={
+                userInfo.role.slice(0, 5) === "ROL01"
+                  ? dataFilterStatus.filter((item) => item.Value != "Draft")
+                  : dataFilterStatus
+              }
               defaultValue=""
             />
           </Filter>

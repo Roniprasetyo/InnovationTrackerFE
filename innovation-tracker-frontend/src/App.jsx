@@ -14,8 +14,7 @@ import Logout from "./component/page/logout/Index";
 import QualityControlProject from "./component/page/quality-control-project/Root";
 import QualityControlCircle from "./component/page/quality-control-circle/Root";
 import NotFound from "./component/page/not-found/Index";
-import UnderConstruction from "./component/page/under-construction/Index";
-import SuggestionSystem from "./component/page/suggestion_system/Root.jsx";
+import SuggestionSystem from "./component/page/suggestion-system/Root.jsx";
 import ValueChainInnovation from "./component/page/value-chain-innovation/Root.jsx";
 
 export default function App() {
@@ -72,7 +71,7 @@ export default function App() {
           },
           {
             path: "/*",
-            element: <UnderConstruction />,
+            element: <NotFound />,
           }
         );
 

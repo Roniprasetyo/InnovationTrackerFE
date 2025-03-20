@@ -532,7 +532,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
       setErrors
     );
 
-    console.log(formDataRef.current);
     if (Object.values(validationErrors).every((error) => !error)) {
       if (currentData.length < 2) {
         window.scrollTo(0, 0);
@@ -814,6 +813,15 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciStartDate"
                               label="Start Date"
                               isRequired
+                              placeholder={
+                                periodDataRef.current.startPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.startPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciStartDate}
@@ -825,6 +833,15 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciEndDate"
                               label="End Date"
                               isRequired
+                              placeholder={
+                                periodDataRef.current.endPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.endPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciEndDate}

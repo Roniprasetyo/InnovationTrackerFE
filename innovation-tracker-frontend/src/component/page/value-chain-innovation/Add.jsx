@@ -335,6 +335,8 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
           Key: id,
           No: prevData.length + 1,
           Name: Name,
+          Section:
+            listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
           Count: prevData.length + 1,
           Action: ["Delete"],
           Alignment: ["center", "left", "left", "center", "center"],
@@ -412,7 +414,6 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
       setErrors
     );
 
-    console.log(formDataRef.current);
     if (Object.values(validationErrors).every((error) => !error)) {
       if (currentData.length < 2) {
         window.scrollTo(0, 0);

@@ -1,29 +1,29 @@
 import { useState } from "react";
-import MasterPelangganIndex from "./Index";
-import MasterPelangganAdd from "./Add";
-import MasterPelangganDetail from "./Detail";
-import MasterPelangganEdit from "./Edit";
+import SuggestionSytemIndex from "./Index";
+import SuggestionSystemAdd from "./Add";
+import SuggestionSystemEdit from "./Edit";
+import SuggestionSystemDetail from "./Detail";
 
-export default function MasterPelanggan() {
+export default function SuggestionSystem() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <MasterPelangganIndex onChangePage={handleSetPageMode} />;
+        return <SuggestionSytemIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <MasterPelangganAdd onChangePage={handleSetPageMode} />;
-      case "detail":
+        return <SuggestionSystemAdd onChangePage={handleSetPageMode} />;
+      case "edit":
         return (
-          <MasterPelangganDetail
+          <SuggestionSystemEdit
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
-      case "edit":
+      case "detail":
         return (
-          <MasterPelangganEdit
+          <SuggestionSystemDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
@@ -40,5 +40,5 @@ export default function MasterPelanggan() {
     setPageMode(mode);
   }
 
-  return <div>{getPageMode()}</div>;
+  return <div className="container min-vh-100">{getPageMode()}</div>;
 }
