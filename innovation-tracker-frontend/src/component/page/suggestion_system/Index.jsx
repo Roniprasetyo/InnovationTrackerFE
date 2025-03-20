@@ -31,12 +31,12 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
-  { Value: "[Team Name] asc", Text: "Team Name [↑]" },
-  { Value: "[Team Name] desc", Text: "Team Name [↓]" },
-  { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
-  { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
-  { Value: "[Circle Benefit] asc", Text: "[Circle Benefit] [↑]" },
-  { Value: "[Circle Benefit] desc", Text: "[Circle Benefit] [↓]" },
+  // { Value: "[Team Name] asc", Text: "Team Name [↑]" },
+  // { Value: "[Team Name] desc", Text: "Team Name [↓]" },
+  // { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
+  // { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
+  // { Value: "[Circle Benefit] asc", Text: "[Circle Benefit] [↑]" },
+  // { Value: "[Circle Benefit] desc", Text: "[Circle Benefit] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
@@ -49,16 +49,19 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
   { Value: "Revision", Text: "Revision" },
   { Value: "Rejected", Text: "Rejected" },
 ];
-const dataFilterJenis = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-];
 
-export default function QualityControlCircleIndex({ onChangePage }) {
+// const dataFilterJenis = [
+//   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+//   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+//   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
+// ];
+
+export default function SystemSuggestionIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -69,9 +72,9 @@ export default function QualityControlCircleIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Team Name] asc",
+    sort: "[Start Date] asc",
     status: "",
-    jenis: "QCC",
+    jenis: "SS",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -138,7 +141,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+      UseFetch(API_LINK + "RencanaSs/SentRencanaSs", {
         id: id,
       })
         .then((data) => {
@@ -162,8 +165,8 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCP",
-          currentFilter
+          API_LINK + "RencanaSs/GetRencanaSS",
+          currentFilter 
         );
 
         if (data === "ERROR") {
@@ -175,7 +178,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
             No: index + 1,
-            "Circle Name": maxCharDisplayed(value["Team Name"], 30),
+            "Name": maxCharDisplayed(value["Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
               50
