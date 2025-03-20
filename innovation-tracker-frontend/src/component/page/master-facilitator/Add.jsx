@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { number, object, string } from "yup";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -12,11 +12,6 @@ import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 import SearchDropdown from "../../part/SearchDropdown";
 
-const listTypeFacilitator = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-];
-
 export default function MasterFacilitatorAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -24,6 +19,7 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
 
   const [listEmployee, setListEmployee] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
 
   const formDataRef = useRef({
     kryID: "",
@@ -36,6 +32,64 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
     perID: string().required("required"),
     role: string().max(100, "maximum 100 characters").required("required"),
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prev) => ({ ...prev, error: false }));
+
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            Value: value.npk,
+            Text: value.npk + " - " + value.nama,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError({ error: true, message: error.message });
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Role Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,39 +123,7 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
 
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
-          {}
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListEmployee(data);
-          window.scrollTo(0, 0);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const validationError = validateInput(name, value, userSchema);
@@ -221,10 +243,10 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
                   />
                 </div>
                 <div className="col-lg-4">
-                  <Input
-                    type="text"
+                  <DropDown
                     forInput="role"
                     label="Role"
+                    arrData={listCategory}
                     isRequired
                     value={formDataRef.current.role}
                     onChange={handleInputChange}

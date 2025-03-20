@@ -5,6 +5,7 @@ import {
   API_LINK,
   APPLICATION_ID,
   APPLICATION_NAME,
+  EMP_API_LINK,
   ROOT_LINK,
 } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
@@ -23,6 +24,7 @@ export default function Login() {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [listRole, setListRole] = useState([]);
+  const [userDetail, setUserDetail] = useState({});
 
   const formDataRef = useRef({
     username: "",
@@ -63,6 +65,18 @@ export default function Login() {
       setErrors({});
 
       try {
+        // const login = await UseFetch(
+        //   EMP_API_LINK + "login",
+        //   formDataRef.current
+        // );
+        // if (login === "ERROR") throw new Error("Error: Failed to authenticate.");
+        // else if (!login)
+        //   throw new Error("Wrong username or password.");
+        // else {
+        //   setListRole(data);
+        //   modalRef.current.open();
+        // }
+
         const data = await UseFetch(
           API_LINK + "Utilities/Login",
           formDataRef.current
@@ -72,6 +86,21 @@ export default function Login() {
         else if (data.Status && data.Status === "LOGIN FAILED")
           throw new Error("Wrong username or password.");
         else {
+          const response = await fetch(
+            `${EMP_API_LINK}getUserDetail?username=${formDataRef.current.username}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+              },
+            }
+          )
+            .then((res) => res.json())
+            .then((data) => setUserDetail(data[0]))
+            .catch((err) => {
+              throw new Error("Failed to get user detail.");
+            });
           setListRole(data);
           modalRef.current.open();
         }
@@ -88,7 +117,16 @@ export default function Login() {
     } else window.scrollTo(0, 0);
   };
 
-  async function handleLoginWithRole(role, nama, peran, npk) {
+  async function handleLoginWithRole(
+    role,
+    nama,
+    peran,
+    npk,
+    inorole,
+    jabatan,
+    upt,
+    departmen
+  ) {
     try {
       const ipAddress = await UseFetch(
         "https://api.ipify.org/?format=json",
@@ -117,7 +155,6 @@ export default function Login() {
             agent: navigator.userAgent,
             application: APPLICATION_ID,
           });
-          console.log("sampe sini");
           if (data === "ERROR")
             throw new Error("Error: Failed to select role.");
           else {
@@ -127,6 +164,10 @@ export default function Login() {
               nama: nama,
               peran: peran,
               npk: npk,
+              inorole: inorole,
+              jabatan: jabatan,
+              upt: upt,
+              departemen: departmen,
               lastLogin: data[1]
                 ? data[1].lastLogin
                 : new Date().toISOString().split("T")[0] +
@@ -182,7 +223,16 @@ export default function Login() {
                   className="list-group-item list-group-item-action"
                   aria-current="true"
                   onClick={() =>
-                    handleLoginWithRole(value.RoleID, value.Nama, value.Role, value.Npk)
+                    handleLoginWithRole(
+                      value.RoleID,
+                      userDetail.nama,
+                      value.Role,
+                      userDetail.npk,
+                      value.InoRole,
+                      userDetail.jabatan,
+                      userDetail.upt_bagian,
+                      userDetail.departemen_jurusan
+                    )
                   }
                 >
                   Login as {value.Role}

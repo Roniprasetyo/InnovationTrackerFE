@@ -84,7 +84,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                 <ul className="navbar-nav">
                   <Menu listMenu={listMenu} />
                 </ul>
-                <div className="my-3">
+                {/* <div className="my-3">
                   <div className="flex-fill ">
                     <div className="input-group">
                       <input
@@ -103,74 +103,81 @@ export default function Header({ displayName, roleName, listMenu }) {
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="mb-3">
-                  <div className="d-flex align-items-center">
-                    <div className="">
-                      <div className="dropdown">
-                        <a
-                          href="#"
-                          id="profileDropdown"
-                          role="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                        >
-                          <i
-                            className="fi fi-rr-circle-user"
-                            style={{ color: "white", fontSize: "28px" }}
-                          ></i>
-                        </a>
-                        <ul
-                          className="dropdown-menu"
-                          aria-labelledby="profileDropdown"
-                        >
-                          <li>
-                            <a className="dropdown-item" href="/profile">
-                              PROFILE
-                            </a>
-                          </li>
-                          <li className="m-0">
-                            <a className="dropdown-item" href="/notification">
-                              NOTIFICATION
-                              <span
-                                className="badge rounded-pill bg-danger ms-1"
-                                style={{
-                                  fontSize: ".8em",
-                                }}
+                  {isLoggedIn ? (
+                    <div className="d-flex align-items-center">
+                      <div className="">
+                        <div className="dropdown">
+                          <a
+                            href="#"
+                            id="profileDropdown"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                            <i
+                              className="fi fi-rr-circle-user"
+                              style={{ color: "white", fontSize: "28px" }}
+                            ></i>
+                          </a>
+                          <ul
+                            className="dropdown-menu"
+                            aria-labelledby="profileDropdown"
+                          >
+                            {/* <li>
+                              <a className="dropdown-item" href="/profile">
+                                PROFILE
+                              </a>
+                            </li>
+                            <li className="m-0">
+                              <a className="dropdown-item" href="/notification">
+                                NOTIFICATION
+                                <span
+                                  className="badge rounded-pill bg-danger ms-1"
+                                  style={{
+                                    fontSize: ".8em",
+                                  }}
+                                >
+                                  {countNotifikasi}
+                                </span>
+                              </a>
+                            </li>
+                            <li>
+                              <hr className="dropdown-divider" />
+                            </li> */}
+                            <li>
+                              <a
+                                className="dropdown-item text-danger"
+                                href="/logout"
                               >
-                                {countNotifikasi}
-                              </span>
-                            </a>
-                          </li>
-                          <li>
-                            <hr className="dropdown-divider" />
-                          </li>
-                          <li>
-                            <a
-                              className="dropdown-item text-danger"
-                              href="/logout"
-                            >
-                              LOGOUT
-                            </a>
-                          </li>
-                        </ul>
+                                LOGOUT
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="">
+                        <p className="text-start text-white ms-3 mt-2">
+                          {displayName || "Public"} ({roleName || "Public"})
+                          <span
+                            className="badge rounded-pill bg-danger ms-2"
+                            style={{
+                              fontSize: ".8em",
+                              position: "absolute",
+                            }}
+                          >
+                            {countNotifikasi}
+                          </span>
+                        </p>
                       </div>
                     </div>
-                    <div className="">
-                      <p className="text-start text-white ms-3 mt-2">
-                        {displayName || "John Doe"} ({roleName || "Admin"})
-                        <span
-                          className="badge rounded-pill bg-danger ms-2"
-                          style={{
-                            fontSize: ".8em",
-                            position: "absolute",
-                          }}
-                        >
-                          {countNotifikasi}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
+                  ) : (
+                    <a className="btn bg-white rounded-5 fw-bold" href="/login">
+                      <Icon name="enter me-1" />
+                      LOGIN
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -213,7 +220,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                     <Menu listMenu={listMenu} />
                   </ul>
                 </div>
-                <div className="ms-4">
+                {/* <div className="ms-4">
                   <div className="flex-fill ">
                     <div className="input-group">
                       <input
@@ -232,7 +239,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="ms-3" style={{ marginRight: "2rem" }}>
                   {isLoggedIn ? (
                     <div className="dropdown mt-1">
@@ -262,7 +269,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                         className="dropdown-menu dropdown-menu-end"
                         aria-labelledby="profileDropdown"
                       >
-                        <li>
+                        {/* <li>
                           <a className="dropdown-item" href="/profile">
                             PROFILE
                           </a>
@@ -282,7 +289,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                         </li>
                         <li>
                           <hr className="dropdown-divider" />
-                        </li>
+                        </li> */}
                         <li>
                           <a
                             className="dropdown-item text-danger"
@@ -295,9 +302,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                     </div>
                   ) : (
                     <a className="btn bg-white rounded-5 fw-bold" href="/login">
-                      <Icon
-                        name="enter me-1"
-                      />
+                      <Icon name="enter me-1" />
                       LOGIN
                     </a>
                   )}

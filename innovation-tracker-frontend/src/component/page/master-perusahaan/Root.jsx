@@ -1,26 +1,26 @@
 import { useState } from "react";
-import MasterPeriodIndex from "./Index";
-import MasterPeriodAdd from "./Add";
-import MasterPeriodDetail from "./Detail";
-import MasterPeriodEdit from "./Edit";
+import MasterPerusahaanIndex from "./Index";
+import MasterPerusahaanAdd from "./Add";
+import MasterPerusahaanDetail from "./Detail";
+import MasterPerusahaanEdit from "./Edit";
 
-export default function MasterPeriod() {
+export default function MasterPerusahaan() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <MasterPeriodIndex onChangePage={handleSetPageMode} />;
+        return <MasterPerusahaanIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <MasterPeriodAdd onChangePage={handleSetPageMode} />;
+        return <MasterPerusahaanAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <MasterPeriodEdit onChangePage={handleSetPageMode} withID={dataID} />
+          <MasterPerusahaanEdit onChangePage={handleSetPageMode} withID={dataID} />
         );
       case "detail":
         return (
-          <MasterPeriodDetail
+          <MasterPerusahaanDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />

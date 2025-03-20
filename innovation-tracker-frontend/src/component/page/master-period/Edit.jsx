@@ -39,12 +39,15 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Terjadi kesalahan: Gagal mengambil data periode.");
         } else {
-          formDataRef.current = {
-            ...formDataRef.current,
+          // Format tanggal ke format yyyy-MM-dd
+          const formattedData = {
             perId: data[0].perId,
-            perAwal: data[0].perAwal.split("T")[0],
-            perAkhir: data[0].perAkhir.split("T")[0],
+            perAwal: new Date(data[0].perAwal).toLocaleDateString("en-CA"), // yyyy-MM-dd
+            perAkhir: new Date(data[0].perAkhir).toLocaleDateString("en-CA"), // yyyy-MM-dd
           };
+
+          // Update formDataRef dengan data yang sudah diformat
+          formDataRef.current = formattedData;
         }
       } catch (error) {
         window.scrollTo(0, 0);

@@ -1,26 +1,29 @@
 import { useState } from "react";
-import MasterPeriodIndex from "./Index";
-import MasterPeriodAdd from "./Add";
-import MasterPeriodDetail from "./Detail";
-import MasterPeriodEdit from "./Edit";
+import ValueChainInnovationIndex from "./Index";
+import ValueChainInnovationAdd from "./Add";
+import ValueChainInnovationEdit from "./Edit";
+import ValueChainInnovationDetail from "./Detail";
 
-export default function MasterPeriod() {
+export default function ValueChainInnovation() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <MasterPeriodIndex onChangePage={handleSetPageMode} />;
+        return <ValueChainInnovationIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <MasterPeriodAdd onChangePage={handleSetPageMode} />;
+        return <ValueChainInnovationAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <MasterPeriodEdit onChangePage={handleSetPageMode} withID={dataID} />
+          <ValueChainInnovationEdit
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
         );
       case "detail":
         return (
-          <MasterPeriodDetail
+          <ValueChainInnovationDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />

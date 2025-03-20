@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -15,6 +15,7 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
+    Section: null,
     Count: 0,
   },
 ];
@@ -27,6 +28,8 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+
+  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -57,7 +60,39 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
 
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            npk: value.npk,
+            upt: value.upt_bagian,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
           API_LINK + "RencanaCircle/GetRencanaQCPById",
@@ -80,8 +115,11 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                   Key: index,
                   No: index + 1,
                   Name: item.Name,
+                  Section:
+                    listEmployee.find((value) => value.npk === item.Npk)?.upt ||
+                    "",
                   Count: memberCount,
-                  Alignment: ["center", "left"],
+                  Alignment: ["center", "left", "left"],
                 }))
               )
             : setCurrentData(inisialisasiData);
@@ -99,7 +137,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [listEmployee, withID]);
 
   if (isLoading) return <Loading />;
 
@@ -153,23 +191,14 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-6">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
-                          <Label
-                            title="Prodi/UPT/Dep​"
-                            data="Manajemen Informatika"
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Directorate"
-                            data="Manajemen Informatika"
-                          />
+                          <Label title="Section" data={userInfo.upt} />
                         </div>
                         <div className="col-md-6">
                           <Label
@@ -220,8 +249,10 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                         </div>
                         <div className="col-lg-3">
                           <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
+                            title="Knowledge Category"
+                            data={decodeHtml(
+                              formDataRef.current.CategoryImp || "-"
+                            )}
                           />
                         </div>
                         <div className="col-lg-3">
@@ -282,6 +313,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -301,7 +333,8 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
-                        <div className="col-lg-12 mb-4">
+                        <hr />
+                        <div className="col-lg-12 mb-3">
                           <Label
                             title="Goal Statement​"
                             data={decodeHtml(
@@ -331,7 +364,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                       <div className="row">
                         <div className="col-lg-12">
                           <Label
-                            title="Project Benefit"
+                            title="Project Benefit (Rp)"
                             data={
                               separator(
                                 formDataRef.current["Project Benefit"]

@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
-import { API_LINK, EMP_API_LINK } from "../../util/Constants";
+import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
+import { separator, clearSeparator } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
@@ -17,142 +18,100 @@ import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
-import { clearSeparator, separator } from "../../util/Formatting";
-import { formatDate, decodeHtml } from "../../util/Formatting";
+import { decodeHtml, formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
     Key: null,
-    No: null,
     Name: null,
-    Section: null,
     Count: 0,
   },
 ];
 
-export default function QualityControlProjectAdd({ onChangePage }) {
+export default function SuggestionSystemEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [currentData, setCurrentData] = useState(inisialisasiData);
-  const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [checkedStates, setCheckedStates] = useState({
-    rciQuality: false,
-    rciCost: false,
-    rciDelivery: false,
-    rciSafety: false,
-    rciMoral: false,
-  });
 
   const [listCategory, setListCategory] = useState([]);
-  const [listEmployee, setListEmployee] = useState([]);
-  const [listEmployeeFull, setListEmployeeFull] = useState([]);
-  const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
 
+  const [checkedStates, setCheckedStates] = useState({
+    sisQuality: false,
+    sisCost: false,
+    sisDelivery: false,
+    sisSafety: false,
+    sisMoral: false,
+  });
+
+  const handleCheckboxChange = (key) => {
+    if (checkedStates[key]) formDataRef.current[key] = "";
+    setCheckedStates((prevState) => ({
+      ...prevState,
+      [key]: !prevState[key],
+    }));
+  };
+
   const formDataRef = useRef({
-    setId: "",
-    perId: "",
-    rciGroupName: "",
-    rciTitle: "",
-    rciProjBenefit: "",
-    rciCase: "",
-    rciCaseFile: "",
-    rciProblem: "",
-    rciProblemFile: "",
-    rciGoal: "",
-    rciGoalFile: "",
-    rciScope: "",
-    rciStartDate: "",
-    rciEndDate: "",
-    rciQuality: "",
-    rciCost: "",
-    rciDelivery: "",
-    rciSafety: "",
-    rciMoral: "",
-    rciFacil: "",
-    rciLeader: userInfo.npk,
-    setId2: "",
+    sis_id: "",
+    kry_id: "",
+    sis_judul: "",
+    ino_category: "",
+    know_category: "",
+    sis_tanggalmulai: "",
+    sis_tanggalakhir: "",
+    per_id: "",
+    sis_ruanglingkup: "",
+    sis_kasus: "",
+    sis_kasusfile: "",
+    sis_masalah: "",
+    sis_masalahfile: "",
+    sis_tujuan: "",
+    sis_tujuanfile: "",
+    sisQuality: "",
+    sisCost: "",
+    sisDelivery: "",
+    sisSafety: "",
+    sisMoral: "",
   });
-  const memberDataRef = useRef({
-    rciMember: "",
-  });
+
   const periodDataRef = useRef({
     startPeriod: "",
     endPeriod: "",
   });
+
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    setId: string().required("required"),
-    perId: string().nullable(),
-    rciGroupName: string()
-      .max(100, "maximum 100 characters")
-      .required("required"),
-    rciTitle: string().required("required"),
-    rciProjBenefit: string().max(13, "maximum 10 digits"),
-    rciCase: string().required("required"),
-    rciCaseFile: string().nullable(),
-    rciProblem: string().required("required"),
-    rciProblemFile: string().nullable(),
-    rciGoal: string().required("required"),
-    rciGoalFile: string().nullable(),
-    rciScope: string().required("required"),
-    rciStartDate: date().typeError("invalid date").required("required"),
-    rciEndDate: date()
+    sis_id: number().required("required"),
+    kry_id: number().required("required"),
+    sis_judul: string().required("required"),
+    ino_category: string().required("required"),
+    know_category: string().required("required"),
+    sis_tanggalmulai: date().typeError("invalid date").required("required"),
+    sis_tanggalakhir: date()
       .typeError("Invalid date format")
       .required("Start date is required"),
-    rciQuality: string().max(200, "maximum 200 characters").nullable(),
-    rciCost: string().max(200, "maximum 200 characters").nullable(),
-    rciSafety: string().max(200, "maximum 200 characters").nullable(),
-    rciDelivery: string().max(200, "maximum 200 characters").nullable(),
-    rciMoral: string().max(200, "maximum 200 characters").nullable(),
-    rciLeader: string().required("required"),
-    rciFacil: string().required("required"),
-    setId2: string().required("required"),
+    per_id: number().required("required"),
+    sis_ruanglingkup: string().required("required"),
+    sis_kasus: string().required("required"),
+    sis_kasusfile: string().nullable(),
+    sis_masalah: string().required("required"),
+    sis_masalahfile: string().nullable(),
+    sis_tujuan: string().required("required"),
+    sis_tujuanfile: string().nullable(),
+    sisQuality: string().max(200, "maximum 200 characters").nullable(),
+    sisCost: string().max(200, "maximum 200 characters").nullable(),
+    sisSafety: string().max(200, "maximum 200 characters").nullable(),
+    sisDelivery: string().max(200, "maximum 200 characters").nullable(),
+    sisMoral: string().max(200, "maximum 200 characters").nullable(),
   });
-
-  const memberSchema = object({
-    rciMember: string().required("required"),
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prev) => ({ ...prev, error: false }));
-
-      try {
-        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        });
-
-        const data = await response.json();
-        setListEmployeeFull(data);
-        setListEmployee(
-          data.map((value) => ({
-            Value: value.npk,
-            Text: value.npk + " - " + value.nama + " - " + value.upt_bagian,
-          }))
-        );
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError({ error: true, message: error.message });
-        setListEmployee({});
-        setListEmployeeFull({});
-      }
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,7 +124,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCP")));
+          setListCategory(data.filter((item) => item.Text.includes("SS")));
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -192,12 +151,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListImpCategory(
-            data.map((item) => ({
-              ...item,
-              Text: decodeHtml(item.Text),
-            }))
-          );
+          setListImpCategory(data);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -226,11 +180,6 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -239,35 +188,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod([]);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(
-          API_LINK + "MasterFacilitator/GetListFacilitator",
-          { p1: new Date().getFullYear(), p2: 8 }
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the facilitator data.");
-        } else {
-          setListFacil(data);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListFacil([]);
+        setListPeriod({});
       }
     };
 
@@ -279,123 +200,60 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       setIsLoading(true);
       try {
-        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-          p1: selectedPeriod,
+        const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSById", {
+          id: withID,
         });
 
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the period data.");
+        if (data === "ERROR" || data.length === 0) {
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
+          );
         } else {
-          const sDate = data[0].perAwal.split("T")[0];
-          const eDate = data[0].perAkhir.split("T")[0];
-          if (data[0]) {
-            periodDataRef.current = {
-              startPeriod: sDate,
-              endPeriod: eDate,
-            };
-          }
+          formDataRef.current = {
+            sis_id: data[0]["Key"],
+            kry_id: data[0]["NPK"],
+            per_id: data[0]["PeriodId"],
+            ino_category: data[0]["CategoryId"],
+            know_category: data[0]["CategoryIdImp"],
+            sis_judul: decodeHtml(data[0]["Project Title"]),
+            sis_kasus: decodeHtml(data[0]["Case"]),
+            sis_kasusfile: data[0]["CaseFile"],
+            sis_masalah: decodeHtml(data[0]["Problem"]),
+            sis_masalahfile: data[0]["ProblemFile"],
+            sis_tujuan: decodeHtml(data[0]["Goal"]),
+            sis_tujuanfile: data[0]["GoalFile"],
+            sis_ruanglingkup: decodeHtml(data[0]["Scope"]),
+            sis_tanggalmulai: data[0]["Start Date"].split("T")[0],
+            sis_tanggalakhir: data[0]["End Date"].split("T")[0],
+            sisQuality: data[0]["Quality"],
+            sisCost: data[0]["Cost"],
+            sisDelivery: data[0]["Delivery"],
+            sisSafety: data[0]["Safety"],
+            sisMoral: data[0]["Moral"],
+          };
+
+          setCheckedStates({
+            sisQuality: data[0]["Quality"] ? true : false,
+            sisCost: data[0]["Cost"] ? true : false,
+            sisDelivery: data[0]["Delivery"] ? true : false,
+            sisSafety: data[0]["Safety"] ? true : false,
+            sisMoral: data[0]["Moral"] ? true : false,
+          });
         }
       } catch (error) {
         window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [selectedPeriod]);
-
-  const handleAddMember = (id, Name) => {
-    if (
-      id === null ||
-      id === undefined ||
-      Name === null ||
-      Name === undefined
-    ) {
-      setIsError({
-        error: true,
-        message: "Invalid member: Please select a member",
-      });
-      return;
-    }
-    if (id === userInfo.npk) {
-      setIsError({
-        error: true,
-        message: "Invalid member: Selected employee is a leader",
-      });
-      return;
-    }
-    if (
-      formDataRef.current.rciFacil !== "" &&
-      id === formDataRef.current.rciFacil
-    ) {
-      setIsError({
-        error: true,
-        message: "Invalid member: Selected employee is a facilitator",
-      });
-      return;
-    }
-    if (currentData[0].Count === 0) {
-      const data = [
-        {
-          Key: id,
-          No: 1,
-          Name: Name,
-          Count: 1,
-        },
-      ];
-      const formattedData = data.map((value) => ({
-        ...value,
-        Section:
-          listEmployeeFull.find((item) => item.npk === value.Key)?.upt_bagian ||
-          "",
-        Action: ["Delete"],
-        Alignment: ["center", "left", "left", "center", "center"],
-      }));
-      setCurrentData(formattedData);
-    } else {
-      if (currentData.some((member) => member.Key === id) === true) {
-        window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Member already exists!" });
-        return;
-      }
-      if (currentData.length === 6) {
-        window.scrollTo(0, 0);
-        setIsError({ error: true, message: "Max member reached!" });
-        return;
-      }
-      setCurrentData((prevData) => [
-        ...prevData,
-        {
-          Key: id,
-          No: prevData.length + 1,
-          Name: Name,
-          Section:
-            listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
-          Count: prevData.length + 1,
-          Action: ["Delete"],
-          Alignment: ["center", "left", "left", "center", "center"],
-        },
-      ]);
-    }
-    memberDataRef.current.rciMember = "";
-  };
-
-  const handleCheckboxChange = (key) => {
-    if (checkedStates[key]) formDataRef.current[key] = "";
-    setCheckedStates((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
-  };
-
-  const handleDelete = (id) => {
-    if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else
-      setCurrentData((prevData) =>
-        prevData.filter((member) => member.Key !== id)
-      );
-  };
+  }, [withID]);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
@@ -421,19 +279,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const validationError = validateInput(name, value, userSchema);
-    name === "rciProjBenefit"
-      ? (formDataRef.current[name] = separator(value))
-      : (formDataRef.current[name] = value);
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
-  };
-
-  const handleInputMemberChange = (e) => {
-    const { name, value } = e.target;
-    const validationError = validateInput(name, value, memberSchema);
-    memberDataRef.current[name] = value;
+    formDataRef.current[name] = value;
     setErrors((prevErrors) => ({
       ...prevErrors,
       [validationError.name]: validationError.error,
@@ -450,51 +296,6 @@ export default function QualityControlProjectAdd({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
-      if (currentData.length < 2) {
-        window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message: "Invalid member: Please add at least 2 members!",
-        });
-        return;
-      }
-      const sDate = new Date(formDataRef.current.rciStartDate);
-      const eDate = new Date(formDataRef.current.rciEndDate);
-      const innovationEndPeriod = new Date(periodDataRef.current.endPeriod);
-
-      if (sDate >= eDate) {
-        window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message: "Invalid date: The end date must be after the start date!",
-        });
-        return;
-      }
-
-      if (eDate >= innovationEndPeriod) {
-        window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message:
-            "Invalid date: Selected end date outrange the innovation period end date",
-        });
-        return;
-      }
-
-      const newMemData = [
-        { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
-        { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-        ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
-      ];
-
-      formDataRef.current = {
-        ...formDataRef.current,
-        rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
-        member: newMemData,
-      };
-      delete formDataRef.current.rciFacil;
-      delete formDataRef.current.rciLeader;
-
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -504,21 +305,21 @@ export default function QualityControlProjectAdd({ onChangePage }) {
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (formDataRef.current["rciCaseFile"] = data.Hasil)
+            (data) => (formDataRef.current["sis_kasusfile"] = data.Hasil)
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-            (data) => (formDataRef.current["rciProblemFile"] = data.Hasil)
+            (data) => (formDataRef.current["sis_masalahfile"] = data.Hasil)
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-            (data) => (formDataRef.current["rciGoalFile"] = data.Hasil)
+            (data) => (formDataRef.current["sis_tujuanfile"] = data.Hasil)
           )
         );
       }
@@ -527,7 +328,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/CreateRencanaQCP",
+          API_LINK + "RencanaSS/UpdateRencanaSS",
           formDataRef.current
         );
 
@@ -571,7 +372,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Add Data
+          Update Data
         </h2>
       </div>
       <div className="mt-3">
@@ -587,7 +388,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">SS REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -597,87 +398,40 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                   <div className="col-lg-12">
                     <div className="card mb-3">
                       <div className="card-header">
-                        <h5 className="fw-medium">Team Member</h5>
+                        <h5 className="fw-medium">User Data</h5>
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-6">
+                          <div className="col-md-4">
                             <Input
                               type="text"
-                              forInput="rciGroupName"
-                              label="Circle Name"
-                              isRequired
-                              value={formDataRef.current.rciGroupName}
+                              forInput="kry_id"
+                              label="NPK"
+                              isDisabled
+                              value={formDataRef.current.kry_id}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciGroupName}
+                              errorMessage={errors.kry_id}
                             />
                           </div>
-                          <div className="col-md-6">
+                          <div className="col-md-4">
                             <Input
                               type="text"
-                              forInput="setName"
+                              forInput="nama_kar"
+                              label="Name​"
+                              isDisabled
+                              value={userInfo.nama}
+                            />
+                          </div>
+                          <div className="col-md-4">
+                            <Input
+                              type="text"
+                              forInput="produptdep"
                               label="Section"
                               isDisabled
                               value={userInfo.upt}
                             />
                           </div>
-                          <div className="col-md-6">
-                            <SearchDropdown
-                              forInput="rciFacil"
-                              label="Facilitator"
-                              placeHolder="Facilitator"
-                              arrData={listFacil}
-                              isRequired
-                              isRound
-                              value={formDataRef.current.rciFacil}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciFacil}
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <Input
-                              type="text"
-                              forInput="rciLeader"
-                              label="Leader"
-                              isRequired
-                              isDisabled
-                              value={userInfo.nama}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciLeader}
-                            />
-                          </div>
                         </div>
-                        <div className="flex-fill">
-                          <div className="input-group">
-                            <div className="flex-grow-1">
-                              <SearchDropdown
-                                forInput="rciMember"
-                                placeHolder="Member"
-                                arrData={listEmployee}
-                                isRequired
-                                value={memberDataRef.current.rciMember}
-                                onChange={handleInputMemberChange}
-                                errorMessage={errors.rciMember}
-                              />
-                            </div>
-                            <Button
-                              iconName="add"
-                              label="Add Member"
-                              classType="success"
-                              onClick={() =>
-                                handleAddMember(
-                                  memberDataRef.current.rciMember,
-                                  listEmployee.find(
-                                    (item) =>
-                                      item.Value ===
-                                      memberDataRef.current.rciMember
-                                  )?.Text
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                        <Table data={currentData} onDelete={handleDelete} />
                       </div>
                     </div>
                   </div>
@@ -690,42 +444,40 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                         <div className="row">
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciTitle"
+                              forInput="sis_judul"
                               label="Title"
                               isRequired
-                              value={formDataRef.current.rciTitle}
+                              value={formDataRef.current.sis_judul}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciTitle}
+                              errorMessage={errors.sis_judul}
                             />
                           </div>
                           <div className="col-lg-6">
                             <DropDown
-                              forInput="setId"
+                              forInput="ino_category"
                               label="Innovation Category"
                               arrData={listCategory}
                               isRequired
-                              value={formDataRef.current.setId}
+                              value={formDataRef.current.ino_category}
                               onChange={handleInputChange}
-                              errorMessage={errors.setId}
+                              errorMessage={errors.ino_category}
                             />
                           </div>
                           <div className="col-lg-6">
-                            <SearchDropdown
-                              forInput="setId2"
+                            <DropDown
+                              forInput="know_category"
                               label="Knowledge Category"
-                              placeHolder="Knowledge Category"
                               arrData={listImpCategory}
                               isRequired
-                              isRound
-                              value={formDataRef.current.setId2}
+                              value={formDataRef.current.know_category}
                               onChange={handleInputChange}
-                              errorMessage={errors.setId2}
+                              errorMessage={errors.know_category}
                             />
                           </div>
                           <div className="col-lg-4">
                             <Input
                               type="date"
-                              forInput="rciStartDate"
+                              forInput="sis_tanggalmulai"
                               label="Start Date"
                               placeholder={
                                 periodDataRef.current.startPeriod
@@ -737,50 +489,52 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                                   : ""
                               }
                               isRequired
-                              value={formDataRef.current.rciStartDate}
+                              value={formDataRef.current.sis_tanggalmulai}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciStartDate}
+                              errorMessage={errors.sis_tanggalmulai}
                             />
                           </div>
                           <div className="col-lg-4">
                             <Input
                               type="date"
-                              forInput="rciEndDate"
+                              forInput="sis_tanggalakhir"
                               label="End Date"
                               placeholder={
-                                "Innovation period ends on " +
-                                formatDate(
-                                  periodDataRef.current.endPeriod,
-                                  true
-                                )
+                                periodDataRef.current.endPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.endPeriod,
+                                      true
+                                    )
+                                  : ""
                               }
                               isRequired
-                              value={formDataRef.current.rciEndDate}
+                              value={formDataRef.current.sis_tanggalakhir}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciEndDate}
+                              errorMessage={errors.sis_tanggalakhir}
                             />
                           </div>
                           <div className="col-lg-4">
                             <DropDown
-                              forInput="perId"
+                              forInput="per_id"
                               label="Period"
                               arrData={listPeriod}
                               isRequired
                               isDisabled
-                              value={formDataRef.current.perId}
+                              value={formDataRef.current.per_id}
                               onChange={handleInputChange}
-                              errorMessage={errors.perId}
+                              errorMessage={errors.per_id}
                             />
                           </div>
 
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciScope"
+                              forInput="sis_ruanglingkup"
                               label="Project Scope"
                               isRequired
-                              value={formDataRef.current.rciScope}
+                              value={formDataRef.current.sis_ruanglingkup}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciScope}
+                              errorMessage={errors.sis_ruanglingkup}
                             />
                           </div>
                         </div>
@@ -796,70 +550,73 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                         <div className="row">
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciCase"
+                              forInput="sis_kasus"
                               label="Bussiness Case"
                               isRequired
-                              value={formDataRef.current.rciCase}
+                              value={formDataRef.current.sis_kasus}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciCase}
+                              errorMessage={errors.sis_kasus}
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
                             <FileUpload
-                              forInput="rciCaseFile"
+                              forInput="sis_kasusfile"
                               label="Bussiness Case Document (.pdf)"
                               formatFile=".pdf"
                               ref={bussinessCaseFileRef}
                               onChange={() =>
                                 handleFileChange(bussinessCaseFileRef, "pdf")
                               }
-                              errorMessage={errors.rciCaseFile}
+                              hasExisting={formDataRef.current.CaseFile}
+                              errorMessage={errors.sis_kasusfile}
                             />
                           </div>
                           <hr />
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciProblem"
+                              forInput="sis_masalah"
                               label="Problem Statement​"
                               isRequired
-                              value={formDataRef.current.rciProblem}
+                              value={formDataRef.current.sis_masalah}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciProblem}
+                              errorMessage={errors.sis_masalah}
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
                             <FileUpload
-                              forInput="rciProblemFile"
+                              forInput="sis_masalahfile"
                               label="Problem Statement​ Document (.pdf)"
                               formatFile=".pdf"
                               ref={problemFileRef}
                               onChange={() =>
                                 handleFileChange(problemFileRef, "pdf")
                               }
-                              errorMessage={errors.rciProblemFile}
+                              hasExisting={formDataRef.current.ProblemFile}
+                              errorMessage={errors.sis_masalahfile}
                             />
                           </div>
                           <hr />
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciGoal"
+                              forInput="sis_tujuan"
                               label="Goal Statement​"
                               isRequired
-                              value={formDataRef.current.rciGoal}
+                              value={formDataRef.current.sis_tujuan}
                               onChange={handleInputChange}
-                              errorMessage={errors.rciGoal}
+                              errorMessage={errors.sis_tujuan}
                             />
                           </div>
                           <div className="col-lg-4">
                             <FileUpload
-                              forInput="goalFileRef"
+                              forInput="sis_tujuanfile"
                               label="Goal Statement​ Document (.pdf)"
                               formatFile=".pdf"
                               ref={goalFileRef}
                               onChange={() =>
                                 handleFileChange(goalFileRef, "pdf")
                               }
-                              errorMessage={errors.goalFileRef}
+                              hasExisting={formDataRef.current.GoalFile}
+                              errorMessage={errors.sis_tujuanfile}
                             />
                           </div>
                         </div>
@@ -868,21 +625,8 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                   </div>
                   <div className="col-lg-12">
                     <div className="card mb-3">
-                      <div className="card-header">
-                        <h5 className="fw-medium">Project Benefit</h5>
-                      </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-lg-6">
-                            <Input
-                              type="text"
-                              forInput="rciProjBenefit"
-                              label="Project Benefit (Rp)"
-                              value={formDataRef.current.rciProjBenefit}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciProjBenefit}
-                            />
-                          </div>
                           <div className="col-lg-12">
                             <label className="form-label fw-bold ms-1">
                               Tangible Benefit
@@ -891,20 +635,20 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciQuality}
+                                checked={checkedStates.sisQuality}
                                 onChange={() =>
-                                  handleCheckboxChange("rciQuality")
+                                  handleCheckboxChange("sisQuality")
                                 }
                               />
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciQuality"
+                                  forInput="sisQuality"
                                   label="Quality"
-                                  isDisabled={!checkedStates.rciQuality}
-                                  value={formDataRef.current.rciQuality}
+                                  isDisabled={!checkedStates.sisQuality}
+                                  value={formDataRef.current.sisQuality}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciQuality}
+                                  errorMessage={errors.sisQuality}
                                 />
                               </div>
                             </div>
@@ -912,18 +656,18 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciCost}
-                                onChange={() => handleCheckboxChange("rciCost")}
+                                checked={checkedStates.sisCost}
+                                onChange={() => handleCheckboxChange("sisCost")}
                               />
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciCost"
+                                  forInput="sisCost"
                                   label="Cost"
-                                  isDisabled={!checkedStates.rciCost}
-                                  value={formDataRef.current.rciCost}
+                                  isDisabled={!checkedStates.sisCost}
+                                  value={formDataRef.current.sisCost}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciCost}
+                                  errorMessage={errors.sisCost}
                                 />
                               </div>
                             </div>
@@ -931,20 +675,20 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciDelivery}
+                                checked={checkedStates.sisDelivery}
                                 onChange={() =>
-                                  handleCheckboxChange("rciDelivery")
+                                  handleCheckboxChange("sisDelivery")
                                 }
                               />
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciDelivery"
+                                  forInput="sisDelivery"
                                   label="Delivery"
-                                  isDisabled={!checkedStates.rciDelivery}
-                                  value={formDataRef.current.rciDelivery}
+                                  isDisabled={!checkedStates.sisDelivery}
+                                  value={formDataRef.current.sisDelivery}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciDelivery}
+                                  errorMessage={errors.sisDelivery}
                                 />
                               </div>
                             </div>
@@ -957,41 +701,41 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               <input
                                 className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciSafety}
+                                checked={checkedStates.sisSafety}
                                 onChange={() =>
-                                  handleCheckboxChange("rciSafety")
+                                  handleCheckboxChange("sisSafety")
                                 }
                               />
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciSafety"
+                                  forInput="sisSafety"
                                   label="Safety"
-                                  isDisabled={!checkedStates.rciSafety}
-                                  value={formDataRef.current.rciSafety}
+                                  isDisabled={!checkedStates.sisSafety}
+                                  value={formDataRef.current.sisSafety}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciSafety}
+                                  errorMessage={errors.sisSafety}
                                 />
                               </div>
                             </div>
                             <div className="d-flex align-items-center">
                               <input
-                                className="form-check-input me-2"
+                                className="form-check-input mb-2 me-2"
                                 type="checkbox"
-                                isDisabled={checkedStates.rciMoral}
+                                checked={checkedStates.sisMoral}
                                 onChange={() =>
-                                  handleCheckboxChange("rciMoral")
+                                  handleCheckboxChange("sisMoral")
                                 }
                               />
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
                                   label="Moral"
-                                  forInput="rciMoral"
-                                  isDisabled={!checkedStates.rciMoral}
-                                  value={formDataRef.current.rciMoral}
+                                  forInput="sisMoral"
+                                  isDisabled={!checkedStates.sisMoral}
+                                  value={formDataRef.current.sisMoral}
                                   onChange={handleInputChange}
-                                  errorMessage={errors.rciMoral}
+                                  errorMessage={errors.sisMoral}
                                 />
                               </div>
                             </div>

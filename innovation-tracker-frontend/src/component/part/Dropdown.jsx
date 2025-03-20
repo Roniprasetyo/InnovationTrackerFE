@@ -18,7 +18,11 @@ const DropDown = forwardRef(function DropDown(
 
   switch (type) {
     case "pilih":
-      placeholder = <option value="">{"-- Select " + label + " --"}</option>;
+      placeholder = (
+        <option value="" disabled>
+          {"-- Select " + label + " --"}
+        </option>
+      );
       break;
     case "semua":
       placeholder = <option value="">-- All --</option>;
