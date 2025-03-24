@@ -32,20 +32,20 @@ function CalendarView() {
   return (
     <div className='row'>
       <div className='d-flex'>
-        <div className="card rounded-0" style={{backgroundColor:'#03045e', width:'500px', height: '470px'}}>
+        <div className="card rounded-0" style={{backgroundColor:'#03045e', width:'450px', height: '430px'}}>
           <div className="h5 d-flex justify-content-center text-white">CREATIVE CONNECT</div>
           <div className="row">
             <div className="d-flex">
-              <div className="card-body" style={{width:'300px', color:'white'}}>
+              <div className="card-body p-2 small" style={{width:'250px', color:'white'}}>
                 <Calendar onChange={setDate} value={date} className="react-calendar"/>
                 <hr />
-                <h7>{formatDate(date)} : {newsData[date.toISOString().split("T")[0]] || "Tidak ada berita."}</h7>
+                <h7 className="text-nowrap">{formatDate(date)} : {newsData[date.toISOString().split("T")[0]] || "Tidak ada berita."}</h7>
               </div>
               <div className="card-body">
                 <h6 className="text-uppercase text-white">Task</h6>
-                <div className="d-flex flex-column gap-3">
+                <div className="d-flex flex-column gap-3 small">
                   {/* Item 1 */}
-                  <div className="d-flex border-start border-danger border-4 ps-3">
+                  <div className="d-flex border-start border-danger small border-4 ps-3">
                     <div>
                       <h7 className="fw-bold text-danger">Daily Challenge - 38</h7>
                       <p className="text-white m-0">Day: 38 Creative Connect challenge calendar.</p>
@@ -53,7 +53,7 @@ function CalendarView() {
                   </div>
 
                   {/* Item 2 */}
-                  <div className="d-flex border-start border-danger border-4 ps-3">
+                  <div className="d-flex border-start border-danger small border-4 ps-3">
                     <div>
                       <h7 className="fw-bold text-danger">Daily Challenge - 39</h7>
                       <p className="text-white m-0">Day: 39 Creative Connect challenge calendar.</p>
@@ -61,7 +61,7 @@ function CalendarView() {
                   </div>
 
                   {/* Item 3 */}
-                  <div className="d-flex border-start border-danger border-4 ps-3">
+                  <div className="d-flex border-start border-danger small border-4 ps-3">
                     <div>
                       <h7 className="fw-bold text-danger">Daily Challenge - 40</h7>
                       <p className="text-white m-0">Day: 40 Creative Connect challenge calendar.</p>
@@ -73,7 +73,7 @@ function CalendarView() {
           </div>
         </div>
         <div className="card bg-danger rounded-0" >
-          <div className='mt-2' style={{width:'40px'}}>
+          <div className='mt-2' style={{width:'30px'}}>
             <h6 className="border-bottom border-white border-2 text-white" style={{width:'30px', textAlign:'center'}}>
               31
             </h6>
