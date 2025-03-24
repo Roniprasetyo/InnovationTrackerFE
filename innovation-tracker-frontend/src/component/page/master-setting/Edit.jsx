@@ -12,8 +12,9 @@ import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 
 const listTypeSetting = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+  { Value: "Innovation Category", Text: "Innovation Category" },
+  { Value: "Knowledge Category", Text: "Knowledge Category" },
+  { Value: "Innovation Role Category", Text: "Innovation Role Category" },
 ];
 
 export default function MasterSettingEdit({ onChangePage, withID }) {

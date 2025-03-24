@@ -69,20 +69,6 @@ export default function Footer() {
                 >
                   <p>- Campus Location</p>
                 </a>
-                <a
-                  href="https://sia.polytechnic.astra.ac.id"
-                  target="_blank"
-                  style={{ textDecoration: "none", color: "white" }}
-                >
-                  <p>- Sistem Informasi Akademik</p>
-                </a>
-                <a
-                  href="https://pmb.polytechnic.astra.ac.id"
-                  target="_blank"
-                  style={{ textDecoration: "none", color: "white" }}
-                >
-                  <p>- Login Akun PMB</p>
-                </a>
               </div>
               <div
                 className="col-lg-4"
@@ -93,16 +79,13 @@ export default function Footer() {
                 }}
               >
                 <p style={{ marginBottom: "20px" }}>
-                  <span style={{ fontWeight: "bold" }}>Whatsapp</span> :
-                  628121960121
-                  <br />
                   <span style={{ fontWeight: "bold" }}>Email</span>
-                  : marketing@polytechnic.astra.ac.id
+                  : fajar.lestari@polytechnic.astra.ac.id
                   <br />
                   <span style={{ fontWeight: "bold" }}>Website</span>:
                   https://www.polytechnic.astra.ac.id
                 </p>
-                <p className="mt-3 mb-0">© 2024 Politeknik Astra</p>
+                <p className="mt-3 mb-0">© 2025 Politeknik Astra</p>
               </div>
             </div>
           </div>

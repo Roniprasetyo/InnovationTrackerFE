@@ -12,7 +12,10 @@ import Footer from "./component/backbone/Footer.jsx";
 import Login from "./component/page/login/Index";
 import Logout from "./component/page/logout/Index";
 import QualityControlProject from "./component/page/quality-control-project/Root";
+import QualityControlCircle from "./component/page/quality-control-circle/Root";
 import NotFound from "./component/page/not-found/Index";
+import SuggestionSystem from "./component/page/suggestion-system/Root.jsx";
+import ValueChainInnovation from "./component/page/value-chain-innovation/Root.jsx";
 
 export default function App() {
   const [listMenu, setListMenu] = useState([]);
@@ -22,7 +25,6 @@ export default function App() {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (isLogoutPage) return <Logout />;
-  else if (!cookie) return <Login />;
   else {
     if (cookie) userInfo = JSON.parse(decryptId(cookie));
 
@@ -52,8 +54,20 @@ export default function App() {
             element: <Login />,
           },
           {
+            path: "/submission/ss",
+            element: <SuggestionSystem />,
+          },
+          {
             path: "/submission/qcp",
             element: <QualityControlProject />,
+          },
+          {
+            path: "/submission/qcc",
+            element: <QualityControlCircle />,
+          },
+          {
+            path: "/submission/vci",
+            element: <ValueChainInnovation />,
           },
           {
             path: "/*",

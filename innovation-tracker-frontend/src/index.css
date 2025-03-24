@@ -92,6 +92,11 @@ dialog::backdrop {
   color: rgb(0, 89, 171);
 }
 
+.sub:hover {
+  background-color: rgb(28, 120, 206);
+  color: white;
+}
+
 @media (min-width: 768px) {
   .nav-mobile {
     display: none;
