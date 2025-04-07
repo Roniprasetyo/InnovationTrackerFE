@@ -88,7 +88,7 @@ const Input = forwardRef(function Input(
               className={
                 isRound
                   ? "form-control text-" + textAlign
-                  : "form-control rounded-5 text-" + textAlign
+                  : "form-control text-" + textAlign
               }
               placeholder={placeholder}
               ref={ref}

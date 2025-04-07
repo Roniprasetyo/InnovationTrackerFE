@@ -13,6 +13,7 @@ const MasterUser = lazy(() => import("../page/master-user/Root"));
 const MasterFacilitator = lazy(() => import("../page/master-facilitator/Root"));
 const MasterPeriod = lazy(() => import("../page/master-period/Root"));
 const MasterPerusahaan = lazy(() => import("../page/master-perusahaan/Root"));
+const MasterStep = lazy(() => import("../page/master-step/Root"));
 
 const routeList = [
   {
@@ -66,6 +67,10 @@ const routeList = [
   {
     path: "/period",
     element: <MasterPeriod />,
+  },
+  {
+    path: "/step",
+    element: <MasterStep />,
   },
 ];
 
