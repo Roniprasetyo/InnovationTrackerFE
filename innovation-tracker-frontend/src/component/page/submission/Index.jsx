@@ -42,7 +42,7 @@ export default function Submission() {
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
+            "Terjadi kesalahan: Gagal mengambil data setting."
           );
         } else {
           formDataRef.current = { ...formDataRef.current, ...data[0] };
@@ -169,6 +169,40 @@ export default function Submission() {
                     <p className="fw-small text-white my-1">
                       <small>
                         <i>Quality Control Project Requirements</i>
+                      </small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row bg-second rounded-5 shadow-sm mb-3">
+            <div
+              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate("/submission/bpi")}
+            >
+              <div className="mb-2 ms-3">
+                <div className="display-3 fw-bold">BPI</div>
+                <div className="fw-medium">
+                  <i>(Business Performance Improvement)</i>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-9">
+              <div className="p-4">
+                <p className="lead fw-medium">
+                Business Performance Improvement (BPI) is an innovation that is cross-Division/Vice Director in ASTRAtech, which is a new business that impacts the increase of tangible value at Poltek ASTRA as an educational institution that is part of the ASTRA business unit.
+                </p>
+                <div className="col-sm-5 bg-success rounded-5">
+                  <div
+                    className="d-flex align-items-center mx-3"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Icon name="download me-2 text-white" />
+                    <p className="fw-small text-white my-1">
+                      <small>
+                        <i>Business Performance Improvement Requirements</i>
                       </small>
                     </p>
                   </div>

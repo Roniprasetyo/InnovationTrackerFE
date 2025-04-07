@@ -8,6 +8,7 @@ const QualityControlProject = lazy(() => import("../page/quality-control-project
 const QualityControlCircle = lazy(() => import("../page/quality-control-circle/Root"));
 const SuggestionSystem = lazy(() => import("../page/suggestion-system/Root"));
 const ValueChainInnovation = lazy(() => import("../page/value-chain-innovation/Root"));
+const BusinessPerformaceImprovement = lazy(() => import("../page/business-performance-improvement/Root"));
 const MasterSetting = lazy(() => import("../page/master-setting/Root"));
 const MasterUser = lazy(() => import("../page/master-user/Root"));
 const MasterFacilitator = lazy(() => import("../page/master-facilitator/Root"));
@@ -43,6 +44,10 @@ const routeList = [
   {
     path: "/submission/vci",
     element: <ValueChainInnovation />,
+  },
+  {
+    path: "/submission/bpi",
+    element: <BusinessPerformaceImprovement />,
   },
   {
     path: "/setting",
