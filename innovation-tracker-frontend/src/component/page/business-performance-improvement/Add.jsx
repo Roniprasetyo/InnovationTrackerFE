@@ -166,7 +166,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCP")));
+          setListCategory(data.filter((item) => item.Text.includes("BPI")));
         }
       } catch (error) {
         window.scrollTo(0, 0);

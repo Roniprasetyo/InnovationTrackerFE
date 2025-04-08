@@ -88,6 +88,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciLeader: "",
     setId2: "",
     rciStatus: "",
+    rciReasonforRejection: "",
   });
 
   const memberDataRef = useRef({
@@ -132,6 +133,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciFacil: string().required("required"),
     setId2: string().required("required"),
     rciStatus: string().required("required"),
+    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({

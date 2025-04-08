@@ -19,6 +19,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
+import Label from "../../part/Label";
 
 const inisialisasiData = [
   {
@@ -86,6 +87,8 @@ export default function BusinessPerformanceImprovementEdit({ onChangePage, withI
     rciFacil: "",
     rciLeader: "",
     setId2: "",
+    rciReasonforRejection:"",
+    rciStatus: "",
   });
 
   const memberDataRef = useRef({
@@ -129,6 +132,8 @@ export default function BusinessPerformanceImprovementEdit({ onChangePage, withI
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     setId2: string().required("required"),
+    rciReasonforRejection: string().required("required"),
+    rciStatus: string().required("required"),
   });
 
   const memberSchema = object({
@@ -323,6 +328,8 @@ export default function BusinessPerformanceImprovementEdit({ onChangePage, withI
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
             setId2: data["CategoryIdImp"],
+            rciReasonforRejection: data["Alasan Penolakan"],
+            rciStatus: data["Status"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -670,7 +677,7 @@ export default function BusinessPerformanceImprovementEdit({ onChangePage, withI
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">BPI REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -1091,6 +1098,15 @@ export default function BusinessPerformanceImprovementEdit({ onChangePage, withI
                         </div>
                       </div>
                     </div>
+                    {formDataRef.current.rciStatus === "Rejected" && (
+                      <>
+                        <hr />
+                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <Label
+                        data={formDataRef.current.rciReasonforRejection}/>
+                        <hr />
+                      </>
+                    )}
                   </div>
                 </div>
               )}

@@ -73,7 +73,7 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
     query: "",
     sort: "[Category] asc",
     status: "",
-    jenis: "QCP",
+    jenis: "BPI",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -179,6 +179,7 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
       UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
         id: id,
         set: "Rejected",
+        reason: confirm,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -232,7 +233,11 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : ["Detail"],
+                : role === "ROL03" &&
+                value["Status"] === "Rejected" &&
+                value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : ["Detail"],
             Alignment: [
               "center",
               "left",

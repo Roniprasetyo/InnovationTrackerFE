@@ -86,8 +86,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciFacil: "",
     rciLeader: "",
     setId2: "",
-    rciReasonforRejection:"",
     rciStatus: "",
+    rciReasonforRejection:"",
   });
 
   const memberDataRef = useRef({
@@ -131,6 +131,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     setId2: string().required("required"),
+    rciStatus: string().required("required"),
     rciReasonforRejection: string().required("required"),
   });
 
