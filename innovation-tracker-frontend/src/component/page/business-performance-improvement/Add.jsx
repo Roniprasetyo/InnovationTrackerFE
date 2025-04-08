@@ -13,12 +13,13 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
+import DropDownSearch from "../../part/DropDownSearch";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { clearSeparator, separator } from "../../util/Formatting";
-import { formatDate } from "../../util/Formatting";
+import { formatDate, decodeHtml } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -30,7 +31,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
+export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -39,8 +40,6 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [listEmployeeFull, setListEmployeeFull] = useState([]);
-
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
     rciCost: false,
@@ -49,12 +48,15 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
     rciMoral: false,
   });
 
+  const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
+  const [listEmployeeFull, setListEmployeeFull] = useState([]);
   const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
-  const [ListCompany, setListCompany] = useState([]);
+  const [listImpCategory, setListImpCategory] = useState([]);
 
   const formDataRef = useRef({
+    setId: "",
     perId: "",
     rciGroupName: "",
     rciTitle: "",
@@ -75,8 +77,7 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
     rciMoral: "",
     rciFacil: "",
     rciLeader: userInfo.npk,
-    rciPerusahaan1: "",
-    rciPerusahaan2: "",
+    setId2: "",
   });
   const memberDataRef = useRef({
     rciMember: "",
@@ -90,6 +91,7 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
   const goalFileRef = useRef(null);
 
   const userSchema = object({
+    setId: string().required("required"),
     perId: string().nullable(),
     rciGroupName: string()
       .max(100, "maximum 100 characters")
@@ -114,8 +116,7 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
     rciMoral: string().max(200, "maximum 200 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    rciPerusahaan1: string().required("required"),
-    rciPerusahaan2: string(),
+    setId2: string().required("required"),
   });
 
   const memberSchema = object({
@@ -158,6 +159,65 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data.filter((item) => item.Text.includes("QCP")));
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Knowledge Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListImpCategory(
+            data.map((item) => ({
+              ...item,
+              Text: decodeHtml(item.Text),
+            }))
+          );
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListImpCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
           {}
@@ -181,33 +241,6 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
           message: error.message,
         }));
         setListPeriod([]);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListPerusahaan"
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the company data.");
-        } else {
-          setListCompany(data);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCompany([]);
       }
     };
 
@@ -314,6 +347,9 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
+        Section:
+          listEmployeeFull.find((item) => item.npk === value.Key)?.upt_bagian ||
+          "",
         Action: ["Delete"],
         Alignment: ["center", "left", "left", "center", "center"],
       }));
@@ -441,7 +477,7 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected start date or end date outrange the selected period",
+            "Invalid date: Selected end date outrange the innovation period end date",
         });
         return;
       }
@@ -492,7 +528,7 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/CreateRencanaVCI",
+          API_LINK + "RencanaCircle/CreateRencanaQCP",
           formDataRef.current
         );
 
@@ -552,7 +588,7 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">VCI REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">BPI REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -566,7 +602,7 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-12">
+                          <div className="col-md-6">
                             <Input
                               type="text"
                               forInput="rciGroupName"
@@ -578,28 +614,12 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <SearchDropdown
-                              forInput="rciPerusahaan1"
-                              label="Company 1"
-                              placeHolder="Company 1"
-                              arrData={ListCompany}
-                              isRequired
-                              isRound
-                              value={formDataRef.current.rciPerusahaan1}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciPerusahaan1}
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <SearchDropdown
-                              forInput="rciPerusahaan2"
-                              label="Company 2"
-                              placeHolder="Company 2"
-                              arrData={ListCompany}
-                              isRound
-                              value={formDataRef.current.rciPerusahaan2}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciPerusahaan2}
+                            <Input
+                              type="text"
+                              forInput="setName"
+                              label="Section"
+                              isDisabled
+                              value={userInfo.upt}
                             />
                           </div>
                           <div className="col-md-6">
@@ -677,6 +697,30 @@ export default function BusinessPerformaceImprovementAdd({ onChangePage }) {
                               value={formDataRef.current.rciTitle}
                               onChange={handleInputChange}
                               errorMessage={errors.rciTitle}
+                            />
+                          </div>
+                          <div className="col-lg-6">
+                            <DropDown
+                              forInput="setId"
+                              label="Innovation Category"
+                              arrData={listCategory}
+                              isRequired
+                              value={formDataRef.current.setId}
+                              onChange={handleInputChange}
+                              errorMessage={errors.setId}
+                            />
+                          </div>
+                          <div className="col-lg-6">
+                            <SearchDropdown
+                              forInput="setId2"
+                              label="Knowledge Category"
+                              placeHolder="Knowledge Category"
+                              arrData={listImpCategory}
+                              isRequired
+                              isRound
+                              value={formDataRef.current.setId2}
+                              onChange={handleInputChange}
+                              errorMessage={errors.setId2}
                             />
                           </div>
                           <div className="col-lg-4">

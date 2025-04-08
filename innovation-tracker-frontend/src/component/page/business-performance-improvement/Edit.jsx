@@ -29,7 +29,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function BusinessPerformaceImprovementEdit({ onChangePage, withID }) {
+export default function BusinessPerformanceImprovementEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -38,13 +38,13 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-
-  const [listEmployee, setListEmployee] = useState([]);
   const [listEmployeeFull, setListEmployeeFull] = useState([]);
+
+  const [listCategory, setListCategory] = useState([]);
+  const [listEmployee, setListEmployee] = useState([]);
   const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
-  const [listCompany, setListCompany] = useState([]);
-  const [ListCompany2, setListCompany2] = useState([]);
+  const [listImpCategory, setListImpCategory] = useState([]);
 
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
@@ -52,11 +52,6 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
     rciDelivery: false,
     rciSafety: false,
     rciMoral: false,
-  });
-
-  const periodDataRef = useRef({
-    startPeriod: "",
-    endPeriod: "",
   });
 
   const handleCheckboxChange = (key) => {
@@ -90,12 +85,16 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
     rciMoral: "",
     rciFacil: "",
     rciLeader: "",
-    rciPerusahaan1: "",
-    rciPerusahaan2: "",
+    setId2: "",
   });
 
   const memberDataRef = useRef({
     rciMember: "",
+  });
+
+  const periodDataRef = useRef({
+    startPeriod: "",
+    endPeriod: "",
   });
 
   const bussinessCaseFileRef = useRef(null);
@@ -104,8 +103,8 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
 
   const userSchema = object({
     rciId: number().required("required"),
-    setId: number().required("required"),
-    perId: number().nullable(),
+    setId: string().required("required"),
+    perId: string().nullable(),
     rciGroupName: string()
       .max(100, "maximum 100 characters")
       .required("required"),
@@ -122,15 +121,14 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
     rciEndDate: date()
       .typeError("Invalid date format")
       .required("Start date is required"),
-    rciQuality: string().max(100, "maximum 100 characters").nullable(),
-    rciCost: string().max(100, "maximum 100 characters").nullable(),
-    rciSafety: string().max(100, "maximum 100 characters").nullable(),
-    rciDelivery: string().max(100, "maximum 100 characters").nullable(),
-    rciMoral: string().max(100, "maximum 100 characters").nullable(),
+    rciQuality: string().max(200, "maximum 200 characters").nullable(),
+    rciCost: string().max(200, "maximum 200 characters").nullable(),
+    rciSafety: string().max(200, "maximum 200 characters").nullable(),
+    rciDelivery: string().max(200, "maximum 200 characters").nullable(),
+    rciMoral: string().max(200, "maximum 200 characters").nullable(),
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
-    rciPerusahaan1: string().required("required"),
-    rciPerusahaan2: string(),
+    setId2: string().required("required"),
   });
 
   const memberSchema = object({
@@ -173,6 +171,65 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data.filter((item) => item.Text.includes("QCP")));
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Knowledge Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListImpCategory(
+            data.map((item) => ({
+              ...item,
+              Text: decodeHtml(item.Text),
+            }))
+          );
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListImpCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
           {}
@@ -182,11 +239,6 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -195,7 +247,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
           error: true,
           message: error.message,
         }));
-        setListPeriod([]);
+        setListPeriod({});
       }
     };
 
@@ -223,7 +275,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
           error: true,
           message: error.message,
         }));
-        setListFacil([]);
+        setListFacil({});
       }
     };
 
@@ -235,41 +287,14 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListPerusahaan"
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the company data.");
-        } else {
-          setListCompany(data);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCompany([]);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaVCIByIdforEdit",
+          API_LINK + "RencanaCircle/GetRencanaQCPById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data VCI.");
+          throw new Error("Error: Failed to get qcc data.");
         } else {
           formDataRef.current = {
             rciId: data["Key"],
@@ -297,8 +322,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
             ).Npk,
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
-            rciPerusahaan1: data["Company 1"],
-            rciPerusahaan2: data["Company 2"] || "",
+            setId2: data["CategoryIdImp"],
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -328,6 +352,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
             rciSafety: data["Safety"] ? true : false,
             rciMoral: data["Moral"] ? true : false,
           });
+          setSelectedPeriod(data["PeriodId"]);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -544,14 +569,15 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
         { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
         ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
       ];
-      delete formDataRef.current.rciFacil;
-      delete formDataRef.current.rciLeader;
 
-      const body = {
+      formDataRef.current = {
         ...formDataRef.current,
         rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
         member: newMemData,
       };
+      delete formDataRef.current.rciFacil;
+      delete formDataRef.current.rciLeader;
+
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -561,21 +587,21 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (body["rciCaseFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciCaseFile"] = data.Hasil)
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-            (data) => (body["rciProblemFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciProblemFile"] = data.Hasil)
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-            (data) => (body["rciGoalFile"] = data.Hasil)
+            (data) => (formDataRef.current["rciGoalFile"] = data.Hasil)
           )
         );
       }
@@ -584,8 +610,8 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/UpdateRencanaVCI",
-          body
+          API_LINK + "RencanaCircle/UpdateRencanaQCP",
+          formDataRef.current
         );
 
         if (data === "ERROR") {
@@ -644,7 +670,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">VCI REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -658,7 +684,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-md-12">
+                          <div className="col-md-6">
                             <Input
                               type="text"
                               forInput="rciGroupName"
@@ -670,26 +696,12 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                             />
                           </div>
                           <div className="col-md-6">
-                            <DropDown
-                              forInput="rciPerusahaan1"
-                              label="Company 1"
-                              type="pilih"
-                              arrData={listCompany}
-                              isRequired
-                              value={formDataRef.current.rciPerusahaan1}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciPerusahaan1}
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <DropDown
-                              forInput="rciPerusahaan2"
-                              label="Company 2"
-                              arrData={listCompany}
-                              type="pilih"
-                              value={formDataRef.current.rciPerusahaan2}
-                              onChange={handleInputChange}
-                              errorMessage={errors.rciPerusahaan2}
+                            <Input
+                              type="text"
+                              forInput="setName"
+                              label="Section"
+                              isDisabled
+                              value={userInfo.upt}
                             />
                           </div>
                           <div className="col-md-6">
@@ -771,12 +783,45 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                               errorMessage={errors.rciTitle}
                             />
                           </div>
+                          <div className="col-lg-6">
+                            <DropDown
+                              forInput="setId"
+                              label="Innovation Category"
+                              arrData={listCategory}
+                              isRequired
+                              value={formDataRef.current.setId}
+                              onChange={handleInputChange}
+                              errorMessage={errors.setId}
+                            />
+                          </div>
+                          <div className="col-lg-6">
+                            <SearchDropdown
+                              forInput="setId2"
+                              label="Knowledge Category"
+                              placeHolder="Knowledge Category"
+                              arrData={listImpCategory}
+                              isRequired
+                              isRound
+                              value={formDataRef.current.setId2}
+                              onChange={handleInputChange}
+                              errorMessage={errors.setId2}
+                            />
+                          </div>
                           <div className="col-lg-4">
                             <Input
                               type="date"
                               forInput="rciStartDate"
                               label="Start Date"
                               isRequired
+                              placeholder={
+                                periodDataRef.current.startPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.startPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciStartDate}
@@ -788,6 +833,15 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                               forInput="rciEndDate"
                               label="End Date"
                               isRequired
+                              placeholder={
+                                periodDataRef.current.endPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.endPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciEndDate}
@@ -935,6 +989,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                                   forInput="rciQuality"
                                   label="Quality"
                                   isDisabled={!checkedStates.rciQuality}
+                                  placeholder="Quality"
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
@@ -954,6 +1009,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                                   forInput="rciCost"
                                   label="Cost"
                                   isDisabled={!checkedStates.rciCost}
+                                  placeholder="Cost"
                                   value={formDataRef.current.rciCost}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciCost}
@@ -974,6 +1030,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                                   type="text"
                                   forInput="rciDelivery"
                                   label="Delivery"
+                                  placeholder="Delivery"
                                   isDisabled={!checkedStates.rciDelivery}
                                   value={formDataRef.current.rciDelivery}
                                   onChange={handleInputChange}
@@ -1001,6 +1058,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                                   forInput="rciSafety"
                                   label="Safety"
                                   isDisabled={!checkedStates.rciSafety}
+                                  placeholder="Safety"
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
@@ -1022,6 +1080,7 @@ export default function BusinessPerformaceImprovementEdit({ onChangePage, withID
                                   forInput="rciMoral"
                                   label="Moral"
                                   isDisabled={!checkedStates.rciMoral}
+                                  placeholder="Moral"
                                   value={formDataRef.current.rciMoral}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciMoral}

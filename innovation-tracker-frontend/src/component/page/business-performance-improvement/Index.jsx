@@ -10,6 +10,7 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import Icon from "../../part/Icon";
 import {
   decodeHtml,
   formatDate,
@@ -25,9 +26,8 @@ const inisialisasiData = [
     No: null,
     "Circle Name": null,
     "Project Title": null,
+    Category: null,
     "Project Benefit": null,
-    "Company 1": null,
-    "Company 2": null,
     "Start Date": null,
     "End Date": null,
     Period: null,
@@ -43,6 +43,8 @@ const dataFilterSort = [
   { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
   { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
   { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
+  { Value: "[Category] asc", Text: "[Category] [↑]" },
+  { Value: "[Category] desc", Text: "[Category] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
@@ -58,7 +60,7 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-export default function BusinessPerformaceImprovementIndex({ onChangePage }) {
+export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -69,8 +71,9 @@ export default function BusinessPerformaceImprovementIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Project Title] asc",
+    sort: "[Category] asc",
     status: "",
+    jenis: "QCP",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -167,6 +170,9 @@ export default function BusinessPerformaceImprovementIndex({ onChangePage }) {
       "Are you sure you want to reject this submission?",
       "warning",
       "REJECT",
+      null,
+      "",
+      true
     );
 
     if (confirm) {
@@ -190,7 +196,7 @@ export default function BusinessPerformaceImprovementIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaVCI",
+          API_LINK + "RencanaCircle/GetRencanaQCP",
           currentFilter
         );
 
@@ -206,12 +212,13 @@ export default function BusinessPerformaceImprovementIndex({ onChangePage }) {
             No: value["No"],
             "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
-              decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
+              decodeHtml(
+                decodeHtml(decodeHtml(value["Project Title"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
               50
             ),
+            Category: value["Category"],
             "Project Benefit": separator(value["Project Benefit"]),
-            "Company 1": value["Company 1"] ? value["Company 1"] : "-",
-            "Company 2": value["Company 2"] ? value["Company 2"] : "-",
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
             Period: value["Period"],
@@ -230,9 +237,8 @@ export default function BusinessPerformaceImprovementIndex({ onChangePage }) {
               "center",
               "left",
               "left",
+              "left",
               "right",
-              "center",
-              "center",
               "center",
               "center",
               "center",
@@ -308,7 +314,7 @@ export default function BusinessPerformaceImprovementIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Project Title] asc"
+              defaultValue="[Category] asc"
             />
             <DropDown
               ref={searchFilterStatus}

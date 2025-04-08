@@ -1,29 +1,29 @@
 import { useState } from "react";
-import BusinessPerformaceImprovementIndex from "./Index";
-import BusinessPerformaceImprovementAdd from "./Add";
-import BusinessPerformaceImprovementEdit from "./Edit";
-import BusinessPerformaceImprovementDetail from "./Detail";
+import BusinessPerformanceImprovementIndex from "./Index";
+import BusinessPerformanceImprovementAdd from "./Add";
+import BusinessPerformanceImprovementEdit from "./Edit";
+import BusinessPerformanceImprovementDetail from "./Detail";
 
-export default function BusinessPerformaceImprovement() {
+export default function BusinessPerformanceImprovement() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <BusinessPerformaceImprovementIndex onChangePage={handleSetPageMode} />;
+        return <BusinessPerformanceImprovementIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <BusinessPerformaceImprovementAdd onChangePage={handleSetPageMode} />;
+        return <BusinessPerformanceImprovementAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <BusinessPerformaceImprovementEdit
+          <BusinessPerformanceImprovementEdit
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
       case "detail":
         return (
-          <BusinessPerformaceImprovementDetail
+          <BusinessPerformanceImprovementDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />

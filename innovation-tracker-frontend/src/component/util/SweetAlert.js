@@ -21,10 +21,9 @@ const SweetAlert = (
   } else {
     let inputElement = null;
 
-    // Cuma buat REJECT pakai textarea
     if (confirmText === "REJECT") {
       inputElement = document.createElement("textarea");
-      inputElement.placeholder = placeholder || "Please enter a reason for rejection....";
+      inputElement.placeholder = placeholder || "Please enter a reason for rejection...";
       inputElement.rows = 4;
       inputElement.style.width = "100%";
       inputElement.style.padding = "8px";
@@ -36,25 +35,38 @@ const SweetAlert = (
       inputElement.style.marginTop = "10px";
     }
 
-    return swal({
-      title: title,
-      text: text,
-      icon: icon,
-      content: inputElement || undefined,
-      buttons: {
-        cancel: "Batal",
-        confirm: {
-          text: confirmText,
-          value: true,
+    return new Promise((resolve) => {
+      swal({
+        title: title,
+        text: text,
+        icon: icon,
+        content: inputElement || undefined,
+        buttons: {
+          cancel: "Batal",
+          confirm: {
+            text: confirmText,
+            value: true,
+          },
         },
-      },
-      dangerMode: icon === "warning",
-    }).then((value) => {
-      if (confirmText === "REJECT" && value) {
-        const result = inputElement.value.trim();
-        return result === "" ? "-" : result;
-      }
-      return value;
+        dangerMode: icon === "warning",
+      }).then((value) => {
+        if (value) {
+          if (confirmText === "REJECT") {
+            const result = inputElement.value.trim();
+            if (result === "") {
+              swal("Reason is required!", "Please enter a reason for rejection.", "error").then(() => {
+                SweetAlert(title, text, icon, confirmText, inputType, placeholder, html).then(resolve);
+              });
+              return;
+            }
+            resolve(result);
+          } else {
+            resolve(value);
+          }
+        } else {
+          resolve(null);
+        }
+      });
     });
   }
 };
