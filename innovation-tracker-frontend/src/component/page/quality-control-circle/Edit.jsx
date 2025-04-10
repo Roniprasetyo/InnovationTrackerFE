@@ -336,8 +336,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
             setId2: data["CategoryIdImp"],
-            rciReasonforRejection: data["Alasan Penolakan"],
-            rciStatus: data["Status"]
+            rciStatus: data["Status"],
+            rciReasonforRejection: data["Alasan Penolakan"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"

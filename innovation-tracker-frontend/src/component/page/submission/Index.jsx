@@ -87,15 +87,16 @@ export default function Submission() {
                   the benefits of Instantly felt by changemakers
                 </p>
                 <div className="row">
-                <div className="col-sm-4 bg-success rounded-5">
+                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/ss")}>
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>System Suggestion Requirements</i>
+                        <Icon name="plus me-2 text-white" />
+                        <i>System Suggestion </i>
                       </small>
                     </p>
                   </div>
@@ -124,15 +125,16 @@ export default function Submission() {
                   Study Program/UPT/Unit, where the target project is relate
                   with the KPIs of each Study Program/UPT/Unit.
                 </p>
-                <div className="col-sm-4 bg-success rounded-5">
+                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/qcc")}>
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                  
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>Quality Control Circle Requirements</i>
+                        <Icon name="plus me-2 text-white" />
+                        <i>Quality Control Circle</i>
                       </small>
                     </p>
                   </div>
@@ -160,15 +162,16 @@ export default function Submission() {
                   across Study Programs/UPTs/Units where the project target is
                   in accordance with the KPIs of each WaDir.
                 </p>
-                <div className="col-sm-4 bg-success rounded-5">
+                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/qcp")}>
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>Quality Control Project Requirements</i>
+                        <Icon name="plus me-2 text-white" />
+                        <i>Quality Control Project</i>
                       </small>
                     </p>
                   </div>
@@ -194,15 +197,16 @@ export default function Submission() {
                 <p className="lead fw-medium">
                 Business Performance Improvement (BPI) is an innovation that is cross-Division/Vice Director in ASTRAtech, which is a new business that impacts the increase of tangible value at Poltek ASTRA as an educational institution that is part of the ASTRA business unit.
                 </p>
-                <div className="col-sm-5 bg-success rounded-5">
+                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/bpi")}>
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>Business Performance Improvement Requirements</i>
+                        <Icon name="plus me-2 text-white" />
+                        <i>Business Performance Improvement </i>
                       </small>
                     </p>
                   </div>
@@ -232,15 +236,16 @@ export default function Submission() {
                   including ASTRA Polytechnic as an educational institution that
                   is part of ASTRA's business unit
                 </p>
-                <div className="col-sm-4 bg-success rounded-5">
+                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/vci")}>
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>Value Chain Innovation Requirements</i>
+                      <Icon name="plus me-2 text-white" />
+                        <i>Value Chain Innovation </i>
                       </small>
                     </p>
                   </div>

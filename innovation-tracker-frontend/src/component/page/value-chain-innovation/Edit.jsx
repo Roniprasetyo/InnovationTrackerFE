@@ -19,6 +19,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
+import Label from "../../part/Label";
 
 const inisialisasiData = [
   {
@@ -92,6 +93,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciLeader: "",
     rciPerusahaan1: "",
     rciPerusahaan2: "",
+    rciReasonforRejection: ""
   });
 
   const memberDataRef = useRef({
@@ -131,6 +133,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciFacil: string().required("required"),
     rciPerusahaan1: string().required("required"),
     rciPerusahaan2: string(),
+    rciStatus: string().required("required"),
+    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({
@@ -299,6 +303,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
               .Npk,
             rciPerusahaan1: data["Company 1"],
             rciPerusahaan2: data["Company 2"] || "",
+            rciStatus: data["Status"],
+            rciReasonforRejection: data["Alasan Penolakan"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -1032,6 +1038,15 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
+                    {formDataRef.current.rciStatus === "Rejected" && (
+                      <>
+                        <hr />
+                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <Label
+                        data={formDataRef.current.rciReasonforRejection}/>
+                        <hr />
+                      </>
+                    )}
                   </div>
                 </div>
               )}

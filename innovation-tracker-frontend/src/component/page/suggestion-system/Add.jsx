@@ -135,6 +135,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }));
         setListCategory({});
       }
+      console.log("COOKIE", JSON.parse(decryptId(cookie)));
     };
 
     fetchData();

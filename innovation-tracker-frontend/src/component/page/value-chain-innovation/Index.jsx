@@ -176,6 +176,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
         id: id,
         set: "Rejected",
+        reason: confirm,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -228,7 +229,11 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : ["Detail"],
+                : role === "ROL03" &&
+                value["Status"] === "Rejected" &&
+                value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : ["Detail"],
             Alignment: [
               "center",
               "left",
