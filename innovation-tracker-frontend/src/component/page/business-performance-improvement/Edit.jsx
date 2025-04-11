@@ -24,21 +24,22 @@ import Label from "../../part/Label";
 const inisialisasiData = [
   {
     Key: null,
-    No: null,
     Name: null,
+    Section: null,
     Count: 0,
   },
 ];
 
-export default function QualityControlCircleEdit({ onChangePage, withID }) {
+export default function BusinessPerformanceImprovementEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [memberData, setCurrentData] = useState(inisialisasiData);
+  const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [listEmployeeFull, setListEmployeeFull] = useState([]);
 
   const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
@@ -86,8 +87,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciFacil: "",
     rciLeader: "",
     setId2: "",
-    rciStatus: "",
     rciReasonforRejection:"",
+    rciStatus: "",
   });
 
   const memberDataRef = useRef({
@@ -104,7 +105,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    rciId: string().nullable(),
+    rciId: number().required("required"),
     setId: string().required("required"),
     perId: string().nullable(),
     rciGroupName: string()
@@ -131,8 +132,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     setId2: string().required("required"),
-    rciStatus: string().required("required"),
     rciReasonforRejection: string().required("required"),
+    rciStatus: string().required("required"),
   });
 
   const memberSchema = object({
@@ -152,33 +153,24 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           },
         });
 
-        if (!response.ok)
-          setIsError({ error: true, message: "Failed to fetch data" });
-
         const data = await response.json();
-
-        if (!Array.isArray(data))
-          setIsError({ error: true, message: "Invalid data format" });
-
-        const filteredData = data.filter(
-          (item) => item?.upt_bagian === userInfo?.upt
-        );
-
+        setListEmployeeFull(data);
         setListEmployee(
-          filteredData.map(({ npk, nama }) => ({
-            Value: npk ?? "",
-            Text: npk && nama ? `${npk} - ${nama}` : "",
+          data.map((value) => ({
+            Value: value.npk,
+            Text: value.npk + " - " + value.nama + " - " + value.upt_bagian,
           }))
         );
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError({ error: true, message: error.message });
-        setListEmployee([]);
+        setListEmployee({});
+        setListEmployeeFull({});
       }
     };
 
     fetchData();
-  }, [userInfo?.upt]);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -191,7 +183,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCC")));
+          setListCategory(data.filter((item) => item.Text.includes("QCP")));
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -336,23 +328,30 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
             setId2: data["CategoryIdImp"],
-            rciStatus: data["Status"],
-            rciReasonforRejection: data["Alasan Penolakan"]
+            rciReasonforRejection: data["Alasan Penolakan"],
+            rciStatus: data["Status"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
           );
           const memberCount = members.length || 0;
-          setCurrentData(
-            members?.map((item, index) => ({
-              Key: item.Npk,
-              No: index + 1,
-              Name: item.Npk + " - " + item.Name,
-              Count: memberCount,
-              Action: ["Delete"],
-              Alignment: ["center", "left", "center", "center"],
-            })) || []
-          );
+          if (memberCount > 0) {
+            setCurrentData(
+              members?.map((item, index) => ({
+                Key: item.Npk,
+                No: index + 1,
+                Name: item.Npk + " - " + item.Name,
+                Section:
+                  listEmployeeFull.find((value) => value.npk === item.Npk)
+                    ?.upt_bagian || "",
+                Count: memberCount,
+                Action: ["Delete"],
+                Alignment: ["center", "left", "left", "center", "center"],
+              })) || []
+            );
+          } else {
+            setCurrentData(inisialisasiData);
+          }
           setCheckedStates({
             rciQuality: data["Quality"] ? true : false,
             rciCost: data["Cost"] ? true : false,
@@ -373,7 +372,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, [withID]);
+  }, [withID, listEmployeeFull]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -435,7 +434,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       });
       return;
     }
-    if (memberData[0].Count === 0) {
+    if (currentData[0].Count === 0) {
       const data = [
         {
           Key: id,
@@ -446,25 +445,21 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
+        Section:
+          listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
         Action: ["Delete"],
-        Alignment: ["center", "left", "center", "center"],
+        Alignment: ["center", "left", "left", "center", "center"],
       }));
       setCurrentData(formattedData);
     } else {
-      if (memberData.some((member) => member.Key === id) === true) {
+      if (currentData.some((member) => member.Key === id) === true) {
         window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message: "Invalid member: Member already exists!",
-        });
+        setIsError({ error: true, message: "Member already exists!" });
         return;
       }
-      if (memberData.length === 6) {
+      if (currentData.length === 6) {
         window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message: "Invalid member: Max member reached!",
-        });
+        setIsError({ error: true, message: "Max member reached!" });
         return;
       }
       setCurrentData((prevData) => [
@@ -472,10 +467,12 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         {
           Key: id,
           No: prevData.length + 1,
-          Name,
+          Name: Name,
+          Section:
+            listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
           Count: prevData.length + 1,
           Action: ["Delete"],
-          Alignment: ["center", "left", "center", "center"],
+          Alignment: ["center", "left", "left", "center", "center"],
         },
       ]);
     }
@@ -483,7 +480,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   };
 
   const handleDelete = (id) => {
-    if (memberData.length === 1) setCurrentData(inisialisasiData);
+    if (currentData.length === 1) setCurrentData(inisialisasiData);
     else
       setCurrentData((prevData) =>
         prevData.filter((member) => member.Key !== id)
@@ -499,9 +496,9 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     const validationError = validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024576 > 10) error = "file is too large";
+    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
     else if (!extAllowed.split(",").includes(fileExt))
-      error = "invalid file format";
+      error = "format berkas tidak valid";
 
     if (error) ref.current.value = "";
 
@@ -543,7 +540,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
-      if (memberData.length < 2) {
+      if (currentData.length < 2) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
@@ -577,7 +574,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       const newMemData = [
         { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
         { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-        ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
+        ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
       ];
 
       formDataRef.current = {
@@ -680,7 +677,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCC REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">BPI REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -772,14 +769,14 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             />
                           </div>
                         </div>
-                        <Table data={memberData} onDelete={handleDelete} />
+                        <Table data={currentData} onDelete={handleDelete} />
                       </div>
                     </div>
                   </div>
                   <div className="col-lg-12">
                     <div className="card mb-3">
                       <div className="card-header">
-                        <h5 className="fw-medium">Circle Description</h5>
+                        <h5 className="fw-medium">Project Description</h5>
                       </div>
                       <div className="card-body">
                         <div className="row">
@@ -822,16 +819,16 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               type="date"
                               forInput="rciStartDate"
                               label="Start Date"
+                              isRequired
                               placeholder={
                                 periodDataRef.current.startPeriod
-                                  ? "Innovation period starts on " +
+                                  ? "Innovation period ends on " +
                                     formatDate(
                                       periodDataRef.current.startPeriod,
                                       true
                                     )
                                   : ""
                               }
-                              isRequired
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciStartDate}
@@ -842,16 +839,16 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               type="date"
                               forInput="rciEndDate"
                               label="End Date"
+                              isRequired
                               placeholder={
                                 periodDataRef.current.endPeriod
-                                  ? "Selected period ends on " +
+                                  ? "Innovation period ends on " +
                                     formatDate(
                                       periodDataRef.current.endPeriod,
                                       true
                                     )
                                   : ""
                               }
-                              isRequired
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciEndDate}
@@ -873,7 +870,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciScope"
-                              label="Circle Scope"
+                              label="Project Scope"
                               isRequired
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
@@ -887,7 +884,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                   <div className="col-lg-12">
                     <div className="card mb-3">
                       <div className="card-header">
-                        <h5 className="fw-medium">Circle Charter</h5>
+                        <h5 className="fw-medium">Project Charter</h5>
                       </div>
                       <div className="card-body">
                         <div className="row">
@@ -895,13 +892,12 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             <TextArea
                               forInput="rciCase"
                               label="Bussiness Case"
-                              isRequired
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
                             />
                           </div>
-                          <div className="col-lg-4  mb-3">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="rciCaseFile"
                               label="Bussiness Case Document (.pdf)"
@@ -919,7 +915,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             <TextArea
                               forInput="rciProblem"
                               label="Problem Statement​"
-                              isRequired
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
@@ -943,7 +938,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             <TextArea
                               forInput="rciGoal"
                               label="Goal Statement​"
-                              isRequired
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}

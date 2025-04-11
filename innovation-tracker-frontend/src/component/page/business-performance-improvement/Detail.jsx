@@ -20,7 +20,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function ValueChainInnovationDetail({ onChangePage, withID }) {
+export default function BusinessPerformanceImprovementDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -28,11 +28,13 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+
   const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
     Category: "",
+    CategoryImp: "",
     "Group Name": "",
     "Project Title": "",
     "Project Benefit": 0,
@@ -50,11 +52,8 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
     Delivery: "",
     Safety: "",
     Moral: "",
-    "Company 1": "",
-    "Company 2": "",
     Status: "",
     Creaby: "",
-    "Alasan Penolakan": "",
     member: [{}],
   });
 
@@ -94,17 +93,16 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaVCIById",
+          API_LINK + "RencanaCircle/GetRencanaQCPById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get VCI data");
+          throw new Error("Error: Failed to get QCP data");
         } else {
           formDataRef.current = data;
           const members = data.member.filter(
@@ -117,6 +115,9 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                   Key: index,
                   No: index + 1,
                   Name: item.Name,
+                  Section:
+                    listEmployee.find((value) => value.npk === item.Npk)?.upt ||
+                    "",
                   Count: memberCount,
                   Alignment: ["center", "left", "left"],
                 }))
@@ -136,7 +137,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, [withID, listEmployee]);
+  }, [listEmployee, withID]);
 
   if (isLoading) return <Loading />;
 
@@ -176,7 +177,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">VCI REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -190,23 +191,14 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-6">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
-                          <Label
-                            title="Company 1​"
-                            data={formDataRef.current["Company 1"] || "-"}
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Company 2​"
-                            data={formDataRef.current["Company 2"] || "-"}
-                          />
+                          <Label title="Section" data={userInfo.upt} />
                         </div>
                         <div className="col-md-6">
                           <Label
@@ -246,6 +238,20 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                             title="Project Title"
                             data={decodeHtml(
                               formDataRef.current["Project Title"] || "-"
+                            )}
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Innovation Category"
+                            data={formDataRef.current.Category || "-"}
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Knowledge Category"
+                            data={decodeHtml(
+                              formDataRef.current.CategoryImp || "-"
                             )}
                           />
                         </div>
@@ -328,7 +334,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                           )}
                         </div>
                         <hr />
-                        <div className="col-lg-12 mb-4">
+                        <div className="col-lg-12 mb-3">
                           <Label
                             title="Goal Statement​"
                             data={decodeHtml(
@@ -409,15 +415,6 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
-                  {formDataRef.current.Status === "Rejected" && (
-                    <div>
-                      <hr />
-                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                      <Label
-                      data={formDataRef.current["Alasan Penolakan"]}/>
-                      <hr />
-                    </div>
-                  )}
                 </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>

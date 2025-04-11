@@ -60,7 +60,7 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-export default function QualityControlProjectIndex({ onChangePage }) {
+export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -73,7 +73,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     query: "",
     sort: "[Category] asc",
     status: "",
-    jenis: "QCP",
+    jenis: "BPI",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -234,8 +234,8 @@ export default function QualityControlProjectIndex({ onChangePage }) {
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
                 : role === "ROL03" &&
-                  value["Status"] === "Rejected" &&
-                  value["Creaby"] === userInfo.username
+                value["Status"] === "Rejected" &&
+                value["Creaby"] === userInfo.username
                   ? ["Detail", "Edit", "Submit"]
                   : ["Detail"],
             Alignment: [
@@ -270,10 +270,10 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       <div className="my-3">
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
-            <h2 className="display-1 fw-bold">Quality</h2>
+            <h2 className="display-1 fw-bold">Business</h2>
             <div className="d-flex align-items-end mb-2">
               <h2 className="display-5 fw-bold align-items-end">
-                Control Project
+                Performance Improvement
               </h2>
             </div>
           </div>

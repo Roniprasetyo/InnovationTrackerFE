@@ -6,45 +6,67 @@ const SweetAlert = (
   icon,
   confirmText = "",
   inputType = null,
-  placeholder = ""
+  placeholder = "",
+  html = null
 ) => {
   if (confirmText === "") {
-    swal({
-      title: title,
-      text: text,
-      icon: icon,
-    });
-  } else {
-    let textContent = "";
-    const additional = {
-      content: {
-        element: inputType,
-        attributes: {
-          placeholder: placeholder,
-          onchange: function () {
-            textContent = this.value;
-          },
-        },
-      },
-    };
-
     return swal({
       title: title,
       text: text,
       icon: icon,
-      buttons: {
-        cancel: "Batal",
-        confirm: {
-          text: confirmText,
-          value: true,
+      content: html
+        ? { element: "div", attributes: { innerHTML: html } }
+        : undefined,
+    });
+  } else {
+    let inputElement = null;
+
+    if (confirmText === "REJECT") {
+      inputElement = document.createElement("textarea");
+      inputElement.placeholder = placeholder || "Please enter a reason for rejection...";
+      inputElement.rows = 4;
+      inputElement.style.width = "100%";
+      inputElement.style.padding = "8px";
+      inputElement.style.border = "1px solid #ccc";
+      inputElement.style.borderRadius = "5px";
+      inputElement.style.fontSize = "16px";
+      inputElement.style.boxSizing = "border-box";
+      inputElement.style.resize = "vertical";
+      inputElement.style.marginTop = "10px";
+    }
+
+    return new Promise((resolve) => {
+      swal({
+        title: title,
+        text: text,
+        icon: icon,
+        content: inputElement || undefined,
+        buttons: {
+          cancel: "Batal",
+          confirm: {
+            text: confirmText,
+            value: true,
+          },
         },
-      },
-      dangerMode: icon === "warning",
-      ...(inputType === null ? null : additional),
-    }).then((value) => {
-      if (inputType !== null && value)
-        return textContent === "" ? "-" : textContent;
-      return value;
+        dangerMode: icon === "warning",
+      }).then((value) => {
+        if (value) {
+          if (confirmText === "REJECT") {
+            const result = inputElement.value.trim();
+            if (result === "") {
+              swal("Reason is required!", "Please enter a reason for rejection.", "error").then(() => {
+                SweetAlert(title, text, icon, confirmText, inputType, placeholder, html).then(resolve);
+              });
+              return;
+            }
+            resolve(result);
+          } else {
+            resolve(value);
+          }
+        } else {
+          resolve(null);
+        }
+      });
     });
   }
 };

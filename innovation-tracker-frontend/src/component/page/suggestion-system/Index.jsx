@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PAGE_SIZE, API_LINK } from "../../util/Constants";
+import { PAGE_SIZE, API_LINK, EMP_API_LINK } from "../../util/Constants";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
@@ -23,9 +23,13 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Name: null,
-    Type: null,
+    "Project Title": null,
+    "Start Date": null,
+    "End Date": null,
+    "Period": null,
+    "Category": null,
     Status: null,
+    Creaby: null,
     Count: 0,
   },
 ];
@@ -60,9 +64,9 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
-
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [listEmployee, setListEmployee] = useState([]);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
@@ -176,6 +180,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Rejected",
+        reason: confirm,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -187,6 +192,42 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     }
   };
 
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
+          });
+  
+          const data = await response.json();
+          setListEmployee(
+            data.map((value) => ({
+              username: value.username,
+              npk: value.npk,
+              upt: value.upt_bagian,
+            }))
+          );
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListEmployee({});
+        }
+      };
+  
+      fetchData();
+    }, []);
+    
+  const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
+  console.log("DATA HANIF:", hanifData);
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -204,43 +245,55 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         } else {
           const role = userInfo.role.slice(0, 5);
           const inorole = userInfo.inorole;
-          const formattedData = data.map((value, index) => ({
-            Key: value.Key,
-            No: value["No"],
-            "Project Title": maxCharDisplayed(
-              decodeHtml(
-                decodeHtml(decodeHtml(value["Project Title"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              50
-            ),
-            Category: value["Category"],
-            "Start Date": formatDate(value["Start Date"], true),
-            "End Date": formatDate(value["End Date"], true),
-            Period: value["Period"],
-            Status: value["Status"],
-            Count: value["Count"],
-            Action:
-              role === "ROL03" &&
-              value["Status"] === "Draft" &&
-              value["Creaby"] === userInfo.username
-                ? ["Detail", "Edit", "Submit"]
-                : inorole === "Facilitator" &&
-                  value["Status"] === "Waiting Approval"
-                ? ["Detail", "Reject", "Approve"]
-                : ["Detail"],
-            Alignment: [
-              "center",
-              "left",
-              "left",
-              "left",
-              "right",
-              "center",
-              "center",
-              "center",
-              "center",
-              "center",
-            ],
-          }));
+          const formattedData = data.map((value, index) => {
+            const foundEmployee = listEmployee.find(
+              (emp) => emp.username === value["Creaby"]
+            );
+          
+            return {
+              Key: value.Key,
+              No: value["No"],
+              "Project Title": maxCharDisplayed(
+                decodeHtml(
+                  decodeHtml(decodeHtml(value["Project Title"]))
+                ).replace(/<\/?[^>]+(>|$)/g, ""),
+                50
+              ),
+              Category: value["Category"],
+              "Start Date": formatDate(value["Start Date"], true),
+              "End Date": formatDate(value["End Date"], true),
+              Period: value["Period"],
+              Status: value["Status"],
+              Creaby: value["Creaby"], // tetap tampilkan username
+              UPT: foundEmployee ? foundEmployee.upt : "-", // tambahkan ini
+              Count: value["Count"],
+              Action:
+                role === "ROL03" &&
+                value["Status"] === "Draft" &&
+                value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : inorole === "Facilitator" &&
+                    value["Status"] === "Waiting Approval"
+                  ? ["Detail", "Reject", "Approve"]
+                  : role === "ROL03" &&
+                    value["Status"] === "Rejected" &&
+                    value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : ["Detail"],
+              Alignment: [
+                "center",
+                "left",
+                "left",
+                "left",
+                "right",
+                "center",
+                "center",
+                "center",
+                "center",
+                "center",
+              ],
+            };
+          });          
           setCurrentData(formattedData);
         }
       } catch {
@@ -250,6 +303,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       }
     };
 
+    console.log("COOKIE", JSON.parse(decryptId(cookie))); 
     fetchData();
   }, [currentFilter]);
 

@@ -106,9 +106,17 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleSubmit = async (id) => {
     setIsError(false);
+    console.log("INI", currentData["Status"]);
+    let status;
+    if(currentData.Status === "Approved") {
+      status = "Rejected"
+    }
+    else {
+      status = "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed."
+    }
     const confirm = await SweetAlert(
       "Confirm",
-      "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.",
+      status,
       "warning",
       "SUBMIT",
       null,
@@ -137,6 +145,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleApprove = async (id) => {
     setIsError(false);
+    
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to approve this submission?",
@@ -178,6 +187,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
       UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
         id: id,
         set: "Rejected",
+        reason: confirm,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -231,7 +241,14 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : ["Detail"],
+                : role === "ROL03" &&
+                value["Status"] === "Rejected" &&
+                value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : role === "ROL01" &&
+                  value["Status"] === "Approved"
+                    ? ["Detail", "Submit"]
+                    : ["Detail"],
             Alignment: [
               "center",
               "left",
