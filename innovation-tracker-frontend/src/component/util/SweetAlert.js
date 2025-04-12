@@ -21,7 +21,7 @@ const SweetAlert = (
   } else {
     let inputElement = null;
 
-    if (confirmText === "REJECT") {
+    if (confirmText === "Reject") {
       inputElement = document.createElement("textarea");
       inputElement.placeholder = placeholder || "Please enter a reason for rejection...";
       inputElement.rows = 4;
@@ -42,7 +42,7 @@ const SweetAlert = (
         icon: icon,
         content: inputElement || undefined,
         buttons: {
-          cancel: "Batal",
+          cancel: "Cancel",
           confirm: {
             text: confirmText,
             value: true,
@@ -51,7 +51,7 @@ const SweetAlert = (
         dangerMode: icon === "warning",
       }).then((value) => {
         if (value) {
-          if (confirmText === "REJECT") {
+          if (confirmText === "Reject") {
             const result = inputElement.value.trim();
             if (result === "") {
               swal("Reason is required!", "Please enter a reason for rejection.", "error").then(() => {

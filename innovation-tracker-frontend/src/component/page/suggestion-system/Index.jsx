@@ -78,6 +78,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     npk: userInfo.npk,
   });
 
+  console.log("user info", userInfo);
+
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
@@ -112,7 +114,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.",
       "warning",
-      "SUBMIT",
+      "Submit",
       null,
       "",
       true
@@ -143,7 +145,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to approve this submission?",
       "warning",
-      "APPROVE",
+      "Approve",
       null,
       "",
       true
@@ -170,7 +172,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to reject this submission?",
       "warning",
-      "REJECT",
+      "Reject",
       null,
       "",
       true
@@ -226,8 +228,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       fetchData();
     }, []);
     
-  const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
-  console.log("DATA HANIF:", hanifData);
+  
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -243,6 +244,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
+          const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
+          console.log("DATA HANIF:", hanifData);
           const role = userInfo.role.slice(0, 5);
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => {
@@ -250,6 +253,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               (emp) => emp.username === value["Creaby"]
             );
           
+            console.log("FOND", foundEmployee);
             return {
               Key: value.Key,
               No: value["No"],
@@ -264,8 +268,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               "End Date": formatDate(value["End Date"], true),
               Period: value["Period"],
               Status: value["Status"],
-              Creaby: value["Creaby"], // tetap tampilkan username
-              UPT: foundEmployee ? foundEmployee.upt : "-", // tambahkan ini
               Count: value["Count"],
               Action:
                 role === "ROL03" &&
@@ -279,6 +281,11 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                     value["Status"] === "Rejected" &&
                     value["Creaby"] === userInfo.username
                   ? ["Detail", "Edit", "Submit"]
+                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi"
+                  ? ["Detail", "Reject", "Approve"]
+                  : role === "ROL01" &&
+                  value["Status"] === "Approved"
+                  ? ["Detail", "Submit"]
                   : ["Detail"],
               Alignment: [
                 "center",
@@ -302,11 +309,11 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         setIsLoading(false);
       }
     };
-
+    
     console.log("COOKIE", JSON.parse(decryptId(cookie))); 
     fetchData();
-  }, [currentFilter]);
-
+  }, [currentFilter, listEmployee]);
+  
   if (isLoading) return <Loading />;
 
   return (

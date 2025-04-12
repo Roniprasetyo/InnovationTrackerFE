@@ -142,7 +142,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to approve this submission?",
       "warning",
-      "APPROVE",
+      "Approve",
       null,
       "",
       true
@@ -169,7 +169,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to reject this submission?",
       "warning",
-      "REJECT",
+      "Reject",
       null,
       "",
       true
