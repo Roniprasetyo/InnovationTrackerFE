@@ -67,6 +67,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [listEmployee, setListEmployee] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
+  const [listReviewer, setListReviewer] = useState([]);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
@@ -108,13 +110,31 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     });
   }
 
+  const getStatusByKey = (key) => {
+    const data = currentData.find(item => item.Key === key);
+    return data ? data.Status : null;
+  };
+
   const handleSubmit = async (id) => {
     setIsError(false);
+    const tempStatus = getStatusByKey(id);
+    var alertStatus;
+
+    if(tempStatus === "Approved") {
+      alertStatus = "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
+    }
+    else {
+      alertStatus = "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
+    }
+    
     const confirm = await SweetAlert(
       "Confirm",
-      "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.",
+      alertStatus,
       "warning",
       "Submit",
+      listCategory,
+      tempStatus,
+      listReviewer,
       null,
       "",
       true
@@ -227,7 +247,58 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   
       fetchData();
     }, []);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListReviewer(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListReviewer({});
+        }
+      };
+  
+      fetchData();
+    }, []);
     
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+            p1: "Innovation Category",
+          });
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListCategory(data.filter((item) => item.Text.includes("Batch")));
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }
+      };
+  
+      fetchData();
+    }, []);
   
   useEffect(() => {
     const fetchData = async () => {

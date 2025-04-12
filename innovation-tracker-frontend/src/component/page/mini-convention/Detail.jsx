@@ -11,7 +11,7 @@ const listTypeSetting = [
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MasterSettingDetail({ onChangePage, withID }) {
+export default function MiniConventionDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +28,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingById", {
+        const data = await UseFetch(API_LINK + "MiniConvention/GetSettingById", {
           id: withID,
         });
 

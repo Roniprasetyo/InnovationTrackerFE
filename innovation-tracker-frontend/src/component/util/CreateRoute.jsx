@@ -15,6 +15,7 @@ const MasterFacilitator = lazy(() => import("../page/master-facilitator/Root"));
 const MasterPeriod = lazy(() => import("../page/master-period/Root"));
 const MasterPerusahaan = lazy(() => import("../page/master-perusahaan/Root"));
 const MasterStep = lazy(() => import("../page/master-step/Root"));
+const MiniKonvensi = lazy(() => import("../page/mini-convention/Root"));
 
 const routeList = [
   {
@@ -76,6 +77,10 @@ const routeList = [
   {
     path: "/step",
     element: <MasterStep />,
+  },
+  {
+    path: "/mini_konvensi",
+    element: <MiniKonvensi />,
   },
 ];
 
