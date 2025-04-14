@@ -141,21 +141,46 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
-        id: id,
-      })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert(
-              "Success",
-              "Thank you for submitting your registration form. Please wait until the next update",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
-          }
+      if(tempStatus !== "Approved") {
+        UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
+          id: id,
         })
-        .then(() => setIsLoading(false));
+          .then((data) => {
+            if (data === "ERROR" || data.length === 0) setIsError(true);
+            else {
+              SweetAlert(
+                "Success",
+                "Thank you for submitting your registration form. Please wait until the next update",
+                "success"
+              );
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
+          .then(() => setIsLoading(false));
+      }
+      else {
+        const reviewer = confirm.reviewer;
+        const batch = confirm.batch;
+        const category = confirm.category;
+        UseFetch(API_LINK + "RencanaSS/CreateKonvensiSS", {
+          reviewer,
+          batch,
+          id,
+          category,
+        })
+          .then((data) => {
+            if (data === "ERROR" || data.length === 0) setIsError(true);
+            else {
+              SweetAlert(
+                "Success",
+                "Thank you for submitting your registration form. Please wait until the next update",
+                "success"
+              );
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
+          .then(() => setIsLoading(false));
+      }
     }
   };
 

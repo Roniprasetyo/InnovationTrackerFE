@@ -97,8 +97,8 @@ const SweetAlert = (
     
       const batchGroup = createRadioGroup("Select Batch", "reviewOption", data);
       const categoryGroup = createRadioGroup("Select Category", "categoryOption", [
-        { value: "mini_konvensi", label: "Mini Konvensi" },
-        { value: "final_konvensi", label: "Final Konvensi" },
+        { value: "Mini konvensi", label: "Mini Konvensi" },
+        { value: "Final konvensi", label: "Final Konvensi" },
       ]);
       
       const radioGroup = document.createElement("div");

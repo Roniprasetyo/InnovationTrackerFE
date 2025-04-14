@@ -3,6 +3,7 @@ import MiniConventionIndex from "./Index";
 import MiniConventionAdd from "./Add";
 import MiniConventionDetail from "./Detail";
 import MiniConventionEdit from "./Edit";
+import MiniConventionScoring from "./Scoring";
 
 export default function MiniConvention() {
   const [pageMode, setPageMode] = useState("index");
@@ -11,7 +12,7 @@ export default function MiniConvention() {
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <MiniConventionIndex onChangePage={handleSetPageMode} />;
+        return <MiniConventionIndex onChangePage={handleSetPageMode} onScoring={handleScoring}/>;
       case "add":
         return <MiniConventionAdd onChangePage={handleSetPageMode} />;
       case "edit":
@@ -25,7 +26,20 @@ export default function MiniConvention() {
             withID={dataID}
           />
         );
+      // case "scoring":
+      //   return (
+      //     <MiniConventionScoring
+      //       onChangePage={handleSetPageMode}
+      //       withID={dataID}
+      //     />
+      //   );
     }
+  }
+
+  function handleScoring(_, id) {
+    const scoringUrl = `/scoring?id=${id}`;
+    setDataID(id);
+    window.open(scoringUrl, "_blank");
   }
 
   function handleSetPageMode(mode) {

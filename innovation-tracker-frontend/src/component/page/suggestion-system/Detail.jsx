@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -23,6 +23,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  const [listEmployee, setListEmployee] = useState([]);
+  const [userData, setUserData] = useState({});
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
@@ -83,6 +85,54 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
 
     fetchData();
   }, [withID]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            username: value.username,
+            npk: value.npk,
+            name: value.nama,
+            upt: value.upt_bagian,
+            jabatan: value.jabatan,
+          }))
+        );
+
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []); 
+        
+  useEffect(() => {
+    if (listEmployee.length > 0 && userInfo?.upt) {
+      const userData = listEmployee.find(
+        (value) =>
+          value.npk === formDataRef.current["NPK"]
+      );
+      setUserData(userData);
+    }
+  }, [listEmployee, userInfo]);
+
 
   if (isLoading) return <Loading />;
 
@@ -146,14 +196,14 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         <div className="col-md-4">
                           <Label
                             title="Name​"
-                            data={userInfo.nama}
+                            data={userData["name"]}
                           />
                         </div>
 
                         <div className="col-md-4">
                           <Label
                             title="Section​"
-                            data={userInfo.upt}
+                            data={userData["upt"]}
                           />
                         </div>
                       </div>

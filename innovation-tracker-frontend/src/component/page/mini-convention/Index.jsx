@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PAGE_SIZE, API_LINK } from "../../util/Constants";
+import { PAGE_SIZE, API_LINK, EMP_API_LINK } from "../../util/Constants";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
@@ -10,14 +10,22 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import { decodeHtml } from "../../util/Formatting";
+import {
+  decodeHtml,
+  formatDate,
+  maxCharDisplayed,
+  separator,
+} from "../../util/Formatting";
+import { decryptId } from "../../util/Encryptor";
+import Cookies from "js-cookie";
 
 const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Name: null,
-    Type: null,
+    "Submission Name": null,
+    "Project Title": null,
+    Batch: null,
     Status: null,
     Count: 0,
   },
@@ -38,16 +46,22 @@ const dataFilterJenis = [
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MiniConventionIndex({ onChangePage }) {
+export default function MiniConventionIndex({ onChangePage , onScoring}) {
+  const cookie = Cookies.get("activeUser");
+  let userInfo = "";
+  if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [isError, setIsError] = useState(false);
+  const [listEmployee, setListEmployee] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Name] asc",
-    status: "Aktif",
-    jenis: "",
+    sort: "[Submission Name] asc",
+    status: "Awaiting Scoring",
+    jenis: "Batch",
+    role: userInfo.role,
+    npk: userInfo.npk,
   });
 
   const searchQuery = useRef();
@@ -112,7 +126,7 @@ export default function MiniConventionIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "MiniConvention/GetSetting",
+          API_LINK + "MiniConvention/GetMiniConvention",
           currentFilter
         );
 
@@ -121,12 +135,36 @@ export default function MiniConventionIndex({ onChangePage }) {
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
-          const formattedData = data.map((value) => ({
-            ...value,
-            Name: decodeHtml(value.Name),
-            Action: ["Delete", "Detail", "Edit"],
-            Alignment: ["center", "left", "center", "center", "center"],
-          }));
+          const formattedData = data.map((value, index) => {
+            const foundEmployee = listEmployee.find(
+              (emp) => emp.npk === value["Submission Name"]
+            );
+          
+            console.log("FOND", foundEmployee);
+            return {
+              Key: value.Key,
+              No: value["No"],
+              "Submission Name": foundEmployee ? foundEmployee.name : value["Submission Name"] + " (N/A)",
+              "Project Title": maxCharDisplayed(
+                decodeHtml(
+                  decodeHtml(decodeHtml(value["Project Title"]))
+                ).replace(/<\/?[^>]+(>|$)/g, ""),
+                50
+              ),
+              Batch: value["Batch"],
+              Status: value["Status"],
+              Count: value["Count"],
+              Action: ["Detail", "Scoring"],
+              Alignment: [
+                "center",
+                "left",
+                "left",
+                "left",
+                "center",
+                "center",
+              ],
+            };
+          });  
           setCurrentData(formattedData);
         }
       } catch {
@@ -138,6 +176,43 @@ export default function MiniConventionIndex({ onChangePage }) {
 
     fetchData();
   }, [currentFilter]);
+
+  useEffect(() => {
+          const fetchData = async () => {
+            setIsError((prevError) => ({ ...prevError, error: false }));
+            try {
+              const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+                },
+              });
+      
+              const data = await response.json();
+              setListEmployee(
+                data.map((value) => ({
+                  username: value.username,
+                  npk: value.npk,
+                  name: value.nama,
+                  upt: value.upt_bagian,
+                  jabatan: value.jabatan,
+                }))
+              );
+  
+            } catch (error) {
+              window.scrollTo(0, 0);
+              setIsError((prevError) => ({
+                ...prevError,
+                error: true,
+                message: error.message,
+              }));
+              setListEmployee({});
+            }
+          };
+      
+          fetchData();
+        }, []);
 
   return (
     <>
@@ -212,6 +287,7 @@ export default function MiniConventionIndex({ onChangePage }) {
               onDelete={handleDelete}
               onDetail={onChangePage}
               onEdit={onChangePage}
+              onScoring={onScoring}
             />
             <Paging
               pageSize={PAGE_SIZE}
