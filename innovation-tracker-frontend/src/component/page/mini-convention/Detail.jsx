@@ -19,13 +19,13 @@ const inisialisasiData = [
   },
 ];
 
-export default function SuggestionSystemDetail({ onChangePage, withID }) {
+export default function MiniConventionDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
   const [userData, setUserData] = useState({});
-  const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -60,7 +60,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaSS/GetRencanaSSById",
+          API_LINK + "MiniConvention/GetMiniConventionById",
           {
             id: withID,
           }
@@ -87,43 +87,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   }, [withID]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        });
-
-        const data = await response.json();
-        setListEmployee(
-          data.map((value) => ({
-            username: value.username,
-            npk: value.npk,
-            name: value.nama,
-            upt: value.upt_bagian,
-            jabatan: value.jabatan,
-          }))
-        );
-
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListEmployee({});
-      }
-    };
-
-    fetchData();
-  }, []); 
-        
-  useEffect(() => {
     if (listEmployee.length > 0 && userInfo?.upt) {
       const userData = listEmployee.find(
         (value) =>
@@ -133,6 +96,42 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     }
   }, [listEmployee, userInfo]);
 
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
+          });
+  
+          const data = await response.json();
+          setListEmployee(
+            data.map((value) => ({
+              username: value.username,
+              npk: value.npk,
+              name: value.nama,
+              upt: value.upt_bagian,
+              jabatan: value.jabatan,
+            }))
+          );
+  
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListEmployee({});
+        }
+      };
+  
+      fetchData();
+    }, []);
 
   if (isLoading) return <Loading />;
 
@@ -172,7 +171,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">SS REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">SS CONVENTION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (

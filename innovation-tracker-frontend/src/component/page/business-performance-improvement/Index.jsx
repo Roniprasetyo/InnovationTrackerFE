@@ -169,7 +169,7 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to reject this submission?",
       "warning",
-      "REJECT",
+      "Reject",
       null,
       "",
       true
