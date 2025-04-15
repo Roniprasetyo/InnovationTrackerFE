@@ -296,6 +296,29 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      const sDate = new Date(formDataRef.current.sis_tanggalmulai);
+      const eDate = new Date(formDataRef.current.sis_tanggalakhir);
+      const selectedEndDate = new Date(periodDataRef.current.endPeriod);
+
+      if (sDate >= eDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid date: The end date must be after the start date!",
+        });
+        return;
+      }
+
+      if (eDate > selectedEndDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message:
+            "Invalid date: Selected end date exceeds the innovation period end date",
+        });
+        return;
+      }
+
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -447,6 +470,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                               forInput="sis_judul"
                               label="Title"
                               isRequired
+                              placeholder="Contains a brief explanation of the idea <i>(memuat penjelasan singkat tentang ide yang akan disampaikan)</i>"
                               value={formDataRef.current.sis_judul}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_judul}
@@ -532,6 +556,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                               forInput="sis_ruanglingkup"
                               label="Project Scope"
                               isRequired
+                              placeholder="Designing a plan with a focus on processes, results, and impact on the team <i>(merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team)</i>"
                               value={formDataRef.current.sis_ruanglingkup}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_ruanglingkup}
@@ -553,6 +578,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                               forInput="sis_kasus"
                               label="Bussiness Case"
                               isRequired
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.sis_kasus}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_kasus}
@@ -577,6 +603,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                               forInput="sis_masalah"
                               label="Problem Statement​"
                               isRequired
+                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.sis_masalah}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_masalah}
@@ -601,6 +628,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                               forInput="sis_tujuan"
                               label="Goal Statement​"
                               isRequired
+                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.sis_tujuan}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_tujuan}

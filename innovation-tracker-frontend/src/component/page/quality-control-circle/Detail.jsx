@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -27,6 +27,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -52,7 +53,37 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Status: "",
     Creaby: "",
     member: [{}],
+    Nama: "",
+    Section: "",
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(data);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,6 +115,16 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                 }))
               )
             : setCurrentData(inisialisasiData);
+          formDataRef.current = {
+            ...formDataRef.current,
+            Section: listEmployee.find(
+              (member) =>
+                member.npk ===
+                formDataRef.current.member.find(
+                  (pos) => pos.Position === "Leader"
+                )?.Npk
+            )?.upt_bagian,
+          };
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -98,7 +139,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, [withID]);
+  }, [withID, listEmployee]);
 
   if (isLoading) return <Loading />;
 
@@ -161,7 +202,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                         <div className="col-md-6">
                           <Label
                             title="Section"
-                            data={userInfo.upt}
+                            data={formDataRef.current.Section}
                           />
                         </div>
                         <div className="col-md-6">

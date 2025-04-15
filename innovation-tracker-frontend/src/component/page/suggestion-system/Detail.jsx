@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -26,10 +26,11 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
+  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
-    NPK:"",
+    NPK: "",
     Period: "",
     Category: "",
     CategoryImp: "",
@@ -49,19 +50,43 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     Safety: "",
     Moral: "",
     Status: "",
+    Nama: "",
+    Section: "",
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prev) => ({ ...prev, error: false }));
+
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(data);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError({ error: true, message: error.message });
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/GetRencanaSSById",
-          {
-            id: withID,
-          }
-        );
+        const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSById", {
+          id: withID,
+        });
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
@@ -82,6 +107,21 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
 
     fetchData();
   }, [withID]);
+
+  useEffect(() => {
+    const setUserInfo = async () => {
+      const userInfo =
+        listEmployee.find((value) => value.npk === formDataRef.current.NPK) ||
+        {};
+      formDataRef.current = {
+        ...formDataRef.current,
+        Nama: userInfo.nama,
+        Section: userInfo.upt_bagian,
+      };
+    };
+
+    setUserInfo();
+  }, [formDataRef.current.NPK, listEmployee]);
 
   if (isLoading) return <Loading />;
 
@@ -145,14 +185,14 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         <div className="col-md-4">
                           <Label
                             title="Name​"
-                            data={userInfo.nama}
+                            data={formDataRef.current.Nama}
                           />
                         </div>
 
                         <div className="col-md-4">
                           <Label
                             title="Section​"
-                            data={userInfo.upt}
+                            data={formDataRef.current.Section}
                           />
                         </div>
                       </div>
@@ -243,7 +283,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div><hr />
+                        </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -262,7 +303,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div><hr />
+                        </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Goal Statement​"

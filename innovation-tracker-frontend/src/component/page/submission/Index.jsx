@@ -67,11 +67,7 @@ export default function Submission() {
       <div className="container mb-5">
         <div className="p-3 mt-3">
           <div className="row bg-second rounded-5 shadow-sm mb-3">
-            <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/ss")}
-            >
+            <div className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3">
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">SS</div>
                 <div className="fw-medium">
@@ -86,30 +82,17 @@ export default function Submission() {
                   carried out by individuals within the scope of their work and
                   the benefits of Instantly felt by changemakers
                 </p>
-                <div className="row">
-                <div className="col-sm-4 bg-success rounded-5">
-                  <div
-                    className="d-flex align-items-center mx-3"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Icon name="download me-2 text-white" />
-                    <p className="fw-small text-white my-1">
-                      <small>
-                        <i>System Suggestion Requirements</i>
-                      </small>
-                    </p>
-                  </div>
-                </div>
-                </div>
+                <Button
+                  iconName="add"
+                  label="Submit System Suggestion"
+                  classType="success rounded-5"
+                  onClick={() => navigate("/submission/ss")}
+                />
               </div>
             </div>
           </div>
           <div className="row bg-second rounded-5 shadow-sm mb-3">
-            <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/qcc")}
-            >
+            <div className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3">
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">QCC</div>
                 <div className="fw-medium">
@@ -124,28 +107,17 @@ export default function Submission() {
                   Study Program/UPT/Unit, where the target project is relate
                   with the KPIs of each Study Program/UPT/Unit.
                 </p>
-                <div className="col-sm-4 bg-success rounded-5">
-                  <div
-                    className="d-flex align-items-center mx-3"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Icon name="download me-2 text-white" />
-                    <p className="fw-small text-white my-1">
-                      <small>
-                        <i>Quality Control Circle Requirements</i>
-                      </small>
-                    </p>
-                  </div>
-                </div>
+                <Button
+                  iconName="add"
+                  label="Submit Quality Control Circle"
+                  classType="success rounded-5"
+                  onClick={() => navigate("/submission/qcc")}
+                />
               </div>
             </div>
           </div>
           <div className="row bg-second rounded-5 shadow-sm mb-3">
-            <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/qcp")}
-            >
+            <div className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3">
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">QCP</div>
                 <div className="fw-medium">
@@ -160,27 +132,18 @@ export default function Submission() {
                   across Study Programs/UPTs/Units where the project target is
                   in accordance with the KPIs of each WaDir.
                 </p>
-                <div className="col-sm-4 bg-success rounded-5">
-                  <div
-                    className="d-flex align-items-center mx-3"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Icon name="download me-2 text-white" />
-                    <p className="fw-small text-white my-1">
-                      <small>
-                        <i>Quality Control Project Requirements</i>
-                      </small>
-                    </p>
-                  </div>
-                </div>
+                <Button
+                  iconName="add"
+                  label="Submit Quality Control Project"
+                  classType="success rounded-5"
+                  onClick={() => navigate("/submission/qcp")}
+                />
               </div>
             </div>
           </div>
           <div className="row bg-second rounded-5 shadow-sm mb-3">
             <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/vci")}
+              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
             >
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">VCI</div>
@@ -198,19 +161,12 @@ export default function Submission() {
                   including ASTRA Polytechnic as an educational institution that
                   is part of ASTRA's business unit
                 </p>
-                <div className="col-sm-4 bg-success rounded-5">
-                  <div
-                    className="d-flex align-items-center mx-3"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Icon name="download me-2 text-white" />
-                    <p className="fw-small text-white my-1">
-                      <small>
-                        <i>Value Chain Innovation Requirements</i>
-                      </small>
-                    </p>
-                  </div>
-                </div>
+                <Button
+                  iconName="add"
+                  label="Submit Value Chain Innovation"
+                  classType="success rounded-5"
+                  onClick={() => navigate("/submission/vci")}
+                />
               </div>
             </div>
           </div>

@@ -116,6 +116,9 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                   Key: index,
                   No: index + 1,
                   Name: item.Name,
+                  Section:
+                    listEmployee.find((value) => value.npk === item.Npk)
+                      ?.upt || "",
                   Count: memberCount,
                   Alignment: ["center", "left", "left"],
                 }))

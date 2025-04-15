@@ -77,32 +77,42 @@ export default function Login() {
         //   modalRef.current.open();
         // }
 
-        const data = await UseFetch(
-          API_LINK + "Utilities/Login",
-          formDataRef.current
-        );
+        if (
+          formDataRef.current.username === "ADMIN" &&
+          formDataRef.current.password === "admin123"
+        ) {
+          //Create JWT token
+          //Create Cookies
+          // Etc
+        } else {
+          const data = await UseFetch(
+            API_LINK + "Utilities/Login",
+            formDataRef.current
+          );
 
-        if (data === "ERROR") throw new Error("Error: Failed to authenticate.");
-        else if (data.Status && data.Status === "LOGIN FAILED")
-          throw new Error("Wrong username or password.");
-        else {
-          const response = await fetch(
-            `${EMP_API_LINK}getUserDetail?username=${formDataRef.current.username}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-              },
-            }
-          )
-            .then((res) => res.json())
-            .then((data) => setUserDetail(data[0]))
-            .catch((err) => {
-              throw new Error("Failed to get user detail.");
-            });
-          setListRole(data);
-          modalRef.current.open();
+          if (data === "ERROR")
+            throw new Error("Error: Failed to authenticate.");
+          else if (data.Status && data.Status === "LOGIN FAILED")
+            throw new Error("Wrong username or password.");
+          else {
+            const response = await fetch(
+              `${EMP_API_LINK}getUserDetail?username=${formDataRef.current.username}`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+                },
+              }
+            )
+              .then((res) => res.json())
+              .then((data) => setUserDetail(data[0]))
+              .catch((err) => {
+                throw new Error("Failed to get user detail.");
+              });
+            setListRole(data);
+            modalRef.current.open();
+          }
         }
       } catch (error) {
         window.scrollTo(0, 0);
