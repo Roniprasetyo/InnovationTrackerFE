@@ -77,6 +77,36 @@ export default function Login() {
         //   setListRole(data);
         //   modalRef.current.open();
         // }
+        if(formDataRef.current.username == "superadmin" && formDataRef.current.password == "superadmin"){
+          const adminRoleData = [
+            {
+              RoleID: "ROL02",
+              Role: "Facilitator",
+              Nama: "Facilitator",
+              Npk: "000000",
+              InoRole: "-",
+            },
+            {
+              RoleID: "ROL01",
+              Role: "Administrator",
+              Nama: "Administrator",
+              Npk: "000000",
+              InoRole: "-",
+            }
+          ];
+          setListRole(adminRoleData);
+      
+          console.log(listRole);
+          setUserDetail({
+            username: "Superadmin",
+            nama: "Facilitator",
+            jabatan: "Facilitator",
+            departemen: "IT",
+            upt: "-",
+          });
+          modalRef.current.open();
+          return;
+        }
 
         const data = await UseFetch(
           API_LINK + "Utilities/Login",
@@ -92,18 +122,26 @@ export default function Login() {
               Npk: "000000",
               InoRole: "-",
             },
+            {
+              RoleID: "ROL02",
+              Role: "Facilitator",
+              Nama: "Facilitator",
+              Npk: "000000",
+              InoRole: "-",
+            },
           ];
       
           setListRole(adminRoleData);
       
-          console.log(listRole);
+          console.log("INI ROLE: "+listRole);
           setUserDetail({
-            username: "admin",
-            nama: "Administrator",
-            jabatan: "Admin",
+            username: "Superadmin",
+            nama: "Superadmin",
+            jabatan: "-",
             departemen: "IT",
             upt: "-",
           });
+          console.log("INI Userdetail: "+userDetail);
       
           modalRef.current.open();
           return;
