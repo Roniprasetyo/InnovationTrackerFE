@@ -92,6 +92,20 @@ export default function Login() {
               Nama: "Administrator",
               Npk: "000000",
               InoRole: "-",
+            },
+            {
+              RoleID: "ROL04",
+              Role: "Judges",
+              Nama: "Judges",
+              Npk: "000000",
+              InoRole: "-",
+            },
+            {
+              RoleID: "ROL03",
+              Role: "Employee",
+              Nama: "Employee",
+              Npk: "000000",
+              InoRole: "-",
             }
           ];
           setListRole(adminRoleData);
@@ -99,8 +113,8 @@ export default function Login() {
           console.log(listRole);
           setUserDetail({
             username: "Superadmin",
-            nama: "Facilitator",
-            jabatan: "Facilitator",
+            nama: "Superadmin",
+            jabatan: "Superadmin",
             departemen: "IT",
             upt: "-",
           });
@@ -113,45 +127,10 @@ export default function Login() {
           formDataRef.current
         );
 
-        if (formDataRef.current.username.toLowerCase() === "admin") {
-          const adminRoleData = [
-            {
-              RoleID: "ROL01",
-              Role: "Administrator",
-              Nama: "Administrator",
-              Npk: "000000",
-              InoRole: "-",
-            },
-            {
-              RoleID: "ROL02",
-              Role: "Facilitator",
-              Nama: "Facilitator",
-              Npk: "000000",
-              InoRole: "-",
-            },
-          ];
-      
-          setListRole(adminRoleData);
-      
-          console.log("INI ROLE: "+listRole);
-          setUserDetail({
-            username: "Superadmin",
-            nama: "Superadmin",
-            jabatan: "-",
-            departemen: "IT",
-            upt: "-",
-          });
-          console.log("INI Userdetail: "+userDetail);
-      
-          modalRef.current.open();
-          return;
-        }
-
         if (data === "ERROR") throw new Error("Error: Failed to authenticate.");
         else if (data.Status && data.Status === "LOGIN FAILED")
           throw new Error("Wrong username or password.");
         else {
-
           const response = await fetch(
             `${EMP_API_LINK}getUserDetail?username=${formDataRef.current.username}`,
             {
