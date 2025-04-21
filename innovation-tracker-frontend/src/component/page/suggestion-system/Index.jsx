@@ -200,6 +200,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Approved",
+        reason: null,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -297,6 +298,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   
       fetchData();
     }, []);
+
+    console.log("DATA ALL ", currentData);
     
     useEffect(() => {
       const fetchData = async () => {
@@ -377,7 +380,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                     value["Status"] === "Rejected" &&
                     value["Creaby"] === userInfo.username
                   ? ["Detail", "Edit", "Submit"]
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi"
+                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Waiting Approval"
                   ? ["Detail", "Reject", "Approve"]
                   : role === "ROL01" &&
                   value["Status"] === "Approved"
