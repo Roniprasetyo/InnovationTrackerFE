@@ -59,7 +59,7 @@ export default function MiniConventionIndex({ onChangePage , onScoring}) {
     query: "",
     sort: "[Submission Name] asc",
     status: "Awaiting Scoring",
-    jenis: "Batch",
+    jenis: "Mini Convention",
     role: userInfo.role,
     npk: userInfo.npk,
   });
