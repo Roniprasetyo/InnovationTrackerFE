@@ -24,6 +24,7 @@ const inisialisasiData = [
   {
     Key: null,
     Name: null,
+    Section: null,
     Count: 0,
   },
 ];
@@ -35,19 +36,16 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   console.log(userInfo);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  
 
-//   const [listCategory, setListCategory] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
+  const [listEmployeeFull, setListEmployeeFull] = useState([]);
   const [listFacil, setListFacil] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
-//   const [listImpCategory, setListImpCategory] = useState([]);
-  const [ListCompany1, setListCompany1] = useState([]);
+  const [listCompany, setListCompany] = useState([]);
   const [ListCompany2, setListCompany2] = useState([]);
-
 
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
@@ -57,10 +55,10 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciMoral: false,
   });
 
-   const periodDataRef = useRef({
-      startPeriod: "",
-      endPeriod: "",
-    });
+  const periodDataRef = useRef({
+    startPeriod: "",
+    endPeriod: "",
+  });
 
   const handleCheckboxChange = (key) => {
     if (checkedStates[key]) formDataRef.current[key] = "";
@@ -105,7 +103,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
-
   const userSchema = object({
     rciId: number().required("required"),
     setId: number().required("required"),
@@ -114,9 +111,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string()
-      .max(100, "maximum 100 characters")
-      .required("required"),
+    rciProjBenefit: string().max(13, "maximum 10 digits"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -136,18 +131,48 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     rciPerusahaan1: string().required("required"),
-    rciPerusahaan2: string().required("required"),
+    rciPerusahaan2: string(),
   });
 
   const memberSchema = object({
     rciMember: string().required("required"),
   });
 
- 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prev) => ({ ...prev, error: false }));
+
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployeeFull(data);
+        setListEmployee(
+          data.map((value) => ({
+            Value: value.npk,
+            Text: value.npk + " - " + value.nama + " - " + value.upt_bagian,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError({ error: true, message: error.message });
+        setListEmployee({});
+        setListEmployeeFull({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -172,8 +197,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListPeriod([]);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -183,7 +206,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterFacilitator/GetListFacilitator",
@@ -203,8 +225,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListFacil([]);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -212,72 +232,30 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   }, []);
 
   useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        setIsLoading(true);
-        try {
-          let filteredData;
-          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            },
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              setListEmployee(
-                data.map((value) => ({
-                  Value: value.npk,
-                  Text: value.npk + " - " + value.nama,
-                }))
-              );
-            });
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListEmployee([]);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-  
-      fetchData();
-    }, []);
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetListPerusahaan"
+        );
 
-    useEffect(() => {
-        const fetchData = async () => {
-          setIsError((prevError) => ({ ...prevError, error: false }));
-          setIsLoading(true);
-          try {
-            const data = await UseFetch(
-              API_LINK + 'RencanaCircle/GetListPerusahaan'
-            );
-      
-            if (data === 'ERROR') {
-              throw new Error('Error: Failed to get the company data.');
-            } else {
-              setListCompany1(data); 
-              setListCompany2(data); 
-            }
-          } catch (error) {
-            window.scrollTo(0, 0); 
-            setIsError((prevError) => ({
-              ...prevError,
-              error: true,
-              message: error.message,
-            }));
-            setListCompany1([]);  
-          } finally {
-            setIsLoading(false);
-          }
-        };
-        fetchData();
-  }, []);  
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the company data.");
+        } else {
+          setListCompany(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCompany([]);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -292,9 +270,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data VCI."
-          );
+          throw new Error("Terjadi kesalahan: Gagal mengambil data VCI.");
         } else {
           formDataRef.current = {
             rciId: data["Key"],
@@ -323,22 +299,29 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
             rciPerusahaan1: data["Company 1"],
-            rciPerusahaan2: data["Company 2"],
+            rciPerusahaan2: data["Company 2"] || "",
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
           );
           const memberCount = members.length || 0;
-          setCurrentData(
-            members?.map((item, index) => ({
-              Key: item.Npk,
-              No: index + 1,
-              Name: item.Npk + " - " + item.Name,
-              Count: memberCount,
-              Action: ["Delete"],
-              Alignment: ["center", "left", "center", "center"],
-            })) || []
-          );
+          if (memberCount > 0) {
+            setCurrentData(
+              members?.map((item, index) => ({
+                Key: item.Npk,
+                No: index + 1,
+                Name: item.Npk + " - " + item.Name,
+                Section:
+                  listEmployeeFull.find((value) => value.npk === item.Npk)
+                    ?.upt_bagian || "",
+                Count: memberCount,
+                Action: ["Delete"],
+                Alignment: ["center", "left", "left", "center", "center"],
+              })) || []
+            );
+          } else {
+            setCurrentData(inisialisasiData);
+          }
           setCheckedStates({
             rciQuality: data["Quality"] ? true : false,
             rciCost: data["Cost"] ? true : false,
@@ -346,8 +329,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
             rciSafety: data["Safety"] ? true : false,
             rciMoral: data["Moral"] ? true : false,
           });
-        //   document.getElementById("rciLeader").value = data["member"].find((item) => item.Position === "Leader")
-        //   .Npk;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -356,16 +337,72 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
+      }
+    };
+
+    fetchData();
+  }, [withID, listEmployeeFull]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+          p1: selectedPeriod,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          const sDate = data[0].perAwal.split("T")[0];
+          const eDate = data[0].perAkhir.split("T")[0];
+          if (data[0]) {
+            periodDataRef.current = {
+              startPeriod: sDate,
+              endPeriod: eDate,
+            };
+          }
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
       } finally {
-        console.log(formDataRef.current);
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [selectedPeriod]);
 
   const handleAddMember = (id, Name) => {
+    if (
+      id === null ||
+      id === undefined ||
+      Name === null ||
+      Name === undefined
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Please select a member",
+      });
+      return;
+    }
+    if (id === userInfo.npk) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a leader",
+      });
+      return;
+    }
+    if (
+      formDataRef.current.rciFacil !== "" &&
+      id === formDataRef.current.rciFacil
+    ) {
+      setIsError({
+        error: true,
+        message: "Invalid member: Selected employee is a facilitator",
+      });
+      return;
+    }
     if (currentData[0].Count === 0) {
       const data = [
         {
@@ -378,7 +415,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
       const formattedData = data.map((value) => ({
         ...value,
         Action: ["Delete"],
-        Alignment: ["center", "left", "center", "center"],
+        Alignment: ["center", "left", "left", "center", "center"],
       }));
       setCurrentData(formattedData);
     } else {
@@ -397,10 +434,10 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         {
           Key: id,
           No: prevData.length + 1,
-          Name,
+          Name: Name,
           Count: prevData.length + 1,
           Action: ["Delete"],
-          Alignment: ["center", "left", "center", "center"],
+          Alignment: ["center", "left", "left", "center", "center"],
         },
       ]);
     }
@@ -461,29 +498,58 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const newMemData = [
-      { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
-      { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-      ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
-    ];
-
-    console.log(newMemData);
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
 
-    delete formDataRef.current.rciFacil;
-    delete formDataRef.current.rciLeader;
-
-    const body = {
-      ...formDataRef.current,
-      rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
-      member: newMemData,
-    };
-    console.log(body);
     if (Object.values(validationErrors).every((error) => !error)) {
+      if (currentData.length < 2) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid member: Please add at least 2 members!",
+        });
+        return;
+      }
+      const sDate = new Date(formDataRef.current.rciStartDate);
+      const eDate = new Date(formDataRef.current.rciEndDate);
+      const innovationEndPeriod = new Date(periodDataRef.current.endPeriod);
+
+      if (sDate >= eDate) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message: "Invalid date: The end date must be after the start date!",
+        });
+        return;
+      }
+
+      if (eDate >= innovationEndPeriod) {
+        window.scrollTo(0, 0);
+        setIsError({
+          error: true,
+          message:
+            "Invalid date: Selected end date outrange the innovation period end date",
+        });
+        return;
+      }
+
+      const newMemData = [
+        { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
+        { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
+        ...currentData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
+      ];
+      delete formDataRef.current.rciFacil;
+      delete formDataRef.current.rciLeader;
+
+      const body = {
+        ...formDataRef.current,
+        rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
+        member: newMemData,
+      };
+      console.log(body);
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -606,8 +672,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                             <DropDown
                               forInput="rciPerusahaan1"
                               label="Company 1"
-                              type='pilih'
-                              arrData={ListCompany1}
+                              type="pilih"
+                              arrData={listCompany}
                               isRequired
                               value={formDataRef.current.rciPerusahaan1}
                               onChange={handleInputChange}
@@ -618,9 +684,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                             <DropDown
                               forInput="rciPerusahaan2"
                               label="Company 2"
-                              arrData={ListCompany2}
-                              type='pilih'
-                              isRequired
+                              arrData={listCompany}
+                              type="pilih"
                               value={formDataRef.current.rciPerusahaan2}
                               onChange={handleInputChange}
                               errorMessage={errors.rciPerusahaan2}
@@ -640,7 +705,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                             />
                           </div>
                           <div className="col-md-6">
-                          <SearchDropdown
+                            <SearchDropdown
                               forInput="rciLeader"
                               label="Leader"
                               placeHolder="Leader"
@@ -705,7 +770,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciTitle}
                             />
                           </div>
-                            <div className="col-lg-4">
+                          <div className="col-lg-4">
                             <Input
                               type="date"
                               forInput="rciStartDate"
@@ -770,7 +835,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciCase}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="rciCaseFile"
                               label="Bussiness Case Document (.pdf)"
@@ -783,6 +848,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciCaseFile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciProblem"
@@ -792,7 +858,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciProblem}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="rciProblemFile"
                               label="Problem Statement​ Document (.pdf)"
@@ -805,6 +871,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciProblemFile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciGoal"
@@ -842,7 +909,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                             <Input
                               type="text"
                               forInput="rciProjBenefit"
-                              label="Project Benefit"
+                              label="Project Benefit (Rp)"
                               value={formDataRef.current.rciProjBenefit}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProjBenefit}
@@ -867,7 +934,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                                   forInput="rciQuality"
                                   label="Quality"
                                   isDisabled={!checkedStates.rciQuality}
-                                  placeholder="Quality"
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
@@ -887,7 +953,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                                   forInput="rciCost"
                                   label="Cost"
                                   isDisabled={!checkedStates.rciCost}
-                                  placeholder="Cost"
                                   value={formDataRef.current.rciCost}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciCost}
@@ -908,7 +973,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                                   type="text"
                                   forInput="rciDelivery"
                                   label="Delivery"
-                                  placeholder="Delivery"
                                   isDisabled={!checkedStates.rciDelivery}
                                   value={formDataRef.current.rciDelivery}
                                   onChange={handleInputChange}
@@ -936,7 +1000,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                                   forInput="rciSafety"
                                   label="Safety"
                                   isDisabled={!checkedStates.rciSafety}
-                                  placeholder="Safety"
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
@@ -958,7 +1021,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                                   forInput="rciMoral"
                                   label="Moral"
                                   isDisabled={!checkedStates.rciMoral}
-                                  placeholder="Moral"
                                   value={formDataRef.current.rciMoral}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciMoral}

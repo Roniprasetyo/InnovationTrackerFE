@@ -92,7 +92,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
               className={`form-control ${isRound ? "rounded-5" : ""} ${
                 errorMessage ? "is-invalid" : ""
               }`}
-              placeholder={`-- Choose ${placeHolder} --`}
+              placeholder={`-- Select ${placeHolder} --`}
               value={searchTerm}
               onChange={handleInputChange}
               onFocus={() => setDropdownOpen(true)}

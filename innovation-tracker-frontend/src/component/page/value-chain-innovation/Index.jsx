@@ -23,16 +23,22 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Name: null,
-    Type: null,
+    "Circle Name": null,
+    "Project Title": null,
+    "Project Benefit": null,
+    "Company 1": null,
+    "Company 2": null,
+    "Start Date": null,
+    "End Date": null,
+    Period: null,
     Status: null,
     Count: 0,
   },
 ];
 
 const dataFilterSort = [
-  { Value: "[Team Name] asc", Text: "Team Name [↑]" },
-  { Value: "[Team Name] desc", Text: "Team Name [↓]" },
+  { Value: "[Circle Name] asc", Text: "Circle Name [↑]" },
+  { Value: "[Circle Name] desc", Text: "Circle Name [↓]" },
   { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
   { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
   { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
@@ -47,8 +53,8 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
-  { Value: "Revision", Text: "Revision" },
   { Value: "Rejected", Text: "Rejected" },
 ];
 
@@ -65,7 +71,6 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
     query: "",
     sort: "[Project Title] asc",
     status: "",
-    jenis: "VCI",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -128,6 +133,60 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
     }
   };
 
+  const handleApprove = async (id) => {
+    setIsError(false);
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to approve this submission?",
+      "warning",
+      "APPROVE",
+      null,
+      "",
+      true
+    );
+
+    if (confirm) {
+      UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
+        id: id,
+        set: "Approved",
+      })
+        .then((data) => {
+          if (data === "ERROR" || data.length === 0) setIsError(true);
+          else {
+            handleSetCurrentPage(currentFilter.page);
+          }
+        })
+        .then(() => setIsLoading(false));
+    }
+  };
+
+  const handleReject = async (id) => {
+    setIsError(false);
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to reject this submission?",
+      "warning",
+      "REJECT",
+      null,
+      "",
+      true
+    );
+
+    if (confirm) {
+      UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
+        id: id,
+        set: "Rejected",
+      })
+        .then((data) => {
+          if (data === "ERROR" || data.length === 0) setIsError(true);
+          else {
+            handleSetCurrentPage(currentFilter.page);
+          }
+        })
+        .then(() => setIsLoading(false));
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -144,6 +203,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
           setCurrentData(inisialisasiData);
         } else {
           const role = userInfo.role.slice(0, 5);
+          const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
             No: index + 1,
@@ -153,7 +213,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               50
             ),
             "Project Benefit": separator(value["Project Benefit"]),
-            "Company 1": value["Company 1"] ? value["Company 1"] : "-", 
+            "Company 1": value["Company 1"] ? value["Company 1"] : "-",
             "Company 2": value["Company 2"] ? value["Company 2"] : "-",
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
@@ -165,15 +225,17 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
-                : role === "ROL01" && value["Status"] === "Waiting Approval"
+                : inorole === "Facilitator" &&
+                  value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
                 : ["Detail"],
             Alignment: [
               "center",
               "left",
               "left",
-              "left",
               "right",
+              "center",
+              "center",
               "center",
               "center",
               "center",
@@ -220,12 +282,16 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          <Button
-            iconName="add"
-            label="Register"
-            classType="success"
-            onClick={() => onChangePage("add")}
-          />
+          {userInfo.role !== "ROL01" ? (
+            <Button
+              iconName="add"
+              label="Register"
+              classType="success"
+              onClick={() => onChangePage("add")}
+            />
+          ) : (
+            ""
+          )}
           <Input
             ref={searchQuery}
             forInput="pencarianSetting"
@@ -245,7 +311,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Team Name] asc"
+              defaultValue="[Project Title] asc"
             />
             <DropDown
               ref={searchFilterStatus}
@@ -253,7 +319,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               label="Status"
               type="semua"
               arrData={dataFilterStatus}
-              defaultValue="Draft"
+              defaultValue=""
             />
           </Filter>
         </div>
@@ -264,6 +330,8 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
             data={currentData}
             onDetail={onChangePage}
             onSubmit={handleSubmit}
+            onApprove={handleApprove}
+            onReject={handleReject}
             onEdit={onChangePage}
           />
           <Paging

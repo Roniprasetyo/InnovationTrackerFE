@@ -108,7 +108,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string().max(100, "maximum 100 characters"),
+    rciProjBenefit: string().max(13, "maximum 10 digits"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -136,49 +136,40 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
+      setIsError((prev) => ({ ...prev, error: false }));
+
       try {
-        let filteredData;
         const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
           },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            filteredData = data.filter(
-              (item) => item.upt_bagian === userInfo.upt
-            );
-          });
+        });
+
+        const data = await response.json();
+        const filteredData =
+          data?.filter((item) => item.upt_bagian === userInfo.upt) || [];
+
         setListEmployee(
-          filteredData.map((value) => ({
-            Value: value.npk,
-            Text: value.npk + " - " + value.nama,
+          filteredData.map(({ npk, nama }) => ({
+            Value: npk,
+            Text: `${npk} - ${nama}`,
           }))
         );
       } catch (error) {
         window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
+        setIsError({ error: true, message: error.message });
+        setListEmployee([]);
       }
     };
 
     fetchData();
-  }, []);
+  }, [userInfo.upt]);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Innovation Category",
@@ -197,8 +188,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListCategory({});
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -208,7 +197,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
           p1: "Knowledge Category",
@@ -217,7 +205,12 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListImpCategory(data);
+          setListImpCategory(
+            data.map((item) => ({
+              ...item,
+              Text: decodeHtml(item.Text),
+            }))
+          );
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -227,8 +220,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListImpCategory({});
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -238,7 +229,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -258,8 +248,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListPeriod({});
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -269,7 +257,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterFacilitator/GetListFacilitator",
@@ -289,8 +276,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListFacil({});
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -300,7 +285,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
       try {
         const data = await UseFetch(
           API_LINK + "RencanaCircle/GetRencanaQCPById",
@@ -370,18 +354,15 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-      } finally {
-        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [withID]);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
           p1: selectedPeriod,
@@ -392,10 +373,12 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         } else {
           const sDate = data[0].perAwal.split("T")[0];
           const eDate = data[0].perAkhir.split("T")[0];
-          periodDataRef.current = {
-            startPeriod: sDate,
-            endPeriod: eDate,
-          };
+          if (data[0]) {
+            periodDataRef.current = {
+              startPeriod: sDate,
+              endPeriod: eDate,
+            };
+          }
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -538,17 +521,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const newMemData = [
-      { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
-      { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-      ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
-    ];
-
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
+
+    console.log(formDataRef.current);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       if (memberData.length < 2) {
@@ -561,8 +540,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       }
       const sDate = new Date(formDataRef.current.rciStartDate);
       const eDate = new Date(formDataRef.current.rciEndDate);
-      const selectedStartPeriod = new Date(periodDataRef.current.startPeriod);
-      const selectedEndPeriod = new Date(periodDataRef.current.endPeriod);
+      const innovationEndPeriod = new Date(periodDataRef.current.endPeriod);
 
       if (sDate >= eDate) {
         window.scrollTo(0, 0);
@@ -573,15 +551,21 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         return;
       }
 
-      if (eDate >= selectedEndPeriod) {
+      if (eDate >= innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected start date or end date outrange the selected period",
+            "Invalid date: Selected end date outrange the innovation period end date",
         });
         return;
       }
+
+      const newMemData = [
+        { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
+        { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
+        ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
+      ];
 
       formDataRef.current = {
         ...formDataRef.current,
@@ -712,7 +696,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             <Input
                               type="text"
                               forInput="setName"
-                              label="Prodi/UPT/Dep​"
+                              label="Section"
                               isDisabled
                               value={userInfo.upt}
                             />
@@ -808,11 +792,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             />
                           </div>
                           <div className="col-lg-6">
-                            <DropDown
+                            <SearchDropdown
                               forInput="setId2"
                               label="Knowledge Category"
+                              placeHolder="Knowledge Category"
                               arrData={listImpCategory}
                               isRequired
+                              isRound
                               value={formDataRef.current.setId2}
                               onChange={handleInputChange}
                               errorMessage={errors.setId2}
@@ -824,11 +810,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="rciStartDate"
                               label="Start Date"
                               placeholder={
-                                "Selected period starts on " +
-                                formatDate(
-                                  periodDataRef.current.startPeriod,
-                                  true
-                                )
+                                periodDataRef.current.startPeriod
+                                  ? "Innovation period starts on " +
+                                    formatDate(
+                                      periodDataRef.current.startPeriod,
+                                      true
+                                    )
+                                  : ""
                               }
                               isRequired
                               value={formDataRef.current.rciStartDate}
@@ -842,11 +830,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="rciEndDate"
                               label="End Date"
                               placeholder={
-                                "Selected period ends on " +
-                                formatDate(
-                                  periodDataRef.current.endPeriod,
-                                  true
-                                )
+                                periodDataRef.current.endPeriod
+                                  ? "Selected period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.endPeriod,
+                                      true
+                                    )
+                                  : ""
                               }
                               isRequired
                               value={formDataRef.current.rciEndDate}
@@ -892,12 +882,13 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             <TextArea
                               forInput="rciCase"
                               label="Bussiness Case"
+                              isRequired
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4  mb-3">
                             <FileUpload
                               forInput="rciCaseFile"
                               label="Bussiness Case Document (.pdf)"
@@ -910,16 +901,18 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciCaseFile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciProblem"
                               label="Problem Statement​"
+                              isRequired
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="rciProblemFile"
                               label="Problem Statement​ Document (.pdf)"
@@ -932,10 +925,12 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               errorMessage={errors.rciProblemFile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciGoal"
                               label="Goal Statement​"
+                              isRequired
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}
@@ -961,7 +956,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                   <div className="col-lg-12">
                     <div className="card mb-3">
                       <div className="card-header">
-                        <h5 className="fw-medium">Circle Benefit</h5>
+                        <h5 className="fw-medium">Project Benefit</h5>
                       </div>
                       <div className="card-body">
                         <div className="row">
@@ -969,7 +964,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                             <Input
                               type="text"
                               forInput="rciProjBenefit"
-                              label="Circle Benefit"
+                              label="Project Benefit (Rp)"
                               value={formDataRef.current.rciProjBenefit}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProjBenefit}

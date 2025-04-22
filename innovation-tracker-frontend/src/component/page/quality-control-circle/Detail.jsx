@@ -57,7 +57,6 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
       try {
         const data = await UseFetch(
           API_LINK + "RencanaCircle/GetRencanaQCPById",
@@ -99,7 +98,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [withID]);
 
   if (isLoading) return <Loading />;
 
@@ -161,8 +160,8 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                         </div>
                         <div className="col-md-6">
                           <Label
-                            title="Prodi/UPT/Dep​"
-                            data="Manajemen Informatika"
+                            title="Section"
+                            data={userInfo.upt}
                           />
                         </div>
                         <div className="col-md-6">
@@ -276,6 +275,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -295,6 +295,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Goal Statement​"
@@ -325,7 +326,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                       <div className="row">
                         <div className="col-lg-12">
                           <Label
-                            title="Project Benefit"
+                            title="Project Benefit (Rp)"
                             data={
                               separator(
                                 formDataRef.current["Project Benefit"]

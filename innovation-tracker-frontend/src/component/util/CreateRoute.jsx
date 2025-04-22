@@ -7,6 +7,7 @@ const Submission = lazy(() => import("../page/submission/Index"));
 const QualityControlProject = lazy(() => import("../page/quality-control-project/Root"));
 const QualityControlCircle = lazy(() => import("../page/quality-control-circle/Root"));
 const SuggestionSystem = lazy(() => import("../page/suggestion_system/Root"));
+const ValueChainInnovation = lazy(() => import("../page/value-chain-innovation/Root"));
 const MasterSetting = lazy(() => import("../page/master-setting/Root"));
 const MasterUser = lazy(() => import("../page/master-user/Root"));
 const MasterFacilitator = lazy(() => import("../page/master-facilitator/Root"));
@@ -53,6 +54,10 @@ const routeList = [
   {
     path: "/submission/qcc",
     element: <QualityControlCircle />,
+  },
+  {
+    path: "/submission/vci",
+    element: <ValueChainInnovation />,
   },
   {
     path: "/setting",

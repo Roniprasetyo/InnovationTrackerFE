@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -15,6 +15,7 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
+    Section: null,
     Count: 0,
   },
 ];
@@ -27,6 +28,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -58,6 +60,39 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            npk: value.npk,
+            upt: value.upt_bagian,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
         const data = await UseFetch(
@@ -82,7 +117,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                   No: index + 1,
                   Name: item.Name,
                   Count: memberCount,
-                  Alignment: ["center", "left"],
+                  Alignment: ["center", "left", "left"],
                 }))
               )
             : setCurrentData(inisialisasiData);
@@ -100,7 +135,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []);
+  }, [withID, listEmployee]);
 
   if (isLoading) return <Loading />;
 
@@ -271,6 +306,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -290,6 +326,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Goal Statement​"
@@ -320,7 +357,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                       <div className="row">
                         <div className="col-lg-12">
                           <Label
-                            title="Project Benefit"
+                            title="Project Benefit (Rp)"
                             data={
                               separator(
                                 formDataRef.current["Project Benefit"]
