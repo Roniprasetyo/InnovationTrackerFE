@@ -73,7 +73,7 @@ export default function MiniConventionScoring({ onChangePage }) {
   const userSchema = object({
     Key: number().required("required"),
     NPK: string().required("required"),
-    
+
     ino_category: string().required("required"),
     know_category: string().required("required"),
     sis_tanggalmulai: date().typeError("invalid date").required("required"),
@@ -384,23 +384,34 @@ export default function MiniConventionScoring({ onChangePage }) {
                               );
                             })}
                           </div>
-                          <div className="ps-4" style={{ width: '20%' }}>
-                            <div className="d-flex flex-column gap-3" style={{height:'100px'}}>
-                              <div className="card fw-medium text-center" style={{width:'200px'}}>
-                                Ka.Unit/Ka.UPT
-                                <hr />
-                                <h5>{totalScore}</h5>
+                          <div className="ps-4 d-flex flex-column gap-3" style={{ width: '20%' }}>
+                            <div className="card text-center">
+                              <div className="card-header">
+                                <h8 className="fw-medium">Score</h8>
                               </div>
-                              <div className="card fw-medium text-center" style={{width:'200px'}}>
-                                Ka.Prodi/Ka.Dept
-                                <hr />
-                                <h5>{0}</h5>
+                              <div className="card-body d-flex flex-column gap-3">
+                                <div className="card fw-medium text-center">
+                                  Ka.Unit/Ka.UPT
+                                  <hr />
+                                  <h5>{totalScore}</h5>
+                                </div>
+                                <div className="card fw-medium text-center">
+                                  Ka.Prodi/Ka.Dept
+                                  <hr />
+                                  <h5>{0}</h5>
+                                </div>
+                                <div className="card fw-medium text-center">
+                                  WaDIR/DIR
+                                  <hr />
+                                  <h5>{0}</h5>
+                                </div>
                               </div>
-                              <div className="card fw-medium text-center" style={{width:'200px'}}>
-                                WaDIR/DIR
-                                <hr />
-                                <h5>{0}</h5>
+                            </div>
+                            <div className="card fw-medium text-center">
+                              <div className="card-header">
+                                <h7 className="fw-medium">Total Scores</h7>
                               </div>
+                              <h5>{totalScore}</h5>
                             </div>
                             {/* {listKriteriaPenilaian.slice(Math.ceil(listKriteriaPenilaian.length / 2)).map((item) => {
                               const selectedItem = listDetailKriteriaPenilaian.find(
