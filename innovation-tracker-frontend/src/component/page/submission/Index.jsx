@@ -92,10 +92,10 @@ export default function Submission() {
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    <Icon name="add me-2 text-white" />
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>System Suggestion Requirements</i>
+                        <i>Submit System Suggestion</i>
                       </small>
                     </p>
                   </div>
@@ -129,10 +129,10 @@ export default function Submission() {
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    <Icon name="add me-2 text-white" />
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>Quality Control Circle Requirements</i>
+                        <i>Submit Quality Control Circle</i>
                       </small>
                     </p>
                   </div>
@@ -165,10 +165,10 @@ export default function Submission() {
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    <Icon name="add me-2 text-white" />
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>Quality Control Project Requirements</i>
+                        <i>Submit Quality Control Project</i>
                       </small>
                     </p>
                   </div>
@@ -203,10 +203,10 @@ export default function Submission() {
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    <Icon name="download me-2 text-white" />
+                    <Icon name="add me-2 text-white" />
                     <p className="fw-small text-white my-1">
                       <small>
-                        <i>Value Chain Innovation Requirements</i>
+                        <i>Submit Value Chain Innovation</i>
                       </small>
                     </p>
                   </div>
