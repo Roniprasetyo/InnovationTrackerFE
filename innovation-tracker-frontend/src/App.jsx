@@ -17,6 +17,7 @@ import NotFound from "./component/page/not-found/Index";
 import SuggestionSystem from "./component/page/suggestion-system/Root.jsx";
 import ValueChainInnovation from "./component/page/value-chain-innovation/Root.jsx";
 import BusinessPerformaceImprovement from "./component/page/business-performance-improvement/Root.jsx";
+import Scoring from "./component/page/suggestion-system/Scoring.jsx";
 
 export default function App() {
   const [listMenu, setListMenu] = useState([]);
@@ -73,6 +74,10 @@ export default function App() {
           {
             path: "/submission/bpi",
             element: <BusinessPerformaceImprovement />,
+          },
+          {
+            path: "/scoring",
+            element: <Scoring />,
           },
           {
             path: "/*",
