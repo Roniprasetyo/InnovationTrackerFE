@@ -28,7 +28,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -106,7 +105,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
             jabatan: value.jabatan,
           }))
         );
-
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -119,18 +117,16 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []); 
-        
+  }, []);
+
   useEffect(() => {
     if (listEmployee.length > 0 && userInfo?.upt) {
       const userData = listEmployee.find(
-        (value) =>
-          value.npk === formDataRef.current["NPK"]
+        (value) => value.npk === formDataRef.current["NPK"]
       );
       setUserData(userData);
     }
   }, [listEmployee, userInfo]);
-
 
   if (isLoading) return <Loading />;
 
@@ -177,6 +173,16 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
               <Loading />
             ) : (
               <div className="row">
+                {formDataRef.current.Status === "Rejected" && (
+                  <div className="col-lg-12 mb-3">
+                    <div className="bg-gradient bg-danger rounded-3 px-3 pt-3 pb-2 text-white">
+                      <h5 className="fw-medium fw-bold">
+                        Reason for Rejection
+                      </h5>
+                      <Label data={formDataRef.current["Alasan Penolakan"]} />
+                    </div>
+                  </div>
+                )}
                 <div className="col-lg-12">
                   <div className="card mb-3">
                     <div className="card-header">
@@ -192,16 +198,13 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         </div>
 
                         <div className="col-md-4">
-                          <Label
-                            title="Name​"
-                            data={userData["name"]}
-                          />
+                          <Label title="Name​" data={userData["name"] || "-"} />
                         </div>
 
                         <div className="col-md-4">
                           <Label
                             title="Section​"
-                            data={userData["upt"]}
+                            data={userData["upt"] || "-"}
                           />
                         </div>
                       </div>
@@ -382,15 +385,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
-                  {formDataRef.current.Status === "Rejected" && (
-                    <div>
-                      <hr />
-                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                      <Label
-                      data={formDataRef.current["Alasan Penolakan"]}/>
-                      <hr />
-                    </div>
-                  )}
                 </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>
