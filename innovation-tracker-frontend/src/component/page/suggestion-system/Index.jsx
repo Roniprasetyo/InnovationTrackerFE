@@ -60,7 +60,7 @@ const dataFilterStatus = [
 //   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
 // ];
 
-export default function SuggestionSytemIndex({ onChangePage }) {
+export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -337,6 +337,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter
         );
+        console.log("DATA SS:", data);
 
         if (data === "ERROR") {
           // setIsError(true);
@@ -352,7 +353,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               (emp) => emp.username === value["Creaby"]
             );
           
-            console.log("FOND", foundEmployee);
+            console.log("FOUND KEY: ", listEmployee);
             return {
               Key: value.Key,
               No: value["No"],
@@ -385,6 +386,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                   : role === "ROL01" &&
                   value["Status"] === "Approved"
                   ? ["Detail", "Submit"]
+                  // Status Approved By Role 03
+                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Approved" ? ["Detail", "Scoring"]
                   : ["Detail"],
               Alignment: [
                 "center",
@@ -399,7 +402,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                 "center",
               ],
             };
-          });          
+          });
+          console.log(406, formattedData);          
           setCurrentData(formattedData);
         }
       } catch {
@@ -493,6 +497,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             onApprove={handleApprove}
             onReject={handleReject}
             onEdit={onChangePage}
+            onScoring={onScoring}
           />
           <Paging
             pageSize={PAGE_SIZE}

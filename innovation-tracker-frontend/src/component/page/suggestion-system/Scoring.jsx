@@ -21,7 +21,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function MiniConventionScoring({ onChangePage, WithID }) {
+export default function MiniConventionScoring({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
@@ -66,15 +66,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
+      console.log("TES s77", withID);
       try {
         const data = await UseFetch(
-          API_LINK + "MiniConvention/GetMiniConventionById",
+          API_LINK + "RencanaSS/GetRencanaSSByIdV2",
           {
-            id: WithID,
+            id: withID,
           }
         );
+        console.log("ini data: ", data);
 
-        console.log(WithID, data);
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
@@ -96,12 +97,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   }, [id]);
 
   useEffect(() => {
-    if (listEmployee.length > 0 && userInfo?.upt) {
-      const userData = listEmployee.find(
-        (value) =>
-          value.npk === formDataRef.current["NPK"]
-      );
-      setUserData(userData);
+    if (listEmployee.length > 0 && userInfo?.upt && userInfo?.npk) {
+      const foundUser = listEmployee.find((value) => value.npk === userInfo.npk);
+  
+      if (foundUser) {
+        setUserData(foundUser);
+        console.log("User ditemukan di listEmployee", userData);
+      } else {
+        setUserData(null); // atau bisa juga kosongkan objek: {}
+        console.warn("User tidak ditemukan di listEmployee");
+      }
     }
   }, [listEmployee, userInfo]);
 
@@ -163,6 +168,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           setListCategory({});
         }
       };
+  
       fetchData();
     }, []);
 
@@ -202,7 +208,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       // handleInputChange({ target: { name: "budget", value: rawValue } });
     };
 
-    console.log("LIST KRITERIA ", listKriteriaPenilaian);
+    console.log("LIST KRITERIA ", listDetailKriteriaPenilaian);
 
   if (isLoading) return <Loading />;
 
@@ -260,23 +266,23 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                           <div className="col-md-4">
                             <Label
                               title="NPK"
-                              data={formDataRef.current["NPK"] || "-"}
+                              data={userInfo.npk || "-"}
                             />
                           </div>
 
                           <div className="col-md-4">
                             <Label
                               title="Name​"
-                              data={userData?.name || "-"}
+                              data={userInfo?.nama || "-"}
                             />
                           </div>
 
                           <div className="col-md-4">
                             <Label
                               title="Section​"
-                              data={userData?.upt || "-"}
+                              data={userInfo?.upt || "-"}
                             />
-                          </div>
+                          </div>  
                         </div>
                       </div>
                     </div>

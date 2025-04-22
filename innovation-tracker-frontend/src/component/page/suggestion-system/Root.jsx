@@ -3,6 +3,7 @@ import SuggestionSytemIndex from "./Index";
 import SuggestionSystemAdd from "./Add";
 import SuggestionSystemEdit from "./Edit";
 import SuggestionSystemDetail from "./Detail";
+import MiniConventionScoring from "./Scoring";
 
 export default function SuggestionSystem() {
   const [pageMode, setPageMode] = useState("index");
@@ -11,7 +12,7 @@ export default function SuggestionSystem() {
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <SuggestionSytemIndex onChangePage={handleSetPageMode} />;
+        return <SuggestionSytemIndex onChangePage={handleSetPageMode} onScoring={handleScoring} />;
       case "add":
         return <SuggestionSystemAdd onChangePage={handleSetPageMode} />;
       case "edit":
@@ -22,6 +23,7 @@ export default function SuggestionSystem() {
           />
         );
       case "detail":
+        // console.log("ini Root: ", dataID);
         return (
           <SuggestionSystemDetail
             onChangePage={handleSetPageMode}
@@ -29,6 +31,12 @@ export default function SuggestionSystem() {
           />
         );
     }
+  }
+
+  function handleScoring(_, id) {
+    const scoringUrl = `/scoring?id=${id}`;
+    setDataID(id);
+    window.open(scoringUrl, "_blank");
   }
 
   function handleSetPageMode(mode) {
