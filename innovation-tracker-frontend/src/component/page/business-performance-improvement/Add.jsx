@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
 import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
-import { separator, clearSeparator } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
@@ -14,23 +13,25 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
+import DropDownSearch from "../../part/DropDownSearch";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
-import { decodeHtml, formatDate } from "../../util/Formatting";
-import Label from "../../part/Label";
+import { clearSeparator, separator } from "../../util/Formatting";
+import { formatDate, decodeHtml } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
     Key: null,
+    No: null,
     Name: null,
     Section: null,
     Count: 0,
   },
 ];
 
-export default function QualityControlProjectEdit({ onChangePage, withID }) {
+export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -39,14 +40,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [listEmployeeFull, setListEmployeeFull] = useState([]);
-
-  const [listCategory, setListCategory] = useState([]);
-  const [listEmployee, setListEmployee] = useState([]);
-  const [listFacil, setListFacil] = useState([]);
-  const [listPeriod, setListPeriod] = useState([]);
-  const [listImpCategory, setListImpCategory] = useState([]);
-
   const [checkedStates, setCheckedStates] = useState({
     rciQuality: false,
     rciCost: false,
@@ -55,16 +48,14 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciMoral: false,
   });
 
-  const handleCheckboxChange = (key) => {
-    if (checkedStates[key]) formDataRef.current[key] = "";
-    setCheckedStates((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
-  };
+  const [listCategory, setListCategory] = useState([]);
+  const [listEmployee, setListEmployee] = useState([]);
+  const [listEmployeeFull, setListEmployeeFull] = useState([]);
+  const [listFacil, setListFacil] = useState([]);
+  const [listPeriod, setListPeriod] = useState([]);
+  const [listImpCategory, setListImpCategory] = useState([]);
 
   const formDataRef = useRef({
-    rciId: "",
     setId: "",
     perId: "",
     rciGroupName: "",
@@ -85,27 +76,21 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciSafety: "",
     rciMoral: "",
     rciFacil: "",
-    rciLeader: "",
+    rciLeader: userInfo.npk,
     setId2: "",
-    rciStatus: "",
-    rciReasonforRejection: "",
   });
-
   const memberDataRef = useRef({
     rciMember: "",
   });
-
   const periodDataRef = useRef({
     startPeriod: "",
     endPeriod: "",
   });
-
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-    rciId: number().required("required"),
     setId: string().required("required"),
     perId: string().nullable(),
     rciGroupName: string()
@@ -132,8 +117,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     setId2: string().required("required"),
-    rciStatus: string().required("required"),
-    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({
@@ -183,7 +166,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListCategory(data.filter((item) => item.Text.includes("QCP")));
+          setListCategory(data.filter((item) => item.Text.includes("BPI")));
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -244,6 +227,11 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
+          const selected = data.find(
+            (item) => item.Text === new Date().getFullYear()
+          );
+          formDataRef.current.perId = selected.Value;
+          setSelectedPeriod(selected.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -252,7 +240,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
+        setListPeriod([]);
       }
     };
 
@@ -280,7 +268,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
           error: true,
           message: error.message,
         }));
-        setListFacil({});
+        setListFacil([]);
       }
     };
 
@@ -290,93 +278,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
-          {
-            id: withID,
-          }
-        );
-
-        if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get qcc data.");
-        } else {
-          formDataRef.current = {
-            rciId: data["Key"],
-            setId: data["CategoryId"],
-            perId: data["PeriodId"],
-            rciGroupName: data["Group Name"],
-            rciTitle: decodeHtml(data["Project Title"]),
-            rciProjBenefit: separator(data["Project Benefit"]),
-            rciCase: decodeHtml(data["Case"]),
-            rciCaseFile: data["CaseFile"],
-            rciProblem: decodeHtml(data["Problem"]),
-            rciProblemFile: data["ProblemFile"],
-            rciGoal: decodeHtml(data["Goal"]),
-            rciGoalFile: data["GoalFile"],
-            rciScope: decodeHtml(data["Scope"]),
-            rciStartDate: data["Start Date"].split("T")[0],
-            rciEndDate: data["End Date"].split("T")[0],
-            rciQuality: data["Quality"],
-            rciCost: data["Cost"],
-            rciDelivery: data["Delivery"],
-            rciSafety: data["Safety"],
-            rciMoral: data["Moral"],
-            rciFacil: data["member"].find(
-              (item) => item.Position === "Facilitator"
-            ).Npk,
-            rciLeader: data["member"].find((item) => item.Position === "Leader")
-              .Npk,
-            setId2: data["CategoryIdImp"],
-            rciReasonforRejection: data["Alasan Penolakan"],
-            rciStatus: data["Status"]
-          };
-          const members = data["member"].filter(
-            (item) => item.Position === "Member"
-          );
-          const memberCount = members.length || 0;
-          if (memberCount > 0) {
-            setCurrentData(
-              members?.map((item, index) => ({
-                Key: item.Npk,
-                No: index + 1,
-                Name: item.Npk + " - " + item.Name,
-                Section:
-                  listEmployeeFull.find((value) => value.npk === item.Npk)
-                    ?.upt_bagian || "",
-                Count: memberCount,
-                Action: ["Delete"],
-                Alignment: ["center", "left", "left", "center", "center"],
-              })) || []
-            );
-          } else {
-            setCurrentData(inisialisasiData);
-          }
-          setCheckedStates({
-            rciQuality: data["Quality"] ? true : false,
-            rciCost: data["Cost"] ? true : false,
-            rciDelivery: data["Delivery"] ? true : false,
-            rciSafety: data["Safety"] ? true : false,
-            rciMoral: data["Moral"] ? true : false,
-          });
-          setSelectedPeriod(data["PeriodId"]);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      }
-    };
-
-    fetchData();
-  }, [withID, listEmployeeFull]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
           p1: selectedPeriod,
@@ -446,7 +348,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
       const formattedData = data.map((value) => ({
         ...value,
         Section:
-          listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
+          listEmployeeFull.find((item) => item.npk === value.Key)?.upt_bagian ||
+          "",
         Action: ["Delete"],
         Alignment: ["center", "left", "left", "center", "center"],
       }));
@@ -479,22 +382,20 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     memberDataRef.current.rciMember = "";
   };
 
+  const handleCheckboxChange = (key) => {
+    if (checkedStates[key]) formDataRef.current[key] = "";
+    setCheckedStates((prevState) => ({
+      ...prevState,
+      [key]: !prevState[key],
+    }));
+  };
+
   const handleDelete = (id) => {
     if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else {
-      const prevData = currentData.filter((member) => member.Key !== id);
-      setCurrentData(
-        prevData.map((item, index) => ({
-          Key: item.Key,
-          No: index + 1,
-          Name: item.Name,
-          Section: item.Section,
-          Count: prevData.length,
-          Action: ["Delete"],
-          Alignment: ["center", "left", "left", "center", "center"],
-        }))
+    else
+      setCurrentData((prevData) =>
+        prevData.filter((member) => member.Key !== id)
       );
-    }
   };
 
   const handleFileChange = (ref, extAllowed) => {
@@ -571,12 +472,12 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         return;
       }
 
-      if (eDate > innovationEndPeriod) {
+      if (eDate >= innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected end date exceeds the innovation period end date",
+            "Invalid date: Selected end date outrange the innovation period end date",
         });
         return;
       }
@@ -627,7 +528,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/UpdateRencanaQCP",
+          API_LINK + "RencanaCircle/CreateRencanaQCP",
           formDataRef.current
         );
 
@@ -671,7 +572,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
               color: "rgb(0, 89, 171)",
             }}
           />
-          Update Data
+          Add Data
         </h2>
       </div>
       <div className="mt-3">
@@ -687,7 +588,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">BPI REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -735,15 +636,13 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                             />
                           </div>
                           <div className="col-md-6">
-                            <SearchDropdown
+                            <Input
+                              type="text"
                               forInput="rciLeader"
                               label="Leader"
-                              placeHolder="Leader"
-                              arrData={listEmployee}
-                              isDisabled
                               isRequired
-                              isRound
-                              value={formDataRef.current.rciLeader}
+                              isDisabled
+                              value={userInfo.nama}
                               onChange={handleInputChange}
                               errorMessage={errors.rciLeader}
                             />
@@ -773,7 +672,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                     (item) =>
                                       item.Value ===
                                       memberDataRef.current.rciMember
-                                  ).Text
+                                  )?.Text
                                 )
                               }
                             />
@@ -795,7 +694,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciTitle"
                               label="Title"
                               isRequired
-                              placeholder="Contains a brief explanation of the idea <i>(memuat penjelasan singkat tentang ide yang akan disampaikan)</i>"
                               value={formDataRef.current.rciTitle}
                               onChange={handleInputChange}
                               errorMessage={errors.rciTitle}
@@ -830,16 +728,16 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               type="date"
                               forInput="rciStartDate"
                               label="Start Date"
-                              isRequired
                               placeholder={
                                 periodDataRef.current.startPeriod
-                                  ? "Innovation period ends on " +
+                                  ? "Innovation period starts on " +
                                     formatDate(
                                       periodDataRef.current.startPeriod,
                                       true
                                     )
                                   : ""
                               }
+                              isRequired
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciStartDate}
@@ -850,16 +748,14 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               type="date"
                               forInput="rciEndDate"
                               label="End Date"
-                              isRequired
                               placeholder={
-                                periodDataRef.current.endPeriod
-                                  ? "Innovation period ends on " +
-                                    formatDate(
-                                      periodDataRef.current.endPeriod,
-                                      true
-                                    )
-                                  : ""
+                                "Innovation period ends on " +
+                                formatDate(
+                                  periodDataRef.current.endPeriod,
+                                  true
+                                )
                               }
+                              isRequired
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciEndDate}
@@ -883,7 +779,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciScope"
                               label="Project Scope"
                               isRequired
-                              placeholder="Designing a plan with a focus on processes, results, and impact on the team <i>(merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team)</i>"
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
@@ -905,7 +800,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciCase"
                               label="Bussiness Case"
                               isRequired
-                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
@@ -917,7 +811,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               label="Bussiness Case Document (.pdf)"
                               formatFile=".pdf"
                               ref={bussinessCaseFileRef}
-                              hasExisting={formDataRef.current.rciCaseFile}
                               onChange={() =>
                                 handleFileChange(bussinessCaseFileRef, "pdf")
                               }
@@ -930,7 +823,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciProblem"
                               label="Problem Statement​"
                               isRequired
-                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
@@ -942,7 +834,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               label="Problem Statement​ Document (.pdf)"
                               formatFile=".pdf"
                               ref={problemFileRef}
-                              hasExisting={formDataRef.current.rciProblemFile}
                               onChange={() =>
                                 handleFileChange(problemFileRef, "pdf")
                               }
@@ -955,7 +846,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciGoal"
                               label="Goal Statement​"
                               isRequired
-                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}
@@ -967,7 +857,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               label="Goal Statement​ Document (.pdf)"
                               formatFile=".pdf"
                               ref={goalFileRef}
-                              hasExisting={formDataRef.current.rciGoalFile}
                               onChange={() =>
                                 handleFileChange(goalFileRef, "pdf")
                               }
@@ -985,7 +874,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                       </div>
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-lg-8">
+                          <div className="col-lg-6">
                             <Input
                               type="text"
                               forInput="rciProjBenefit"
@@ -1014,7 +903,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   forInput="rciQuality"
                                   label="Quality"
                                   isDisabled={!checkedStates.rciQuality}
-                                  placeholder="Quality"
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
@@ -1034,7 +922,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   forInput="rciCost"
                                   label="Cost"
                                   isDisabled={!checkedStates.rciCost}
-                                  placeholder="Cost"
                                   value={formDataRef.current.rciCost}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciCost}
@@ -1055,7 +942,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   type="text"
                                   forInput="rciDelivery"
                                   label="Delivery"
-                                  placeholder="Delivery"
                                   isDisabled={!checkedStates.rciDelivery}
                                   value={formDataRef.current.rciDelivery}
                                   onChange={handleInputChange}
@@ -1083,7 +969,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                                   forInput="rciSafety"
                                   label="Safety"
                                   isDisabled={!checkedStates.rciSafety}
-                                  placeholder="Safety"
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
@@ -1092,9 +977,9 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                             </div>
                             <div className="d-flex align-items-center">
                               <input
-                                className="form-check-input mb-2 me-2"
+                                className="form-check-input me-2"
                                 type="checkbox"
-                                checked={checkedStates.rciMoral}
+                                isDisabled={checkedStates.rciMoral}
                                 onChange={() =>
                                   handleCheckboxChange("rciMoral")
                                 }
@@ -1102,10 +987,9 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               <div className="flex-grow-1">
                                 <Input
                                   type="text"
-                                  forInput="rciMoral"
                                   label="Moral"
+                                  forInput="rciMoral"
                                   isDisabled={!checkedStates.rciMoral}
-                                  placeholder="Moral"
                                   value={formDataRef.current.rciMoral}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciMoral}
@@ -1116,15 +1000,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
-                    {formDataRef.current.rciStatus === "Rejected" && (
-                      <>
-                        <hr />
-                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                        <Label
-                        data={formDataRef.current.rciReasonforRejection}/>
-                        <hr />
-                      </>
-                    )}
                   </div>
                 </div>
               )}

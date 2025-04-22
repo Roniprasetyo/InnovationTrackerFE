@@ -6,6 +6,7 @@ export default function Table({
   onCancel = () => {},
   onDelete = () => {},
   onDetail = () => {},
+  onScoring = () => {},
   onEdit = () => {},
   onApprove = () => {},
   onReject = () => {},
@@ -166,6 +167,17 @@ export default function Table({
               cssClass="btn px-1 py-0 text-primary"
               title="Print"
               onClick={() => onPrint(id)}
+            />
+          );
+        case "Scoring":
+          return (
+            <Icon
+              key={key + action}
+              name="clipboard-list"
+              type="Bold"
+              cssClass="btn px-1 py-0 text-primary"
+              title="Review"
+              onClick={() => onScoring("scoring", id, rowValue)}
             />
           );
         default: {

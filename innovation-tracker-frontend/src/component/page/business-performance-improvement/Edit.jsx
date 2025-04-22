@@ -30,7 +30,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function QualityControlProjectEdit({ onChangePage, withID }) {
+export default function BusinessPerformanceImprovementEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -87,8 +87,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciFacil: "",
     rciLeader: "",
     setId2: "",
+    rciReasonforRejection:"",
     rciStatus: "",
-    rciReasonforRejection: "",
   });
 
   const memberDataRef = useRef({
@@ -132,8 +132,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     setId2: string().required("required"),
-    rciStatus: string().required("required"),
     rciReasonforRejection: string().required("required"),
+    rciStatus: string().required("required"),
   });
 
   const memberSchema = object({
@@ -481,20 +481,10 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
 
   const handleDelete = (id) => {
     if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else {
-      const prevData = currentData.filter((member) => member.Key !== id);
-      setCurrentData(
-        prevData.map((item, index) => ({
-          Key: item.Key,
-          No: index + 1,
-          Name: item.Name,
-          Section: item.Section,
-          Count: prevData.length,
-          Action: ["Delete"],
-          Alignment: ["center", "left", "left", "center", "center"],
-        }))
+    else
+      setCurrentData((prevData) =>
+        prevData.filter((member) => member.Key !== id)
       );
-    }
   };
 
   const handleFileChange = (ref, extAllowed) => {
@@ -571,12 +561,12 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         return;
       }
 
-      if (eDate > innovationEndPeriod) {
+      if (eDate >= innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected end date exceeds the innovation period end date",
+            "Invalid date: Selected end date outrange the innovation period end date",
         });
         return;
       }
@@ -687,7 +677,7 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">BPI REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -795,7 +785,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciTitle"
                               label="Title"
                               isRequired
-                              placeholder="Contains a brief explanation of the idea <i>(memuat penjelasan singkat tentang ide yang akan disampaikan)</i>"
                               value={formDataRef.current.rciTitle}
                               onChange={handleInputChange}
                               errorMessage={errors.rciTitle}
@@ -883,7 +872,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciScope"
                               label="Project Scope"
                               isRequired
-                              placeholder="Designing a plan with a focus on processes, results, and impact on the team <i>(merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team)</i>"
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
@@ -904,8 +892,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                             <TextArea
                               forInput="rciCase"
                               label="Bussiness Case"
-                              isRequired
-                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
@@ -929,8 +915,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                             <TextArea
                               forInput="rciProblem"
                               label="Problem Statement​"
-                              isRequired
-                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
@@ -954,8 +938,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                             <TextArea
                               forInput="rciGoal"
                               label="Goal Statement​"
-                              isRequired
-                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}

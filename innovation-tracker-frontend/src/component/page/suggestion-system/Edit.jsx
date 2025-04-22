@@ -19,6 +19,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
+import Label from "../../part/Label";
 
 const inisialisasiData = [
   {
@@ -77,6 +78,8 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
     sisDelivery: "",
     sisSafety: "",
     sisMoral: "",
+    sisStatus: "",
+    sisReasonforRejection: "",
   });
 
   const periodDataRef = useRef({
@@ -111,6 +114,8 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
     sisSafety: string().max(200, "maximum 200 characters").nullable(),
     sisDelivery: string().max(200, "maximum 200 characters").nullable(),
     sisMoral: string().max(200, "maximum 200 characters").nullable(),
+    sisStatus: string().required("required"),
+    sisReasonforRejection: string().required("required"),
   });
 
   useEffect(() => {
@@ -230,6 +235,8 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
             sisDelivery: data[0]["Delivery"],
             sisSafety: data[0]["Safety"],
             sisMoral: data[0]["Moral"],
+            sisStatus: data[0]["Status"],
+            sisReasonforRejection: data[0]["Alasan Penolakan"]
           };
 
           setCheckedStates({
@@ -771,6 +778,15 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
+                    {formDataRef.current.sisStatus === "Rejected" && (
+                      <>
+                        <hr />
+                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <Label
+                        data={formDataRef.current.sisReasonforRejection}/>
+                        <hr />
+                      </>
+                    )}
                   </div>
                 </div>
               )}

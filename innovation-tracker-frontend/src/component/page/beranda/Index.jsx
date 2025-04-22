@@ -3,6 +3,8 @@ import { API_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
+import CalendarView from "../../part/CalendarView";
+import NewsListView from "../../part/NewsListView";
 
 export default function BerandaIndex() {
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -73,7 +75,7 @@ export default function BerandaIndex() {
         </div>
       </div>
       <div className="container p-3">
-        {/* {isError.error && (
+        {isError.error && (
           <div className="flex-fill ">
             <Alert
               type="danger"
@@ -81,18 +83,26 @@ export default function BerandaIndex() {
               handleClose={() => setIsError({ error: false, message: "" })}
             />
           </div>
-        )} */}
-        <div className="container-sm my-3">
-          <div className="mb-4 color-primary text-center">
-            <div className="d-flex gap-3 justify-content-center">
-              <h2 className="display-3 fw-bold">WELCOME</h2>
-              <div className="d-flex align-items-end mb-2">
-                <h2 className="display-6 fw-medium align-items-end text-start">
-                  TO ASTRATECH
-                </h2>
+        )}
+        <div className="row">
+          <div className="d-flex justify-content-between container-sm my-3">
+            <div className="mb-4 color-primary align-items-center justify-content-center text-left">
+              <div className="gap-3 justify-content-left">
+                <h2 className="display-5 fw-bold">WELCOME</h2>
+                <div className="d-flex align-items-end mb-2">
+                  <h2 className="display-10 fw-medium align-items-end text-start">
+                    TO ASTRATECH
+                  </h2>
+                </div>
+              </div>
+              <div className="display-6 fw-medium text-nowrap">INNOVATION LIBRARY</div>
+            </div>
+            <div className="row">
+              <div className="d-flex gap-4">
+                <NewsListView />
+                <CalendarView />
               </div>
             </div>
-            <div className="display-4 fw-medium">INNOVATION LIBRARY</div>
           </div>
         </div>
       </div>
