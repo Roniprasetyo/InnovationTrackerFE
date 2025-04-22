@@ -10,6 +10,7 @@ import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
+import Input from "../../part/Input";
 
 const inisialisasiData = [
   {
@@ -28,9 +29,13 @@ export default function MiniConventionScoring({ onChangePage }) {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
+  const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
+  const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] = useState([]);
   const [userData, setUserData] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
+  const [userInput, setUserInput] = useState("");
+  const [formattedValue, setFormattedValue] = useState("");
 
   const formDataRef = useRef({
     Key: "",
@@ -136,6 +141,69 @@ export default function MiniConventionScoring({ onChangePage }) {
       fetchData();
     }, []);
 
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "MiniConvention/GetListKriteriaPenilaian");
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListKriteriaPenilaian(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }
+      };
+  
+      fetchData();
+    }, []);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "MiniConvention/GetListDetailKriteriaPenilaian");
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListDetailKriteriaPenilaian(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }
+      };
+  
+      fetchData();
+    }, []);
+
+    const formatNumber = (value) => {
+      return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
+    const handleChange = (e) => {
+      const rawValue = e.target.value.replace(/[^\d]/g, "");
+      setFormattedValue(formatNumber(rawValue)); 
+      setUserInput(rawValue);
+      // handleInputChange({ target: { name: "budget", value: rawValue } });
+    };
+
+    console.log("LIST KRITERIA ", listKriteriaPenilaian);
+
   if (isLoading) return <Loading />;
 
   return (
@@ -175,7 +243,7 @@ export default function MiniConventionScoring({ onChangePage }) {
           )}
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">SS SCORING DATA</h3>
+              <h3 className="fw-bold text-center">DATA SCORING FORM</h3>
             </div>
             <div className="card-body p-3">
               {isLoading ? (
@@ -214,186 +282,129 @@ export default function MiniConventionScoring({ onChangePage }) {
                     </div>
                   </div>
                   <div className="col-lg-12">
-                    <div className="card mb-3">
-                      <div className="card-header">
-                        <h5 className="fw-medium">Project Description</h5>
-                      </div>
-                      <div className="card-body">
-                        <div className="row">
-                          <div className="col-lg-12">
-                            <Label
-                              title="Project Title"
-                              data={decodeHtml(
-                                formDataRef.current["Project Title"] || "-"
-                              )}
-                            />
-                          </div>
-                          <div className="col-lg-3">
-                            <Label
-                              title="Innovation Category"
-                              data={formDataRef.current.Category || "-"}
-                            />
-                          </div>
-                          <div className="col-lg-3">
-                            <Label
-                              title="Improvement Category"
-                              data={formDataRef.current.CategoryImp || "-"}
-                            />
-                          </div>
-                          <div className="col-lg-3">
-                            <Label
-                              title="Project Timeframe"
-                              data={
-                                formatDate(
-                                  formDataRef.current["Start Date"].split("T")[0],
-                                  true
-                                ) +
-                                  " - " +
-                                  formatDate(
-                                    formDataRef.current["End Date"].split("T")[0],
-                                    true
-                                  ) || "-"
-                              }
-                            />
-                          </div>
-                          <div className="col-lg-3">
-                            <Label
-                              title="Period"
-                              data={formDataRef.current["Period"] || "-"}
-                            />
-                          </div>
-                          <div className="col-lg-12">
-                            <Label
-                              title="Project Scope"
-                              data={decodeHtml(
-                                formDataRef.current["Scope"] || "-"
-                              )}
-                            />
-                          </div>
+                      <div className="card mb-3">
+                        <div className="card-header align-items-center d-flex">
+                          <h5 className="fw-medium">Criteria</h5>
+                        </div>
+                        <div className="card-body d-flex flex-row flex-wrap align-items-center">
+                          {listKriteriaPenilaian.map((item, index) => (
+                            <div className="card mb-3 col-lg-12">
+                              <div className="card-header align-items-center d-flex gap-3">
+                                <h5 className="fw-medium">{item["Text"] || "-"}</h5>
+                                <div style={{ width: '1px', height: '30px', backgroundColor: 'black' }}></div>
+                                <h6 className="fw-medium mt-1">{item["Desc"] || "-"}</h6>
+                              </div>
+                              {/* {index === 0 && (
+                                <div>
+                                    <div className="card align-items-center rounded-0 border-0" style={{ fontWeight: 'bold' }}>Scores</div>
+                                    <hr />
+                                </div>
+                                )
+                              } */}
+                              <div className={`card-body d-flex ${index !== 0 ? 'flex-column align-items-left' : 'align-items-center'} `} style={{gap:'25px', marginBottom:'-15px'}} key={index}>
+                                {listDetailKriteriaPenilaian
+                                  .filter(item2 => item["Value"] === item2["Value2"])
+                                  // .reduce((acc, curr) => {
+                                  //   const existing = acc.find(item => item.Desc === curr.Desc);
+                                  //   if (existing) {
+                                  //     existing.Scores.push(curr.Score);
+                                  //   } else {
+                                  //     acc.push({ ...curr, Scores: [curr.Score] });
+                                  //   }
+                                  //   return acc;
+                                  // }, [])
+                                  .map((item2, index2, arr) => {
+                                    const parseNumber = (desc) => {
+                                      const match = desc.match(/\d+/);
+                                      return match ? parseInt(match[0], 10) : 0;
+                                    };
+
+                                    const angkaBatas = parseNumber(item2["Desc"]);
+                                    const batasBawah = index2 < arr.length - 1 ? parseNumber(arr[index2 + 1]["Desc"]) : Infinity;
+                                    const inputUser = parseInt(userInput || '', 10);
+                                    const isMasuk = (index2 === 0 && inputUser <= angkaBatas) || (inputUser > angkaBatas && inputUser <= batasBawah);
+                                    return (
+                                      <div key={index2}>
+                                        {item["Value"] === item2["Value2"] && (
+                                          <div className=" d-flex row col-lg-12">
+                                            {/* {index === 0 && ( */}
+                                              <>
+                                                <div className={`small card align-items-center ${index2 !== 0 ? '' : ''}`} style={{minWidth:'45px', backgroundColor: isMasuk ? '#d4edda' : 'transparent', marginLeft:'11.5px'}}>
+                                                  <Label
+                                                  data={item2["Score"]}
+                                                  />
+                                                </div>
+                                                {/* <div className={`small card justify-content-center align-items-center ${index2 !== 0 ? '' : ''}`} style={{minWidth:'45px', backgroundColor: isMasuk ? '#d4edda' : 'transparent', width:'58px'}}>
+                                                  <Label
+                                                  data={item2["Desc"]}
+                                                  />
+                                                </div> */}
+                                              </>
+                                            {/* )} */}
+                                          </div>
+                                        )}
+                                        {isMasuk && index === 0 && (
+                                          <div className="align-items-center d-flex justify-content-center" style={{ color: 'green', fontWeight: 'bold' }}>✓</div>
+                                        )}
+                                        {/* {index !== 0 && (
+                                          <div className="d-flex">
+                                            <div className="hover-card col-lg-12" style={{cursor: 'pointer'}} 
+                                            // onMouseEnter={(e) => {
+                                            //   e.currentTarget.style.backgroundColor = '#e9ecef';
+                                            //   e.currentTarget.style.fontWeight = 'bold';
+                                            // }}
+                                            // onMouseLeave={(e) => {
+                                            //   e.currentTarget.style.backgroundColor = '';
+                                            //   e.currentTarget.style.fontWeight = '';
+                                            // }}
+                                            >
+                                              <div className="d-flex justify-content-between border-bottom">
+                                                <div>
+                                                  <Label
+                                                  data={item2["Desc"]}
+                                                  />
+                                                </div>
+                                                <div>
+                                                  <Label
+                                                  data={item2["Score"]}
+                                                  />
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )} */}
+                                      </div>
+                                    )
+                                  })}
+                              </div>
+                              {index === 0 && (<hr />) }
+                              {index === 0 && ((
+                                <div className="d-flex justify-content-between">
+                                  <div className="d-flex align-items-center mb-3 ms-3 gap-3 flex-wrap flex-sm-nowrap" style={{width:'350px'}}>
+                                      <div>
+                                        <Input
+                                        type="text"
+                                        value={formattedValue}
+                                        onChange={handleChange}
+                                        />
+                                      </div>
+                                      <div style={{width:'200px', marginTop:'15px'}}>
+                                        <Label
+                                        data="X Rp. 1000/bulan"
+                                        />
+                                      </div>
+                                  </div>
+                                  <div className="card d-flex text-center me-3" style={{width:'150px', marginBottom:'15px'}}>
+                                    <Label
+                                    title="Score"
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                  <div className="col-lg-12">
-                    <div className="card mb-3">
-                      <div className="card-header">
-                        <h5 className="fw-medium">Project Charter</h5>
-                      </div>
-                      <div className="card-body">
-                        <div className="row">
-                          <div className="col-lg-12 mb-4">
-                            <Label
-                              title="Bussiness Case"
-                              data={decodeHtml(
-                                formDataRef.current["Case"] || "-"
-                              )}
-                            />
-                            {formDataRef.current["CaseFile"] && (
-                              <a
-                                href={FILE_LINK + formDataRef.current["CaseFile"]}
-                                className="text-decoration-none"
-                                target="_blank"
-                              >
-                                <sub>[Download File]</sub>
-                              </a>
-                            )}
-                          </div><hr />
-                          <div className="col-lg-12 mb-4">
-                            <Label
-                              title="Problem Statement"
-                              data={decodeHtml(
-                                formDataRef.current["Problem"] || "-"
-                              )}
-                            />
-                            {formDataRef.current["ProblemFile"] && (
-                              <a
-                                href={
-                                  FILE_LINK + formDataRef.current["ProblemFile"]
-                                }
-                                className="text-decoration-none"
-                                target="_blank"
-                              >
-                                <sub>[Download File]</sub>
-                              </a>
-                            )}
-                          </div><hr />
-                          <div className="col-lg-12 mb-4">
-                            <Label
-                              title="Goal Statement​"
-                              data={decodeHtml(
-                                formDataRef.current["Goal"] || "-"
-                              )}
-                            />
-                            {formDataRef.current["GoalFile"] && (
-                              <a
-                                href={FILE_LINK + formDataRef.current["GoalFile"]}
-                                className="text-decoration-none"
-                                target="_blank"
-                              >
-                                <sub>[Download File]</sub>
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-lg-12">
-                    <div className="card mb-3">
-                      <div className="card-body">
-                        <div className="row">
-                          <div className="col-lg-6">
-                            <label className="form-label fw-bold">
-                              Tangible Benefit
-                            </label>
-                            <div className="d-flex align-items-center ms-2">
-                              <Label
-                                title="Quality"
-                                data={formDataRef.current["Quality"] || "-"}
-                              />
-                            </div>
-                            <div className="d-flex align-items-center ms-2">
-                              <Label
-                                title="Cost"
-                                data={formDataRef.current["Cost"] || "-"}
-                              />
-                            </div>
-                            <div className="d-flex align-items-center ms-2">
-                              <Label
-                                title="Delivery"
-                                data={formDataRef.current["Delivery"] || "-"}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-lg-6 p-3">
-                            <label className="form-label fw-bold">
-                              Intangible Benefit
-                            </label>
-                            <div className="d-flex align-items-center ms-2">
-                              <Label
-                                title="Safety"
-                                data={formDataRef.current["Safety"] || "-"}
-                              />
-                            </div>
-                            <div className="d-flex align-items-center ms-2">
-                              <Label
-                                title="Moral"
-                                data={formDataRef.current["Moral"] || "-"}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {formDataRef.current.Status === "Rejected" && (
-                      <div>
-                        <hr />
-                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                        <Label
-                        data={formDataRef.current["Alasan Penolakan"]}/>
-                        <hr />
-                      </div>
-                    )}
                   </div>
                   <div className="d-flex justify-content-end pe-3 mb-3">
                     <sub>

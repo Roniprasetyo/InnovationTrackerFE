@@ -96,19 +96,14 @@ const SweetAlert = (
       };
     
       const batchGroup = createRadioGroup("Select Batch", "reviewOption", data);
-      const categoryGroup = createRadioGroup("Select Category", "categoryOption", [
-        { value: "Mini konvensi", label: "Mini Konvensi" },
-        { value: "Final konvensi", label: "Final Konvensi" },
-      ]);
       
       const radioGroup = document.createElement("div");
       radioGroup.style.display = "flex";
       radioGroup.style.flexDirection = "row";
       radioGroup.style.gap = "15px";
       radioGroup.appendChild(batchGroup);
-      radioGroup.appendChild(categoryGroup);
       inputElement.appendChild(radioGroup);
-
+    
       if (Array.isArray(reviewer) && reviewer.length > 0) {
         const reviewerGroup = document.createElement("div");
         reviewerGroup.style.marginTop = "20px";
@@ -132,12 +127,12 @@ const SweetAlert = (
           option.textContent = reviewerOption.Text;
           reviewerSelect.appendChild(option);
         });
-
+    
         reviewerGroup.appendChild(reviewerLabel);
         reviewerGroup.appendChild(reviewerSelect);
         inputElement.appendChild(reviewerGroup);
       }
-    }
+    }    
 
     return new Promise((resolve) => {
       swal({
@@ -167,22 +162,20 @@ const SweetAlert = (
           } 
           else if (confirmText === "Submit" && status === "Approved") {
             const selectedBatch = inputElement.querySelector('input[name="reviewOption"]:checked');
-            const selectedCategory = inputElement.querySelector('input[name="categoryOption"]:checked');
             const selectedReviewer = inputElement.querySelector('select[name="reviewerOption"]');
-
-            if (!selectedBatch || !selectedCategory || !selectedReviewer || selectedReviewer.value === "") {
-              swal("Please complete the form!", "Both batch and category must be selected.", "error").then(() => {
+          
+            if (!selectedBatch || !selectedReviewer || selectedReviewer.value === "") {
+              swal("Please complete the form!", "Batch and reviewer must be selected.", "error").then(() => {
                 SweetAlert(title, text, icon, confirmText, data, inputType, placeholder, html).then(resolve);
               });
               return;
             }
-
+          
             resolve({
               batch: selectedBatch.value,
-              category: selectedCategory.value,
               reviewer: selectedReviewer.value,
             });
-          }
+          }          
           else {
             resolve(value);
           }
