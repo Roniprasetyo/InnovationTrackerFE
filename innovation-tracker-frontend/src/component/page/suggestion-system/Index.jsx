@@ -18,6 +18,8 @@ import {
 } from "../../util/Formatting";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const inisialisasiData = [
   {
@@ -26,8 +28,8 @@ const inisialisasiData = [
     "Project Title": null,
     "Start Date": null,
     "End Date": null,
-    "Period": null,
-    "Category": null,
+    Period: null,
+    Category: null,
     Status: null,
     Creaby: null,
     Count: 0,
@@ -86,6 +88,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
   const searchFilterJenis = useRef();
+  const dataExport = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -111,7 +114,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   }
 
   const getStatusByKey = (key) => {
-    const data = currentData.find(item => item.Key === key);
+    const data = currentData.find((item) => item.Key === key);
     return data ? data.Status : null;
   };
 
@@ -120,13 +123,14 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     const tempStatus = getStatusByKey(id);
     var alertStatus;
 
-    if(tempStatus === "Approved") {
-      alertStatus = "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
+    if (tempStatus === "Approved") {
+      alertStatus =
+        "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
+    } else {
+      alertStatus =
+        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
     }
-    else {
-      alertStatus = "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
-    }
-    
+
     const confirm = await SweetAlert(
       "Confirm",
       alertStatus,
@@ -141,7 +145,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      if(tempStatus !== "Approved") {
+      if (tempStatus !== "Approved") {
         UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
           id: id,
         })
@@ -157,8 +161,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             }
           })
           .then(() => setIsLoading(false));
-      }
-      else {
+      } else {
         const reviewer = confirm.reviewer;
         const batch = confirm.batch;
         const category = confirm.category;
@@ -241,93 +244,92 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   };
 
   useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            },
-          });
-  
-          const data = await response.json();
-          setListEmployee(
-            data.map((value) => ({
-              username: value.username,
-              npk: value.npk,
-              upt: value.upt_bagian,
-            }))
-          );
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListEmployee({});
-        }
-      };
-  
-      fetchData();
-    }, []);
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
 
-    useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
-  
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the category data.");
-          } else {
-            setListReviewer(data);
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListReviewer({});
-        }
-      };
-  
-      fetchData();
-    }, []);
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            username: value.username,
+            npk: value.npk,
+            nama: value.nama,
+            upt: value.upt_bagian,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
 
-    console.log("DATA ALL ", currentData);
-    
-    useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-            p1: "Innovation Category",
-          });
-  
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the category data.");
-          } else {
-            setListCategory(data.filter((item) => item.Text.includes("Batch")));
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListCategory({});
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListReviewer(data);
         }
-      };
-  
-      fetchData();
-    }, []);
-  
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListReviewer({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data.filter((item) => item.Text.includes("Batch")));
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -343,7 +345,9 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
-          const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
+          const hanifData = listEmployee.find(
+            (value) => value.username === currentData.Creaby
+          );
           console.log("DATA HANIF:", hanifData);
           const role = userInfo.role.slice(0, 5);
           const inorole = userInfo.inorole;
@@ -351,56 +355,137 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
-          
+
             console.log("FOND", foundEmployee);
+            if (role === "ROL01") {
+              return {
+                Key: value.Key,
+                No: value["No"],
+                NPK:
+                  listEmployee.find((obj) => obj.username === value.Creaby)
+                    ?.npk || "-",
+                Name:
+                  listEmployee.find((obj) => obj.username === value.Creaby)
+                    ?.nama || "-",
+                "Project Title": maxCharDisplayed(
+                  decodeHtml(
+                    decodeHtml(decodeHtml(value["Project Title"]))
+                  ).replace(/<\/?[^>]+(>|$)/g, ""),
+                  50
+                ),
+                Category: value["Category"],
+                "Start Date": formatDate(value["Start Date"], true),
+                "End Date": formatDate(value["End Date"], true),
+                Period: value["Period"],
+                Status: value["Status"],
+                Count: value["Count"],
+                Action:
+                  role === "ROL03" &&
+                  value["Status"] === "Draft" &&
+                  value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : inorole === "Facilitator" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL03" &&
+                      value["Status"] === "Rejected" &&
+                      value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL01" && value["Status"] === "Approved"
+                    ? ["Detail", "Submit"]
+                    : ["Detail"],
+                Alignment: [
+                  "center",
+                  "left",
+                  "left",
+                  "left",
+                  "left",
+                  "left",
+                  "right",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                ],
+              };
+            } else {
+              return {
+                Key: value.Key,
+                No: value["No"],
+                "Project Title": maxCharDisplayed(
+                  decodeHtml(
+                    decodeHtml(decodeHtml(value["Project Title"]))
+                  ).replace(/<\/?[^>]+(>|$)/g, ""),
+                  50
+                ),
+                Category: value["Category"],
+                "Start Date": formatDate(value["Start Date"], true),
+                "End Date": formatDate(value["End Date"], true),
+                Period: value["Period"],
+                Status: value["Status"],
+                Count: value["Count"],
+                Action:
+                  role === "ROL03" &&
+                  value["Status"] === "Draft" &&
+                  value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : inorole === "Facilitator" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL03" &&
+                      value["Status"] === "Rejected" &&
+                      value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL01" && value["Status"] === "Approved"
+                    ? ["Detail", "Submit"]
+                    : ["Detail"],
+                Alignment: [
+                  "center",
+                  "left",
+                  "left",
+                  "left",
+                  "right",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                ],
+              };
+            }
+          });
+          // console.log(formattedData);
+          setCurrentData(formattedData);
+          const rawData = data.map(({ Key, Count, ...rest }) => rest);
+          const cleanedData = rawData.map((value) => {
             return {
-              Key: value.Key,
               No: value["No"],
-              "Project Title": maxCharDisplayed(
-                decodeHtml(
-                  decodeHtml(decodeHtml(value["Project Title"]))
-                ).replace(/<\/?[^>]+(>|$)/g, ""),
-                50
-              ),
+              NPK:
+                listEmployee.find((obj) => obj.username === value.Creaby)
+                  ?.npk || "-",
+              Name:
+                listEmployee.find((obj) => obj.username === value.Creaby)
+                  ?.nama || "-",
+              "Project Title": decodeHtml(
+                decodeHtml(decodeHtml(value["Project Title"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
               Category: value["Category"],
-              "Start Date": formatDate(value["Start Date"], true),
-              "End Date": formatDate(value["End Date"], true),
+              "Start Date": value["Start Date"].split("T")[0],
+              "End Date": value["End Date"].split("T")[0],
               Period: value["Period"],
               Status: value["Status"],
-              Count: value["Count"],
-              Action:
-                role === "ROL03" &&
-                value["Status"] === "Draft" &&
-                value["Creaby"] === userInfo.username
-                  ? ["Detail", "Edit", "Submit"]
-                  : inorole === "Facilitator" &&
-                    value["Status"] === "Waiting Approval"
-                  ? ["Detail", "Reject", "Approve"]
-                  : role === "ROL03" &&
-                    value["Status"] === "Rejected" &&
-                    value["Creaby"] === userInfo.username
-                  ? ["Detail", "Edit", "Submit"]
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Waiting Approval"
-                  ? ["Detail", "Reject", "Approve"]
-                  : role === "ROL01" &&
-                  value["Status"] === "Approved"
-                  ? ["Detail", "Submit"]
-                  : ["Detail"],
-              Alignment: [
-                "center",
-                "left",
-                "left",
-                "left",
-                "right",
-                "center",
-                "center",
-                "center",
-                "center",
-                "center",
-              ],
             };
-          });          
-          setCurrentData(formattedData);
+          });
+          dataExport.current = cleanedData;
         }
       } catch {
         setIsError(true);
@@ -408,11 +493,24 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         setIsLoading(false);
       }
     };
-    
-    console.log("COOKIE", JSON.parse(decryptId(cookie))); 
+
+    console.log("COOKIE", JSON.parse(decryptId(cookie)));
     fetchData();
   }, [currentFilter, listEmployee]);
-  
+
+  const exportExcel = (jsonData, fileName = "export.xlsx") => {
+    const worksheet = XLSX.utils.json_to_sheet(jsonData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, fileName);
+  };
+
   if (isLoading) return <Loading />;
 
   return (
@@ -446,7 +544,23 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               onClick={() => onChangePage("add")}
             />
           ) : (
-            ""
+            <Button
+              iconName="file-excel"
+              label="Export"
+              classType="success"
+              onClick={() =>
+                exportExcel(
+                  dataExport.current,
+                  "SS_" +
+                    new Date().toLocaleDateString() +
+                    "_" +
+                    new Date().toLocaleTimeString() +
+                    "_" +
+                    currentFilter.page +
+                    ".xlsx"
+                )
+              }
+            />
           )}
           <Input
             ref={searchQuery}
