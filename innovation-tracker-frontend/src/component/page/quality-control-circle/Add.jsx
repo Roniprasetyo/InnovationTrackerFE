@@ -790,6 +790,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               forInput="rciScope"
                               label="Project Scope"
                               isRequired
+                              placeholder="Merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team"
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
@@ -810,6 +811,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             <TextArea
                               forInput="rciCase"
                               label="Bussiness Case"
+                              placeholder="Dokumen manajemen proyek yang menjelaskan baagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan"
                               isRequired
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
@@ -833,6 +835,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             <TextArea
                               forInput="rciProblem"
                               label="Problem Statement​"
+                              placeholder="Mendefinisikan masalah yang dihadapi pengguna atau pelanggan"
                               isRequired
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
@@ -849,13 +852,14 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                 handleFileChange(problemFileRef, "pdf")
                               }
                               errorMessage={errors.rciProblemFile}
-                            />
+                            />    
                           </div>
                           <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciGoal"
-                              label="Goal Statement​"
+                              label="Goal Statement​" 
+                              placeholder="Menjelaskan tentang tujuan"
                               isRequired
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
@@ -917,6 +921,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -983,6 +988,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>

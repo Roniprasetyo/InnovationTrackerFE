@@ -781,6 +781,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
+                              placeholder="Merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team"
                             />
                           </div>
                         </div>
@@ -802,6 +803,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
+                              placeholder="Dokumen manajemen proyek yang menjelaskan baagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan"
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
@@ -825,6 +827,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
+                              placeholder="Mendefinisikan masalah yang dihadapi pengguna atau pelanggan"
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
@@ -848,6 +851,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}
+                              placeholder="Menjelaskan tentang tujuan"
                             />
                           </div>
                           <div className="col-lg-4">
@@ -905,6 +909,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -971,6 +976,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>

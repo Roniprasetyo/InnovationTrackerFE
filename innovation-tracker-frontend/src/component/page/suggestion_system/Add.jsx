@@ -582,6 +582,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_ruanglingkup}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_ruanglingkup}
+                              placeholder="Merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team"
                             />
                           </div>
                         </div>
@@ -603,6 +604,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_kasus}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_kasus}
+                              placeholder="Dokumen manajemen proyek yang menjelaskan baagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan"
                             />
                           </div>
                           <div className="col-lg-4">
@@ -625,6 +627,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_masalah}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_masalah}
+                              placeholder="Mendefinisikan masalah yang dihadapi pengguna atau pelanggan"
                             />
                           </div>
                           <div className="col-lg-4">
@@ -647,6 +650,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_tujuan}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_tujuan}
+                              placeholder="Menjelaskan tentang tujuan"
                             />
                           </div>
                           <div className="col-lg-4">
@@ -688,10 +692,10 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                                   forInput="sis_kualitas"
                                   label="Quality"
                                   isDisabled={!checkedStates.sisQuality}
-                                  placeholder="Quality"
                                   value={formDataRef.current.sis_kualitas}
                                   onChange={handleInputChange}
                                   errorMessage={errors.sis_kualitas}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -757,10 +761,10 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                                   forInput="sis_kemanan"
                                   label="Safety"
                                   isDisabled={!checkedStates.sisSafety}
-                                  placeholder="Safety"
                                   value={formDataRef.current.sis_kemanan}
                                   onChange={handleInputChange}
                                   errorMessage={errors.sis_kemanan}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>
