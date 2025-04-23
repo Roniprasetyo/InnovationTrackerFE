@@ -180,6 +180,7 @@ export default function Submission() {
             <div
               className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
               style={{ cursor: "pointer" }}
+              onClick={() => navigate("/submission/vci")}
             >
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">VCI</div>

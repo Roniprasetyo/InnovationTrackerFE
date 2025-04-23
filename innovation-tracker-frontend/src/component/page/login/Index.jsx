@@ -133,7 +133,6 @@ export default function Login() {
         {},
         "GET"
       );
-      console.log(userDetail);
 
       if (ipAddress === "ERROR")
         throw new Error("Error: Failed to get IP address.");
@@ -156,7 +155,6 @@ export default function Login() {
             agent: navigator.userAgent,
             application: APPLICATION_ID,
           });
-          console.log("sampe sini");
           if (data === "ERROR")
             throw new Error("Error: Failed to select role.");
           else {

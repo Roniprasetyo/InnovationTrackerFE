@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -15,11 +15,12 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
+    Section: null,
     Count: 0,
   },
 ];
 
-export default function QualityControlCircleDetail({ onChangePage, withID }) {
+export default function ValueChainInnovationDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -27,11 +28,11 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
     Category: "",
-    CategoryImp: "",
     "Group Name": "",
     "Project Title": "",
     "Project Benefit": 0,
@@ -49,6 +50,8 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Delivery: "",
     Safety: "",
     Moral: "",
+    "Company 1": "",
+    "Company 2": "",
     Status: "",
     Creaby: "",
     member: [{}],
@@ -58,15 +61,49 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            npk: value.npk,
+            upt: value.upt_bagian,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+
+      try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaCircle/GetRencanaVCIById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get QCP data");
+          throw new Error("Error: Failed to get VCI data");
         } else {
           formDataRef.current = data;
           const members = data.member.filter(
@@ -80,7 +117,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                   No: index + 1,
                   Name: item.Name,
                   Count: memberCount,
-                  Alignment: ["center", "left"],
+                  Alignment: ["center", "left", "left"],
                 }))
               )
             : setCurrentData(inisialisasiData);
@@ -98,7 +135,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, [withID]);
+  }, [withID, listEmployee]);
 
   if (isLoading) return <Loading />;
 
@@ -138,7 +175,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCC REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">VCI REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -152,7 +189,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-6">
+                        <div className="col-md-12">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
@@ -160,8 +197,14 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                         </div>
                         <div className="col-md-6">
                           <Label
-                            title="Section"
-                            data={userInfo.upt}
+                            title="Company 1​"
+                            data={formDataRef.current["Company 1"] || "-"}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <Label
+                            title="Company 2​"
+                            data={formDataRef.current["Company 2"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
@@ -203,18 +246,6 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                             data={decodeHtml(
                               formDataRef.current["Project Title"] || "-"
                             )}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Innovation Category"
-                            data={formDataRef.current.Category || "-"}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
                           />
                         </div>
                         <div className="col-lg-3">

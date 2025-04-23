@@ -10,22 +10,22 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import { formatDate } from "../../util/Formatting";
+import { maxCharDisplayed } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
     Key: null,
     No: null,
-    StartDate: null,
-    EndDate: null,
+    Name: null,
+    Address: null,
     Status: null,
     Count: 0,
   },
 ];
 
 const dataFilterSort = [
-  { Value: "[StartDate] asc", Text: "StartDate [↑]" },
-  { Value: "[EndDate] desc", Text: "EndDate [↓]" },
+  { Value: "[Name] asc", Text: "Name [↑]" },
+  { Value: "[Name] desc", Text: "Name [↓]" },
 ];
 
 const dataFilterStatus = [
@@ -33,20 +33,22 @@ const dataFilterStatus = [
   { Value: "Tidak Aktif", Text: "Tidak Aktif" },
 ];
 
-export default function MasterPeriodIndex({ onChangePage }) {
+export default function MasterPerusahaanIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[StartDate] asc",
+    sort: "[Name] asc",
     status: "Aktif",
+    jenis: "",
   });
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
+  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -71,32 +73,40 @@ export default function MasterPeriodIndex({ onChangePage }) {
     });
   }
 
-  function handleSetStatus(id) {
-    setIsLoading(true);
+  async function handleDelete(id) {
     setIsError(false);
-    UseFetch(API_LINK + "MasterPeriod/SetStatusPeriod", {
-      idPeriod: id,
-    })
-      .then((data) => {
-        if (data === "ERROR" || data.length === 0) setIsError(true);
-        else {
-          SweetAlert(
-            "Sukses",
-            "Status data berhasil diubah menjadi " + data[0].Status,
-            "success"
-          );
-          handleSetCurrentPage(currentFilter.page);
-        }
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to delete this data?.",
+      "warning",
+      "DELETE",
+      null,
+      "",
+      true
+    );
+
+    if (confirm) {
+      UseFetch(API_LINK + "MasterPerusahaan/SetStatusPerusahaan", {
+        idSetting: id,
       })
-      .then(() => setIsLoading(false));
+        .then((data) => {
+          if (data === "ERROR" || data.length === 0) setIsError(true);
+          else {
+            SweetAlert("Success", "Data successfully deleted", "success");
+            handleSetCurrentPage(currentFilter.page);
+          }
+        })
+        .then(() => setIsLoading(false));
+    }
   }
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
+
       try {
         const data = await UseFetch(
-          API_LINK + "MasterPeriod/GetPeriod",
+          API_LINK + "MasterPerusahaan/GetPerusahaan",
           currentFilter
         );
 
@@ -107,14 +117,13 @@ export default function MasterPeriodIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            StartDate: formatDate(value.StartDate.split("T")[0], true),
-            EndDate: formatDate(value.EndDate.split("T")[0], true),
-            Action: ["Toggle", "Edit"],
-            Alignment: ["center", "center", "center", "center", "center"],
+            Address: maxCharDisplayed(value.Address, 50),
+            Action: ["Delete", "Edit", "Detail"],
+            Alignment: ["center", "left", "left", "center", "center"],
           }));
           setCurrentData(formattedData);
         }
-      } catch (error) {
+      } catch {
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -131,7 +140,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
           <div className="d-flex gap-3 justify-content-center">
             <h2 className="display-1 fw-bold">Manage</h2>
             <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">Period</h2>
+              <h2 className="display-5 fw-bold align-items-end">Company</h2>
             </div>
           </div>
         </div>
@@ -154,7 +163,8 @@ export default function MasterPeriodIndex({ onChangePage }) {
           />
           <Input
             ref={searchQuery}
-            forInput="pencarianPeriod"
+            forInput="pencarianPerusahaan"
+            isRound
             placeholder="Search"
           />
           <Button
@@ -170,7 +180,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[StartDate] asc"
+              defaultValue="[Nama Alat/Mesin] asc"
             />
             <DropDown
               ref={searchFilterStatus}
@@ -190,7 +200,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
           <div className="table-responsive">
             <Table
               data={currentData}
-              onToggle={handleSetStatus}
+              onDelete={handleDelete}
               onDetail={onChangePage}
               onEdit={onChangePage}
             />

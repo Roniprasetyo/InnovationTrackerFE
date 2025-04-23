@@ -23,26 +23,33 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Name: null,
-    Type: null,
+    "Circle Name": null,
+    "Project Title": null,
+    Category: null,
+    "Project Benefit": null,
+    "Start Date": null,
+    "End Date": null,
+    Period: null,
     Status: null,
     Count: 0,
   },
 ];
 
 const dataFilterSort = [
-  { Value: "[Circle Name] asc", Text: "[Circle Name] [↑]" },
-  { Value: "[Circle Name] desc", Text: "[Circle Name] [↓]" },
+  { Value: "[Circle Name] asc", Text: "Circle Name [↑]" },
+  { Value: "[Circle Name] desc", Text: "Circle Name [↓]" },
+  { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
+  { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
   { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
   { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
+  { Value: "[Category] asc", Text: "[Category] [↑]" },
+  { Value: "[Category] desc", Text: "[Category] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
   { Value: "[End Date] desc", Text: "[End Date] [↓]" },
   { Value: "[Period] asc", Text: "[Period] [↑]" },
   { Value: "[Period] desc", Text: "[Period] [↓]" },
-  { Value: "[Category] asc", Text: "[Category] [↑]" },
-  { Value: "[Category] desc", Text: "[Category] [↓]" },
 ];
 
 const dataFilterStatus = [
@@ -201,7 +208,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
-            No: index + 1,
+            No: value["No"],
             "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(
@@ -277,12 +284,16 @@ export default function QualityControlCircleIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          <Button
-            iconName="add"
-            label="Register"
-            classType="success"
-            onClick={() => onChangePage("add")}
-          />
+          {userInfo.role.slice(0, 5) !== "ROL01" ? (
+            <Button
+              iconName="add"
+              label="Register"
+              classType="success"
+              onClick={() => onChangePage("add")}
+            />
+          ) : (
+            ""
+          )}
           <Input
             ref={searchQuery}
             forInput="pencarianSetting"
@@ -309,7 +320,11 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               forInput="ddStatus"
               label="Status"
               type="semua"
-              arrData={dataFilterStatus}
+              arrData={
+                userInfo.role.slice(0, 5) === "ROL01"
+                  ? dataFilterStatus.filter((item) => item.Value != "Draft")
+                  : dataFilterStatus
+              }
               defaultValue=""
             />
           </Filter>

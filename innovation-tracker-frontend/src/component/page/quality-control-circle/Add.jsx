@@ -17,7 +17,12 @@ import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
-import { clearSeparator, formatDate, separator } from "../../util/Formatting";
+import {
+  clearSeparator,
+  decodeHtml,
+  formatDate,
+  separator,
+} from "../../util/Formatting";
 
 const inisialisasiData = [
   {
@@ -72,7 +77,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     rciSafety: "",
     rciMoral: "",
     rciFacil: "",
-    rciLeader: "",
+    rciLeader: userInfo.npk,
     setId2: "",
   });
   const memberDataRef = useRef({
@@ -93,7 +98,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       .max(100, "maximum 100 characters")
       .required("required"),
     rciTitle: string().required("required"),
-    rciProjBenefit: string().max(100, "maximum 100 characters"),
+    rciProjBenefit: string().max(13, "maximum 10 digits"),
     rciCase: string().required("required"),
     rciCaseFile: string().nullable(),
     rciProblem: string().required("required"),
@@ -120,42 +125,44 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsError((prev) => ({ ...prev, error: false }));
+
       try {
-        let filteredData;
         const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
           },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            filteredData = data.filter(
-              (item) => item.upt_bagian === userInfo.upt
-            );
-          });
+        });
+
+        if (!response.ok)
+          setIsError({ error: true, message: "Failed to fetch data" });
+
+        const data = await response.json();
+
+        if (!Array.isArray(data))
+          setIsError({ error: true, message: "Invalid data format" });
+
+        const filteredData = data.filter(
+          (item) => item?.upt_bagian === userInfo?.upt
+        );
+
         setListEmployee(
-          filteredData.map((value) => ({
-            Value: value.npk,
-            Text: value.npk + " - " + value.nama,
+          filteredData.map(({ npk, nama }) => ({
+            Value: npk ?? "", 
+            Text: npk && nama ? `${npk} - ${nama}` : "",
           }))
         );
-        formDataRef.current.rciLeader = userInfo.npk;
       } catch (error) {
         window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
+        setIsError({ error: true, message: error.message });
         setListEmployee([]);
       }
     };
 
     fetchData();
-  }, []);
+  }, [userInfo?.upt]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -177,7 +184,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListCategory([]);
+        setListCategory({});
       }
     };
 
@@ -195,7 +202,12 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListImpCategory(data);
+          setListImpCategory(
+            data.map((item) => ({
+              ...item,
+              Text: decodeHtml(item.Text),
+            }))
+          );
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -204,7 +216,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListImpCategory([]);
+        setListImpCategory({});
       }
     };
 
@@ -237,7 +249,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListPeriod([]);
+        setListPeriod({});
       }
     };
 
@@ -265,7 +277,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        setListFacil([]);
+        setListFacil({});
       }
     };
 
@@ -286,10 +298,12 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         } else {
           const sDate = data[0].perAwal.split("T")[0];
           const eDate = data[0].perAkhir.split("T")[0];
-          periodDataRef.current = {
-            startPeriod: sDate,
-            endPeriod: eDate,
-          };
+          if (data[0]) {
+            periodDataRef.current = {
+              startPeriod: sDate,
+              endPeriod: eDate,
+            };
+          }
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -300,8 +314,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
 
     fetchData();
   }, [selectedPeriod]);
-
-  
 
   const handleCheckboxChange = (key) => {
     if (checkedStates[key]) formDataRef.current[key] = "";
@@ -442,12 +454,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const newMemData = [
-      { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
-      { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
-      ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
-    ];
-
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
@@ -465,8 +471,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
       }
       const sDate = new Date(formDataRef.current.rciStartDate);
       const eDate = new Date(formDataRef.current.rciEndDate);
-      const selectedStartPeriod = new Date(periodDataRef.current.startPeriod);
-      const selectedEndPeriod = new Date(periodDataRef.current.endPeriod);
+      const innovationEndPeriod = new Date(periodDataRef.current.endPeriod);
 
       if (sDate >= eDate) {
         window.scrollTo(0, 0);
@@ -477,21 +482,28 @@ export default function QualityControlCircleAdd({ onChangePage }) {
         return;
       }
 
-      if (eDate >= selectedEndPeriod) {
+      if (eDate >= innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected start date or end date outrange the selected period",
+            "Invalid date: Selected end date outrange the innovation period end date",
         });
         return;
       }
+
+      const newMemData = [
+        { memNpk: formDataRef.current.rciFacil, memPost: "Facilitator" },
+        { memNpk: formDataRef.current.rciLeader, memPost: "Leader" },
+        ...memberData.map(({ Key }) => ({ memNpk: Key, memPost: "Member" })),
+      ];
 
       formDataRef.current = {
         ...formDataRef.current,
         rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
         member: newMemData,
       };
+
       delete formDataRef.current.rciFacil;
       delete formDataRef.current.rciLeader;
 
@@ -616,7 +628,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             <Input
                               type="text"
                               forInput="setName"
-                              label="Prodi/UPT/Dep​"
+                              label="Section"
                               isDisabled
                               value={userInfo.upt}
                             />
@@ -710,11 +722,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             />
                           </div>
                           <div className="col-lg-6">
-                            <DropDown
+                            <SearchDropdown
                               forInput="setId2"
                               label="Knowledge Category"
+                              placeHolder="Knowledge Category"
                               arrData={listImpCategory}
                               isRequired
+                              isRound
                               value={formDataRef.current.setId2}
                               onChange={handleInputChange}
                               errorMessage={errors.setId2}
@@ -727,7 +741,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               label="Start Date"
                               placeholder={
                                 periodDataRef.current.startPeriod
-                                  ? "Selected period starts on " +
+                                  ? "Innovation period starts on " +
                                     formatDate(
                                       periodDataRef.current.startPeriod,
                                       true
@@ -746,7 +760,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               forInput="rciEndDate"
                               label="End Date"
                               placeholder={
-                                "Selected period ends on " +
+                                "Innovation period ends on " +
                                 formatDate(
                                   periodDataRef.current.endPeriod,
                                   true
@@ -802,7 +816,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               errorMessage={errors.rciCase}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="rciCaseFile"
                               label="Bussiness Case Document (.pdf)"
@@ -814,6 +828,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               errorMessage={errors.rciCaseFile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciProblem"
@@ -824,7 +839,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               errorMessage={errors.rciProblem}
                             />
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="rciProblemFile"
                               label="Problem Statement​ Document (.pdf)"
@@ -836,6 +851,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                               errorMessage={errors.rciProblemFile}
                             />
                           </div>
+                          <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciGoal"
@@ -873,7 +889,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             <Input
                               type="text"
                               forInput="rciProjBenefit"
-                              label="Project Benefit"
+                              label="Project Benefit (Rp)"
                               value={formDataRef.current.rciProjBenefit}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProjBenefit}
@@ -898,7 +914,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   forInput="rciQuality"
                                   label="Quality"
                                   isDisabled={!checkedStates.rciQuality}
-                                  placeholder="Quality"
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
@@ -918,7 +933,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   forInput="rciCost"
                                   label="Cost"
                                   isDisabled={!checkedStates.rciCost}
-                                  placeholder="Cost"
                                   value={formDataRef.current.rciCost}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciCost}
@@ -939,7 +953,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   type="text"
                                   forInput="rciDelivery"
                                   label="Delivery"
-                                  placeholder="Delivery"
                                   isDisabled={!checkedStates.rciDelivery}
                                   value={formDataRef.current.rciDelivery}
                                   onChange={handleInputChange}
@@ -967,7 +980,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   forInput="rciSafety"
                                   label="Safety"
                                   isDisabled={!checkedStates.rciSafety}
-                                  placeholder="Safety"
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
@@ -989,7 +1001,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   label="Moral"
                                   forInput="rciMoral"
                                   isDisabled={!checkedStates.rciMoral}
-                                  placeholder="Moral"
                                   value={formDataRef.current.rciMoral}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciMoral}

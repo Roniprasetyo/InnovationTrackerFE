@@ -1,26 +1,29 @@
 import { useState } from "react";
-import MasterPeriodIndex from "./Index";
-import MasterPeriodAdd from "./Add";
-import MasterPeriodDetail from "./Detail";
-import MasterPeriodEdit from "./Edit";
+import SuggestionSytemIndex from "./Index";
+import SuggestionSystemAdd from "./Add";
+import SuggestionSystemEdit from "./Edit";
+import SuggestionSystemDetail from "./Detail";
 
-export default function MasterPeriod() {
+export default function SuggestionSystem() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <MasterPeriodIndex onChangePage={handleSetPageMode} />;
+        return <SuggestionSytemIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <MasterPeriodAdd onChangePage={handleSetPageMode} />;
+        return <SuggestionSystemAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <MasterPeriodEdit onChangePage={handleSetPageMode} withID={dataID} />
+          <SuggestionSystemEdit
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
         );
       case "detail":
         return (
-          <MasterPeriodDetail
+          <SuggestionSystemDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />

@@ -23,33 +23,24 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    "Circle Name": null,
-    "Project Title": null,
-    Category: null,
-    "Project Benefit": null,
-    "Start Date": null,
-    "End Date": null,
-    Period: null,
+    Name: null,
+    Type: null,
     Status: null,
     Count: 0,
   },
 ];
 
 const dataFilterSort = [
-  { Value: "[Circle Name] asc", Text: "Circle Name [↑]" },
-  { Value: "[Circle Name] desc", Text: "Circle Name [↓]" },
   { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
   { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
-  { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
-  { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
-  { Value: "[Category] asc", Text: "[Category] [↑]" },
-  { Value: "[Category] desc", Text: "[Category] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
   { Value: "[End Date] desc", Text: "[End Date] [↓]" },
   { Value: "[Period] asc", Text: "[Period] [↑]" },
   { Value: "[Period] desc", Text: "[Period] [↓]" },
+  { Value: "[Category] asc", Text: "[Category] [↑]" },
+  { Value: "[Category] desc", Text: "[Category] [↓]" },
 ];
 
 const dataFilterStatus = [
@@ -59,7 +50,13 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-export default function QualityControlProjectIndex({ onChangePage }) {
+// const dataFilterJenis = [
+//   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+//   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+//   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
+// ];
+
+export default function SuggestionSytemIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -72,7 +69,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     query: "",
     sort: "[Category] asc",
     status: "",
-    jenis: "QCP",
+    jenis: "SS",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -80,6 +77,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
+  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -117,7 +115,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+      UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
         id: id,
       })
         .then((data) => {
@@ -148,7 +146,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
+      UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Approved",
       })
@@ -175,7 +173,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
+      UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Rejected",
       })
@@ -195,12 +193,12 @@ export default function QualityControlProjectIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCP",
+          API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter
         );
 
         if (data === "ERROR") {
-          setIsError(true);
+          // setIsError(true);
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
@@ -209,7 +207,6 @@ export default function QualityControlProjectIndex({ onChangePage }) {
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
             No: value["No"],
-            "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(
                 decodeHtml(decodeHtml(value["Project Title"]))
@@ -217,7 +214,6 @@ export default function QualityControlProjectIndex({ onChangePage }) {
               50
             ),
             Category: value["Category"],
-            "Project Benefit": separator(value["Project Benefit"]),
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
             Period: value["Period"],
@@ -264,11 +260,9 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       <div className="my-3">
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
-            <h2 className="display-1 fw-bold">Quality</h2>
+            <h2 className="display-1 fw-bold">Suggestion</h2>
             <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">
-                Control Project
-              </h2>
+              <h2 className="display-5 fw-bold align-items-end">System</h2>
             </div>
           </div>
         </div>
@@ -313,7 +307,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Category] asc"
+              defaultValue="[Team Name] asc"
             />
             <DropDown
               ref={searchFilterStatus}
