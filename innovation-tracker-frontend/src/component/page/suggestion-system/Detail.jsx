@@ -9,6 +9,7 @@ import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
+import SearchDropdown from "../../part/SearchDropdown";
 
 const inisialisasiData = [
   {
@@ -25,6 +26,9 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [listEmployee, setListEmployee] = useState([]);
   const [userData, setUserData] = useState({});
+  const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
+  const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
+    useState([]);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +57,9 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     Status: "",
     "Alasan Penolakan": "",
   });
+
+  const formDataRef2 = useRef({});
+  const formDataRef3 = useRef({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,6 +140,94 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     }
   }, [listEmployee, userInfo]);
 
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(
+            API_LINK + "MiniConvention/GetListKriteriaPenilaian"
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListKriteriaPenilaian(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }
+      };
+      fetchData();
+    }, []);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(
+            API_LINK + "MiniConvention/GetListDetailKriteriaPenilaian"
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            const dataDetail = data.map((item) => ({
+              Text: `${item.Desc} - (${item.Score})`,
+              Value: item.Value,
+              Score: item.Score,
+              Id: item.Value2,
+            }));
+  
+            setListDetailKriteriaPenilaian(dataDetail);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }
+      };
+  
+      fetchData();
+    }, []);
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+  
+      formDataRef2.current[name] = value;
+  
+      const validationError = validateInput(name, value, userSchema);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [validationError.name]: validationError.error,
+      }));
+  
+      let total = 0;
+      Object.values(formDataRef2.current).forEach((val) => {
+        const matched = listDetailKriteriaPenilaian.find(
+          (item) => item.Value === val
+        );
+      
+        formDataRef3.current[name] = matched.Score;
+  
+        console.log("val dari formDataRef2:", val);
+        console.log("matched item:", formDataRef3);
+  
+        const parsed = parseFloat(matched?.Score);
+        if (!isNaN(parsed)) total += parsed;
+      });
+  
+      setTotalScore(total);
+    };
 
   if (isLoading) return <Loading />;
 
@@ -392,6 +487,75 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                     </div>
                   )}
                 </div>
+                {formDataRef.current.Status === "Approved" && (
+                  <div className="col-lg-12">
+                  <div className="card mb-3">
+                    <div className="card-header align-items-center d-flex">
+                      <h5 className="fw-medium">Criteria</h5>
+                    </div>
+                    <div className="card-body d-flex flex-wrap">
+                      <div
+                        className="pe-4 border-end"
+                        style={{ width: "80%" }}
+                      >
+                        {listKriteriaPenilaian.map((item) => {
+                          const selectedItem =
+                            listDetailKriteriaPenilaian.find(
+                              (detail) => detail.Id === item.Value
+                            );
+
+                          const filteredArrData =
+                            listDetailKriteriaPenilaian.filter(
+                              (detail) => detail.Id === item.Value
+                            );
+
+                          return (
+                            <div className="row mb-3" key={item.Value}>
+                              <div className="col-lg-4">
+                                <Label data={item.Text} />
+                              </div>
+                              <div className="col-lg-8">
+                                --
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="ps-4" style={{ width: "20%" }}>
+                        <div
+                          className="d-flex flex-column gap-3"
+                          style={{ height: "100px" }}
+                        >
+                          <div
+                            className="card fw-medium text-center"
+                            style={{ width: "200px" }}
+                          >
+                            Ka.Unit/Ka.UPT
+                            <hr />
+                            <h5>{0}</h5>
+                          </div>
+                          <div
+                            className="card fw-medium text-center"
+                            style={{ width: "200px" }}
+                          >
+                            Ka.Prodi/Ka.Dept
+                            <hr />
+                            <h5>{0}</h5>
+                          </div>
+                          <div
+                            className="card fw-medium text-center"
+                            style={{ width: "200px" }}
+                          >
+                            WaDIR/DIR
+                            <hr />
+                            <h5>{0}</h5>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                )}
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>
                     Submitted by{" "}

@@ -16,6 +16,8 @@ import Input from "../../part/Input";
 import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
+import { Tabs, Tab, Box, Paper } from "@mui/material";
+import PropTypes from 'prop-types';
 
 const inisialisasiData = [
   {
@@ -26,6 +28,35 @@ const inisialisasiData = [
   },
 ];
 
+function TabScoring(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+TabScoring.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
 export default function MiniConventionScoring({ onChangePage, WithID }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
@@ -35,6 +66,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
+  const [listPenilaian, setListPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
     useState([]);
   const [userData, setUserData] = useState({});
@@ -43,6 +75,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userInput, setUserInput] = useState("");
   const [formattedValue, setFormattedValue] = useState("");
+  const [forPenilai, setForPenilai] = useState("");
+  const [selectedTab, setSelectedTab] = useState(0);
 
   const formDataRef = useRef({
     Key: "",
@@ -188,6 +222,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             jabatan: value.jabatan,
           }))
         );
+
+        const temp = data.find((value) => value.npk === userInfo.npk);
+        setForPenilai(temp);
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -202,17 +239,58 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     fetchData();
   }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     const payload = {
-      dkp_id: formDataRef2.current,
+      dkp_id: Object.values(formDataRef2.current).join(", "),
       sis_id: id,
-      pen_nilai: formDataRef3.current,
+      pen_nilai: Object.values(formDataRef3.current).join(", "),
       jabatan: userInfo.jabatan,
-      status: "-"
+      status: "-",
     };
-    console.log("Payload ID: ", payload);
-    console.log("Payload SIS ID: ", formDataRef3);
-  }
+
+    // const validationErrors = await validateAllInputs(
+    //   formDataRef2.current,
+    //   userSchema,
+    //   setErrors
+    // );
+
+    console.log("FormDataRef: ", formDataRef2.current);
+    console.log("Payload: ", payload);
+    console.log("Payload nilai: ", formDataRef3);
+
+    // if (Object.values(validationErrors).every((error) => !error)) {
+    //   setIsLoading(true);
+    //   setIsError((prevError) => ({ ...prevError, error: false }));
+    //   setErrors({});
+
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/CreatePenilian",
+          payload
+        );
+
+        console.log("tes", data);
+        if (!data) {
+          throw new Error("Error: Failed to Submit the data.");
+        } else {
+          SweetAlert("Success", "Data Successfully Submitted", "success");
+          window.location.href = ROOT_LINK + "/submission/ss"
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    // } else window.scrollTo(0, 0);
+  };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -239,6 +317,35 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     };
     fetchData();
   }, []);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetPenilaianById", {id}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListPenilaian(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+    fetchData();
+  }, []);
+
+  console.log("DATA ", listPenilaian);
+  console.log("ID ", id);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -252,7 +359,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (${item.Score})`,
+            Text: `${item.Desc} - (Poin ${item.Score})`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -274,7 +381,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     fetchData();
   }, []);
 
-  console.log("DATA ", listDetailKriteriaPenilaian);
   const formatNumber = (value) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
@@ -372,98 +478,123 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                           <h5 className="fw-medium">Criteria</h5>
                         </div>
                         <div className="card-body d-flex flex-wrap">
-                          <div
-                            className="pe-4 border-end"
-                            style={{ width: "80%" }}
-                          >
-                            {listKriteriaPenilaian.map((item) => {
-                              const selectedItem =
-                                listDetailKriteriaPenilaian.find(
-                                  (detail) => detail.Id === item.Value
-                                );
-
-                              const filteredArrData =
-                                listDetailKriteriaPenilaian.filter(
-                                  (detail) => detail.Id === item.Value
-                                );
-
-                              return (
-                                <div className="row mb-3" key={item.Value}>
-                                  <div className="col-lg-4">
-                                    <Label data={item.Text} />
-                                  </div>
-                                  <div className="col-lg-8">
-                                    <SearchDropdown
-                                      forInput={item.Value}
-                                      arrData={filteredArrData}
-                                      isRound
-                                      value={
-                                        formDataRef2.current[item.Value] || ""
-                                      }
-                                      onChange={handleInputChange}
+                          <Box sx={{width:'80%'}}>
+                            <div>
+                              <Box>
+                                <Tabs
+                                  value={selectedTab}
+                                  className="card rounded-bottom-0"
+                                  onChange={(e, newValue) => setSelectedTab(newValue)} 
+                                  variant="fullWidth"
+                                  sx={{
+                                    "& .MuiTabs-indicator": {
+                                      height: "3px",
+                                      backgroundColor: "#1976d2",
+                                    },
+                                  }}
+                                >
+                                  {["Ka.Unit/Ka.UPT", "Ka.Prodi/Ka.Dept", "WaDIR/DIR"].map((label, index) => (
+                                    <Tab
+                                      key={label}
+                                      label={label}
+                                      sx={{
+                                        backgroundColor: selectedTab === index ? "#ffffff" : "#f0f0f0", // putih saat aktif, abu saat non-aktif
+                                        borderRight: index !== 2 ? '1px solid #ddd' : 'none',
+                                        fontWeight: "bold",
+                                        color: "black",
+                                        minHeight: '48px',
+                                      }}
                                     />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          <div className="ps-4" style={{ width: "20%" }}>
-                            <div
-                              className="d-flex flex-column gap-3"
-                              style={{ height: "100px" }}
-                            >
+                                  ))}
+                                </Tabs>
+                              </Box>
+                            </div>
+                            <div className="card" style={{ borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
                               <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
+                                className=" card-body pe-4"
+                                
                               >
-                                Ka.Unit/Ka.UPT
-                                <hr />
-                                <h5>{totalScore}</h5>
-                              </div>
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
-                              >
-                                Ka.Prodi/Ka.Dept
-                                <hr />
-                                <h5>{0}</h5>
-                              </div>
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
-                              >
-                                WaDIR/DIR
-                                <hr />
-                                <h5>{0}</h5>
+                                {listKriteriaPenilaian.map((item) => {
+                                  const selectedItem =
+                                    listDetailKriteriaPenilaian.find(
+                                      (detail) => detail.Id === item.Value
+                                    );
+
+                                  const filteredArrData =
+                                    listDetailKriteriaPenilaian.filter(
+                                      (detail) => detail.Id === item.Value
+                                    );
+
+                                  const filteredArrDataPenilaian = listPenilaian.filter(
+                                    (detail) => detail["Jabatan Penilai"] === forPenilai.jabatan
+                                  );
+
+                                  const matchingPenilaian = listPenilaian.find(
+                                    (detail) =>
+                                      detail["Jabatan Penilai"] === forPenilai.jabatan &&
+                                      detail.Kriteria === item.Value
+                                  );
+
+                                  console.log("FILTER ", filteredArrDataPenilaian);
+                                  return (
+                                    <div className="row mb-3" key={item.Value}>
+                                      <div className="col-lg-4">
+                                        <Label data={item.Text} />
+                                      </div>
+                                      <div className="col-lg-8">
+                                      {matchingPenilaian ? (
+                                        <div className="form-control bg-light">
+                                          {`${matchingPenilaian.Deskripsi} - (Poin ${matchingPenilaian.Nilai})`}
+                                        </div>
+                                      ) : (
+                                        <SearchDropdown
+                                          forInput={item.Value}
+                                          arrData={filteredArrData}
+                                          isRound
+                                          value={formDataRef2.current[item.Value] || ""}
+                                          onChange={handleInputChange}
+                                        />
+                                      )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
-                            {/* {listKriteriaPenilaian.slice(Math.ceil(listKriteriaPenilaian.length / 2)).map((item) => {
-                              const selectedItem = listDetailKriteriaPenilaian.find(
-                                (detail) => detail.Id === item.Value
-                              );
-
-                              const filteredArrData = listDetailKriteriaPenilaian.filter(
-                                (detail) => detail.Id === item.Value
-                              );
-
-                              return (
-                                <div className="row mb-3" key={item.Value}>
-                                  <div className="col-lg-4">
-                                    <Label data={item.Text} />
-                                  </div>
-                                  <div className="col-lg-8">
-                                    <SearchDropdown
-                                      forInput={item.Value}
-                                      arrData={filteredArrData}
-                                      isRound
-                                      value={formDataRef2.current[item.Value] || ""}
-                                      onChange={handleInputChange}
-                                    />
-                                  </div>
+                          </Box>
+                          <Box sx={{width:'20%'}}>
+                            <div className="ps-4">
+                              <div
+                                className="d-flex flex-column gap-3"
+                                style={{ height: "100px" }}
+                              >
+                                <div
+                                  className="card fw-medium text-center"
+                                  style={{ width: "200px", minHeight:'180px' }}
+                                >
+                                  Ka.Unit/Ka.UPT
+                                  <hr />
+                                  <h5>{totalScore}</h5>
                                 </div>
-                              );
-                            })} */}
-                          </div>
+                                <div
+                                  className="card fw-medium text-center"
+                                  style={{ width: "200px", minHeight:'180px' }}
+                                >
+                                  Ka.Prodi/Ka.Dept
+                                  <hr />
+                                  <h5>{0}</h5>
+                                </div>
+                                <div
+                                  className="card fw-medium text-center"
+                                  style={{ width: "200px", minHeight:'180px' }}
+                                >
+                                  WaDIR/DIR
+                                  <hr />
+                                  <h5>{0}</h5>
+                                </div>
+                              </div>
+                            </div>
+                          </Box>
                         </div>
                       </div>
                     </div>
