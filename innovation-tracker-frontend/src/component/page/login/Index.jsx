@@ -23,6 +23,7 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [admin, setAdmin] = useState("");
   const [listRole, setListRole] = useState([]);
   const [userDetail, setUserDetail] = useState({});
 
@@ -76,43 +77,79 @@ export default function Login() {
         //   setListRole(data);
         //   modalRef.current.open();
         // }
+        if(formDataRef.current.username == "superadmin" && formDataRef.current.password == "superadmin"){
+          const adminRoleData = [
+            {
+              RoleID: "ROL02",
+              Role: "Facilitator",
+              Nama: "Facilitator",
+              Npk: "000000",
+              InoRole: "-",
+            },
+            {
+              RoleID: "ROL01",
+              Role: "Administrator",
+              Nama: "Administrator",
+              Npk: "000000",
+              InoRole: "-",
+            },
+            {
+              RoleID: "ROL04",
+              Role: "Judges",
+              Nama: "Judges",
+              Npk: "000000",
+              InoRole: "-",
+            },
+            {
+              RoleID: "ROL03",
+              Role: "Employee",
+              Nama: "Employee",
+              Npk: "000000",
+              InoRole: "-",
+            }
+          ];
+          setListRole(adminRoleData);
+      
+          console.log(listRole);
+          setUserDetail({
+            username: "Superadmin",
+            nama: "Superadmin",
+            jabatan: "Superadmin",
+            departemen: "IT",
+            upt: "-",
+          });
+          modalRef.current.open();
+          return;
+        }
 
-        if (
-          formDataRef.current.username === "ADMIN" &&
-          formDataRef.current.password === "admin123"
-        ) {
-          //Create JWT token
-          //Create Cookies
-          // Etc
-        } else {
-          const data = await UseFetch(
-            API_LINK + "Utilities/Login",
-            formDataRef.current
-          );
+        const data = await UseFetch(
+          API_LINK + "Utilities/Login",
+          formDataRef.current
+        );
 
-          if (data === "ERROR")
-            throw new Error("Error: Failed to authenticate.");
-          else if (data.Status && data.Status === "LOGIN FAILED")
-            throw new Error("Wrong username or password.");
-          else {
-            const response = await fetch(
-              `${EMP_API_LINK}getUserDetail?username=${formDataRef.current.username}`,
-              {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-                },
-              }
-            )
-              .then((res) => res.json())
-              .then((data) => setUserDetail(data[0]))
-              .catch((err) => {
-                throw new Error("Failed to get user detail.");
-              });
-            setListRole(data);
-            modalRef.current.open();
-          }
+        if (data === "ERROR") throw new Error("Error: Failed to authenticate.");
+        else if (data.Status && data.Status === "LOGIN FAILED")
+          throw new Error("Wrong username or password.");
+        else {
+          const response = await fetch(
+            `${EMP_API_LINK}getUserDetail?username=${formDataRef.current.username}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+              },
+            }
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              setUserDetail(data[0]);
+            })
+            .catch((err) => {
+              throw new Error("Failed to get user detail.");
+            });
+          setListRole(data);
+          modalRef.current.open();
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -126,7 +163,8 @@ export default function Login() {
       }
     } else window.scrollTo(0, 0);
   };
-
+  
+  
   async function handleLoginWithRole(
     role,
     nama,
@@ -137,6 +175,7 @@ export default function Login() {
     upt,
     departmen
   ) {
+    console.log("RESPON", role);
     try {
       const ipAddress = await UseFetch(
         "https://api.ipify.org/?format=json",

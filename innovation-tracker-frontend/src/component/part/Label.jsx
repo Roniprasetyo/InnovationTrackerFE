@@ -2,10 +2,14 @@ export default function Label({ title, data, forLabel }) {
   return (
     <>
       <div className="mb-3">
-        <label htmlFor={forLabel} className="form-label fw-bold">
-          {title}
-        </label>
-        <br />
+      {title && (
+        <>
+          <label htmlFor={forLabel} className="form-label fw-bold">
+            {title}
+          </label>
+          <br />
+        </>
+      )}
         <span
           style={{ whiteSpace: "pre-wrap" }}
           dangerouslySetInnerHTML={{ __html: data }}

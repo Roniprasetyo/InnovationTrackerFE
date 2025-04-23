@@ -1,42 +1,34 @@
 import { useState } from "react";
-import SuggestionSytemIndex from "./Index";
-import SuggestionSystemAdd from "./Add";
-import SuggestionSystemEdit from "./Edit";
-import SuggestionSystemDetail from "./Detail";
-import MiniConventionScoring from "./Scoring";
+import BusinessPerformanceImprovementIndex from "./Index";
+import BusinessPerformanceImprovementAdd from "./Add";
+import BusinessPerformanceImprovementEdit from "./Edit";
+import BusinessPerformanceImprovementDetail from "./Detail";
 
-export default function SuggestionSystem() {
+export default function BusinessPerformanceImprovement() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <SuggestionSytemIndex onChangePage={handleSetPageMode} onScoring={handleScoring} />;
+        return <BusinessPerformanceImprovementIndex onChangePage={handleSetPageMode} />;
       case "add":
-        return <SuggestionSystemAdd onChangePage={handleSetPageMode} />;
+        return <BusinessPerformanceImprovementAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <SuggestionSystemEdit
+          <BusinessPerformanceImprovementEdit
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
       case "detail":
-        // console.log("ini Root: ", dataID);
         return (
-          <SuggestionSystemDetail
+          <BusinessPerformanceImprovementDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
     }
-  }
-
-  function handleScoring(_, id) {
-    const scoringUrl = `/scoring?id=${id}`;
-    setDataID(id);
-    window.open(scoringUrl, "_blank");
   }
 
   function handleSetPageMode(mode) {

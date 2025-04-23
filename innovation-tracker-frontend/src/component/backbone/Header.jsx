@@ -240,65 +240,81 @@ export default function Header({ displayName, roleName, listMenu }) {
                     </div>
                   </div>
                 </div> */}
-                <div className="ms-3" style={{ marginRight: "2rem" }}>
+                <div className="ms-3">
                   {isLoggedIn ? (
-                    <div className="dropdown mt-1">
-                      <a
-                        href="#"
-                        id="profileDropdown"
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        style={{ textDecoration: "none" }}
-                      >
-                        <i
-                          className="fi fi-rr-circle-user"
-                          style={{ color: "white", fontSize: "32px" }}
-                        ></i>
-                        <span
-                          className="badge rounded-pill bg-danger "
-                          style={{
-                            fontSize: ".8em",
-                            position: "absolute",
-                          }}
-                        >
-                          {countNotifikasi}
-                        </span>
-                      </a>
-                      <ul
-                        className="dropdown-menu dropdown-menu-end"
-                        aria-labelledby="profileDropdown"
-                      >
-                        {/* <li>
-                          <a className="dropdown-item" href="/profile">
-                            PROFILE
-                          </a>
-                        </li>
-                        <li className="m-0">
-                          <a className="dropdown-item" href="/notification">
-                            NOTIFICATION
-                            <span
-                              className="badge rounded-pill bg-danger ms-1"
-                              style={{
-                                fontSize: ".8em",
-                              }}
-                            >
-                              {countNotifikasi}
-                            </span>
-                          </a>
-                        </li>
-                        <li>
-                          <hr className="dropdown-divider" />
-                        </li> */}
-                        <li>
-                          <a
-                            className="dropdown-item text-danger"
-                            href="/logout"
+                    <div className="d-flex align-items-center gap-2">
+                      <div
+                        style={{
+                          width: "1px",
+                          height: "30px",
+                          backgroundColor: "#ffffff80", // putih transparan, bisa kamu ubah
+                        }}
+                      ></div>
+                      <div className="">
+                        <p className="text-start text-white ms-3 mt-3">
+                          {displayName || "Public"} <strong>({roleName || "Public"})</strong>
+                          <span
+                            className="badge rounded-pill bg-danger ms-2"
+                            style={{
+                              fontSize: ".8em",
+                              position: "absolute",
+                            }}
                           >
-                            LOGOUT
+                            {countNotifikasi}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="">
+                        <div className="dropdown mt-2">
+                          <a
+                            href="#"
+                            id="profileDropdown"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            className="text-decoration-none"
+                          >
+                            <i
+                              className="fi fi-rr-circle-user"
+                              style={{ color: "white", fontSize: "30px" }}
+                            ></i>
                           </a>
-                        </li>
-                      </ul>
+                          <ul
+                            className="dropdown-menu dropdown-menu-end"
+                            aria-labelledby="profileDropdown"
+                          >
+                            {/* <li>
+                              <a className="dropdown-item" href="/profile">
+                                PROFILE
+                              </a>
+                            </li>
+                            <li className="m-0">
+                              <a className="dropdown-item" href="/notification">
+                                NOTIFICATION
+                                <span
+                                  className="badge rounded-pill bg-danger ms-1"
+                                  style={{
+                                    fontSize: ".8em",
+                                  }}
+                                >
+                                  {countNotifikasi}
+                                </span>
+                              </a>
+                            </li>
+                            <li>
+                              <hr className="dropdown-divider" />
+                            </li> */}
+                            <li>
+                              <a
+                                className="dropdown-item text-danger"
+                                href="/logout"
+                              >
+                                LOGOUT
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <a className="btn bg-white rounded-5 fw-bold" href="/login">

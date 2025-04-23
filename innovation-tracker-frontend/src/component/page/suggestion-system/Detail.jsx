@@ -23,14 +23,15 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  const [listEmployee, setListEmployee] = useState([]);
+  const [userData, setUserData] = useState({});
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
-    NPK: "",
+    NPK:"",
     Period: "",
     Category: "",
     CategoryImp: "",
@@ -50,43 +51,20 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     Safety: "",
     Moral: "",
     Status: "",
-    Nama: "",
-    Section: "",
+    "Alasan Penolakan": "",
   });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prev) => ({ ...prev, error: false }));
-
-      try {
-        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        });
-
-        const data = await response.json();
-        setListEmployee(data);
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError({ error: true, message: error.message });
-        setListEmployee({});
-      }
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSById", {
-          id: withID,
-        });
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetRencanaSSById",
+          {
+            id: withID,
+          }
+        );
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
@@ -109,19 +87,52 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   }, [withID]);
 
   useEffect(() => {
-    const setUserInfo = async () => {
-      const userInfo =
-        listEmployee.find((value) => value.npk === formDataRef.current.NPK) ||
-        {};
-      formDataRef.current = {
-        ...formDataRef.current,
-        Nama: userInfo.nama,
-        Section: userInfo.upt_bagian,
-      };
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            username: value.username,
+            npk: value.npk,
+            name: value.nama,
+            upt: value.upt_bagian,
+            jabatan: value.jabatan,
+          }))
+        );
+
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
     };
 
-    setUserInfo();
-  }, [formDataRef.current.NPK, listEmployee]);
+    fetchData();
+  }, []); 
+        
+  useEffect(() => {
+    if (listEmployee.length > 0 && userInfo?.upt) {
+      const userData = listEmployee.find(
+        (value) =>
+          value.npk === formDataRef.current["NPK"]
+      );
+      setUserData(userData);
+    }
+  }, [listEmployee, userInfo]);
+
 
   if (isLoading) return <Loading />;
 
@@ -185,14 +196,14 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         <div className="col-md-4">
                           <Label
                             title="Name​"
-                            data={formDataRef.current.Nama}
+                            data={userData["name"]}
                           />
                         </div>
 
                         <div className="col-md-4">
                           <Label
                             title="Section​"
-                            data={formDataRef.current.Section}
+                            data={userData["upt"]}
                           />
                         </div>
                       </div>
@@ -283,8 +294,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div>
-                        <hr />
+                        </div><hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -303,8 +313,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div>
-                        <hr />
+                        </div><hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Goal Statement​"
@@ -373,6 +382,15 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
+                  {formDataRef.current.Status === "Rejected" && (
+                    <div>
+                      <hr />
+                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                      <Label
+                      data={formDataRef.current["Alasan Penolakan"]}/>
+                      <hr />
+                    </div>
+                  )}
                 </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>

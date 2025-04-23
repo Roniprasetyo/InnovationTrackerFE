@@ -10,6 +10,7 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import Icon from "../../part/Icon";
 import {
   decodeHtml,
   formatDate,
@@ -141,7 +142,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to approve this submission?",
       "warning",
-      "APPROVE",
+      "Approve",
       null,
       "",
       true
@@ -168,7 +169,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to reject this submission?",
       "warning",
-      "REJECT",
+      "Reject",
       null,
       "",
       true
@@ -178,6 +179,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
       UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
         id: id,
         set: "Rejected",
+        reason: confirm,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -231,7 +233,11 @@ export default function QualityControlProjectIndex({ onChangePage }) {
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : ["Detail"],
+                : role === "ROL03" &&
+                  value["Status"] === "Rejected" &&
+                  value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : ["Detail"],
             Alignment: [
               "center",
               "left",

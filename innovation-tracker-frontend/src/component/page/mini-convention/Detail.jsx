@@ -15,27 +15,27 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
-    Section: null,
     Count: 0,
   },
 ];
 
-export default function ValueChainInnovationDetail({ onChangePage, withID }) {
+export default function MiniConventionDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
+  const [listEmployee, setListEmployee] = useState([]);
+  const [userData, setUserData] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [currentData, setCurrentData] = useState(inisialisasiData);
-  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
+    NPK:"",
+    Period: "",
     Category: "",
-    "Group Name": "",
+    CategoryImp: "",
     "Project Title": "",
-    "Project Benefit": 0,
     Case: "",
     CaseFile: "",
     Problem: "",
@@ -50,46 +50,9 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
     Delivery: "",
     Safety: "",
     Moral: "",
-    "Company 1": "",
-    "Company 2": "",
     Status: "",
-    Creaby: "",
     "Alasan Penolakan": "",
-    member: [{}],
   });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        });
-
-        const data = await response.json();
-        setListEmployee(
-          data.map((value) => ({
-            npk: value.npk,
-            upt: value.upt_bagian,
-          }))
-        );
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListEmployee({});
-      }
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,34 +60,16 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaVCIById",
+          API_LINK + "MiniConvention/GetMiniConventionById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get VCI data");
+          throw new Error("Error: Failed to get SS data");
         } else {
-          formDataRef.current = data;
-          const members = data.member.filter(
-            (item) => item.Position === "Member"
-          );
-          const memberCount = members.length || 0;
-          memberCount > 0
-            ? setCurrentData(
-                members?.map((item, index) => ({
-                  Key: index,
-                  No: index + 1,
-                  Name: item.Name,
-                  Section:
-                    listEmployee.find((value) => value.npk === item.Npk)
-                      ?.upt || "",
-                  Count: memberCount,
-                  Alignment: ["center", "left", "left"],
-                }))
-              )
-            : setCurrentData(inisialisasiData);
+          formDataRef.current = data[0];
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -139,7 +84,54 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, [withID, listEmployee]);
+  }, [withID]);
+
+  useEffect(() => {
+    if (listEmployee.length > 0 && userInfo?.upt) {
+      const userData = listEmployee.find(
+        (value) =>
+          value.npk === formDataRef.current["NPK"]
+      );
+      setUserData(userData);
+    }
+  }, [listEmployee, userInfo]);
+
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
+          });
+  
+          const data = await response.json();
+          setListEmployee(
+            data.map((value) => ({
+              username: value.username,
+              npk: value.npk,
+              name: value.nama,
+              upt: value.upt_bagian,
+              jabatan: value.jabatan,
+            }))
+          );
+  
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListEmployee({});
+        }
+      };
+  
+      fetchData();
+    }, []);
 
   if (isLoading) return <Loading />;
 
@@ -179,7 +171,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">VCI REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">SS CONVENTION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -189,51 +181,31 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                 <div className="col-lg-12">
                   <div className="card mb-3">
                     <div className="card-header">
-                      <h5 className="fw-medium">Team Member</h5>
+                      <h5 className="fw-medium">User Data</h5>
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-4">
                           <Label
-                            title="Circle Name"
-                            data={formDataRef.current["Group Name"] || "-"}
+                            title="NPK"
+                            data={formDataRef.current["NPK"] || "-"}
                           />
                         </div>
-                        <div className="col-md-6">
+
+                        <div className="col-md-4">
                           <Label
-                            title="Company 1​"
-                            data={formDataRef.current["Company 1"] || "-"}
+                            title="Name​"
+                            data={userData["name"]}
                           />
                         </div>
-                        <div className="col-md-6">
+
+                        <div className="col-md-4">
                           <Label
-                            title="Company 2​"
-                            data={formDataRef.current["Company 2"] || "-"}
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Facilitator"
-                            data={
-                              formDataRef.current.member.find(
-                                (item) => item.Position === "Facilitator"
-                              )?.Name || "-"
-                            }
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <Label
-                            title="Leader"
-                            data={
-                              formDataRef.current.member.find(
-                                (item) => item.Position === "Leader"
-                              )?.Name || "-"
-                            }
+                            title="Section​"
+                            data={userData["upt"]}
                           />
                         </div>
                       </div>
-                      <Label title="Team Member" />
-                      <Table data={currentData} />
                     </div>
                   </div>
                 </div>
@@ -250,6 +222,18 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                             data={decodeHtml(
                               formDataRef.current["Project Title"] || "-"
                             )}
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Innovation Category"
+                            data={formDataRef.current.Category || "-"}
+                          />
+                        </div>
+                        <div className="col-lg-3">
+                          <Label
+                            title="Improvement Category"
+                            data={formDataRef.current.CategoryImp || "-"}
                           />
                         </div>
                         <div className="col-lg-3">
@@ -309,8 +293,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div>
-                        <hr />
+                        </div><hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -329,8 +312,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div>
-                        <hr />
+                        </div><hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Goal Statement​"
@@ -354,21 +336,8 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                 </div>
                 <div className="col-lg-12">
                   <div className="card mb-3">
-                    <div className="card-header">
-                      <h5 className="fw-medium">Project Benefit</h5>
-                    </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-lg-12">
-                          <Label
-                            title="Project Benefit (Rp)"
-                            data={
-                              separator(
-                                formDataRef.current["Project Benefit"]
-                              ) || "-"
-                            }
-                          />
-                        </div>
                         <div className="col-lg-6">
                           <label className="form-label fw-bold">
                             Tangible Benefit

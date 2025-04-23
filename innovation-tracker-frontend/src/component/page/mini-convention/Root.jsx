@@ -1,35 +1,38 @@
 import { useState } from "react";
-import SuggestionSytemIndex from "./Index";
-import SuggestionSystemAdd from "./Add";
-import SuggestionSystemEdit from "./Edit";
-import SuggestionSystemDetail from "./Detail";
+import MiniConventionIndex from "./Index";
+import MiniConventionAdd from "./Add";
+import MiniConventionDetail from "./Detail";
+import MiniConventionEdit from "./Edit";
 import MiniConventionScoring from "./Scoring";
 
-export default function SuggestionSystem() {
+export default function MiniConvention() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <SuggestionSytemIndex onChangePage={handleSetPageMode} onScoring={handleScoring} />;
+        return <MiniConventionIndex onChangePage={handleSetPageMode} onScoring={handleScoring}/>;
       case "add":
-        return <SuggestionSystemAdd onChangePage={handleSetPageMode} />;
+        return <MiniConventionAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
-          <SuggestionSystemEdit
-            onChangePage={handleSetPageMode}
-            withID={dataID}
-          />
+          <MiniConventionEdit onChangePage={handleSetPageMode} withID={dataID} />
         );
       case "detail":
-        // console.log("ini Root: ", dataID);
         return (
-          <SuggestionSystemDetail
+          <MiniConventionDetail
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
+      // case "scoring":
+      //   return (
+      //     <MiniConventionScoring
+      //       onChangePage={handleSetPageMode}
+      //       withID={dataID}
+      //     />
+      //   );
     }
   }
 

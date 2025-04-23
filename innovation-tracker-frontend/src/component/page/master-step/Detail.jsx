@@ -11,16 +11,14 @@ const listTypeSetting = [
   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
 ];
 
-export default function MasterSettingDetail({ onChangePage, withID }) {
+export default function MasterStepDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
-    setId: "",
-    setName: "",
-    setType: "",
-    setDesc: "",
+    steId: "",
+    steName: "",
   });
 
   useEffect(() => {
@@ -28,13 +26,13 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingById", {
+        const data = await UseFetch(API_LINK + "MasterStep/GetStepById", {
           id: withID,
         });
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
+            "Terjadi kesalahan: Gagal mengambil data step."
           );
         } else {
           formDataRef.current = { ...formDataRef.current, ...data[0] };
@@ -101,21 +99,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
                   <Label
                     forLabel="setName"
                     title="Name"
-                    data={formDataRef.current.setName}
-                  />
-                </div>
-                <div className="col-lg-6">
-                  <Label
-                    forLabel="setType"
-                    title="Type"
-                    data={formDataRef.current.setType}
-                  />
-                </div>
-                <div className="col-lg-12">
-                  <Label
-                    forLabel="setDesc"
-                    title="Description"
-                    data={formDataRef.current.setDesc}
+                    data={formDataRef.current.steName}
                   />
                 </div>
               </div>

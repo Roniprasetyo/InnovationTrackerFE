@@ -10,6 +10,7 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import Icon from "../../part/Icon";
 import {
   decodeHtml,
   formatDate,
@@ -25,9 +26,8 @@ const inisialisasiData = [
     No: null,
     "Circle Name": null,
     "Project Title": null,
+    Category: null,
     "Project Benefit": null,
-    "Company 1": null,
-    "Company 2": null,
     "Start Date": null,
     "End Date": null,
     Period: null,
@@ -43,6 +43,8 @@ const dataFilterSort = [
   { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
   { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
   { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
+  { Value: "[Category] asc", Text: "[Category] [↑]" },
+  { Value: "[Category] desc", Text: "[Category] [↓]" },
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
@@ -58,7 +60,7 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-export default function ValueChainInnovationIndex({ onChangePage }) {
+export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -69,8 +71,9 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Project Title] asc",
+    sort: "[Category] asc",
     status: "",
+    jenis: "BPI",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -139,7 +142,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to approve this submission?",
       "warning",
-      "Approve",
+      "APPROVE",
       null,
       "",
       true
@@ -194,7 +197,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaVCI",
+          API_LINK + "RencanaCircle/GetRencanaQCP",
           currentFilter
         );
 
@@ -210,12 +213,13 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
             No: value["No"],
             "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
-              decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
+              decodeHtml(
+                decodeHtml(decodeHtml(value["Project Title"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
               50
             ),
+            Category: value["Category"],
             "Project Benefit": separator(value["Project Benefit"]),
-            "Company 1": value["Company 1"] ? value["Company 1"] : "-",
-            "Company 2": value["Company 2"] ? value["Company 2"] : "-",
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
             Period: value["Period"],
@@ -238,9 +242,8 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               "center",
               "left",
               "left",
+              "left",
               "right",
-              "center",
-              "center",
               "center",
               "center",
               "center",
@@ -267,10 +270,10 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       <div className="my-3">
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
-            <h2 className="display-1 fw-bold">Value</h2>
+            <h2 className="display-1 fw-bold">Business</h2>
             <div className="d-flex align-items-end mb-2">
               <h2 className="display-5 fw-bold align-items-end">
-                Chain Innovation
+                Performance Improvement
               </h2>
             </div>
           </div>
@@ -316,7 +319,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Project Title] asc"
+              defaultValue="[Category] asc"
             />
             <DropDown
               ref={searchFilterStatus}

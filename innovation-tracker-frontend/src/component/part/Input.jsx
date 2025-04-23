@@ -73,7 +73,7 @@ const Input = forwardRef(function Input(
               rows="5"
               id={forInput}
               name={forInput}
-              className="form-control rounded-5 p-3"
+              className="form-control p-3"
               placeholder={placeholder}
               ref={ref}
               disabled={isDisabled}
@@ -88,7 +88,7 @@ const Input = forwardRef(function Input(
               className={
                 isRound
                   ? "form-control text-" + textAlign
-                  : "form-control rounded-5 text-" + textAlign
+                  : "form-control text-" + textAlign
               }
               placeholder={placeholder}
               ref={ref}
