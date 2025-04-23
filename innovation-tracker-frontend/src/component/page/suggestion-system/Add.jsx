@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
 import { formatDate } from "../../util/Formatting";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -37,7 +37,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-
+  const [listEmployee, setListEmployee] = useState([]);
+  const [sectionHead, setSectionHead] = useState({});
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
@@ -78,6 +79,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     sis_pengiriman: "",
     sis_kemanan: "",
     sis_moral: "",
+    facil_id: sectionHead.npk,
   });
 
   const periodDataRef = useRef({
@@ -111,7 +113,30 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     sis_kemanan: string().max(200, "maximum 200 characters").nullable(),
     sis_pengiriman: string().max(200, "maximum 200 characters").nullable(),
     sis_moral: string().max(200, "maximum 200 characters").nullable(),
+    facil_id: string(),
   });
+
+  useEffect(() => {
+    if (listEmployee.length > 0 && userInfo?.upt) {
+      const KepalaSeksiData = listEmployee.find(
+        (value) =>
+          value.upt === userInfo.upt && value.jabatan === "Kepala Seksi"
+      );
+      setSectionHead(KepalaSeksiData);
+    }
+  }, [listEmployee, userInfo]);
+
+  useEffect(() => {
+    if (sectionHead?.npk) {
+      formDataRef.current.facil_id = sectionHead.npk;
+    }
+  }, [sectionHead]);
+  
+
+  console.log("SECTION HEAD NPK:", formDataRef.current.facil_id);
+
+  // useEffect(() => {
+  // }, [sectionHead]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,6 +160,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }));
         setListCategory({});
       }
+      console.log("COOKIE", JSON.parse(decryptId(cookie)));
     };
 
     fetchData();
@@ -231,6 +257,43 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     fetchData();
   }, [selectedPeriod]);
 
+  useEffect(() => {
+        const fetchData = async () => {
+          setIsError((prevError) => ({ ...prevError, error: false }));
+          try {
+            const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+              },
+            });
+    
+            const data = await response.json();
+            setListEmployee(
+              data.map((value) => ({
+                username: value.username,
+                npk: value.npk,
+                name: value.nama,
+                upt: value.upt_bagian,
+                jabatan: value.jabatan,
+              }))
+            );
+
+          } catch (error) {
+            window.scrollTo(0, 0);
+            setIsError((prevError) => ({
+              ...prevError,
+              error: true,
+              message: error.message,
+            }));
+            setListEmployee({});
+          }
+        };
+    
+        fetchData();
+      }, []);   
+
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
@@ -284,12 +347,12 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         return;
       }
 
-      if (eDate >= selectedEndDate) {
+      if (eDate > selectedEndDate) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected start date or end date outrange the selected period",
+            "Invalid date: Selected end date exceeds the innovation period end date",
         });
         return;
       }
@@ -443,6 +506,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               forInput="sis_judul"
                               label="Title"
                               isRequired
+                              placeholder="Contains a brief explanation of the idea <i>(memuat penjelasan singkat tentang ide yang akan disampaikan)</i>"
                               value={formDataRef.current.sis_judul}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_judul}
@@ -530,6 +594,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               forInput="sis_ruanglingkup"
                               label="Project Scope"
                               isRequired
+                              placeholder="Designing a plan with a focus on processes, results, and impact on the team <i>(merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team)</i>"
                               value={formDataRef.current.sis_ruanglingkup}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_ruanglingkup}
@@ -552,6 +617,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               forInput="sis_kasus"
                               label="Bussiness Case"
                               isRequired
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.sis_kasus}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_kasus}
@@ -576,6 +642,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               forInput="sis_masalah"
                               label="Problem Statement​"
                               isRequired
+                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.sis_masalah}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_masalah}
@@ -600,6 +667,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               forInput="sis_tujuan"
                               label="Goal Statement​"
                               isRequired
+                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.sis_tujuan}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_tujuan}

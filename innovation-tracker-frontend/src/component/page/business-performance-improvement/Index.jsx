@@ -10,6 +10,7 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import Icon from "../../part/Icon";
 import {
   decodeHtml,
   formatDate,
@@ -23,38 +24,52 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Name: null,
-    Type: null,
+    "Circle Name": null,
+    "Project Title": null,
+    Category: null,
+    "Project Benefit": null,
+    "Start Date": null,
+    "End Date": null,
+    Period: null,
     Status: null,
     Count: 0,
   },
 ];
 
 const dataFilterSort = [
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
   // { Value: "[Team Name] asc", Text: "Team Name [↑]" },
   // { Value: "[Team Name] desc", Text: "Team Name [↓]" },
   // { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
   // { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
   { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
   { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
+=======
+  { Value: "[Circle Name] asc", Text: "Circle Name [↑]" },
+  { Value: "[Circle Name] desc", Text: "Circle Name [↓]" },
+  { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
+  { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
+  { Value: "[Project Benefit] asc", Text: "[Project Benefit] [↑]" },
+  { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
+  { Value: "[Category] asc", Text: "[Category] [↑]" },
+  { Value: "[Category] desc", Text: "[Category] [↓]" },
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
   { Value: "[End Date] desc", Text: "[End Date] [↓]" },
   { Value: "[Period] asc", Text: "[Period] [↑]" },
   { Value: "[Period] desc", Text: "[Period] [↓]" },
-  { Value: "[Category] asc", Text: "[Category] [↑]" },
-  { Value: "[Category] desc", Text: "[Category] [↓]" },
 ];
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
   { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
-  { Value: "Revision", Text: "Revision" },
   { Value: "Rejected", Text: "Rejected" },
 ];
 
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
 // const dataFilterJenis = [
 //   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
 //   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
@@ -62,6 +77,9 @@ const dataFilterStatus = [
 // ];
 
 export default function SuggestionSytemIndex({ onChangePage }) {
+=======
+export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -74,7 +92,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     query: "",
     sort: "[Category] asc",
     status: "",
-    jenis: "SS",
+    jenis: "BPI",
     role: userInfo.role,
     npk: userInfo.npk,
   });
@@ -82,7 +100,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -103,7 +120,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         query: searchQuery.current.value,
         sort: searchFilterSort.current.value,
         status: searchFilterStatus.current.value,
-        jenis: searchFilterJenis.current.value,
       };
     });
   }
@@ -121,7 +137,11 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     );
 
     if (confirm) {
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
       UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
+=======
+      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
         id: id,
       })
         .then((data) => {
@@ -140,6 +160,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   };
 
   const handleApprove = async (id) => {
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
       setIsError(false);
       const confirm = await SweetAlert(
         "Confirm",
@@ -192,6 +213,61 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           .then(() => setIsLoading(false));
       }
     };
+=======
+    setIsError(false);
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to approve this submission?",
+      "warning",
+      "APPROVE",
+      null,
+      "",
+      true
+    );
+
+    if (confirm) {
+      UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
+        id: id,
+        set: "Approved",
+      })
+        .then((data) => {
+          if (data === "ERROR" || data.length === 0) setIsError(true);
+          else {
+            handleSetCurrentPage(currentFilter.page);
+          }
+        })
+        .then(() => setIsLoading(false));
+    }
+  };
+
+  const handleReject = async (id) => {
+    setIsError(false);
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to reject this submission?",
+      "warning",
+      "Reject",
+      null,
+      "",
+      true
+    );
+
+    if (confirm) {
+      UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
+        id: id,
+        set: "Rejected",
+        reason: confirm,
+      })
+        .then((data) => {
+          if (data === "ERROR" || data.length === 0) setIsError(true);
+          else {
+            handleSetCurrentPage(currentFilter.page);
+          }
+        })
+        .then(() => setIsLoading(false));
+    }
+  };
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
 
   useEffect(() => {
     const fetchData = async () => {
@@ -199,8 +275,13 @@ export default function SuggestionSytemIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
           API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter 
+=======
+          API_LINK + "RencanaCircle/GetRencanaQCP",
+          currentFilter
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
         );
 
         if (data === "ERROR") {
@@ -212,7 +293,12 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
             No: index + 1,
+=======
+            No: value["No"],
+            "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
             "Project Title": maxCharDisplayed(
               decodeHtml(
                 decodeHtml(decodeHtml(value["Project Title"]))
@@ -233,7 +319,11 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : ["Detail"],
+                : role === "ROL03" &&
+                value["Status"] === "Rejected" &&
+                value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : ["Detail"],
             Alignment: [
               "center",
               "left",
@@ -268,10 +358,10 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       <div className="my-3">
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
-            <h2 className="display-1 fw-bold">Suggestion</h2>
+            <h2 className="display-1 fw-bold">Business</h2>
             <div className="d-flex align-items-end mb-2">
               <h2 className="display-5 fw-bold align-items-end">
-                System
+                Performance Improvement
               </h2>
             </div>
           </div>
@@ -288,12 +378,16 @@ export default function SuggestionSytemIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          <Button
-            iconName="add"
-            label="Register"
-            classType="success"
-            onClick={() => onChangePage("add")}
-          />
+          {userInfo.role.slice(0, 5) !== "ROL01" ? (
+            <Button
+              iconName="add"
+              label="Register"
+              classType="success"
+              onClick={() => onChangePage("add")}
+            />
+          ) : (
+            ""
+          )}
           <Input
             ref={searchQuery}
             forInput="pencarianSetting"
@@ -313,15 +407,19 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Team Name] asc"
+              defaultValue="[Category] asc"
             />
             <DropDown
               ref={searchFilterStatus}
               forInput="ddStatus"
               label="Status"
               type="semua"
-              arrData={dataFilterStatus}
-              defaultValue="Draft"
+              arrData={
+                userInfo.role.slice(0, 5) === "ROL01"
+                  ? dataFilterStatus.filter((item) => item.Value != "Draft")
+                  : dataFilterStatus
+              }
+              defaultValue=""
             />
           </Filter>
         </div>

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -15,11 +15,16 @@ const inisialisasiData = [
     Key: null,
     No: null,
     Name: null,
+    Section: null,
     Count: 0,
   },
 ];
 
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
 export default function SuggestionSystemDetail({ onChangePage, withID }) {
+=======
+export default function BusinessPerformanceImprovementDetail({ onChangePage, withID }) {
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -27,6 +32,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+
+  const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -55,7 +62,39 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
 
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            npk: value.npk,
+            upt: value.upt_bagian,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
           API_LINK + "RencanaSS/GetRencanaSSById",
@@ -67,8 +106,30 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
           console.log(data);
           formDataRef.current = data[0];
+=======
+          formDataRef.current = data;
+          const members = data.member.filter(
+            (item) => item.Position === "Member"
+          );
+          const memberCount = members.length || 0;
+          memberCount > 0
+            ? setCurrentData(
+                members?.map((item, index) => ({
+                  Key: index,
+                  No: index + 1,
+                  Name: item.Name,
+                  Section:
+                    listEmployee.find((value) => value.npk === item.Npk)?.upt ||
+                    "",
+                  Count: memberCount,
+                  Alignment: ["center", "left", "left"],
+                }))
+              )
+            : setCurrentData(inisialisasiData);
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -83,7 +144,11 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     };
 
     fetchData();
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
   }, [withID]);
+=======
+  }, [listEmployee, withID]);
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
 
   if (isLoading) return <Loading />;
 
@@ -123,7 +188,11 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
             <h3 className="fw-bold text-center">SS REGISTRATION DETAIL</h3>
+=======
+            <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -152,9 +221,32 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         </div>
 
                         <div className="col-md-6">
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
                           <Label
                             title="Prodi/UPT/Dep​"
                             data={userInfo.upt}
+=======
+                          <Label title="Section" data={userInfo.upt} />
+                        </div>
+                        <div className="col-md-6">
+                          <Label
+                            title="Facilitator"
+                            data={
+                              formDataRef.current.member.find(
+                                (item) => item.Position === "Facilitator"
+                              )?.Name || "-"
+                            }
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <Label
+                            title="Leader"
+                            data={
+                              formDataRef.current.member.find(
+                                (item) => item.Position === "Leader"
+                              )?.Name || "-"
+                            }
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
                           />
                         </div>
                       </div>
@@ -184,8 +276,10 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         </div>
                         <div className="col-lg-3">
                           <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
+                            title="Knowledge Category"
+                            data={decodeHtml(
+                              formDataRef.current.CategoryImp || "-"
+                            )}
                           />
                         </div>
                         <div className="col-lg-3">
@@ -246,6 +340,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -265,7 +360,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                             </a>
                           )}
                         </div>
-                        <div className="col-lg-12 mb-4">
+                        <hr />
+                        <div className="col-lg-12 mb-3">
                           <Label
                             title="Goal Statement​"
                             data={decodeHtml(
@@ -290,6 +386,19 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                   <div className="card mb-3">
                     <div className="card-body">
                       <div className="row">
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
+=======
+                        <div className="col-lg-12">
+                          <Label
+                            title="Project Benefit (Rp)"
+                            data={
+                              separator(
+                                formDataRef.current["Project Benefit"]
+                              ) || "-"
+                            }
+                          />
+                        </div>
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
                         <div className="col-lg-6">
                           <label className="form-label fw-bold">
                             Tangible Benefit

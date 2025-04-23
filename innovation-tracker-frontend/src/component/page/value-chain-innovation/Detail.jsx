@@ -54,6 +54,7 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
     "Company 2": "",
     Status: "",
     Creaby: "",
+    "Alasan Penolakan": "",
     member: [{}],
   });
 
@@ -116,6 +117,9 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                   Key: index,
                   No: index + 1,
                   Name: item.Name,
+                  Section:
+                    listEmployee.find((value) => value.npk === item.Npk)
+                      ?.upt || "",
                   Count: memberCount,
                   Alignment: ["center", "left", "left"],
                 }))
@@ -408,6 +412,15 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
+                  {formDataRef.current.Status === "Rejected" && (
+                    <div>
+                      <hr />
+                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                      <Label
+                      data={formDataRef.current["Alasan Penolakan"]}/>
+                      <hr />
+                    </div>
+                  )}
                 </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>

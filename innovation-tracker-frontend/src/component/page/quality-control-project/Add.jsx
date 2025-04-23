@@ -13,6 +13,7 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
+import DropDownSearch from "../../part/DropDownSearch";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
@@ -391,10 +392,20 @@ export default function QualityControlProjectAdd({ onChangePage }) {
 
   const handleDelete = (id) => {
     if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else
-      setCurrentData((prevData) =>
-        prevData.filter((member) => member.Key !== id)
+    else {
+      const prevData = currentData.filter((member) => member.Key !== id);
+      setCurrentData(
+        prevData.map((item, index) => ({
+          Key: item.Key,
+          No: index + 1,
+          Name: item.Name,
+          Section: item.Section,
+          Count: prevData.length,
+          Action: ["Delete"],
+          Alignment: ["center", "left", "left", "center", "center"],
+        }))
       );
+    }
   };
 
   const handleFileChange = (ref, extAllowed) => {
@@ -471,12 +482,12 @@ export default function QualityControlProjectAdd({ onChangePage }) {
         return;
       }
 
-      if (eDate >= innovationEndPeriod) {
+      if (eDate > innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected end date outrange the innovation period end date",
+            "Invalid date: Selected end date exceeds the innovation period end date",
         });
         return;
       }
@@ -693,6 +704,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               forInput="rciTitle"
                               label="Title"
                               isRequired
+                              placeholder="Contains a brief explanation of the idea <i>(memuat penjelasan singkat tentang ide yang akan disampaikan)</i>"
                               value={formDataRef.current.rciTitle}
                               onChange={handleInputChange}
                               errorMessage={errors.rciTitle}
@@ -778,6 +790,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               forInput="rciScope"
                               label="Project Scope"
                               isRequired
+                              placeholder="Designing a plan with a focus on processes, results, and impact on the team <i>(merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team)</i>"
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
@@ -800,6 +813,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               forInput="rciCase"
                               label="Bussiness Case"
                               isRequired
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
@@ -824,6 +838,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               forInput="rciProblem"
                               label="Problem Statement​"
                               isRequired
+                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
@@ -848,6 +863,7 @@ export default function QualityControlProjectAdd({ onChangePage }) {
                               forInput="rciGoal"
                               label="Goal Statement​"
                               isRequired
+                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}

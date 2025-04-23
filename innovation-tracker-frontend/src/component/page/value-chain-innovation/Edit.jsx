@@ -19,6 +19,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
+import Label from "../../part/Label";
 
 const inisialisasiData = [
   {
@@ -92,6 +93,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciLeader: "",
     rciPerusahaan1: "",
     rciPerusahaan2: "",
+    rciReasonforRejection: ""
   });
 
   const memberDataRef = useRef({
@@ -131,6 +133,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciFacil: string().required("required"),
     rciPerusahaan1: string().required("required"),
     rciPerusahaan2: string(),
+    rciStatus: string().required("required"),
+    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({
@@ -299,6 +303,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
               .Npk,
             rciPerusahaan1: data["Company 1"],
             rciPerusahaan2: data["Company 2"] || "",
+            rciStatus: data["Status"],
+            rciReasonforRejection: data["Alasan Penolakan"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -449,10 +455,20 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
 
   const handleDelete = (id) => {
     if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else
-      setCurrentData((prevData) =>
-        prevData.filter((member) => member.Key !== id)
+    else {
+      const prevData = currentData.filter((member) => member.Key !== id);
+      setCurrentData(
+        prevData.map((item, index) => ({
+          Key: item.Key,
+          No: index + 1,
+          Name: item.Name,
+          Section: item.Section,
+          Count: prevData.length,
+          Action: ["Delete"],
+          Alignment: ["center", "left", "left", "center", "center"],
+        }))
       );
+    }
   };
 
   const handleFileChange = (ref, extAllowed) => {
@@ -529,12 +545,12 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         return;
       }
 
-      if (eDate >= innovationEndPeriod) {
+      if (eDate > innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected end date outrange the innovation period end date",
+            "Invalid date: Selected end date exceeds the innovation period end date",
         });
         return;
       }
@@ -1032,6 +1048,15 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
+                    {formDataRef.current.rciStatus === "Rejected" && (
+                      <>
+                        <hr />
+                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <Label
+                        data={formDataRef.current.rciReasonforRejection}/>
+                        <hr />
+                      </>
+                    )}
                   </div>
                 </div>
               )}
