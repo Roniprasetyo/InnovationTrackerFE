@@ -18,8 +18,7 @@ import {
 } from "../../util/Formatting";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportExcel } from "../../util/ExportExcel";
 
 const inisialisasiData = [
   {
@@ -87,8 +86,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
-  const dataExport = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -215,6 +212,37 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     }
   };
 
+  const handleExport = async (param) => {
+    setIsError(false);
+    const response = await UseFetch(API_LINK + "RencanaSS/getAllDataSS", param);
+    console.log(response);
+    if (response === "ERROR") {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: "Failed to download data",
+      }));
+    } else {
+      const byteCharacters = atob(response.fileContents);
+      const byteNumbers = new Array(byteCharacters.length)
+        .fill()
+        .map((_, i) => byteCharacters.charCodeAt(i));
+      const byteArray = new Uint8Array(byteNumbers);
+
+      const blob = new Blob([byteArray], { type: response.contentType });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = response.fileDownloadName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  };
+
   const handleReject = async (id) => {
     setIsError(false);
     const confirm = await SweetAlert(
@@ -262,6 +290,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             npk: value.npk,
             nama: value.nama,
             upt: value.upt_bagian,
+            departmen: value.departemen_jurusan,
           }))
         );
       } catch (error) {
@@ -377,6 +406,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                 "Start Date": formatDate(value["Start Date"], true),
                 "End Date": formatDate(value["End Date"], true),
                 Period: value["Period"],
+                "Submitted On": formatDate(value["Creadate"]),
                 Status: value["Status"],
                 Count: value["Count"],
                 Action:
@@ -434,9 +464,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                   value["Status"] === "Draft" &&
                   value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
-                    : inorole === "Facilitator" &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
                     : role === "ROL03" &&
                       value["Status"] === "Rejected" &&
                       value["Creaby"] === userInfo.username
@@ -465,27 +492,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           });
           // console.log(formattedData);
           setCurrentData(formattedData);
-          const rawData = data.map(({ Key, Count, ...rest }) => rest);
-          const cleanedData = rawData.map((value) => {
-            return {
-              No: value["No"],
-              NPK:
-                listEmployee.find((obj) => obj.username === value.Creaby)
-                  ?.npk || "-",
-              Name:
-                listEmployee.find((obj) => obj.username === value.Creaby)
-                  ?.nama || "-",
-              "Project Title": decodeHtml(
-                decodeHtml(decodeHtml(value["Project Title"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              Category: value["Category"],
-              "Start Date": value["Start Date"].split("T")[0],
-              "End Date": value["End Date"].split("T")[0],
-              Period: value["Period"],
-              Status: value["Status"],
-            };
-          });
-          dataExport.current = cleanedData;
         }
       } catch {
         setIsError(true);
@@ -498,24 +504,20 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     fetchData();
   }, [currentFilter, listEmployee]);
 
-  const exportExcel = (jsonData, fileName = "export.xlsx") => {
-    const worksheet = XLSX.utils.json_to_sheet(jsonData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, fileName);
-  };
-
   if (isLoading) return <Loading />;
 
   return (
     <>
       <div className="my-3">
+        {isError.error && (
+          <div className="flex-fill ">
+            <Alert
+              type="danger"
+              message={isError.message}
+              handleClose={() => setIsError({ error: false, message: "" })}
+            />
+          </div>
+        )}
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
             <h2 className="display-1 fw-bold">Suggestion</h2>
@@ -525,15 +527,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           </div>
         </div>
       </div>
-      {isError.error && (
-        <div className="flex-fill ">
-          <Alert
-            type="danger"
-            message={isError.message}
-            handleClose={() => setIsError({ error: false, message: "" })}
-          />
-        </div>
-      )}
       <div className="flex-fill">
         <div className="input-group">
           {userInfo.role.slice(0, 5) !== "ROL01" ? (
@@ -548,18 +541,16 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               iconName="file-excel"
               label="Export"
               classType="success"
-              onClick={() =>
-                exportExcel(
-                  dataExport.current,
-                  "SS_" +
-                    new Date().toLocaleDateString() +
-                    "_" +
-                    new Date().toLocaleTimeString() +
-                    "_" +
-                    currentFilter.page +
-                    ".xlsx"
-                )
-              }
+              onClick={() => {
+                const param = {
+                  query: currentFilter.query,
+                  sort: currentFilter.sort,
+                  status: currentFilter.status,
+                  jenis: "SS",
+                  kryData: listEmployee,
+                };
+                handleExport(param);
+              }}
             />
           )}
           <Input
@@ -581,7 +572,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Team Name] asc"
+              defaultValue="[Project Title] asc"
             />
             <DropDown
               ref={searchFilterStatus}
