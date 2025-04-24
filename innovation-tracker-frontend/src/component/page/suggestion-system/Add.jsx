@@ -598,7 +598,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_ruanglingkup}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_ruanglingkup}
-                              placeholder="Merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team"
                             />
                           </div>
                         </div>
@@ -621,7 +620,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_kasus}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_kasus}
-                              placeholder="Dokumen manajemen proyek yang menjelaskan baagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan"
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
@@ -646,7 +644,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_masalah}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_masalah}
-                              placeholder="Mendefinisikan masalah yang dihadapi pengguna atau pelanggan"
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
@@ -671,7 +668,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                               value={formDataRef.current.sis_tujuan}
                               onChange={handleInputChange}
                               errorMessage={errors.sis_tujuan}
-                              placeholder="Menjelaskan tentang tujuan"
                             />
                           </div>
                           <div className="col-lg-4">

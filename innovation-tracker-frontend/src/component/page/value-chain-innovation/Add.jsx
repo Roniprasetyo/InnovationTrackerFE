@@ -753,7 +753,6 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
-                              placeholder="Merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team"
                             />
                           </div>
                         </div>
@@ -776,7 +775,6 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
-                              placeholder="Dokumen manajemen proyek yang menjelaskan baagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan"
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
@@ -801,7 +799,6 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
-                              placeholder="Mendefinisikan masalah yang dihadapi pengguna atau pelanggan"
                             />
                           </div>
                           <div className="col-lg-4 mb-3">
@@ -826,7 +823,6 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}
-                              placeholder="Menjelaskan tentang tujuan"
                             />
                           </div>
                           <div className="col-lg-4">

@@ -31,11 +31,7 @@ const inisialisasiData = [
   },
 ];
 
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-export default function SuggestionSystemEdit({ onChangePage, withID }) {
-=======
 export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -43,15 +39,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-
-  const [listCategory, setListCategory] = useState([]);
-  const [listPeriod, setListPeriod] = useState([]);
-  const [listImpCategory, setListImpCategory] = useState([]);
-
-=======
   const [selectedPeriod, setSelectedPeriod] = useState(null);
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
   const [checkedStates, setCheckedStates] = useState({
     sisQuality: false,
     sisCost: false,
@@ -68,33 +56,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const [listImpCategory, setListImpCategory] = useState([]);
 
   const formDataRef = useRef({
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-    sis_id: "",
-    kry_id: "",
-    sis_judul: "",
-    ino_category: "",
-    know_category: "",
-    sis_tanggalmulai: "",
-    sis_tanggalakhir: "",
-    per_id: "",    
-    sis_ruanglingkup: "",
-    sis_kasus: "",
-    sis_kasusfile: "",
-    sis_masalah: "",
-    sis_masalahfile: "",
-    sis_tujuan: "",
-    sis_tujuanfile: "",
-    sis_kualitas: "",
-    sis_biaya: "",
-    sis_pengiriman: "",
-    sis_kemanan: "",
-    sis_moral: "",
-  });
-
-  const periodDataRef = useRef({
-    startPeriod: "",
-    endPeriod: "",
-=======
     setId: "",
     perId: "",
     rciGroupName: "",
@@ -120,7 +81,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   });
   const memberDataRef = useRef({
     rciMember: "",
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
   });
   const periodDataRef = useRef({
     startPeriod: "",
@@ -131,34 +91,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const goalFileRef = useRef(null);
 
   const userSchema = object({
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-    sis_id: number().required("required"),
-    kry_id: number().required("required"),
-    sis_judul: string().required("required"),
-    ino_category: string().required("required"),
-    know_category: string().required("required"),
-    sis_tanggalmulai: date()
-      .min(new Date(), "start date must be after today")
-      .typeError("invalid date")
-      .required("required"),
-    sis_tanggalakhir: date()
-      .min(new Date(), "start date must be after today")
-      .typeError("Invalid date format")
-      .required("Start date is required"),
-    per_id: number().required("required"),  
-    sis_ruanglingkup: string().required("required"),
-    sis_kasus: string().required("required"),
-    sis_kasusfile: string().nullable(),
-    sis_masalah: string().required("required"),
-    sis_masalahfile: string().nullable(),
-    sis_tujuan: string().required("required"),
-    sis_tujuanfile: string().nullable(),
-    sis_kualitas: string().nullable(),
-    sis_biaya: string().nullable(),
-    sis_kemanan: string().nullable(),
-    sis_pengiriman: string().nullable(),
-    sis_moral: string().nullable(),   
-=======
     setId: string().required("required"),
     perId: string().nullable(),
     rciGroupName: string()
@@ -189,7 +121,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
 
   const memberSchema = object({
     rciMember: string().required("required"),
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
   });
 
   useEffect(() => {
@@ -235,11 +166,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-          setListCategory(data.filter((item) => item.Text.includes("SS")));
-=======
           setListCategory(data.filter((item) => item.Text.includes("BPI")));
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -314,11 +241,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-        setListPeriod({});
-      } finally {
-        setIsLoading(false);
-=======
         setListPeriod([]);
       }
     };
@@ -348,7 +270,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
           message: error.message,
         }));
         setListFacil([]);
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
       }
     };
 
@@ -360,51 +281,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       // setIsLoading(true);
       try {
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/GetRencanaSSById",
-          {
-            id: withID,
-          }
-        );
-
-        if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data alat/mesin."
-          );
-        } else {
-          console.log(data[0]["Start Date"])
-          formDataRef.current = {
-            sis_id: data[0]["Key"],
-            kry_id: data[0]["NPK"],
-            per_id: data[0]["PeriodId"],
-            ino_category: data[0]["CategoryId"],
-            know_category: data[0]["CategoryIdImp"],
-            sis_judul: decodeHtml(data[0]["Project Title"]),
-            sis_kasus: decodeHtml(data[0]["Case"]),
-            sis_kasusfile: data[0]["CaseFile"],
-            sis_masalah: decodeHtml(data[0]["Problem"]),
-            sis_masalahfile: data[0]["ProblemFile"],
-            sis_tujuan: decodeHtml(data[0]["Goal"]),
-            sis_tujuanfile: data[0]["GoalFile"],
-            sis_ruanglingkup: decodeHtml(data[0]["Scope"]),
-            sis_tanggalmulai: data[0]["Start Date"].split("T")[0],
-            sis_tanggalakhir: data[0]["End Date"].split("T")[0],
-            sis_kualitas: data[0]["Quality"],
-            sis_biaya: data[0]["Cost"],
-            sis_pengiriman: data[0]["Delivery"],
-            sis_kemanan: data[0]["Safety"],
-            sis_moral: data[0]["Moral"],
-          };
-          
-          setCheckedStates({
-            sis_kualitas: data["Quality"] ? true : false,
-            sis_biaya: data["Cost"] ? true : false,
-            sis_pengiriman: data["Delivery"] ? true : false,
-            sis_kemanan: data["Safety"] ? true : false,
-            sis_moral: data["Moral"] ? true : false,
-          });
-=======
         const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
           p1: selectedPeriod,
         });
@@ -420,7 +296,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
               endPeriod: eDate,
             };
           }
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -432,8 +307,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
     fetchData();
   }, [selectedPeriod]);
 
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-=======
   const handleAddMember = (id, Name) => {
     if (
       id === null ||
@@ -526,7 +399,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
       );
   };
 
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
@@ -622,33 +494,21 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
       if (bussinessCaseFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(bussinessCaseFileRef.current).then(
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-            (data) => (formDataRef.current["sis_kasusfile"] = data.Hasil)
-=======
             (data) => (formDataRef.current["rciCaseFile"] = data.Hasil)
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
           )
         );
       }
       if (problemFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(problemFileRef.current).then(
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-            (data) => (formDataRef.current["sis_masalahfile"] = data.Hasil)
-=======
             (data) => (formDataRef.current["rciProblemFile"] = data.Hasil)
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
           )
         );
       }
       if (goalFileRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(goalFileRef.current).then(
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-            (data) => (formDataRef.current["sis_tujuanfile"] = data.Hasil)
-=======
             (data) => (formDataRef.current["rciGoalFile"] = data.Hasil)
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
           )
         );
       }
@@ -657,11 +517,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-          API_LINK + "RencanaSS/UpdateRencanaSS",
-=======
           API_LINK + "RencanaCircle/CreateRencanaQCP",
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
           formDataRef.current
         );
 
@@ -721,376 +577,13 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-              <h3 className="fw-bold text-center">SS REGISTRATION FORM</h3>
-=======
               <h3 className="fw-bold text-center">BPI REGISTRATION FORM</h3>
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
             </div>
             <div className="card-body p-4">
               {isLoading ? (
                 <Loading />
               ) : (
                 <div className="row">
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Edit.jsx
-                                  <div className="col-lg-12">
-                                    <div className="card mb-3">
-                                      <div className="card-header">
-                                        <h5 className="fw-medium">User Data</h5>
-                                      </div>
-                                      <div className="card-body">
-                                        <div className="row">
-                                          <div className="col-md-6">
-                                            <Input
-                                              type="text"
-                                              forInput="kry_id"
-                                              label="NPK"
-                                              isDisabled
-                                              value={formDataRef.current.kry_id}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.kry_id}
-                                            />
-                                          </div>
-                                          <div className="col-md-6">
-                                            <Input
-                                              type="text"
-                                              forInput="nama_kar"
-                                              label="Name​"
-                                              isDisabled
-                                              //   isRequired
-                                              value={userInfo.nama}
-                                              //   onChange={handleInputChange}
-                                              //   errorMessage={errors.setName}
-                                            />
-                                          </div>
-                                          <div className="col-md-6">
-                                            <Input
-                                              type="text"
-                                              forInput="produptdep"
-                                              label="Prodi/UPT/Dep"
-                                              isDisabled
-                                              //   isRequired
-                                              value={userInfo.upt}
-                                              //   onChange={handleInputChange}
-                                              //   errorMessage={errors.setName}
-                                            />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="col-lg-12">
-                                    <div className="card mb-3">
-                                      <div className="card-header">
-                                        <h5 className="fw-medium">Project Description</h5>
-                                      </div>
-                                      <div className="card-body">
-                                        <div className="row">
-                                          <div className="col-lg-12">
-                                            <TextArea
-                                              forInput="sis_judul"
-                                              label="Title"
-                                              isRequired
-                                              value={formDataRef.current.sis_judul}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.sis_judul}
-                                            />
-                                          </div>
-                                          <div className="col-lg-6">
-                                            <DropDown
-                                              forInput="ino_category"
-                                              label="Innovation Category"
-                                              arrData={listCategory}
-                                              isRequired
-                                              value={formDataRef.current.ino_category}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.ino_category}
-                                            />
-                                          </div>
-                                          <div className="col-lg-6">
-                                            <DropDown
-                                              forInput="know_category"
-                                              label="Knowledge Category"
-                                              arrData={listImpCategory}
-                                              isRequired
-                                              value={formDataRef.current.know_category}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.know_category}
-                                            />
-                                          </div>
-                                          <div className="col-lg-4">
-                                          <Input
-                                            type="date"
-                                            forInput="sis_tanggalmulai"
-                                            label="Start Date"
-                                            placeholder={
-                                            periodDataRef.current.startPeriod
-                                            ? "Selected period starts on " +
-                                            formatDate(
-                                              periodDataRef.current.startPeriod,
-                                                true
-                                              )
-                                            : ""
-                                          }
-                                          isRequired
-                                          value={formDataRef.current.sis_tanggalmulai}
-                                          onChange={handleInputChange}
-                                          errorMessage={errors.sis_tanggalmulai}
-                                          />
-                                          </div>
-                                          <div className="col-lg-4">
-                                          <Input
-                                            type="date"
-                                            forInput="sis_tanggalakhir"
-                                            label="Start Date"
-                                            placeholder={
-                                            periodDataRef.current.endPeriod
-                                            ? "Selected period ends on " +
-                                            formatDate(
-                                              periodDataRef.current.endPeriod,
-                                                true
-                                              )
-                                            : ""
-                                          }
-                                          isRequired
-                                          value={formDataRef.current.sis_tanggalakhir}
-                                          onChange={handleInputChange}
-                                          errorMessage={errors.sis_tanggalakhir}
-                                          />
-                                          </div>
-                                          <div className="col-lg-4">
-                                            <DropDown
-                                              forInput="per_id"
-                                              label="Period"
-                                              arrData={listPeriod}
-                                              isRequired
-                                              isDisabled
-                                              value={formDataRef.current.per_id}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.per_id}
-                                            />
-                                          </div>
-                
-                                
-                                          <div className="col-lg-12">
-                                            <TextArea
-                                              forInput="sis_ruanglingkup"
-                                              label="Project Scope"
-                                              isRequired
-                                              value={formDataRef.current.sis_ruanglingkup}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.sis_ruanglingkup}
-                                            />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="col-lg-12">
-                                    <div className="card mb-3">
-                                      <div className="card-header">
-                                        <h5 className="fw-medium">Project Charter</h5>
-                                      </div>
-                                      <div className="card-body">
-                                        <div className="row">
-                                          <div className="col-lg-12">
-                                            <TextArea
-                                              forInput="sis_kasus"
-                                              label="Bussiness Case"
-                                              isRequired
-                                              value={formDataRef.current.sis_kasus}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.sis_kasus}
-                                            />
-                                          </div>
-                                          <div className="col-lg-4">
-                                            <FileUpload
-                                              forInput="sis_kasusfile"
-                                              label="Bussiness Case Document (.pdf)"
-                                              formatFile=".pdf"
-                                              ref={bussinessCaseFileRef}
-                                              onChange={() =>
-                                                handleFileChange(bussinessCaseFileRef, "pdf")
-                                              }
-                                              errorMessage={errors.sis_kasusfile}
-                                            />
-                                          </div>
-                                          <div className="col-lg-12">
-                                            <TextArea
-                                              forInput="sis_masalah"
-                                              label="Problem Statement​"
-                                              isRequired
-                                              value={formDataRef.current.sis_masalah}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.sis_masalah}
-                                            />
-                                          </div>
-                                          <div className="col-lg-4">
-                                            <FileUpload
-                                              forInput="sis_masalahfile"
-                                              label="Problem Statement​ Document (.pdf)"
-                                              formatFile=".pdf"
-                                              ref={problemFileRef}
-                                              onChange={() =>
-                                                handleFileChange(problemFileRef, "pdf")
-                                              }
-                                              errorMessage={errors.sis_masalahfile}
-                                            />
-                                          </div>
-                                          <div className="col-lg-12">
-                                            <TextArea
-                                              forInput="sis_tujuan"
-                                              label="Goal Statement​"
-                                              isRequired
-                                              value={formDataRef.current.sis_tujuan}
-                                              onChange={handleInputChange}
-                                              errorMessage={errors.sis_tujuan}
-                                            />
-                                          </div>
-                                          <div className="col-lg-4">
-                                            <FileUpload
-                                              forInput="sis_tujuanfile"
-                                              label="Goal Statement​ Document (.pdf)"
-                                              formatFile=".pdf"
-                                              ref={goalFileRef}
-                                              onChange={() =>
-                                                handleFileChange(goalFileRef, "pdf")
-                                              }
-                                              errorMessage={errors.sis_tujuanfile}
-                                            />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="col-lg-12">
-                                    <div className="card mb-3">
-                                      <div className="card-body">
-                                        <div className="row">
-                                          <div className="col-lg-12">
-                                            <label className="form-label fw-bold ms-1">
-                                              Tangible Benefit
-                                            </label>
-                                            <div className="d-flex align-items-center">
-                                              <input
-                                                className="form-check-input mb-2 me-2"
-                                                type="checkbox"
-                                                checked={checkedStates.sisQuality}
-                                                onChange={() =>
-                                                  handleCheckboxChange("sisQuality")
-                                                }
-                                              />
-                                              <div className="flex-grow-1">
-                                                <Input
-                                                  type="text"
-                                                  forInput="sis_kualitas"
-                                                  label="Quality"
-                                                  isDisabled={!checkedStates.sisQuality}
-                                                  placeholder="Quality"
-                                                  value={formDataRef.current.sis_kualitas}
-                                                  onChange={handleInputChange}
-                                                  errorMessage={errors.sis_kualitas}
-                                                />
-                                              </div>
-                                            </div>
-                                            <div className="d-flex align-items-center">
-                                              <input
-                                                className="form-check-input mb-2 me-2"
-                                                type="checkbox"
-                                                checked={checkedStates.sisCost}
-                                                onChange={() => handleCheckboxChange("sisCost")}
-                                              />
-                                              <div className="flex-grow-1">
-                                                <Input
-                                                  type="text"
-                                                  forInput="sis_biaya"
-                                                  label="Cost"
-                                                  isDisabled={!checkedStates.sisCost}
-                                                  placeholder="Cost"
-                                                  value={formDataRef.current.sis_biaya}
-                                                  onChange={handleInputChange}
-                                                  errorMessage={errors.sis_biaya}
-                                                />
-                                              </div>
-                                            </div>
-                                            <div className="d-flex align-items-center">
-                                              <input
-                                                className="form-check-input mb-2 me-2"
-                                                type="checkbox"
-                                                checked={checkedStates.sisDelivery}
-                                                onChange={() =>
-                                                  handleCheckboxChange("sisDelivery")
-                                                }
-                                              />
-                                              <div className="flex-grow-1">
-                                                <Input
-                                                  type="text"
-                                                  forInput="sis_pengiriman"
-                                                  label="Delivery"
-                                                  placeholder="Delivery"
-                                                  isDisabled={!checkedStates.sisDelivery}
-                                                  value={formDataRef.current.sis_pengiriman}
-                                                  onChange={handleInputChange}
-                                                  errorMessage={errors.sis_pengiriman}
-                                                />
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <div className="col-lg-12">
-                                            <label className="form-label fw-bold ms-1">
-                                              Intangible Benefit
-                                            </label>
-                                            <div className="d-flex align-items-center">
-                                              <input
-                                                className="form-check-input mb-2 me-2"
-                                                type="checkbox"
-                                                checked={checkedStates.sisSafety}
-                                                onChange={() =>
-                                                  handleCheckboxChange("sisSafety")
-                                                }
-                                              />
-                                              <div className="flex-grow-1">
-                                                <Input
-                                                  type="text"
-                                                  forInput="sis_kemanan"
-                                                  label="Safety"
-                                                  isDisabled={!checkedStates.sisSafety}
-                                                  placeholder="Safety"
-                                                  value={formDataRef.current.sis_kemanan}
-                                                  onChange={handleInputChange}
-                                                  errorMessage={errors.sis_kemanan}
-                                                />
-                                              </div>
-                                            </div>
-                                            <div className="d-flex align-items-center">
-                                              <input
-                                                className="form-check-input me-2"
-                                                type="checkbox"
-                                                isDisabled={checkedStates.sisMoral}
-                                                onChange={() =>
-                                                  handleCheckboxChange("sisMoral")
-                                                }
-                                              />
-                                              <div className="flex-grow-1">
-                                                <Input
-                                                  type="text"
-                                                  label="Moral"
-                                                  forInput="sis_moral"
-                                                  isDisabled={!checkedStates.sisMoral}
-                                                  placeholder="Moral"
-                                                  value={formDataRef.current.sis_moral}
-                                                  onChange={handleInputChange}
-                                                  errorMessage={errors.sis_moral}
-                                                />
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-=======
                   <div className="col-lg-12">
                     <div className="card mb-3">
                       <div className="card-header">
@@ -1498,7 +991,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                     </div>
                   </div>
                 </div>
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Add.jsx
               )}
               <div className="d-flex justify-content-between align-items-center">
                 <div className="flex-grow-1 m-2">

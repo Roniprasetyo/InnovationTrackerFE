@@ -821,7 +821,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             <TextArea
                               forInput="rciCase"
                               label="Bussiness Case"
-                              placeholder="Dokumen manajemen proyek yang menjelaskan baagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan"
                               isRequired
                               placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.rciCase}
@@ -846,7 +845,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             <TextArea
                               forInput="rciProblem"
                               label="Problem Statement​"
-                              placeholder="Mendefinisikan masalah yang dihadapi pengguna atau pelanggan"
                               isRequired
                               placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.rciProblem}
@@ -871,7 +869,6 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                             <TextArea
                               forInput="rciGoal"
                               label="Goal Statement​" 
-                              placeholder="Menjelaskan tentang tujuan"
                               isRequired
                               placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.rciGoal}
