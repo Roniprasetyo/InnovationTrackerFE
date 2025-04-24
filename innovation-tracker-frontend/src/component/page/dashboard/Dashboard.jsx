@@ -17,6 +17,10 @@ import { API_LINK } from "../../util/Constants";
 import { EMP_API_LINK } from "../../util/Constants";
 import { use } from "react";
 import Label from "../../part/Label";
+import Button from "../../part/Button";
+import { exportExcel } from "../../util/ExportExcel";
+import Table from "../../part/Table";
+import Loading from "../../part/Loading";
 
 ChartJS.register(
   CategoryScale,
@@ -112,26 +116,11 @@ const initialChart = {
 export default function Dashboard() {
   const [selectedLomba, setSelectedLomba] = useState("SS");
   const [isError, setIsError] = useState(false);
-
-  const selectedData = dataLomba[selectedLomba];
-
-  // Hitung total otomatis
-  const total = selectedData.totalSubmit.reduce(
-    (acc, item) => {
-      if (selectedLomba === "VCI") {
-        acc.total += item.total;
-      } else {
-        acc.technic += item.technic;
-        acc.nonTechnic += item.nonTechnic;
-      }
-      return acc;
-    },
-    selectedLomba === "VCI"
-      ? { total: 0 }
-      : { technic: 0, nonTechnic: 0 }
-  );
   const [currentData, setCurrentData] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
+  const [tableData, setTableData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [currentFilter, setCurrentFilter] = useState({
     jenis: selectedLomba,
   });
@@ -183,35 +172,57 @@ export default function Dashboard() {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the period data.");
         } else {
-          // console.log(data);
-
           let userData = [];
+          let departmentCount = {};
+          let departments = new Set();
+          let categorySet = new Set();
+
           data.forEach((element) => {
             const usr = listEmployee.find(
               (item) => item.username === element["Creaby"]
             );
             if (usr !== undefined) {
-              userData.push({ ...element, departmen: usr.departmen });
+              const fullData = { ...element, departmen: usr.departmen };
+              userData.push(fullData);
+
+              const dept = usr.departmen;
+              departmentCount[dept] = (departmentCount[dept] || 0) + 1;
+              departments.add(dept);
+
+              categorySet.add(element.Submission);
             }
           });
-          const departments = [
-            ...new Set(userData.map((item) => item.departmen)),
-          ];
-          const category = [...new Set(data.map((item) => item.Submission))];
-          const formatted = category.map((category, index) => {
-            return {
-              label: category,
-              data: departments.map((dept) => {
-                return userData.filter((sub) => sub.departmen === dept).length;
-              }),
-              backgroundColor: index % 2 === 0 ? ["#3B82F6"] : "#10B981",
-            };
-          });
-          console.log(formatted);
+
+          const departmentsArray = [...departments];
+          const categoryArray = [...categorySet];
+
+          const tableData = departmentsArray
+            .map((dept, index) => ({
+              Department: dept,
+              Total: departmentCount[dept],
+              Alignment: ["center", "left", "right"],
+            }))
+            .sort((a, b) => b.Total - a.Total);
+
+          setTableData(
+            tableData.map((prev, index) => ({
+              Key: index + 1,
+              No: index + 1,
+              ...prev,
+            }))
+          );
+
+          const formatted = categoryArray.map((category, index) => ({
+            label: category,
+            data: departmentsArray.map((dept) => departmentCount[dept] || 0),
+            backgroundColor: index % 2 === 0 ? "#3B82F6" : "#59D2FE",
+          }));
+
           const formattedData = {
-            labels: departments,
+            labels: departmentsArray,
             datasets: formatted,
           };
+
           setCurrentData(formattedData);
         }
       } catch (error) {
@@ -222,21 +233,22 @@ export default function Dashboard() {
           message: error.message,
         }));
         setListPeriod({});
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [listEmployee, currentFilter]);
 
+  if (isLoading) return <Loading />;
+
   return (
     <>
-      <div className="my-3">
+      <div className="my-3 mt-4">
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
-            <h2 className="display-1 fw-bold">Total Submission</h2>
-            <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">Data</h2>
-            </div>
+            <h2 className="display-4 fw-bold">Total Submission Data</h2>
           </div>
         </div>
       </div>
@@ -261,6 +273,7 @@ export default function Dashboard() {
               { Text: "QCC", Value: "QCC" },
               { Text: "QCP", Value: "QCP" },
               { Text: "VCI", Value: "VCI" },
+              { Text: "BPI", Value: "BPI" },
             ]}
             value={currentFilter.jenis}
             onChange={(e) =>
@@ -273,65 +286,50 @@ export default function Dashboard() {
             }
           />
         </div>
-
-
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold mb-2">
-            Total Submission {selectedLomba} per Departemen
-          </h3>
-          <table className="table table-bordered w-75">
-          <thead>
-            <tr className="text-center">
-              <th>No</th>
-              <th>Departemen</th>
-              {selectedLomba === "VCI" ? (
-                <th>Total Submit</th>
-              ) : (
-                <>
-                  <th>{selectedData.datasets[0].label}</th>
-                  <th>{selectedData.datasets[1].label}</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {selectedData.totalSubmit.map((item, index) => (
-              <tr key={index}>
-                <td className="text-center">{index + 1}</td>
-                <td>{item.departemen}</td>
-                {selectedLomba === "VCI" ? (
-                  <td className="text-end">{item.total}</td>
-                ) : (
-                  <>
-                    <td className="text-end">{item.technic}</td>
-                    <td className="text-end">{item.nonTechnic}</td>
-                  </>
-                )}
-              </tr>
-            ))}
-            <tr className="fw-bold">
-              <td colSpan="2" className="text-center">Total Submit</td>
-              {selectedLomba === "VCI" ? (
-                <td className="text-end">{total.total}</td>
-              ) : (
-                <>
-                  <td className="text-end">{total.technic}</td>
-                  <td className="text-end">{total.nonTechnic}</td>
-                </>
-              )}
-            </tr>
-          </tbody>
-        </table>
-
-        </div>
-        <br />
-        <br />
-        <Bar data={selectedData} options={{ responsive: true }} />
         {currentData.length !== 0 ? (
           <Bar data={currentData} options={{ responsive: true }} />
         ) : (
           <Label data="No data Available" />
         )}
+        <hr />
+        <div className="mt-5 mb-3">
+          <div className="mt-4">
+            <div className="color-primary text-center">
+              <div className="d-flex gap-3 justify-content-center">
+                <h2 className="display-6 fw-bold">
+                  {" "}
+                  Summary of {currentFilter.jenis} Submission
+                </h2>
+              </div>
+            </div>
+          </div>
+          <div className="mb-3">
+            <Button
+              iconName="file-excel"
+              label="Export"
+              classType="success"
+              onClick={() => {
+                exportExcel(
+                  tableData,
+                  currentFilter.jenis +
+                    "_" +
+                    new Date().toLocaleDateString() +
+                    "_" +
+                    new Date().toLocaleTimeString() +
+                    "_" +
+                    ".xlsx"
+                );
+              }}
+            />
+          </div>
+          {tableData.length !== 0 ? (
+            <>
+              <Table data={tableData} />
+            </>
+          ) : (
+            ""
+          )}
+        </div>
       </div>
     </>
   );

@@ -19,6 +19,7 @@ import {
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import { exportExcel } from "../../util/ExportExcel";
+import Modal from "../../part/Modal";
 
 const inisialisasiData = [
   {
@@ -55,12 +56,6 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-// const dataFilterJenis = [
-//   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-//   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-//   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
-// ];
-
 export default function SuggestionSytemIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
@@ -80,12 +75,19 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     role: userInfo.role,
     npk: userInfo.npk,
   });
+  const [selectedKeys, setSelectedKeys] = useState([]);
 
   console.log("user info", userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
+  const modalRef = useRef();
+
+  const handleSelectionChange = (data = []) => {
+    setSelectedKeys(data);
+    console.log(data);
+  };
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -209,6 +211,20 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           }
         })
         .then(() => setIsLoading(false));
+    }
+  };
+
+  const handleAssign = (arrData) => {
+    console.log(arrData);
+    if (arrData.length === 0) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: "Please select one or more data!",
+      }));
+    } else {
+      modalRef.current.open();
     }
   };
 
@@ -370,7 +386,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         );
 
         if (data === "ERROR") {
-          // setIsError(true);
+          setIsError(true);
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
@@ -386,7 +402,11 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             );
 
             console.log("FOND", foundEmployee);
-            if (role === "ROL01") {
+            if (
+              role === "ROL01" ||
+              userInfo.jabatan === "Kepala Departemen" ||
+              userInfo.jabatan === "Sekretaris Prodi"
+            ) {
               return {
                 Key: value.Key,
                 No: value["No"],
@@ -490,7 +510,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               };
             }
           });
-          // console.log(formattedData);
+          console.log(formattedData);
           setCurrentData(formattedData);
         }
       } catch {
@@ -587,11 +607,26 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               defaultValue=""
             />
           </Filter>
+          {userInfo.role.slice(0, 5) === "ROL01" ? (
+            <Button
+              iconName="paper-plane-top"
+              classType="primary px-3 border-start"
+              title="Assign"
+              onClick={() => handleAssign(selectedKeys)}
+            />
+          ) : (
+            ""
+          )}
         </div>
       </div>
       <div className="mt-3 mb-5">
         <div className="d-flex flex-column">
           <Table
+            checkboxTable={
+              userInfo.role.slice(0, 5) === "ROL01" ||
+              userInfo.jabatan === "Kepala Departemen"
+            }
+            onCheckedChange={handleSelectionChange}
             data={currentData}
             onDetail={onChangePage}
             onSubmit={handleSubmit}
@@ -607,6 +642,72 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           />
         </div>
       </div>
+      <Modal
+        title="Select Submission Batch"
+        ref={modalRef}
+        centered
+        size="small"
+      >
+        <div
+          className="mb-3"
+          style={{
+            maxHeight: "250px",
+            overflowY: "auto",
+            scrollbarWidth: "none", // Firefox
+            msOverflowStyle: "none",
+          }}
+        >
+          <table className="table table-hover table-striped border">
+            <thead className="text-center">
+              <tr>
+                <th>No</th>
+                <th>NPK</th>
+                <th>Name</th>
+                <th>Title</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedKeys.map((item, index) => (
+                <tr key={index}>
+                  <td className="text-center">{index + 1}</td>
+                  <td>{item.NPK}</td>
+                  <td>{maxCharDisplayed(item.Name, 10)}</td>
+                  <td>{maxCharDisplayed(item["Project Title"], 20)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-center">Assign To</p>
+        <DropDown arrData={listCategory} showLabel={false} />
+        {/* <div className="list-group">
+          {listCategory.map((value, index) => {
+            return (
+              <button
+                key={index}
+                type="button"
+                className="list-group-item list-group-item-action"
+                aria-current="true"
+                // onClick={() =>
+                //   handleLoginWithRole(
+                //     value.RoleID,
+                //     userDetail.nama,
+                //     value.Role,
+                //     userDetail.npk,
+                //     value.InoRole,
+                //     userDetail.jabatan,
+                //     userDetail.upt_bagian,
+                //     userDetail.departemen_jurusan
+                //   )
+                // }
+              >
+                {value.Text}
+              </button>
+            );
+          })}
+        </div> */}
+      </Modal>
     </>
   );
 }

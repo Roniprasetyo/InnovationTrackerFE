@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import Button from "./Button";
 
 const Modal = forwardRef(function Modal(
-  { title, children, size, Button1 = null, Button2 = null },
+  { title, children, size, Button1 = null, Button2 = null, centered = false },
   ref
 ) {
   const dialog = useRef();
@@ -35,7 +35,24 @@ const Modal = forwardRef(function Modal(
   });
 
   return (
-    <dialog ref={dialog} style={{ maxWidth: maxSize }}>
+    <dialog
+      ref={dialog}
+      style={
+        centered === false
+          ? { maxWidth: maxSize }
+          : {
+              maxWidth: maxSize,
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              margin: 0,
+              border: "none",
+              borderRadius: "8px",
+              zIndex: 1000,
+            }
+      }
+    >
       <div className="modal-header lead fw-medium p-3">{title}</div>
       <hr className="m-0" />
       <div className="modal-body p-3">{children}</div>
