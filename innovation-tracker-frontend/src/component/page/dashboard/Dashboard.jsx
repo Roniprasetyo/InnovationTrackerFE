@@ -10,6 +10,13 @@ import {
   Legend,
 } from "chart.js";
 import DropDown from "../../part/Dropdown";
+import { useEffect } from "react";
+import UseFetch from "../../util/UseFetch";
+import Alert from "../../part/Alert";
+import { API_LINK } from "../../util/Constants";
+import { EMP_API_LINK } from "../../util/Constants";
+import { use } from "react";
+import Label from "../../part/Label";
 
 ChartJS.register(
   CategoryScale,
@@ -82,11 +89,111 @@ const dataLomba = {
     ],
   },
 };
-
+const initialChart = {
+  labels: [],
+  datasets: [],
+};
 
 export default function Dashboard() {
   const [selectedLomba, setSelectedLomba] = useState("SS");
   const [isError, setIsError] = useState(false);
+  const [currentData, setCurrentData] = useState([]);
+  const [listEmployee, setListEmployee] = useState([]);
+  const [currentFilter, setCurrentFilter] = useState({
+    jenis: selectedLomba,
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            username: value.username,
+            upt: value.upt_bagian,
+            jabatan: value.jabatan,
+            departmen: value.departemen_jurusan,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "Chart/GetAllSubbmision",
+          currentFilter
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          // console.log(data);
+
+          let userData = [];
+          data.forEach((element) => {
+            const usr = listEmployee.find(
+              (item) => item.username === element["Creaby"]
+            );
+            if (usr !== undefined) {
+              userData.push({ ...element, departmen: usr.departmen });
+            }
+          });
+          const departments = [
+            ...new Set(userData.map((item) => item.departmen)),
+          ];
+          const category = [...new Set(data.map((item) => item.Submission))];
+          const formatted = category.map((category, index) => {
+            return {
+              label: category,
+              data: departments.map((dept) => {
+                return userData.filter((sub) => sub.departmen === dept).length;
+              }),
+              backgroundColor: index % 2 === 0 ? ["#3B82F6"] : "#10B981",
+            };
+          });
+          console.log(formatted);
+          const formattedData = {
+            labels: departments,
+            datasets: formatted,
+          };
+          setCurrentData(formattedData);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListPeriod({});
+      }
+    };
+
+    fetchData();
+  }, [listEmployee, currentFilter]);
 
   return (
     <>
@@ -122,12 +229,23 @@ export default function Dashboard() {
               { Text: "QCP", Value: "QCP" },
               { Text: "VCI", Value: "VCI" },
             ]}
-            value={selectedLomba}
-            onChange={(e) => setSelectedLomba(e.target.value)}
+            value={currentFilter.jenis}
+            onChange={(e) =>
+              setCurrentFilter((prevFilter) => {
+                return {
+                  ...prevFilter,
+                  jenis: e.target.value,
+                };
+              })
+            }
           />
         </div>
 
-        <Bar data={dataLomba[selectedLomba]} options={{ responsive: true }} />
+        {currentData.length !== 0 ? (
+          <Bar data={currentData} options={{ responsive: true }} />
+        ) : (
+          <Label data="No data Available" />
+        )}
       </div>
     </>
   );
