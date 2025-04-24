@@ -20,7 +20,11 @@ const inisialisasiData = [
   },
 ];
 
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
+export default function SuggestionSystemDetail({ onChangePage, withID }) {
+=======
 export default function BusinessPerformanceImprovementDetail({ onChangePage, withID }) {
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -33,11 +37,11 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
 
   const formDataRef = useRef({
     Key: "",
+    NPK:"",
+    Period: "",
     Category: "",
     CategoryImp: "",
-    "Group Name": "",
     "Project Title": "",
-    "Project Benefit": 0,
     Case: "",
     CaseFile: "",
     Problem: "",
@@ -53,8 +57,6 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
     Safety: "",
     Moral: "",
     Status: "",
-    Creaby: "",
-    member: [{}],
   });
 
   useEffect(() => {
@@ -95,15 +97,19 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaSS/GetRencanaSSById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get QCP data");
+          throw new Error("Error: Failed to get SS data");
         } else {
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
+          console.log(data);
+          formDataRef.current = data[0];
+=======
           formDataRef.current = data;
           const members = data.member.filter(
             (item) => item.Position === "Member"
@@ -123,6 +129,7 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
                 }))
               )
             : setCurrentData(inisialisasiData);
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -137,7 +144,11 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
     };
 
     fetchData();
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
+  }, [withID]);
+=======
   }, [listEmployee, withID]);
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
 
   if (isLoading) return <Loading />;
 
@@ -177,7 +188,11 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
         )}
         <div className="card mb-5">
           <div className="card-header">
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
+            <h3 className="fw-bold text-center">SS REGISTRATION DETAIL</h3>
+=======
             <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -187,17 +202,30 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
                 <div className="col-lg-12">
                   <div className="card mb-3">
                     <div className="card-header">
-                      <h5 className="fw-medium">Team Member</h5>
+                      <h5 className="fw-medium">User Data</h5>
                     </div>
                     <div className="card-body">
                       <div className="row">
                         <div className="col-md-6">
                           <Label
-                            title="Circle Name"
-                            data={formDataRef.current["Group Name"] || "-"}
+                            title="NPK"
+                            data={formDataRef.current["NPK"] || "-"}
                           />
                         </div>
+
                         <div className="col-md-6">
+                          <Label
+                            title="Name​"
+                            data={userInfo.nama}
+                          />
+                        </div>
+
+                        <div className="col-md-6">
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
+                          <Label
+                            title="Prodi/UPT/Dep​"
+                            data={userInfo.upt}
+=======
                           <Label title="Section" data={userInfo.upt} />
                         </div>
                         <div className="col-md-6">
@@ -218,11 +246,10 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
                                 (item) => item.Position === "Leader"
                               )?.Name || "-"
                             }
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
                           />
                         </div>
                       </div>
-                      <Label title="Team Member" />
-                      <Table data={currentData} />
                     </div>
                   </div>
                 </div>
@@ -357,11 +384,10 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
                 </div>
                 <div className="col-lg-12">
                   <div className="card mb-3">
-                    <div className="card-header">
-                      <h5 className="fw-medium">Project Benefit</h5>
-                    </div>
                     <div className="card-body">
                       <div className="row">
+<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Detail.jsx
+=======
                         <div className="col-lg-12">
                           <Label
                             title="Project Benefit (Rp)"
@@ -372,6 +398,7 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
                             }
                           />
                         </div>
+>>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Detail.jsx
                         <div className="col-lg-6">
                           <label className="form-label fw-bold">
                             Tangible Benefit

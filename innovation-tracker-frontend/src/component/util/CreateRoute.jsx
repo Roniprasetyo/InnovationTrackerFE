@@ -17,6 +17,7 @@ const MasterPerusahaan = lazy(() => import("../page/master-perusahaan/Root"));
 // const MasterStep = lazy(() => import("../page/master-step/Root"));
 // const MiniKonvensi = lazy(() => import("../page/mini-convention/Root"));
 // const Scoring = lazy(() => import("../page/mini-convention/Scoring"));
+const Dashboard = lazy(() => import("../page/dashboard/Dashboard"));
 
 const routeList = [
   {
@@ -30,6 +31,10 @@ const routeList = [
   {
     path: "/submission",
     element: <Submission />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
   },
   {
     path: "/submission/ss",

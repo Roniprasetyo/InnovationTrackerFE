@@ -712,6 +712,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                                   value={formDataRef.current.sis_kualitas}
                                   onChange={handleInputChange}
                                   errorMessage={errors.sis_kualitas}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -778,6 +779,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                                   value={formDataRef.current.sis_kemanan}
                                   onChange={handleInputChange}
                                   errorMessage={errors.sis_kemanan}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>

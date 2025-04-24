@@ -880,6 +880,7 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -946,6 +947,7 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>
