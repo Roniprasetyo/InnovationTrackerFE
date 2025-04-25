@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK, ROOT_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, string } from "yup";
@@ -283,7 +283,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
           SweetAlert("Success", "Data Successfully Submitted", "success");
-          onChangePage("index");
+          // onChangePage("index");
+          window.href = API_LINK + "/submission/ss";
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -474,6 +475,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   return (
     <>
+    
       <div className="container min-vh-100">
         <div
           className="row my-3"
