@@ -70,6 +70,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [listDepartment, setListDepartment] = useState([]);
   const [listAllDepartment, setAllListDepartment] = useState([]);
   const [listPenilaian, setListPenilaian] = useState([]);
+  const [listPenilaianUpdate, setListPenilaianUpdate] = useState([]);
   const [listKaDept, setKaDept] = useState([]);
   const [listRecordPenilaian, setRecordListPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
@@ -82,6 +83,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [formattedValue, setFormattedValue] = useState("");
   const [forPenilai, setForPenilai] = useState("");
   const [selectedTab, setSelectedTab] = useState(0);
+  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
 
   const formDataRef = useRef({
     Key: "",
@@ -326,6 +328,40 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   }, []);
   
   useEffect(() => {
+    const fetchDataDetailByID = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          sis_id: id,
+        });
+
+        // console.log("INI DATA SISIA: ", data);
+        if (!data) {
+          // throw new Error("Error: Failed to get the category data.");
+        } else {
+          const dataDetail = data.map((item) => ({
+            Keys: item.Key,
+            Text: `${item.Deskripsi} - (${item.Nilai})`,
+            Value: item.Value,
+            Score: item.Nilai,
+            KrpId: item.Kriteria,
+          }));
+
+          setListPenilaianUpdate(dataDetail);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      }
+    };
+    fetchDataDetailByID();
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
@@ -420,6 +456,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   console.log("DeptArrData:", listDepartment);
   console.log("All Dept:", listAllDepartment);
   console.log("List Penilaian:", listPenilaian);
+  console.log("List Penilaian Update:", listPenilaianUpdate);
+  console.log("User Info:", userInfo);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -469,6 +507,31 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const DeptArrData = listDepartment.length > 0 && userInfo?.npk
   ? listDepartment.find(detail => String(detail.Npk) === String(userInfo.npk))
   : null;
+
+  const handleTabChange = (e, newValue) => {
+    setSelectedTab(newValue);
+    setHasUserSelectedTab(true);
+  };
+  
+  useEffect(() => {
+    if (!hasUserSelectedTab) {
+      if (userInfo?.jabatan === "Sekretaris Prodi" || userInfo?.jabatan === "Kepala Departemen") {
+        setSelectedTab(1);
+      } else if (userInfo?.jabatan === "Kepala Seksi") {
+        setSelectedTab(0);
+      } else if (userInfo?.jabatan === "Wakil Direktur") {
+        setSelectedTab(2);
+      }
+    }
+  }, [userInfo, hasUserSelectedTab]);
+
+  const tabLabels = ["Ka.Unit/Ka.UPT"];
+  if (userInfo?.jabatan === "Sekretaris Prodi") {
+    tabLabels.push("Ka.Prodi/Ka.Dept");
+  }else if(userInfo?.jabatan === "Wakil Direktur") {
+    tabLabels.push("Ka.Prodi/Ka.Dept", "WaDIR/DIR");
+  }
+  
 
   if (isLoading) return <Loading />;
 
@@ -560,7 +623,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 <Tabs
                                   value={selectedTab}
                                   className="card rounded-bottom-0"
-                                  onChange={(e, newValue) => setSelectedTab(newValue)} 
+                                  onChange={handleTabChange} 
                                   variant="fullWidth"
                                   sx={{
                                     "& .MuiTabs-indicator": {
@@ -569,7 +632,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     },
                                   }}
                                 >
-                                  {["Ka.Unit/Ka.UPT", "Ka.Prodi/Ka.Dept", "WaDIR/DIR"].map((label, index) => (
+                                  {tabLabels.map((label, index) => (
                                     <Tab
                                       key={label}
                                       label={label}
@@ -609,6 +672,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         detail["Jabatan Penilai"] !== forPenilai.jabatan &&
                                       detail.Kriteria === item.Value
                                     );
+                                    const arrTextData =
+                                    listPenilaianUpdate.map(
+                                      (item) => item
+                                      
+                                    );
                                   return (
                                     <div className="row mb-3" key={item.Value}>
                                       <div className="col-lg-4">
@@ -632,6 +700,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           forInput={item.Value}
                                           arrData={filteredArrData}
                                           isRound
+                                          selectedValued={arrTextData[item.Value-1]}
                                           value={formDataRef2.current[item.Value] || ""}
                                           onChange={handleInputChange}
                                         />
