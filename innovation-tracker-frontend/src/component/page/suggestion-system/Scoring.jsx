@@ -1,15 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import {
-  API_LINK,
-  ROOT_LINK,
-  EMP_API_LINK,
-  FILE_LINK,
-} from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
-import { date, number, object, Schema, string } from "yup";
+import { date, number, object, string } from "yup";
 import Alert from "../../part/Alert";
 import SweetAlert from "../../util/SweetAlert";
 import Icon from "../../part/Icon";
@@ -19,13 +14,11 @@ import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
 import Input from "../../part/Input";
-import TextArea from "../../part/TextArea";
 import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import { Tabs, Tab, Box, Paper, List } from "@mui/material";
 import PropTypes from 'prop-types';
-import SweetAlert from "../../util/SweetAlert";
 
 const inisialisasiData = [
   {
@@ -66,7 +59,6 @@ function a11yProps(index) {
 }
 
 export default function MiniConventionScoring({ onChangePage, WithID }) {
-
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
@@ -116,10 +108,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     "Alasan Penolakan": "",
   });
 
-  const formDataRef2 = useRef({
-  });
+  const formDataRef2 = useRef({});
   const formDataRef3 = useRef({});
-  const formComment = useRef();
 
   const userSchema = object({
     Key: number().required("required"),
@@ -189,7 +179,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(name,value)
+
     formDataRef2.current[name] = value;
 
     const validationError = validateInput(name, value, userSchema);
@@ -203,7 +193,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
-
+    
       formDataRef3.current[name] = matched.Score;
 
       // console.log("val dari formDataRef2:", val);
@@ -259,9 +249,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formDataRef2.current);
-    console.log(formComment.current.value);
-
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "),
       sis_id: id,
@@ -279,23 +266,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     // console.log("FormDataRef: ", formDataRef2.current);
     // console.log("Payload: ", payload);
     // console.log("Payload nilai: ", formDataRef3);
-    console.log("payload: ", payload);
-
-    // const SchemaPayload = object({
-    //   dkp_id: array().required("Field Wajib Diisi"),
-    //   sis_id: number().required(),
-    //   pen_nilai: required("Field Wajib Diisi"),
-    //   jabatan: string().required(),
-    //   status: string().nullable()
-    // })
-
-    // const validationErrors = await validateAllInputs(
-    //   payload,
-    //   SchemaPayload,
-    //   setErrors
-    // );
-
-    // console.log("VALIDASI: ", validationErrors);
 
     // if (Object.values(validationErrors).every((error) => !error)) {
     //   setIsLoading(true);
@@ -325,6 +295,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       } finally {
         setIsLoading(false);
       }
+    // } else window.scrollTo(0, 0);
+  };
 
   useEffect(() => {
     
@@ -660,27 +632,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           forInput={item.Value}
                                           arrData={filteredArrData}
                                           isRound
-                                          // isRequired
-                                          value={
-                                            formDataRef2.current[item.Value] || ""
-                                          }
+                                          value={formDataRef2.current[item.Value] || ""}
                                           onChange={handleInputChange}
-                                          // errorMessage={errors.formDataRef2.current[item.Value]}
                                         />
                                       }
-                                      </div>
-                                      <div className="col-lg-4">
-                                        <Label data="Comment" />
-                                      </div>
-                                      <div className="col-lg-8">
-                                        <Input
-                                          type="textarea"
-                                          forInput="comment"
-                                          ref={formComment}
-                                          // isRequired
-                                          handleChange
-                                          errorMessage={errors.formComment}
-                                        />
                                       </div>
                                     </div>
                                   );
@@ -759,5 +714,4 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       </div>
     </>
   );
-}
 }
