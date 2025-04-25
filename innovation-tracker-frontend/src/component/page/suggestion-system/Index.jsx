@@ -37,12 +37,14 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
+  { Value: "[NPK] asc", Text: "[NPK] [↑]" },
+  { Value: "[NPK] desc", Text: "[NPK] [↓]" },
+  { Value: "[Name] asc", Text: "[Name] [↑]" },
+  { Value: "[Name] desc", Text: "[Name] [↓]" },
   { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
   { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
-  { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
-  { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
-  { Value: "[End Date] asc", Text: "[End Date] [↑]" },
-  { Value: "[End Date] desc", Text: "[End Date] [↓]" },
+  { Value: "[Creadate] asc", Text: "[Submit Time] [↑]" },
+  { Value: "[Creadate] desc", Text: "[Submit Time] [↓]" },
   { Value: "[Period] asc", Text: "[Period] [↑]" },
   { Value: "[Period] desc", Text: "[Period] [↓]" },
   { Value: "[Category] asc", Text: "[Category] [↑]" },
@@ -69,10 +71,10 @@ export default function SuggestionSytemIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Category] asc",
+    sort: "[Creadate] desc",
     status: "",
     jenis: "SS",
-    role: userInfo.role,
+    role: userInfo.role.slice(0, 5),
     npk: userInfo.npk,
   });
   const [selectedKeys, setSelectedKeys] = useState([]);
@@ -405,17 +407,16 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             if (
               role === "ROL01" ||
               userInfo.jabatan === "Kepala Departemen" ||
-              userInfo.jabatan === "Sekretaris Prodi"
+              userInfo.jabatan === "Sekretaris Prodi" ||
+              userInfo.jabatan === "Direktur" ||
+              userInfo.jabatan === "Wakil Direktur" ||
+              userInfo.jabatan === "Kepala Seksi"
             ) {
               return {
                 Key: value.Key,
                 No: value["No"],
-                NPK:
-                  listEmployee.find((obj) => obj.username === value.Creaby)
-                    ?.npk || "-",
-                Name:
-                  listEmployee.find((obj) => obj.username === value.Creaby)
-                    ?.nama || "-",
+                NPK: value["NPK"] || "-",
+                Name: value["Name"] || "-",
                 "Project Title": maxCharDisplayed(
                   decodeHtml(
                     decodeHtml(decodeHtml(value["Project Title"]))
@@ -428,6 +429,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                 Period: value["Period"],
                 "Submitted On": formatDate(value["Creadate"]),
                 Status: value["Status"],
+                Score: value["Score"] || 0,
                 Count: value["Count"],
                 Action:
                   role === "ROL03" &&
@@ -455,11 +457,11 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                   "left",
                   "left",
                   "left",
+                  "left",
+                  "center",
+                  "center",
+                  "center",
                   "right",
-                  "center",
-                  "center",
-                  "center",
-                  "center",
                   "center",
                 ],
               };
@@ -556,7 +558,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               classType="success"
               onClick={() => onChangePage("add")}
             />
-          ) : (
+          ) : userInfo.peran === "Innovation Coordinator" ? (
             <Button
               iconName="file-excel"
               label="Export"
@@ -572,6 +574,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
                 handleExport(param);
               }}
             />
+          ) : (
+            ""
           )}
           <Input
             ref={searchQuery}
@@ -592,7 +596,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Project Title] asc"
+              defaultValue="[Creadate] desc"
             />
             <DropDown
               ref={searchFilterStatus}
@@ -647,6 +651,9 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         ref={modalRef}
         centered
         size="small"
+        Button1={
+          <Button title="SUBMIT" classType="primary ms-2" label="SUBMIT" />
+        }
       >
         <div
           className="mb-3"
@@ -681,32 +688,6 @@ export default function SuggestionSytemIndex({ onChangePage }) {
 
         <p className="text-center">Assign To</p>
         <DropDown arrData={listCategory} showLabel={false} />
-        {/* <div className="list-group">
-          {listCategory.map((value, index) => {
-            return (
-              <button
-                key={index}
-                type="button"
-                className="list-group-item list-group-item-action"
-                aria-current="true"
-                // onClick={() =>
-                //   handleLoginWithRole(
-                //     value.RoleID,
-                //     userDetail.nama,
-                //     value.Role,
-                //     userDetail.npk,
-                //     value.InoRole,
-                //     userDetail.jabatan,
-                //     userDetail.upt_bagian,
-                //     userDetail.departemen_jurusan
-                //   )
-                // }
-              >
-                {value.Text}
-              </button>
-            );
-          })}
-        </div> */}
       </Modal>
     </>
   );

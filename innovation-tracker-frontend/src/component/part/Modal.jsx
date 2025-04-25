@@ -59,15 +59,15 @@ const Modal = forwardRef(function Modal(
       <hr className="m-0" />
       <div className="modal-footer p-3">
         <form method="dialog">
-          {Button1}
-          {Button2}
           <Button
             classType="secondary"
-            label="Tutup"
+            label="Cancel"
             onClick={() => {
               dialog.current.close();
             }}
           />
+          {Button1}
+          {Button2}
         </form>
       </div>
     </dialog>

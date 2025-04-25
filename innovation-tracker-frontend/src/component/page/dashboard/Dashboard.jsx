@@ -310,7 +310,7 @@ export default function Dashboard() {
               classType="success"
               onClick={() => {
                 exportExcel(
-                  tableData,
+                  tableData.map(({ Key, Alignment, ...rest }) => rest),
                   currentFilter.jenis +
                     "_" +
                     new Date().toLocaleDateString() +
