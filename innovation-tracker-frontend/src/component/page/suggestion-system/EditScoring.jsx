@@ -11,7 +11,6 @@ import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, Schema, string } from "yup";
 import Alert from "../../part/Alert";
-import SweetAlert from "../../util/SweetAlert";
 import Icon from "../../part/Icon";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import Table from "../../part/Table";
@@ -23,8 +22,6 @@ import TextArea from "../../part/TextArea";
 import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
-import { Tabs, Tab, Box, Paper, List } from "@mui/material";
-import PropTypes from 'prop-types';
 import SweetAlert from "../../util/SweetAlert";
 
 const inisialisasiData = [
@@ -36,37 +33,7 @@ const inisialisasiData = [
   },
 ];
 
-function TabScoring(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-TabScoring.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
-
-export default function MiniConventionScoring({ onChangePage, WithID }) {
-
+export default function MiniConventionScoring({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
@@ -75,11 +42,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
-  const [listDepartment, setListDepartment] = useState([]);
-  const [listAllDepartment, setAllListDepartment] = useState([]);
-  const [listPenilaian, setListPenilaian] = useState([]);
-  const [listKaDept, setKaDept] = useState([]);
-  const [listRecordPenilaian, setRecordListPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
     useState([]);
   const [userData, setUserData] = useState({});
@@ -88,8 +50,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userInput, setUserInput] = useState("");
   const [formattedValue, setFormattedValue] = useState("");
-  const [forPenilai, setForPenilai] = useState("");
-  const [selectedTab, setSelectedTab] = useState(0);
+
+  // VARIABLE UNTUK UPDATE LIST DETAIL KRITERIA PENILIAN
+  const [listPenilaian, setListPenilaian] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -116,9 +79,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     "Alasan Penolakan": "",
   });
 
-  const formDataRef2 = useRef({
-  });
+  const formDataRef2 = useRef({});
   const formDataRef3 = useRef({});
+  const key = useRef({});
   const formComment = useRef();
 
   const userSchema = object({
@@ -151,7 +114,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       // console.log("ID: ", id);
-
       try {
         const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
           id: id,
@@ -187,9 +149,40 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     }
   }, [listEmployee, userInfo]);
 
+  useEffect(() => {
+    let total = 0;
+    let data = [];
+    // console.log("DATA", formDataRef2.current);
+    console.log("Key", key.current);
+    let i = 0;
+    Object.values(listPenilaian).forEach((d) => {
+      console.log("ssd", d);
+      key.current[i] = d.Keys;
+      i++; // increment i
+    });
+    
+    Object.values(formDataRef2.current).forEach((val) => {
+      const matched = listDetailKriteriaPenilaian.find(
+        (item) => item.Value === val
+      );
+
+      formDataRef3.current[val] = matched?.Score;
+
+      // console.log(listDetailKriteriaPenilaian);
+      // console.log("val dari formDataRef2:", formDataRef3.current);
+      // console.log("matched score:", matched?.Score);
+
+      const parsed = parseFloat(matched?.Score);
+      if (!isNaN(parsed)) total += parsed;
+    });
+    console.log("Key", key.current);
+
+    setTotalScore(total);
+  })
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(name,value)
+    // console.log(name, value);
     formDataRef2.current[name] = value;
 
     const validationError = validateInput(name, value, userSchema);
@@ -204,7 +197,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         (item) => item.Value === val
       );
 
-      formDataRef3.current[name] = matched.Score;
+      // formDataRef3.current[name] = matched?.Score;
 
       // console.log("val dari formDataRef2:", val);
       // console.log("matched item:", formDataRef3);
@@ -236,12 +229,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             name: value.nama,
             upt: value.upt_bagian,
             jabatan: value.jabatan,
-            // jurusan: value.departemen_jurusan,
           }))
         );
-
-        const temp = data.find((value) => value.npk === userInfo.npk);
-        setForPenilai(temp);
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -259,8 +248,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formDataRef2.current);
-    console.log(formComment.current.value);
+    console.log(formDataRef3.current);
+    // console.log(formComment.current.value);
 
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "),
@@ -268,18 +257,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       pen_nilai: Object.values(formDataRef3.current).join(", "),
       jabatan: userInfo.jabatan,
       status: "-",
+      pen_created: userInfo.username,
+      pen_id: Object.values(key.current).join(", ")
     };
 
-    // const validationErrors = await validateAllInputs(
-    //   formDataRef2.current,
-    //   userSchema,
-    //   setErrors
-    // );
-
-    // console.log("FormDataRef: ", formDataRef2.current);
-    // console.log("Payload: ", payload);
-    // console.log("Payload nilai: ", formDataRef3);
-    console.log("payload: ", payload);
+    // console.log("payload: ", payload);
 
     // const SchemaPayload = object({
     //   dkp_id: array().required("Field Wajib Diisi"),
@@ -302,32 +284,37 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     //   setIsError((prevError) => ({ ...prevError, error: false }));
     //   setErrors({});
 
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/CreatePenilaian",
-          payload
-        );
+      console.log("FormDataRef: ", formDataRef2.current);
+      console.log("Payload: ", payload);
+      console.log("Payload nilai: ", formDataRef3.current);
 
-        // console.log("tes", data);
-        if (!data) {
-          throw new Error("Error: Failed to Submit the data.");
-        } else {
-          SweetAlert("Success", "Data Successfully Submitted", "success");
-          onChangePage("index");
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
+    try {
+      const data = await UseFetch(
+        API_LINK + "RencanaSS/CreatePenilian",
+        payload
+      );
+
+      // console.log("tes", data);
+      if (!data) {
+        throw new Error("Error: Failed to Submit the data.");
+      } else {
+        SweetAlert("Success", "Data Successfully Submitted", "success");
+        window.location.href = ROOT_LINK + "/submission/ss";
       }
+    } catch (error) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: error.message,
+      }));
+    } finally {
+      setIsLoading(false);
+    }
+    // } else window.scrollTo(0, 0);
+  };
 
   useEffect(() => {
-    
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
@@ -352,20 +339,29 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     };
     fetchData();
   }, []);
-  
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataDetailByID = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/GetPenilaianById", {id}
-        );
+        const data = await UseFetch(API_LINK + "RencanaSS/GetDetailPenilaian", {
+          sis_id: id,
+          creaby: userInfo.username,
+        });
 
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
+        // console.log("INI DATA SISIA: ", data);
+        if (!data) {
+          // throw new Error("Error: Failed to get the category data.");
         } else {
-          setListPenilaian(data);
+          const dataDetail = data.map((item) => ({
+            Keys: item.Key,
+            Text: `${item.Deskripsi} - (${item.Nilai})`,
+            Value: item.Value,
+            Score: item.Nilai,
+            KrpId: item.Kriteria,
+          }));
 
+          setListPenilaian(dataDetail);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -374,80 +370,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       }
     };
-    fetchData();
+    fetchDataDetailByID();
   }, []);
 
-  useEffect(() => {
-    if (listPenilaian.length === 0 || listEmployee.length === 0) return;
-  
-    const distinctCreaby = [...new Set(listPenilaian.map(item => item.Creaby).filter(Boolean))];
-
-    const filteredEmployees = listEmployee.filter(emp =>
-      distinctCreaby.includes(emp.username)
-    );
-
-    setRecordListPenilaian(filteredEmployees);
-  
-  }, [listPenilaian, listEmployee]);
-  
-  useEffect(() => {
-    if (listRecordPenilaian.length === 0) return;
-
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/GetListStrukturDepartment"
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          const npkTarget = String(listRecordPenilaian[0]?.npk);
-          const matchingByNpk = data.find(item => String(item.Npk) === npkTarget);
-  
-          const strukturParentTarget = matchingByNpk["Struktur Parent"];
-  
-          const finalResult = data.filter(item =>
-            item["Struktur Parent"] === strukturParentTarget &&
-            (item.Jabatan === "Kepala Departemen" || item.Jabatan === "Sekretaris Prodi")
-          );
-
-          setAllListDepartment(data);
-          setListDepartment(finalResult);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      }
-    };
-    fetchData();
-  }, [listRecordPenilaian]);
-
-  const kadept = listAllDepartment.find(
-    (detail) =>
-      detail["Npk"] === forPenilai.npk
-  );
-  const kaupt = listAllDepartment.find(
-    (detail) =>
-      detail["Creaby"] === listPenilaian[0].npk
-  );
-
-  // console.log("DATA ", listEmployee.filter((item) => item.upt === "Prodi MI" ));
-  console.log("RECORD LIST ", forPenilai);
-  console.log("KA DEPT ", kadept);
-  console.log("KA UPT ",kaupt);
-  console.log("DeptArrData:", listDepartment);
-  console.log("All Dept:", listAllDepartment);
-  console.log("List Penilaian:", listPenilaian);
+  // console.log("INI DATA 377: ", listDetailKriteriaPenilaian);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -461,7 +389,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (Poin ${item.Score})`,
+            Text: `${item.Desc} - (${item.Score})`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -476,13 +404,15 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
+        // setListCategory({});
       }
     };
 
     fetchData();
   }, []);
 
+  // const arrTextData = listDetailKriteriaPenilaian.map(item => item.Text);
+  // console.log("TEXT ", listDetailKriteriaPenilaian);
   const formatNumber = (value) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
@@ -494,9 +424,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     // handleInputChange({ target: { name: "budget", value: rawValue } });
   };
 
-  const DeptArrData = listDepartment.length > 0 && userInfo?.npk
-  ? listDepartment.find(detail => String(detail.Npk) === String(userInfo.npk))
-  : null;
+  // console.log("NILAI: ", listPenilaian);
+  // console.log("LIST KRITERIA ", listDetailKriteriaPenilaian);
 
   if (isLoading) return <Loading />;
 
@@ -582,145 +511,121 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                           <h5 className="fw-medium">Criteria</h5>
                         </div>
                         <div className="card-body d-flex flex-wrap">
-                          <Box sx={{width:'80%'}}>
-                            <div>
-                              <Box>
-                                <Tabs
-                                  value={selectedTab}
-                                  className="card rounded-bottom-0"
-                                  onChange={(e, newValue) => setSelectedTab(newValue)} 
-                                  variant="fullWidth"
-                                  sx={{
-                                    "& .MuiTabs-indicator": {
-                                      height: "3px",
-                                      backgroundColor: "#1976d2",
-                                    },
-                                  }}
-                                >
-                                  {["Ka.Unit/Ka.UPT", "Ka.Prodi/Ka.Dept", "WaDIR/DIR"].map((label, index) => (
-                                    <Tab
-                                      key={label}
-                                      label={label}
-                                      sx={{
-                                        backgroundColor: selectedTab === index ? "#ffffff" : "#f0f0f0", // putih saat aktif, abu saat non-aktif
-                                        borderRight: index !== 2 ? '1px solid #ddd' : 'none',
-                                        fontWeight: "bold",
-                                        color: "black",
-                                        minHeight: '48px',
-                                      }}
-                                    />
-                                  ))}
-                                </Tabs>
-                              </Box>
-                            </div>
-                            <div className="card" style={{ borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
-                              <div
-                                className=" card-body pe-4"
-                                
-                              >
-                                {listKriteriaPenilaian.map((item) => {
+                          <div
+                            className="pe-4 border-end"
+                            style={{ width: "80%" }}
+                          >
+                            {listKriteriaPenilaian.map((item) => {
+                              const selectedItem =
+                                listDetailKriteriaPenilaian.find(
+                                  (detail) => detail.Id === item.Value
+                                );
 
-                                  const filteredArrData =
-                                    listDetailKriteriaPenilaian.filter(
-                                      (detail) => detail.Id === item.Value
-                                    );
+                              const filteredArrData =
+                                listDetailKriteriaPenilaian.filter(
+                                  (detail) => detail.Id === item.Value
+                                );
 
-                                    
-                                    const matchingPenilaian = listPenilaian.find(
-                                      (detail) =>
-                                        detail["Jabatan Penilai"] === forPenilai.jabatan &&
-                                      detail.Kriteria === item.Value
-                                    );
+                              const arrTextData =
+                                listPenilaian.map(
+                                  (item) => item
+                                  
+                                );
 
-                                    const matchingPenilaian2 = listPenilaian.find(
-                                      (detail) =>
-                                        detail["Jabatan Penilai"] !== forPenilai.jabatan &&
-                                      detail.Kriteria === item.Value
-                                    );
-                                  return (
-                                    <div className="row mb-3" key={item.Value}>
-                                      <div className="col-lg-4">
-                                        <Label data={item.Text} />
-                                      </div>
-                                      <div className="col-lg-8">
-                                      {selectedTab === 1 && matchingPenilaian ? (
-                                        <div className="form-control bg-light">
-                                          {`${matchingPenilaian.Deskripsi} - (Poin: ${matchingPenilaian.Nilai})`}
-                                        </div>
-                                      ) : selectedTab === 0 && matchingPenilaian2 ? (
-                                        <div className="form-control bg-light">
-                                        {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
-                                        </div>
-                                        ) : selectedTab === 2 && matchingPenilaian2 ? (
-                                          <div className="form-control bg-light">
-                                          {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
-                                          </div>
-                                        ) :
-                                        <SearchDropdown
-                                          forInput={item.Value}
-                                          arrData={filteredArrData}
-                                          isRound
-                                          // isRequired
-                                          value={
-                                            formDataRef2.current[item.Value] || ""
-                                          }
-                                          onChange={handleInputChange}
-                                          // errorMessage={errors.formDataRef2.current[item.Value]}
-                                        />
+                              return (
+                                <div className="row mb-3" key={item.Value}>
+                                  <div className="col-lg-4">
+                                    <Label data={item.Text} />
+                                  </div>
+                                  <div className="col-lg-8">
+                                    <SearchDropdown
+                                      forInput={item.Value}
+                                      // placeholder={arrTextData[item.Value] || ''}
+                                      arrData={filteredArrData}
+                                      isRound
+                                      // isRequired
+                                      value={
+                                        formDataRef2.current[item.Value] || ""
                                       }
-                                      </div>
-                                      <div className="col-lg-4">
-                                        <Label data="Comment" />
-                                      </div>
-                                      <div className="col-lg-8">
-                                        <Input
-                                          type="textarea"
-                                          forInput="comment"
-                                          ref={formComment}
-                                          // isRequired
-                                          handleChange
-                                          errorMessage={errors.formComment}
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
+                                      selectedValued ={arrTextData[item.Value-1]}
+                                      onChange={handleInputChange}
+                                      // errorMessage={errors.formDataRef2.current[item.Value]}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <div className="col-lg-4">
+                              <Label data="Comment" />
                             </div>
-                          </Box>
-                          <Box sx={{width:'20%'}}>
-                            <div className="ps-4">
+                            <div className="col-lg-8">
+                              <Input
+                                type="textarea"
+                                forInput="comment"
+                                ref={formComment}
+                                // isRequired
+                                handleChange
+                                errorMessage={errors.formComment}
+                              />
+                            </div>
+                          </div>
+                          <div className="ps-4" style={{ width: "20%" }}>
+                            <div
+                              className="d-flex flex-column gap-3"
+                              style={{ height: "100px" }}
+                            >
                               <div
-                                className="d-flex flex-column gap-3"
-                                style={{ height: "100px" }}
+                                className="card fw-medium text-center"
+                                style={{ width: "200px" }}
                               >
-                                <div
-                                  className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
-                                >
-                                  Ka.Unit/Ka.UPT
-                                  <hr />
-                                  <h5>{totalScore}</h5>
-                                </div>
-                                <div
-                                  className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
-                                >
-                                  Ka.Prodi/Ka.Dept
-                                  <hr />
-                                  <h5>{0}</h5>
-                                </div>
-                                <div
-                                  className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
-                                >
-                                  WaDIR/DIR
-                                  <hr />
-                                  <h5>{0}</h5>
-                                </div>
+                                Ka.Unit/Ka.UPT
+                                <hr />
+                                <h5>{totalScore}</h5>
+                              </div>
+                              <div
+                                className="card fw-medium text-center"
+                                style={{ width: "200px" }}
+                              >
+                                Ka.Prodi/Ka.Dept
+                                <hr />
+                                <h5>{0}</h5>
+                              </div>
+                              <div
+                                className="card fw-medium text-center"
+                                style={{ width: "200px" }}
+                              >
+                                WaDIR/DIR
+                                <hr />
+                                <h5>{0}</h5>
                               </div>
                             </div>
-                          </Box>
+                            {/* {listKriteriaPenilaian.slice(Math.ceil(listKriteriaPenilaian.length / 2)).map((item) => {
+                              const selectedItem = listDetailKriteriaPenilaian.find(
+                                (detail) => detail.Id === item.Value
+                              );
+
+                              const filteredArrData = listDetailKriteriaPenilaian.filter(
+                                (detail) => detail.Id === item.Value
+                              );
+
+                              return (
+                                <div className="row mb-3" key={item.Value}>
+                                  <div className="col-lg-4">
+                                    <Label data={item.Text} />
+                                  </div>
+                                  <div className="col-lg-8">
+                                    <SearchDropdown
+                                      forInput={item.Value}
+                                      arrData={filteredArrData}
+                                      isRound
+                                      value={formDataRef2.current[item.Value] || ""}
+                                      onChange={handleInputChange}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })} */}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -759,5 +664,4 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       </div>
     </>
   );
-}
 }
