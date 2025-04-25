@@ -60,7 +60,7 @@ const dataFilterStatus = [
 //   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
 // ];
 
-export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
+export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditScoring }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -79,8 +79,8 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
     role: userInfo.role,
     npk: userInfo.npk,
   });
-
-  console.log("user info", userInfo);
+  const [penJabatan, setPenJabatan] = useState([]);
+  // console.log("user info", userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -118,69 +118,62 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
   const handleSubmit = async (id) => {
     setIsError(false);
     const tempStatus = getStatusByKey(id);
-    var alertStatus;
-
-    if(tempStatus === "Approved") {
-      alertStatus = "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
-    }
-    else {
-      alertStatus = "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
-    }
     
     const confirm = await SweetAlert(
       "Confirm",
-      alertStatus,
+      "Are you sure about this value?",
       "warning",
       "Submit",
-      listCategory,
-      tempStatus,
-      listReviewer,
       null,
       "",
       true
     );
 
+
     if (confirm) {
+      console.log(1, id);
       if(tempStatus !== "Approved") {
-        UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
+        UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
           id: id,
         })
-          .then((data) => {
-            if (data === "ERROR" || data.length === 0) setIsError(true);
-            else {
-              SweetAlert(
-                "Success",
-                "Thank you for submitting your registration form. Please wait until the next update",
-                "success"
-              );
-              handleSetCurrentPage(currentFilter.page);
-            }
-          })
-          .then(() => setIsLoading(false));
-      }
-      else {
-        const reviewer = confirm.reviewer;
-        const batch = confirm.batch;
-        const category = confirm.category;
-        UseFetch(API_LINK + "RencanaSS/CreateKonvensiSS", {
-          reviewer,
-          batch,
-          id,
-          category,
+        .then((data) => {
+          if (!data) {
+            setIsError(true)
+          }
+          else {
+            SweetAlert(
+              "Success",
+              "Thank you for your rating. Please wait until the next update",
+              "success"
+            );
+            handleSetCurrentPage(currentFilter.page);
+          }
         })
-          .then((data) => {
-            if (data === "ERROR" || data.length === 0) setIsError(true);
-            else {
-              SweetAlert(
-                "Success",
-                "Thank you for submitting your registration form. Please wait until the next update",
-                "success"
-              );
-              handleSetCurrentPage(currentFilter.page);
-            }
-          })
           .then(() => setIsLoading(false));
       }
+      // else {
+      //   const reviewer = confirm.reviewer;
+      //   const batch = confirm.batch;
+      //   const category = confirm.category;
+      //   UseFetch(API_LINK + "RencanaSS/CreateKonvensiSS", {
+      //     reviewer,
+      //     batch,
+      //     id,
+      //     category,
+      //   })
+      //     .then((data) => {
+      //       if (data === "ERROR" || data.length === 0) setIsError(true);
+      //       else {
+      //         SweetAlert(
+      //           "Success",
+      //           "Thank you for submitting your registration form. Please wait until the next update",
+      //           "success"
+      //         );
+      //         handleSetCurrentPage(currentFilter.page);
+      //       }
+      //     })
+      //     .then(() => setIsLoading(false));
+      // }
     }
   };
 
@@ -275,6 +268,35 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
     }, []);
 
     useEffect(() => {
+      const fetchDataPenilaian = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaian2");
+  
+          // console.log("SIS ID: ", data);
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setPenJabatan({
+              sis_id: data.map((value) => value["Id Sis"]),
+              pen_created_by: data.map((value) => value.CreatedBy)
+            });
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListReviewer({});
+        }
+      };
+      fetchDataPenilaian();
+    }, [])
+    // console.log("Jabatannn: ", penJabatan);
+
+    useEffect(() => {
       const fetchData = async () => {
         setIsError((prevError) => ({ ...prevError, error: false }));
         try {
@@ -299,7 +321,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
       fetchData();
     }, []);
 
-    console.log("DATA ALL ", currentData);
+    console.log("User Info ", userInfo);
     
     useEffect(() => {
       const fetchData = async () => {
@@ -345,7 +367,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
           setCurrentData(inisialisasiData);
         } else {
           const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
-          console.log("DATA HANIF:", hanifData);
+          // console.log("DATA HANIF:", hanifData);
           const role = userInfo.role.slice(0, 5);
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => {
@@ -353,7 +375,15 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
               (emp) => emp.username === value["Creaby"]
             );
           
-            console.log("FOUND KEY: ", listEmployee);
+            // console.log("FOUND KEY: ", listEmployee);
+            // console.log("1",userInfo)
+            console.log("v",value);
+            console.log("us",userInfo);
+            console.log("2",foundEmployee)
+            console.log("3",penJabatan)
+            console.log("4",data)
+            const uniqueKeys = [...new Set(data.map(item => item.Key))];
+// console.log("Unique Keys:", uniqueKeys);
             return {
               Key: value.Key,
               No: value["No"],
@@ -387,7 +417,9 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
                   value["Status"] === "Approved"
                   ? ["Detail", "Submit"]
                   // Status Approved By Role 03
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Approved" ? ["Detail", "Scoring"]
+                  // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"] 
+                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
+                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                   : ["Detail"],
               Alignment: [
                 "center",
@@ -403,7 +435,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
               ],
             };
           });
-          console.log(406, formattedData);          
+          // console.log(406, formattedData);          
           setCurrentData(formattedData);
         }
       } catch {
@@ -413,7 +445,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
       }
     };
     
-    console.log("COOKIE", JSON.parse(decryptId(cookie))); 
+    // console.log("COOKIE", JSON.parse(decryptId(cookie))); 
     fetchData();
   }, [currentFilter, listEmployee]);
   
@@ -498,6 +530,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
             onReject={handleReject}
             onEdit={onChangePage}
             onScoring={onScoring}
+            onEditScoring={onEditScoring}
           />
           <Paging
             pageSize={PAGE_SIZE}
