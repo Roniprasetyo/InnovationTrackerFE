@@ -6,6 +6,7 @@ import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, string } from "yup";
 import Alert from "../../part/Alert";
+import SweetAlert from "../../util/SweetAlert";
 import Icon from "../../part/Icon";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import Table from "../../part/Table";
@@ -16,7 +17,7 @@ import Input from "../../part/Input";
 import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
-import { Tabs, Tab, Box, Paper } from "@mui/material";
+import { Tabs, Tab, Box, Paper, List } from "@mui/material";
 import PropTypes from 'prop-types';
 
 const inisialisasiData = [
@@ -66,7 +67,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
+  const [listDepartment, setListDepartment] = useState([]);
+  const [listAllDepartment, setAllListDepartment] = useState([]);
   const [listPenilaian, setListPenilaian] = useState([]);
+  const [listKaDept, setKaDept] = useState([]);
+  const [listRecordPenilaian, setRecordListPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
     useState([]);
   const [userData, setUserData] = useState({});
@@ -135,13 +140,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
-      console.log("ID: ", id);
+      // console.log("ID: ", id);
+
       try {
         const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
           id: id,
         });
 
-        console.log("Data SS: ", id, data);
+        // console.log("Data SS: ", id, data);
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
@@ -190,8 +196,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     
       formDataRef3.current[name] = matched.Score;
 
-      console.log("val dari formDataRef2:", val);
-      console.log("matched item:", formDataRef3);
+      // console.log("val dari formDataRef2:", val);
+      // console.log("matched item:", formDataRef3);
 
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
@@ -220,6 +226,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             name: value.nama,
             upt: value.upt_bagian,
             jabatan: value.jabatan,
+            // jurusan: value.departemen_jurusan,
           }))
         );
 
@@ -256,9 +263,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     //   setErrors
     // );
 
-    console.log("FormDataRef: ", formDataRef2.current);
-    console.log("Payload: ", payload);
-    console.log("Payload nilai: ", formDataRef3);
+    // console.log("FormDataRef: ", formDataRef2.current);
+    // console.log("Payload: ", payload);
+    // console.log("Payload nilai: ", formDataRef3);
 
     // if (Object.values(validationErrors).every((error) => !error)) {
     //   setIsLoading(true);
@@ -267,16 +274,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaSS/CreatePenilian",
+          API_LINK + "RencanaSS/CreatePenilaian",
           payload
         );
 
-        console.log("tes", data);
+        // console.log("tes", data);
         if (!data) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
           SweetAlert("Success", "Data Successfully Submitted", "success");
-          window.location.href = ROOT_LINK + "/submission/ss"
+          onChangePage("index");
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -291,8 +298,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     // } else window.scrollTo(0, 0);
   };
 
-
   useEffect(() => {
+    
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
@@ -330,6 +337,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           setListPenilaian(data);
+
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -344,8 +352,74 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     fetchData();
   }, []);
 
-  console.log("DATA ", listPenilaian);
-  console.log("ID ", id);
+  useEffect(() => {
+    if (listPenilaian.length === 0 || listEmployee.length === 0) return;
+  
+    const distinctCreaby = [...new Set(listPenilaian.map(item => item.Creaby).filter(Boolean))];
+
+    const filteredEmployees = listEmployee.filter(emp =>
+      distinctCreaby.includes(emp.username)
+    );
+
+    setRecordListPenilaian(filteredEmployees);
+  
+  }, [listPenilaian, listEmployee]);
+  
+  useEffect(() => {
+    if (listRecordPenilaian.length === 0) return;
+
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetListStrukturDepartment"
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          const npkTarget = String(listRecordPenilaian[0]?.npk);
+          const matchingByNpk = data.find(item => String(item.Npk) === npkTarget);
+  
+          const strukturParentTarget = matchingByNpk["Struktur Parent"];
+  
+          const finalResult = data.filter(item =>
+            item["Struktur Parent"] === strukturParentTarget &&
+            (item.Jabatan === "Kepala Departemen" || item.Jabatan === "Sekretaris Prodi")
+          );
+
+          setAllListDepartment(data);
+          setListDepartment(finalResult);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+    fetchData();
+  }, [listRecordPenilaian]);
+
+  const kadept = listAllDepartment.find(
+    (detail) =>
+      detail["Npk"] === forPenilai.npk
+  );
+  const kaupt = listAllDepartment.find(
+    (detail) =>
+      detail["Creaby"] === listPenilaian[0].npk
+  );
+
+  // console.log("DATA ", listEmployee.filter((item) => item.upt === "Prodi MI" ));
+  console.log("RECORD LIST ", forPenilai);
+  console.log("KA DEPT ", kadept);
+  console.log("KA UPT ",kaupt);
+  console.log("DeptArrData:", listDepartment);
+  console.log("All Dept:", listAllDepartment);
+  console.log("List Penilaian:", listPenilaian);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -392,7 +466,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     // handleInputChange({ target: { name: "budget", value: rawValue } });
   };
 
-  console.log("LIST KRITERIA ", listKriteriaPenilaian);
+  const DeptArrData = listDepartment.length > 0 && userInfo?.npk
+  ? listDepartment.find(detail => String(detail.Npk) === String(userInfo.npk))
+  : null;
 
   if (isLoading) return <Loading />;
 
@@ -515,38 +591,43 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 
                               >
                                 {listKriteriaPenilaian.map((item) => {
-                                  const selectedItem =
-                                    listDetailKriteriaPenilaian.find(
-                                      (detail) => detail.Id === item.Value
-                                    );
 
                                   const filteredArrData =
                                     listDetailKriteriaPenilaian.filter(
                                       (detail) => detail.Id === item.Value
                                     );
 
-                                  const filteredArrDataPenilaian = listPenilaian.filter(
-                                    (detail) => detail["Jabatan Penilai"] === forPenilai.jabatan
-                                  );
-
-                                  const matchingPenilaian = listPenilaian.find(
-                                    (detail) =>
-                                      detail["Jabatan Penilai"] === forPenilai.jabatan &&
+                                    
+                                    const matchingPenilaian = listPenilaian.find(
+                                      (detail) =>
+                                        detail["Jabatan Penilai"] === forPenilai.jabatan &&
                                       detail.Kriteria === item.Value
-                                  );
+                                    );
 
-                                  console.log("FILTER ", filteredArrDataPenilaian);
+                                    const matchingPenilaian2 = listPenilaian.find(
+                                      (detail) =>
+                                        detail["Jabatan Penilai"] !== forPenilai.jabatan &&
+                                      detail.Kriteria === item.Value
+                                    );
                                   return (
                                     <div className="row mb-3" key={item.Value}>
                                       <div className="col-lg-4">
                                         <Label data={item.Text} />
                                       </div>
                                       <div className="col-lg-8">
-                                      {matchingPenilaian ? (
+                                      {selectedTab === 1 && matchingPenilaian ? (
                                         <div className="form-control bg-light">
-                                          {`${matchingPenilaian.Deskripsi} - (Poin ${matchingPenilaian.Nilai})`}
+                                          {`${matchingPenilaian.Deskripsi} - (Poin: ${matchingPenilaian.Nilai})`}
                                         </div>
-                                      ) : (
+                                      ) : selectedTab === 0 && matchingPenilaian2 ? (
+                                        <div className="form-control bg-light">
+                                        {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
+                                        </div>
+                                        ) : selectedTab === 2 && matchingPenilaian2 ? (
+                                          <div className="form-control bg-light">
+                                          {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
+                                          </div>
+                                        ) :
                                         <SearchDropdown
                                           forInput={item.Value}
                                           arrData={filteredArrData}
@@ -554,7 +635,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           value={formDataRef2.current[item.Value] || ""}
                                           onChange={handleInputChange}
                                         />
-                                      )}
+                                      }
                                       </div>
                                     </div>
                                   );

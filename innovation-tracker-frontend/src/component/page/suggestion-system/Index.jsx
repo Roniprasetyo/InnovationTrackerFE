@@ -258,6 +258,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
               username: value.username,
               npk: value.npk,
               upt: value.upt_bagian,
+              jabatan: value.jabatan,
             }))
           );
         } catch (error) {
@@ -386,8 +387,10 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
                   : role === "ROL01" &&
                   value["Status"] === "Approved"
                   ? ["Detail", "Submit"]
-                  // Status Approved By Role 03
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Approved" ? ["Detail", "Scoring"]
+                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
+                  ? ["Detail", "Scoring"]
+                  : userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen"
+                  ? ["Detail", "Scoring"]
                   : ["Detail"],
               Alignment: [
                 "center",
@@ -418,6 +421,8 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring }) {
   }, [currentFilter, listEmployee]);
   
   if (isLoading) return <Loading />;
+
+  console.log("DeptArrData:", userInfo);
 
   return (
     <>
