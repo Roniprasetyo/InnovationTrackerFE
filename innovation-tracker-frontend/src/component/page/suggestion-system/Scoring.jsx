@@ -110,7 +110,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     "Alasan Penolakan": "",
   });
 
-  const formDataRef2 = useRef({});
+  const formDataRef2 = useRef([]);
   const formDataRef3 = useRef({});
 
   const userSchema = object({
@@ -191,14 +191,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     }));
 
     let total = 0;
+    formDataRef3.current = [];
     Object.values(formDataRef2.current).forEach((val) => {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
     
-      formDataRef3.current[name] = matched.Score;
 
-      // console.log("val dari formDataRef2:", val);
+      formDataRef3.current[val] = matched?.Score;
+
+      console.log("val dari formDataRef2:", matched?.Score);
       // console.log("matched item:", formDataRef3);
 
       const parsed = parseFloat(matched?.Score);
@@ -251,6 +253,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // console.log("DP", formDataRef3);
+
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "),
       sis_id: id,
@@ -265,9 +269,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     //   setErrors
     // );
 
-    // console.log("FormDataRef: ", formDataRef2.current);
-    // console.log("Payload: ", payload);
-    // console.log("Payload nilai: ", formDataRef3);
+    console.log("FormDataRef: ", formDataRef2.current);
+    console.log("Payload: ", payload);
+    console.log("Payload nilai: ", formDataRef3);
 
     // if (Object.values(validationErrors).every((error) => !error)) {
     //   setIsLoading(true);
@@ -286,7 +290,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         } else {
           SweetAlert("Success", "Data Successfully Submitted", "success");
           // onChangePage("index");
-          window.href = API_LINK + "/submission/ss";
+          window.location.href = ROOT_LINK + "/submission/ss";
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -322,45 +326,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       }
     };
     fetchData();
   }, []);
-  
-  useEffect(() => {
-    const fetchDataDetailByID = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
-          sis_id: id,
-        });
-
-        // console.log("INI DATA SISIA: ", data);
-        if (!data) {
-          // throw new Error("Error: Failed to get the category data.");
-        } else {
-          const dataDetail = data.map((item) => ({
-            Keys: item.Key,
-            Text: `${item.Deskripsi} - (${item.Nilai})`,
-            Value: item.Value,
-            Score: item.Nilai,
-            KrpId: item.Kriteria,
-          }));
-
-          setListPenilaianUpdate(dataDetail);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      }
-    };
-    fetchDataDetailByID();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -373,17 +342,25 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
+          const dataDetail = data.map((item) => ({
+            Keys: item.Key,
+            Text: `${item.Deskripsi} - (${item.Nilai})`,
+            Value: item.Value,
+            Score: item.Nilai,
+            KrpId: item.Kriteria,
+          }));
+
+          setListPenilaianUpdate(dataDetail);
           setListPenilaian(data);
 
         }
       } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
+          // window.scrollTo(0, 0);
+          // setIsError((prevError) => ({
+          //   ...prevError,
+          //   error: true,
+          //   message: error.message,
+          // }));
       }
     };
     fetchData();
@@ -412,6 +389,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           API_LINK + "RencanaSS/GetListStrukturDepartment"
         );
 
+        console.log("LISTT DEPATEMEN: ", data);
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
@@ -435,7 +413,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       }
     };
     fetchData();
@@ -468,7 +445,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           API_LINK + "MiniConvention/GetListDetailKriteriaPenilaian"
         );
 
-        if (data === "ERROR") {
+        console.log("471: ", data);
+        if (!data) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
@@ -487,7 +465,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       }
     };
 

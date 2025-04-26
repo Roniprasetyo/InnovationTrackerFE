@@ -79,8 +79,8 @@ export default function MiniConventionScoring({ onChangePage }) {
     "Alasan Penolakan": "",
   });
 
-  const formDataRef2 = useRef({});
-  const formDataRef3 = useRef({});
+  const formDataRef2 = useRef([]);
+  const formDataRef3 = useRef([]);
   const key = useRef({});
   const formComment = useRef();
 
@@ -192,15 +192,17 @@ export default function MiniConventionScoring({ onChangePage }) {
     }));
 
     let total = 0;
+    formDataRef3.current = [];
     Object.values(formDataRef2.current).forEach((val) => {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
 
-      // formDataRef3.current[name] = matched?.Score;
+      formDataRef3.current[val] = matched?.Score;
 
-      // console.log("val dari formDataRef2:", val);
-      // console.log("matched item:", formDataRef3);
+      console.log("val:", val);
+      console.log("matched item:", matched?.Score);
+      console.log("formdataref3:", formDataRef3.current);
 
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
@@ -258,7 +260,7 @@ export default function MiniConventionScoring({ onChangePage }) {
       jabatan: userInfo.jabatan,
       status: "-",
       pen_created: userInfo.username,
-      pen_id: Object.values(key.current).join(", ")
+      pen_modif_by: userInfo.username
     };
 
     // console.log("payload: ", payload);
@@ -290,7 +292,7 @@ export default function MiniConventionScoring({ onChangePage }) {
 
     try {
       const data = await UseFetch(
-        API_LINK + "RencanaSS/CreatePenilian",
+        API_LINK + "RencanaSS/UpdateNilaiSS",
         payload
       );
 
