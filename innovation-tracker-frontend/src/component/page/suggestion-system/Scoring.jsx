@@ -701,8 +701,15 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         setScoringPositionRole(firstData["Jabatan Penilai"]);
       }
     }
-    else if (listPenilaianKaDept !== null & listPenilaianKaDept.length > 0 &&  listPenilaianWadir === null && listPenilaianWadir.length < 0) {
-      const firstData = listPenilaianWadir[0];
+    else if (listPenilaianKaDept !== null & listPenilaianKaDept.length > 0) {
+      const firstData = listPenilaianKaDept[0];
+  
+      if (firstData) {
+        setScoringPosition(firstData["Creaby"]);
+        setScoringPositionRole(firstData["Jabatan Penilai"]);
+      }
+    } else if(listPenilaianKaUpt !== null & listPenilaianKaUpt.length > 0) {
+      const firstData = listPenilaianKaUpt[0];
   
       if (firstData) {
         setScoringPosition(firstData["Creaby"]);
@@ -861,7 +868,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       (detail) => detail.Id === item.Value
                                     );
 
-                                    
                                     const matchingPenilaianforKaUpt = listPenilaianKaUpt.find(
                                       (detail) => detail.Kriteria === item.Value
                                     );
@@ -892,26 +898,38 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         </div>
                                         <div className="col-lg-8">
                                           {
-                                            isFirstTab && isKepalaSeksi ? (
-                                              matchingPenilaianforKaUpt ? (
-                                                <div className="form-control bg-light">
-                                                  {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
-                                                </div>
-                                              ) : <SearchDropdown
-                                                forInput={item.Value}
-                                                arrData={filteredArrData}
-                                                isRound
-                                                // selectedValued={arrTextDataforKaUpt[item.Value - 1]}
-                                                value={formDataRef2.current[item.Value] || ""}
-                                                onChange={handleInputChange}
-                                              />
+                                            isKepalaSeksi ? (
+                                              !isFirstTab ? (
+                                                selectedTab === 1 && matchingPenilaianforKaDept && forPenilai.jabatan !== "Kepala Seksi" ? (
+                                                  <div className="form-control bg-light">
+                                                    {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                                  </div>
+                                                ) : selectedTab === 1 && matchingPenilaianforKaDept && forPenilai.jabatan === "Kepala Seksi" ? (
+                                                  <div className="form-control bg-light">
+                                                    {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                                  </div>
+                                                ) : <div className="form-control bg-light">
+                                                      Not yet scored
+                                                    </div>
+                                              ) : matchingPenilaianforKaUpt ? (
+                                                  <div className="form-control bg-light">
+                                                    {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
+                                                  </div>
+                                                ) : <SearchDropdown
+                                                  forInput={item.Value}
+                                                  arrData={filteredArrData}
+                                                  isRound
+                                                  // selectedValued={arrTextDataforKaUpt[item.Value - 1]}
+                                                  value={formDataRef2.current[item.Value] || ""}
+                                                  onChange={handleInputChange}
+                                                />
                                             ) : isKaDept ? (
                                                 !isFirstTab ? (
                                                   selectedTab === 0 && matchingPenilaianforKaUpt ? (
                                                     <div className="form-control bg-light">
                                                       {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
                                                     </div>
-                                                ) : selectedTab === 2 && matchingPenilaianforWadir ? (
+                                                ) : selectedTab === 2 && matchingPenilaianforWadir && (forPenilai === "Wakil Direktur" || forPenilai === "Direktur") ? (
                                                   <div className="form-control bg-light">
                                                     {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
                                                   </div>
@@ -919,7 +937,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                                     Not yet scored
                                                   </div>
                                               ) : 
-                                                matchingPenilaianforKaDept ? (
+                                                matchingPenilaianforKaDept && (forPenilai === "Sekretaris Prodi" || forPenilai === "Kepala Departemen") ? (
                                                     <div className="form-control bg-light">
                                                       {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
                                                     </div>
@@ -927,9 +945,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                                 <div className="form-control bg-light">
                                                   {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
                                                 </div>
-                                              ) : <div className="form-control bg-light">
-                                                    {`Not Yet - (Poin: Not Yet)`}
-                                                  </div>
+                                              ) : <SearchDropdown
+                                                  forInput={item.Value}
+                                                  arrData={filteredArrData}
+                                                  isRound
+                                                  selectedValued={arrTextDataforKaDept[item.Value - 1]}
+                                                  value={formDataRef2.current[item.Value] || ""}
+                                                  onChange={handleInputChange}
+                                                />
                                             ) : isWadir ? (
                                               !isFirstTab ? (
                                                 selectedTab === 1 && matchingPenilaianforKaDept ? (
@@ -948,21 +971,18 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                                     value={formDataRef2.current[item.Value] || ""}
                                                     onChange={handleInputChange}
                                                   />
-                                              ) : matchingPenilaianforWadir && (
+                                              ) : matchingPenilaianforWadir && (forPenilai === "Sekretaris Prodi" || forPenilai === "Kepala Departemen") ? (
                                                 <div className="form-control bg-light">
                                                   {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
                                                 </div>
-                                              )
-                                            ) : !isFirstTab && isKepalaSeksi ? (
-                                                selectedTab === 1 && matchingPenilaianforKaDept ? (
-                                                <div className="form-control bg-light">
-                                                  {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
-                                                </div>
-                                              ) : selectedTab === 2 && matchingPenilaianforWadir ? (
-                                                <div className="form-control bg-light">
-                                                  {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
-                                                </div>
-                                              ) : null
+                                              ) : <SearchDropdown
+                                                  forInput={item.Value}
+                                                  arrData={filteredArrData}
+                                                  isRound
+                                                  selectedValued={arrTextDataforKaDept[item.Value - 1]}
+                                                  value={formDataRef2.current[item.Value] || ""}
+                                                  onChange={handleInputChange}
+                                                />
                                             ) : null
                                           }
                                         </div>
@@ -1011,28 +1031,23 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                         </div>
                       </div>
                     </div>
-                    <div className="col-lg-12 ms-auto">
+                    <div className="col-lg-12">
                       <div className="d-flex justify-content-between align-items-center">
                         <div className="flex-grow-1 m-2">
-                          {(listPenilaianKaDept.find((item) => item["Jabatan Penilai"] !== forPenilai.jabatan) ||
-                            listPenilaianKaUpt.find((item) => item["Jabatan Penilai"] !== forPenilai.jabatan)) && (
-                            <Button
-                              classType="danger me-2 px-4 py-2"
-                              label="CANCEL"
-                              onClick={() => onChangePage("index")}
-                              style={{ width: "100%", borderRadius: "16px" }}
-                            />
-                          )}
+                          <Button
+                            classType="danger me-2 px-4 py-2"
+                            label="CANCEL"
+                            onClick={() => onChangePage("index")}
+                            style={{ width: "100%", borderRadius: "16px" }}
+                          />
                         </div>
                         <div className="flex-grow-1 m-2">
-                          {listPenilaianKaDept.find((item) => item["Jabatan Penilai"] !== forPenilai.jabatan) && (
-                            <Button
-                              classType="primary ms-2 px-4 py-2"
-                              label="SUBMIT"
-                              onClick={handleSubmit}
-                              style={{ width: "100%", borderRadius: "16px" }}
-                            />
-                          )}
+                          <Button
+                            classType="primary ms-2 px-4 py-2"
+                            label="SUBMIT"
+                            onClick={handleSubmit}
+                            style={{ width: "100%", borderRadius: "16px" }}
+                          />
                         </div>
                       </div>
                     </div>
