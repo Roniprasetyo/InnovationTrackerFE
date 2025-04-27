@@ -812,7 +812,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                           <div className="text-end">
                             <div className="small">Already Scored by:</div>
                             {(listPenilaianKaUpt.length > 0 || listPenilaianKaDept.length > 0 || listPenilaianWadir.length > 0) && (
-                              <div className="fw-semibold">{scoringPosition === userInfo.username? userInfo.nama : "Not Found"} as {scoringPositionRole}</div>
+                              <div className="fw-semibold">{scoringPosition} as {scoringPositionRole}</div>
                             )}
                           </div>
                         </div>
