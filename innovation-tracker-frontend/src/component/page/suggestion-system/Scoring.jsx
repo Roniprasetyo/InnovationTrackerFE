@@ -1,7 +1,12 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, EMP_API_LINK, FILE_LINK, ROOT_LINK } from "../../util/Constants";
+import {
+  API_LINK,
+  EMP_API_LINK,
+  FILE_LINK,
+  ROOT_LINK,
+} from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, string } from "yup";
@@ -18,7 +23,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import { Tabs, Tab, Box, Paper, List } from "@mui/material";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const inisialisasiData = [
   {
@@ -54,7 +59,7 @@ TabScoring.propTypes = {
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
   };
 }
 
@@ -196,7 +201,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
-    
 
       formDataRef3.current[val] = matched?.Score;
 
@@ -278,35 +282,36 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     //   setIsError((prevError) => ({ ...prevError, error: false }));
     //   setErrors({});
 
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/CreatePenilaian",
-          payload
-        );
+    try {
+      const data = await UseFetch(
+        API_LINK + "RencanaSS/CreatePenilaian",
+        payload
+      );
 
-        // console.log("tes", data);
-        if (!data) {
-          throw new Error("Error: Failed to Submit the data.");
-        } else {
-          SweetAlert("Success", "Data Successfully Submitted", "success");
-          // onChangePage("index");
-          window.location.href = ROOT_LINK + "/submission/ss";
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
+      // console.log("tes", data);
+      if (!data) {
+        throw new Error("Error: Failed to Submit the data.");
+      } else {
+        SweetAlert("Success", "Data Successfully Submitted", "success");
+
+        setTimeout(function () {
+          window.close();
+        }, 2000);
       }
+    } catch (error) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: error.message,
+      }));
+    } finally {
+      setIsLoading(false);
+    }
     // } else window.scrollTo(0, 0);
   };
 
   useEffect(() => {
-    
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
@@ -335,9 +340,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/GetPenilaianById", {id}
-        );
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          id,
+        });
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
@@ -352,15 +357,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
           setListPenilaianUpdate(dataDetail);
           setListPenilaian(data);
-
         }
       } catch (error) {
-          // window.scrollTo(0, 0);
-          // setIsError((prevError) => ({
-          //   ...prevError,
-          //   error: true,
-          //   message: error.message,
-          // }));
+        // window.scrollTo(0, 0);
+        // setIsError((prevError) => ({
+        //   ...prevError,
+        //   error: true,
+        //   message: error.message,
+        // }));
       }
     };
     fetchData();
@@ -368,17 +372,18 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   useEffect(() => {
     if (listPenilaian.length === 0 || listEmployee.length === 0) return;
-  
-    const distinctCreaby = [...new Set(listPenilaian.map(item => item.Creaby).filter(Boolean))];
 
-    const filteredEmployees = listEmployee.filter(emp =>
+    const distinctCreaby = [
+      ...new Set(listPenilaian.map((item) => item.Creaby).filter(Boolean)),
+    ];
+
+    const filteredEmployees = listEmployee.filter((emp) =>
       distinctCreaby.includes(emp.username)
     );
 
     setRecordListPenilaian(filteredEmployees);
-  
   }, [listPenilaian, listEmployee]);
-  
+
   useEffect(() => {
     if (listRecordPenilaian.length === 0) return;
 
@@ -394,13 +399,17 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const npkTarget = String(listRecordPenilaian[0]?.npk);
-          const matchingByNpk = data.find(item => String(item.Npk) === npkTarget);
-  
+          const matchingByNpk = data.find(
+            (item) => String(item.Npk) === npkTarget
+          );
+
           const strukturParentTarget = matchingByNpk["Struktur Parent"];
-  
-          const finalResult = data.filter(item =>
-            item["Struktur Parent"] === strukturParentTarget &&
-            (item.Jabatan === "Kepala Departemen" || item.Jabatan === "Sekretaris Prodi")
+
+          const finalResult = data.filter(
+            (item) =>
+              item["Struktur Parent"] === strukturParentTarget &&
+              (item.Jabatan === "Kepala Departemen" ||
+                item.Jabatan === "Sekretaris Prodi")
           );
 
           setAllListDepartment(data);
@@ -419,18 +428,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   }, [listRecordPenilaian]);
 
   const kadept = listAllDepartment.find(
-    (detail) =>
-      detail["Npk"] === forPenilai.npk
+    (detail) => detail["Npk"] === forPenilai.npk
   );
   const kaupt = listAllDepartment.find(
-    (detail) =>
-      detail["Creaby"] === listPenilaian[0].npk
+    (detail) => detail["Creaby"] === listPenilaian[0].npk
   );
 
   // console.log("DATA ", listEmployee.filter((item) => item.upt === "Prodi MI" ));
   console.log("RECORD LIST ", forPenilai);
   console.log("KA DEPT ", kadept);
-  console.log("KA UPT ",kaupt);
+  console.log("KA UPT ", kaupt);
   console.log("DeptArrData:", listDepartment);
   console.log("All Dept:", listAllDepartment);
   console.log("List Penilaian:", listPenilaian);
@@ -482,18 +489,24 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     // handleInputChange({ target: { name: "budget", value: rawValue } });
   };
 
-  const DeptArrData = listDepartment.length > 0 && userInfo?.npk
-  ? listDepartment.find(detail => String(detail.Npk) === String(userInfo.npk))
-  : null;
+  const DeptArrData =
+    listDepartment.length > 0 && userInfo?.npk
+      ? listDepartment.find(
+          (detail) => String(detail.Npk) === String(userInfo.npk)
+        )
+      : null;
 
   const handleTabChange = (e, newValue) => {
     setSelectedTab(newValue);
     setHasUserSelectedTab(true);
   };
-  
+
   useEffect(() => {
     if (!hasUserSelectedTab) {
-      if (userInfo?.jabatan === "Sekretaris Prodi" || userInfo?.jabatan === "Kepala Departemen") {
+      if (
+        userInfo?.jabatan === "Sekretaris Prodi" ||
+        userInfo?.jabatan === "Kepala Departemen"
+      ) {
         setSelectedTab(1);
       } else if (userInfo?.jabatan === "Kepala Seksi") {
         setSelectedTab(0);
@@ -506,16 +519,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const tabLabels = ["Ka.Unit/Ka.UPT"];
   if (userInfo?.jabatan === "Sekretaris Prodi") {
     tabLabels.push("Ka.Prodi/Ka.Dept");
-  }else if(userInfo?.jabatan === "Wakil Direktur") {
+  } else if (userInfo?.jabatan === "Wakil Direktur") {
     tabLabels.push("Ka.Prodi/Ka.Dept", "WaDIR/DIR");
   }
-  
 
   if (isLoading) return <Loading />;
 
   return (
     <>
-    
       <div className="container min-vh-100">
         <div
           className="row my-3"
@@ -596,13 +607,13 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                           <h5 className="fw-medium">Criteria</h5>
                         </div>
                         <div className="card-body d-flex flex-wrap">
-                          <Box sx={{width:'80%'}}>
+                          <Box sx={{ width: "80%" }}>
                             <div>
                               <Box>
                                 <Tabs
                                   value={selectedTab}
                                   className="card rounded-bottom-0"
-                                  onChange={handleTabChange} 
+                                  onChange={handleTabChange}
                                   variant="fullWidth"
                                   sx={{
                                     "& .MuiTabs-indicator": {
@@ -616,74 +627,90 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       key={label}
                                       label={label}
                                       sx={{
-                                        backgroundColor: selectedTab === index ? "#ffffff" : "#f0f0f0", // putih saat aktif, abu saat non-aktif
-                                        borderRight: index !== 2 ? '1px solid #ddd' : 'none',
+                                        backgroundColor:
+                                          selectedTab === index
+                                            ? "#ffffff"
+                                            : "#f0f0f0", // putih saat aktif, abu saat non-aktif
+                                        borderRight:
+                                          index !== 2
+                                            ? "1px solid #ddd"
+                                            : "none",
                                         fontWeight: "bold",
                                         color: "black",
-                                        minHeight: '48px',
+                                        minHeight: "48px",
                                       }}
                                     />
                                   ))}
                                 </Tabs>
                               </Box>
                             </div>
-                            <div className="card" style={{ borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
-                              <div
-                                className=" card-body pe-4"
-                                
-                              >
+                            <div
+                              className="card"
+                              style={{
+                                borderTop: "none",
+                                borderRadius: "0 0 12px 12px",
+                              }}
+                            >
+                              <div className=" card-body pe-4">
                                 {listKriteriaPenilaian.map((item) => {
-
                                   const filteredArrData =
                                     listDetailKriteriaPenilaian.filter(
                                       (detail) => detail.Id === item.Value
                                     );
 
-                                    
-                                    const matchingPenilaian = listPenilaian.find(
-                                      (detail) =>
-                                        detail["Jabatan Penilai"] === forPenilai.jabatan &&
+                                  const matchingPenilaian = listPenilaian.find(
+                                    (detail) =>
+                                      detail["Jabatan Penilai"] ===
+                                        forPenilai.jabatan &&
                                       detail.Kriteria === item.Value
-                                    );
+                                  );
 
-                                    const matchingPenilaian2 = listPenilaian.find(
-                                      (detail) =>
-                                        detail["Jabatan Penilai"] !== forPenilai.jabatan &&
+                                  const matchingPenilaian2 = listPenilaian.find(
+                                    (detail) =>
+                                      detail["Jabatan Penilai"] !==
+                                        forPenilai.jabatan &&
                                       detail.Kriteria === item.Value
-                                    );
-                                    const arrTextData =
-                                    listPenilaianUpdate.map(
-                                      (item) => item
-                                      
-                                    );
+                                  );
+                                  const arrTextData = listPenilaianUpdate.map(
+                                    (item) => item
+                                  );
                                   return (
                                     <div className="row mb-3" key={item.Value}>
                                       <div className="col-lg-4">
                                         <Label data={item.Text} />
                                       </div>
                                       <div className="col-lg-8">
-                                      {selectedTab === 1 && matchingPenilaian ? (
-                                        <div className="form-control bg-light">
-                                          {`${matchingPenilaian.Deskripsi} - (Poin: ${matchingPenilaian.Nilai})`}
-                                        </div>
-                                      ) : selectedTab === 0 && matchingPenilaian2 ? (
-                                        <div className="form-control bg-light">
-                                        {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
-                                        </div>
-                                        ) : selectedTab === 2 && matchingPenilaian2 ? (
+                                        {selectedTab === 1 &&
+                                        matchingPenilaian ? (
                                           <div className="form-control bg-light">
-                                          {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
+                                            {`${matchingPenilaian.Deskripsi} - (Poin: ${matchingPenilaian.Nilai})`}
                                           </div>
-                                        ) :
-                                        <SearchDropdown
-                                          forInput={item.Value}
-                                          arrData={filteredArrData}
-                                          isRound
-                                          selectedValued={arrTextData[item.Value-1]}
-                                          value={formDataRef2.current[item.Value] || ""}
-                                          onChange={handleInputChange}
-                                        />
-                                      }
+                                        ) : selectedTab === 0 &&
+                                          matchingPenilaian2 ? (
+                                          <div className="form-control bg-light">
+                                            {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
+                                          </div>
+                                        ) : selectedTab === 2 &&
+                                          matchingPenilaian2 ? (
+                                          <div className="form-control bg-light">
+                                            {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
+                                          </div>
+                                        ) : (
+                                          <SearchDropdown
+                                            forInput={item.Value}
+                                            arrData={filteredArrData}
+                                            isRound
+                                            selectedValued={
+                                              arrTextData[item.Value - 1]
+                                            }
+                                            value={
+                                              formDataRef2.current[
+                                                item.Value
+                                              ] || ""
+                                            }
+                                            onChange={handleInputChange}
+                                          />
+                                        )}
                                       </div>
                                     </div>
                                   );
@@ -691,7 +718,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                               </div>
                             </div>
                           </Box>
-                          <Box sx={{width:'20%'}}>
+                          <Box sx={{ width: "20%" }}>
                             <div className="ps-4">
                               <div
                                 className="d-flex flex-column gap-3"
@@ -699,7 +726,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                               >
                                 <div
                                   className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
+                                  style={{ width: "200px", minHeight: "180px" }}
                                 >
                                   Ka.Unit/Ka.UPT
                                   <hr />
@@ -707,7 +734,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 </div>
                                 <div
                                   className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
+                                  style={{ width: "200px", minHeight: "180px" }}
                                 >
                                   Ka.Prodi/Ka.Dept
                                   <hr />
@@ -715,7 +742,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 </div>
                                 <div
                                   className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
+                                  style={{ width: "200px", minHeight: "180px" }}
                                 >
                                   WaDIR/DIR
                                   <hr />

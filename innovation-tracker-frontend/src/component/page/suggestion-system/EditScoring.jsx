@@ -23,6 +23,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import SweetAlert from "../../util/SweetAlert";
+import * as Yup from "yup";
 
 const inisialisasiData = [
   {
@@ -82,7 +83,7 @@ export default function MiniConventionScoring({ onChangePage }) {
   const formDataRef2 = useRef([]);
   const formDataRef3 = useRef([]);
   const key = useRef({});
-  const formComment = useRef();
+  const formComment = useRef(null);
 
   const userSchema = object({
     Key: number().required("required"),
@@ -160,7 +161,7 @@ export default function MiniConventionScoring({ onChangePage }) {
       key.current[i] = d.Keys;
       i++; // increment i
     });
-    
+
     Object.values(formDataRef2.current).forEach((val) => {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
@@ -178,7 +179,7 @@ export default function MiniConventionScoring({ onChangePage }) {
     console.log("Key", key.current);
 
     setTotalScore(total);
-  })
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -208,6 +209,7 @@ export default function MiniConventionScoring({ onChangePage }) {
       if (!isNaN(parsed)) total += parsed;
     });
 
+    // formComment.current = e.target.value;
     setTotalScore(total);
   };
 
@@ -250,70 +252,107 @@ export default function MiniConventionScoring({ onChangePage }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formDataRef3.current);
+    console.log("Comment: ", decodeHtml(formComment.current));
+    console.log(
+      "Comment value: ",
+      `${formComment.current}  - ${userInfo.username}`
+    );
     // console.log(formComment.current.value);
 
     const payload = {
-      dkp_id: Object.values(formDataRef2.current).join(", "),
+      dkp_id: Object.values(formDataRef2.current).join(", "), // "12, 2, 4,  7"
       sis_id: id,
-      pen_nilai: Object.values(formDataRef3.current).join(", "),
+      pen_nilai: Object.values(formDataRef3.current).join(", "), // "34, 44, 66, 12"
       jabatan: userInfo.jabatan,
       status: "-",
-      pen_created: userInfo.username,
-      pen_modif_by: userInfo.username
+      pen_createby: listPenilaian[0].creaby,
+      pen_createdate: listPenilaian[0].creadate,
+      pen_modif_by: userInfo.username,
+      pen_comment: formComment.current != "" ? `${formComment.current} - ${userInfo.username}` : "",
     };
 
-    // console.log("payload: ", payload);
+    const payloadSchema = Yup.object().shape({
+      dkp_id: Yup.string()
+        .matches(
+          /^(\d+\s*,\s*)*\d+$/,
+          "dkp_id must be a comma-separated list of numbers"
+        )
+        .required("dkp_id is required"),
 
-    // const SchemaPayload = object({
-    //   dkp_id: array().required("Field Wajib Diisi"),
-    //   sis_id: number().required(),
-    //   pen_nilai: required("Field Wajib Diisi"),
-    //   jabatan: string().required(),
-    //   status: string().nullable()
-    // })
+      sis_id: Yup.string().required("sis_id is required"),
 
-    // const validationErrors = await validateAllInputs(
-    //   payload,
-    //   SchemaPayload,
-    //   setErrors
-    // );
+      pen_nilai: Yup.string()
+        .matches(
+          /^(\d+\s*,\s*)*\d+$/,
+          "pen_nilai must be a comma-separated list of numbers"
+        )
+        .required("pen_nilai is required"),
+
+      jabatan: Yup.string().required("jabatan is required"),
+
+      status: Yup.string()
+        .oneOf(["-"], 'status must be "-"')
+        .required("status is required"),
+
+      pen_createby: Yup.string().required("pen_created is required"),
+
+      pen_createdate: Yup.string().required("pen_createdate is required"),
+
+      pen_modif_by: Yup.string().required("pen_modif_by is required"),
+
+      pen_comment: Yup.string().nullable(),
+    });
+
+    console.log("payload: ", payload);
+
+    const validationErrors = await validateAllInputs(
+      payload,
+      payloadSchema,
+      setErrors
+    );
 
     // console.log("VALIDASI: ", validationErrors);
 
-    // if (Object.values(validationErrors).every((error) => !error)) {
-    //   setIsLoading(true);
-    //   setIsError((prevError) => ({ ...prevError, error: false }));
-    //   setErrors({});
+    if (Object.values(validationErrors).every((error) => !error)) {
+      setIsLoading(true);
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
 
       console.log("FormDataRef: ", formDataRef2.current);
       console.log("Payload: ", payload);
       console.log("Payload nilai: ", formDataRef3.current);
 
-    try {
-      const data = await UseFetch(
-        API_LINK + "RencanaSS/UpdateNilaiSS",
-        payload
-      );
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/UpdateNilaiSS",
+          payload
+        );
 
-      // console.log("tes", data);
-      if (!data) {
-        throw new Error("Error: Failed to Submit the data.");
-      } else {
-        SweetAlert("Success", "Data Successfully Submitted", "success");
-        window.location.href = ROOT_LINK + "/submission/ss";
+        // console.log("tes", data);
+        if (!data) {
+          throw new Error("Error: Failed to Submit the data.");
+        } else {
+          // window.location.href = ROOT_LINK + "/submission/ss";
+          SweetAlert("Success", "Data Successfully Submitted", "success");
+
+          setTimeout(function () {
+            window.close();
+          }, 2000);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
+    } else {
+      // SweetAlert("")
       window.scrollTo(0, 0);
-      setIsError((prevError) => ({
-        ...prevError,
-        error: true,
-        message: error.message,
-      }));
-    } finally {
-      setIsLoading(false);
     }
-    // } else window.scrollTo(0, 0);
   };
 
   useEffect(() => {
@@ -324,6 +363,7 @@ export default function MiniConventionScoring({ onChangePage }) {
           API_LINK + "MiniConvention/GetListKriteriaPenilaian"
         );
 
+        // console.log("")
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
@@ -351,9 +391,9 @@ export default function MiniConventionScoring({ onChangePage }) {
           creaby: userInfo.username,
         });
 
-        // console.log("INI DATA SISIA: ", data);
+        console.log("INI DATA SISIA: ", data);
         if (!data) {
-          // throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
             Keys: item.Key,
@@ -361,6 +401,8 @@ export default function MiniConventionScoring({ onChangePage }) {
             Value: item.Value,
             Score: item.Nilai,
             KrpId: item.Kriteria,
+            creaby: item.Creaby,
+            creadate: item.Creadate,
           }));
 
           setListPenilaian(dataDetail);
@@ -424,6 +466,10 @@ export default function MiniConventionScoring({ onChangePage }) {
     setFormattedValue(formatNumber(rawValue));
     setUserInput(rawValue);
     // handleInputChange({ target: { name: "budget", value: rawValue } });
+  };
+
+  const handleComment = (e) => {
+    formComment.current = e.target.value;
   };
 
   // console.log("NILAI: ", listPenilaian);
@@ -528,11 +574,9 @@ export default function MiniConventionScoring({ onChangePage }) {
                                   (detail) => detail.Id === item.Value
                                 );
 
-                              const arrTextData =
-                                listPenilaian.map(
-                                  (item) => item
-                                  
-                                );
+                              const arrTextData = listPenilaian.map(
+                                (item) => item
+                              );
 
                               return (
                                 <div className="row mb-3" key={item.Value}>
@@ -549,7 +593,9 @@ export default function MiniConventionScoring({ onChangePage }) {
                                       value={
                                         formDataRef2.current[item.Value] || ""
                                       }
-                                      selectedValued ={arrTextData[item.Value-1]}
+                                      selectedValued={
+                                        arrTextData[item.Value - 1]
+                                      }
                                       onChange={handleInputChange}
                                       // errorMessage={errors.formDataRef2.current[item.Value]}
                                     />
@@ -560,13 +606,14 @@ export default function MiniConventionScoring({ onChangePage }) {
                             <div className="col-lg-4">
                               <Label data="Comment" />
                             </div>
-                            <div className="col-lg-8">
+                            <div className="col-lg-12">
                               <Input
                                 type="textarea"
                                 forInput="comment"
-                                ref={formComment}
+                                // ref={formComment}
                                 // isRequired
-                                handleChange
+                                onChange={handleComment}
+                                value={formComment.current}
                                 errorMessage={errors.formComment}
                               />
                             </div>
