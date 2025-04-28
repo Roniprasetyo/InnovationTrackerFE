@@ -624,9 +624,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   
   useEffect(() => {
     if (!hasUserSelectedTab) {
-      if (userInfo?.jabatan === "Sekretaris Prodi" || userInfo?.jabatan === "Kepala Departemen") {
+      if (userInfo?.jabatan === "Kepala Departemen") {
         setSelectedTab(1);
-      } else if (userInfo?.jabatan === "Kepala Seksi") {
+      } else if (userInfo?.jabatan === "Kepala Seksi" || userInfo?.jabatan === "Sekretaris Prodi") {
         setSelectedTab(0);
       } else if (userInfo?.jabatan === "Wakil Direktur") {
         setSelectedTab(2);
@@ -634,12 +634,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     }
   }, [userInfo, hasUserSelectedTab]);
 
-  const tabLabels = ["Ka.Unit/Ka.UPT", "Ka.Prodi/Ka.Dept", "WaDIR/DIR"];
+  const tabLabels = ["Ka.Unit/Ka.UPT/SekProdi", "Ka.Prodi/Ka.Dept", "WaDIR/DIR"];
 
   const tabIndexUser = tabLabels.findIndex((label) => {
-    if (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen") return label === "Ka.Prodi/Ka.Dept";
+    if (userInfo.jabatan === "Kepala Departemen") return label === "Ka.Prodi/Ka.Dept";
     if (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur") return label === "WaDIR/DIR";
-    return label === "Ka.Unit/Ka.UPT";
+    return label === "Ka.Unit/Ka.UPT/SekProdi";
   });
     
   const [selectedTab, setSelectedTab] = useState(tabIndexUser);
@@ -667,7 +667,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     let tempTotal3 = 0;
   
     listPenilaianKaUpt.forEach((item) => {
-      if(item["Jabatan Penilai"] !== "Kepala Seksi") {
+      if(item["Jabatan Penilai"] !== "Kepala Seksi" || item["Jabatan Penilai"] !== "Sekretaris Prodi") {
         tempTotal1 = 0;
       }
       else {
@@ -1155,7 +1155,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 >
                                   Total Score
                                   <hr />
-                                  Ka.Unit/Ka.UPT
+                                  Ka.Unit/Ka.UPT/SekProdi
                                   <h3>{totalScoreforKaUpt}</h3>
                                 </div>
                                 <div
