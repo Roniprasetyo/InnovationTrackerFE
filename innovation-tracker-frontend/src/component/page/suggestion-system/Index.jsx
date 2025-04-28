@@ -417,18 +417,16 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
                   : role === "ROL01" &&
                   value["Status"] === "Approved"
                   ? ["Detail", "Submit"]
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
+                  : userInfo.upt === foundEmployee.upt && (userInfo.jabatan === "Kepala Seksi" || userInfo.jabatan === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
                   ? ["Detail", "Scoring"]
-                  : (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
+                  : (userInfo.jabatan === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
                   ? ["Detail", "Scoring"]
                   : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur") && (value["Status"] !== "Draft Scoring")
                   ? ["Detail", "Scoring"]
                   : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring")
                   ? ["Detail", "Scoring"]
-                  // Status Approved By Role 03
-                  // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"] 
                   : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
+                  : userInfo.upt === foundEmployee.upt && (userInfo.jabatan === "Kepala Seksi" || userInfo.jabatan === "Sekretaris Prodi") && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
                   : userInfo.jabatan === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                   : userInfo.jabatan === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                   : ["Detail"],
@@ -459,6 +457,16 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
     // console.log("COOKIE", JSON.parse(decryptId(cookie))); 
     fetchData();
   }, [currentFilter, listEmployee]);
+
+  useEffect(() => {
+    const shouldRefresh = localStorage.getItem('refreshAfterSubmit');
+  
+    if (shouldRefresh === 'true') {
+      localStorage.removeItem('refreshAfterSubmit');
+      window.location.reload();
+    }
+  }, []);
+  
   
   if (isLoading) return <Loading />;
 

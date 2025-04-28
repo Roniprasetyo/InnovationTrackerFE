@@ -309,6 +309,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           SweetAlert("Success", "Data Successfully Submitted", "success");
 
         setTimeout(function() {
+          localStorage.setItem('refreshAfterSubmit', 'true');
           window.close();  
         }, 2000);  
 
@@ -667,7 +668,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     let tempTotal3 = 0;
   
     listPenilaianKaUpt.forEach((item) => {
-      if(item["Jabatan Penilai"] !== "Kepala Seksi" || item["Jabatan Penilai"] !== "Sekretaris Prodi") {
+      if(item["Jabatan Penilai"] !== "Kepala Seksi" && item["Jabatan Penilai"] !== "Sekretaris Prodi") {
         tempTotal1 = 0;
       }
       else {
@@ -845,7 +846,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                   {tabLabels.map((label, index) => {
                                     let jabatanTarget = '';
 
-                                    if (index === 0) jabatanTarget = ['Kepala Seksi', 'Sekretaris Prodi'];
+                                    if (index === 0) jabatanTarget = 'Kepala Seksi ';
+                                    if (index === 0) jabatanTarget = 'Sekretaris Prodi';
                                     else if (index === 1) jabatanTarget = 'Kepala Departemen';
                                     else if (index === 2) jabatanTarget = 'Wakil Direktur';
 
@@ -937,7 +939,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               The score does not reach the required range.
                                             </div>
                                           ) : matchingPenilaianforKaDept ? (
-                                            ((matchingPenilaianforKaDept['Jabatan Penilai'] !== 'Sekretaris Prodi' || matchingPenilaianforKaDept['Jabatan Penilai'] !== 'Kepala Departemen') && (matchingPenilaianforKaDept["Jabatan Penilai"] === 'Kepala Seksi')) ? (
+                                            ((matchingPenilaianforKaDept['Jabatan Penilai'] !== 'Kepala Departemen') && (matchingPenilaianforKaDept["Jabatan Penilai"] === 'Kepala Seksi' || matchingPenilaianforKaDept["Jabatan Penilai"] === 'Sekretaris Prodi')) ? (
                                               <div className="form-control bg-light">
                                                 Not yet scored
                                               </div>
