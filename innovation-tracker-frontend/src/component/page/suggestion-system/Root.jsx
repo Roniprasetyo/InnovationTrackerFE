@@ -33,7 +33,6 @@ export default function SuggestionSystem() {
   }
 
   function handleEditScoring(_, id) {
-    console.log("TES36");
     const scoringUrl = `/editScoring?id=${id}`;
     setDataID(id);
     window.open(scoringUrl, "_blank");
