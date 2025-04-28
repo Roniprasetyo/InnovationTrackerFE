@@ -403,6 +403,9 @@ export default function MiniConventionScoring({ onChangePage }) {
             KrpId: item.Kriteria,
             creaby: item.Creaby,
             creadate: item.Creadate,
+            komment: userInfo.jabatan == "Kepala Seksi" ? item.Komment1 
+            : userInfo.jabatan == "Sekretaris Prodi" || "Kepala Prodi" || "Kepala Departemen" ? item.Komment2 
+            : userInfo.jabatan == "Wakil Direktur" || "Direktur" ? item.Komment3 : "-"
           }));
 
           setListPenilaian(dataDetail);
@@ -589,7 +592,7 @@ export default function MiniConventionScoring({ onChangePage }) {
                                       // placeholder={arrTextData[item.Value] || ''}
                                       arrData={filteredArrData}
                                       isRound
-                                      // isRequired
+                                      isRequired
                                       value={
                                         formDataRef2.current[item.Value] || ""
                                       }
@@ -613,6 +616,7 @@ export default function MiniConventionScoring({ onChangePage }) {
                                 // ref={formComment}
                                 // isRequired
                                 onChange={handleComment}
+                                selectedValued={listPenilaian.komment || ""}
                                 value={formComment.current}
                                 errorMessage={errors.formComment}
                               />

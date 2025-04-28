@@ -417,8 +417,8 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
                   : role === "ROL01" &&
                   value["Status"] === "Approved"
                   ? ["Detail", "Submit"]
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
-                  ? ["Detail", "Scoring"]
+                  // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
+                  // ? ["Detail", "Scoring"]
                   : (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen")
                   ? ["Detail", "Scoring"]
                   // Status Approved By Role 03
