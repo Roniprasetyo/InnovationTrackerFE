@@ -419,14 +419,18 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
                   ? ["Detail", "Submit"]
                   : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
                   ? ["Detail", "Scoring"]
-                  : (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen")
+                  : (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
                   ? ["Detail", "Scoring"]
-                  : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur")
+                  : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur") && (value["Status"] !== "Draft Scoring")
+                  ? ["Detail", "Scoring"]
+                  : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring")
                   ? ["Detail", "Scoring"]
                   // Status Approved By Role 03
                   // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"] 
                   : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
+                  : userInfo.jabatan === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                  : userInfo.jabatan === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                   : ["Detail"],
               Alignment: [
                 "center",

@@ -676,7 +676,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     });
 
     listPenilaianKaDept.forEach((item) => {
-      if(item["Jabatan Penilai"] !== "Sekretaris Prodi") {
+      if(item["Jabatan Penilai"] !== "Kepala Departemen") {
         tempTotal2 = 0;
       }
       else {
@@ -846,7 +846,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     let jabatanTarget = '';
 
                                     if (index === 0) jabatanTarget = 'Kepala Seksi';
-                                    else if (index === 1) jabatanTarget = 'Sekretaris Prodi';
+                                    else if (index === 1) jabatanTarget = 'Kepala Departemen';
                                     else if (index === 2) jabatanTarget = 'Wakil Direktur';
 
                                     let isChecked = false;
@@ -1082,7 +1082,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                             <div className="form-control bg-light">
                                               The score does not reach the required range.
                                             </div>
-                                          ) : matchingPenilaianforKaDept ? (
+                                          ) : matchingPenilaianforKaDept && (matchingPenilaianforKaDept['Jabatan Penilai'] !== 'Wakil Direktur' || matchingPenilaianforKaDept['Jabatan Penilai'] !== 'Direktur') ? (
                                             <div className="form-control bg-light">
                                               {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
                                             </div>
