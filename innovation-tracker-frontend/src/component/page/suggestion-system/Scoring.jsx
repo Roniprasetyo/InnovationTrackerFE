@@ -72,6 +72,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [listPenilaianKaUpt, setListPenilaianKaUpt] = useState([]);
   const [scoringPosition, setScoringPosition] = useState([]);
   const [scoringPositionRole, setScoringPositionRole] = useState([]);
+  const [activeTab, setActiveTab] = useState(false);
+  const [isSearchDropdown, setIsSearchDropdown] = useState(false);
   const [listAllPenilaian, setAllListPenilaian] = useState([]);
   const [listSettingRanking, setListSettingRanking] = useState([]);
   const [listPenilaianKaDept, setListPenilaianKaDept] = useState([]);
@@ -304,9 +306,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         if (!data) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
-          SweetAlert("Success", "Data Successfully Submitted", "success").then(() => {
-            window.location.reload();
-          });
+          SweetAlert("Success", "Data Successfully Submitted", "success");
+
+        setTimeout(function() {
+          window.close();  
+        }, 2000);  
+
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -738,6 +743,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     return "No Ranking";
   };
 
+  useEffect(() => {
+    setActiveTab(selectedTab === tabIndexUser);
+  }, [selectedTab, tabIndexUser]);
+  
+  console.log("ACTIVE", activeTab);
   if (isLoading) return <Loading />;
 
   return (
@@ -943,15 +953,19 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           );
                                         }
                                          else if (selectedTab === 2) {
-                                          content = matchingPenilaianforWadir && (matchingPenilaianforWadir['Jabatan Penilai'] === 'Wakil Direktur' || matchingPenilaianforWadir['Jabatan Penilai'] === 'Direktur') ? (
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || totalScoreforKaDept < 69 ? (
+                                            <div className="form-control bg-light">
+                                              The score does not reach the required range.
+                                            </div>
+                                          ) : matchingPenilaianforWadir && 
+                                              (matchingPenilaianforWadir['Jabatan Penilai'] === 'Wakil Direktur' || 
+                                                matchingPenilaianforWadir['Jabatan Penilai'] === 'Direktur') ? (
                                             <div className="form-control bg-light">
                                               {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
                                             </div>
-                                          ) : (
-                                            <div className="form-control bg-light">
-                                              Not yet scored
-                                            </div>
-                                          );
+                                          ) : <div className="form-control bg-light">
+                                                Not yet scored
+                                              </div>
                                         }
                                         else {
                                           // Selain tab 1 atau 2
@@ -1002,7 +1016,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                             </div>
                                           );
                                         } else if (selectedTab === 2) {
-                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) ? (
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || totalScoreforKaDept < 69 ? (
                                             <div className="form-control bg-light">
                                               The score does not reach the required range.
                                             </div>
@@ -1035,7 +1049,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
                                             </div>
                                           ) : (
-                                            
                                             <SearchDropdown
                                             forInput={item.Value}
                                             arrData={filteredArrData}
@@ -1170,24 +1183,26 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                       </div>
                     </div>
                     <div className="col-lg-12">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div className="flex-grow-1 m-2">
-                          <Button
-                            classType="danger me-2 px-4 py-2"
-                            label="CANCEL"
-                            onClick={() => onChangePage("index")}
-                            style={{ width: "100%", borderRadius: "16px" }}
-                          />
+                      {activeTab && (
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="flex-grow-1 m-2">
+                            <Button
+                              classType="danger me-2 px-4 py-2"
+                              label="CANCEL"
+                              onClick={() => onChangePage("index")}
+                              style={{ width: "100%", borderRadius: "16px" }}
+                            />
+                          </div>
+                          <div className="flex-grow-1 m-2">
+                            <Button
+                              classType="primary ms-2 px-4 py-2"
+                              label="SUBMIT"
+                              onClick={handleSubmit}
+                              style={{ width: "100%", borderRadius: "16px" }}
+                            />
+                          </div>
                         </div>
-                        <div className="flex-grow-1 m-2">
-                          <Button
-                            classType="primary ms-2 px-4 py-2"
-                            label="SUBMIT"
-                            onClick={handleSubmit}
-                            style={{ width: "100%", borderRadius: "16px" }}
-                          />
-                        </div>
-                      </div>
+                      )}
                     </div>
                     {/* <div className="d-flex justify-content-end pe-3 mb-3">
                     <sub>
