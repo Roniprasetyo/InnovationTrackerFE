@@ -419,7 +419,9 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
                   ? ["Detail", "Submit"]
                   : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
                   ? ["Detail", "Scoring"]
-                  : (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur")
+                  : (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen")
+                  ? ["Detail", "Scoring"]
+                  : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur")
                   ? ["Detail", "Scoring"]
                   // Status Approved By Role 03
                   // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"] 
