@@ -845,7 +845,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                   {tabLabels.map((label, index) => {
                                     let jabatanTarget = '';
 
-                                    if (index === 0) jabatanTarget = 'Kepala Seksi';
+                                    if (index === 0) jabatanTarget = ['Kepala Seksi', 'Sekretaris Prodi'];
                                     else if (index === 1) jabatanTarget = 'Kepala Departemen';
                                     else if (index === 2) jabatanTarget = 'Wakil Direktur';
 
@@ -915,8 +915,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     const rankingKaDept = findRanking(totalScoreforKaDept, listSettingRanking);
                                     const rankingWadir = findRanking(totalScoreforWadir, listSettingRanking);
 
-                                    const isKepalaSeksi = forPenilai.jabatan === "Kepala Seksi";
-                                    const isKaDept = forPenilai.jabatan === "Kepala Departemen" || forPenilai.jabatan === "Sekretaris Prodi";
+                                    const isKepalaSeksi = forPenilai.jabatan === "Kepala Seksi" || forPenilai.jabatan === "Sekretaris Prodi";
+                                    const isKaDept = forPenilai.jabatan === "Kepala Departemen";
                                     const isWadir = forPenilai.jabatan === "Wakil Direktur" || forPenilai.jabatan === "Direktur";
                                     const isFirstTab = selectedTab === tabIndexUser;
                                     
@@ -1044,7 +1044,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                             The score does not reach the required range.
                                           </div>
                                         ) : matchingPenilaianforKaDept ? (
-                                          (matchingPenilaianforKaDept['Jabatan Penilai'] === 'Sekretaris Prodi' || matchingPenilaianforKaDept['Jabatan Penilai'] === 'Kepala Departemen') ? (
+                                          (matchingPenilaianforKaDept['Jabatan Penilai'] === 'Kepala Departemen') ? (
                                             <div className="form-control bg-light">
                                               {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
                                             </div>
