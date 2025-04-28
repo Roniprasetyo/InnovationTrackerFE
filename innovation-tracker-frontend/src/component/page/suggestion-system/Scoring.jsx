@@ -1,12 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import {
-  API_LINK,
-  EMP_API_LINK,
-  FILE_LINK,
-  ROOT_LINK,
-} from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, string } from "yup";
@@ -23,7 +18,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import { Tabs, Tab, Box, Paper, List } from "@mui/material";
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
 const inisialisasiData = [
   {
@@ -59,7 +54,7 @@ TabScoring.propTypes = {
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
   };
 }
 
@@ -74,21 +69,37 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
   const [listDepartment, setListDepartment] = useState([]);
   const [listAllDepartment, setAllListDepartment] = useState([]);
-  const [listPenilaian, setListPenilaian] = useState([]);
-  const [listPenilaianUpdate, setListPenilaianUpdate] = useState([]);
+  const [listPenilaianKaUpt, setListPenilaianKaUpt] = useState([]);
+  const [scoringPosition, setScoringPosition] = useState([]);
+  const [scoringPositionRole, setScoringPositionRole] = useState([]);
+  const [activeTab, setActiveTab] = useState(false);
+  const [isSearchDropdown, setIsSearchDropdown] = useState(false);
+  const [listAllPenilaian, setAllListPenilaian] = useState([]);
+  const [listSettingRanking, setListSettingRanking] = useState([]);
+  const [listPenilaianKaDept, setListPenilaianKaDept] = useState([]);
+  const [listPenilaianWadir, setListPenilaianWadir] = useState([]);
   const [listKaDept, setKaDept] = useState([]);
   const [listRecordPenilaian, setRecordListPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
     useState([]);
   const [userData, setUserData] = useState({});
-  const [totalScore, setTotalScore] = useState(0);
+  const [totalScoreforKaUpt, setTotalScoreforKaUpt] = useState(0);
+  const [totalScoreforKaDept, setTotalScoreforKaDept] = useState(0);
+  const [totalScoreforWadir, setTotalScoreforWadir] = useState(0);
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [userInput, setUserInput] = useState("");
   const [formattedValue, setFormattedValue] = useState("");
   const [forPenilai, setForPenilai] = useState("");
-  const [selectedTab, setSelectedTab] = useState(0);
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
+  const [listValues, setListValues] = useState([]);
+
+  useEffect(() => {
+    if (listKriteriaPenilaian.length > 0) {
+      const values = listKriteriaPenilaian.map((item) => item.Value);
+      setListValues(values);
+    }
+  }, [listKriteriaPenilaian]);
 
   const formDataRef = useRef({
     Key: "",
@@ -115,7 +126,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     "Alasan Penolakan": "",
   });
 
-  const formDataRef2 = useRef([]);
+  const formDataRef2 = useRef({});
   const formDataRef3 = useRef({});
 
   const userSchema = object({
@@ -201,17 +212,22 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
+    
+      if (matched) {
+        formDataRef3.current[val] = matched.Score;
+      } else {
+        console.warn("Data tidak ditemukan untuk value:", val);
+        formDataRef3.current[val] = null;
+      }
 
-      formDataRef3.current[val] = matched?.Score;
-
-      console.log("val dari formDataRef2:", matched?.Score);
+      // console.log("val dari formDataRef2:", val);
       // console.log("matched item:", formDataRef3);
 
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
 
-    setTotalScore(total);
+    // setTotalScoreforKaUpt(total);
   };
 
   useEffect(() => {
@@ -257,8 +273,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // console.log("DP", formDataRef3);
-
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "),
       sis_id: id,
@@ -273,45 +287,47 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     //   setErrors
     // );
 
-    console.log("FormDataRef: ", formDataRef2.current);
-    console.log("Payload: ", payload);
-    console.log("Payload nilai: ", formDataRef3);
+    // console.log("FormDataRef: ", formDataRef2.current);
+    // console.log("Payload: ", payload);
+    // console.log("Payload nilai: ", formDataRef3);
 
     // if (Object.values(validationErrors).every((error) => !error)) {
     //   setIsLoading(true);
     //   setIsError((prevError) => ({ ...prevError, error: false }));
     //   setErrors({});
 
-    try {
-      const data = await UseFetch(
-        API_LINK + "RencanaSS/CreatePenilaian",
-        payload
-      );
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/CreatePenilaian",
+          payload
+        );
 
-      // console.log("tes", data);
-      if (!data) {
-        throw new Error("Error: Failed to Submit the data.");
-      } else {
-        SweetAlert("Success", "Data Successfully Submitted", "success");
+        // console.log("tes", data);
+        if (!data) {
+          throw new Error("Error: Failed to Submit the data.");
+        } else {
+          SweetAlert("Success", "Data Successfully Submitted", "success");
 
-        setTimeout(function () {
-          window.close();
-        }, 2000);
+        setTimeout(function() {
+          window.close();  
+        }, 2000);  
+
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      window.scrollTo(0, 0);
-      setIsError((prevError) => ({
-        ...prevError,
-        error: true,
-        message: error.message,
-      }));
-    } finally {
-      setIsLoading(false);
-    }
     // } else window.scrollTo(0, 0);
   };
 
   useEffect(() => {
+    
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
@@ -331,6 +347,90 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
+        setListCategory({});
+      }
+    };
+    fetchData();
+  }, []);
+  
+  useEffect(() => {
+    const fetchDataDetailByID = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianByIdForKaProd", {
+          sis_id: id,
+        });
+
+        // console.log("INI DATA SISIA: ", data);
+        if (!data) {
+          // throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListPenilaianKaDept(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      }
+    };
+    fetchDataDetailByID();
+  }, []);
+
+
+  useEffect(() => {
+    const fetchDataDetailByID = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianByIdForDirorWadir", {
+          sis_id: id,
+        });
+
+        // console.log("INI DATA SISIA: ", data);
+        if (!data) {
+          // throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListPenilaianWadir(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      }
+    };
+    fetchDataDetailByID();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetPenilaianById", {
+            id: id,
+          }
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          
+          setListPenilaianKaUpt(data);
+
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
       }
     };
     fetchData();
@@ -340,50 +440,72 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
-          id,
-        });
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetAllPenilaianById", {
+            id: id,
+          }
+        );
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          const dataDetail = data.map((item) => ({
-            Keys: item.Key,
-            Text: `${item.Deskripsi} - (${item.Nilai})`,
-            Value: item.Value,
-            Score: item.Nilai,
-            KrpId: item.Kriteria,
-          }));
+          
+          setAllListPenilaian(data);
 
-          setListPenilaianUpdate(dataDetail);
-          setListPenilaian(data);
         }
       } catch (error) {
-        // window.scrollTo(0, 0);
-        // setIsError((prevError) => ({
-        //   ...prevError,
-        //   error: true,
-        //   message: error.message,
-        // }));
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
       }
     };
     fetchData();
   }, []);
 
   useEffect(() => {
-    if (listPenilaian.length === 0 || listEmployee.length === 0) return;
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetListSettingRanking"
+        );
 
-    const distinctCreaby = [
-      ...new Set(listPenilaian.map((item) => item.Creaby).filter(Boolean)),
-    ];
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListSettingRanking(data);
 
-    const filteredEmployees = listEmployee.filter((emp) =>
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (listPenilaianKaUpt.length === 0 || listEmployee.length === 0) return;
+  
+    const distinctCreaby = [...new Set(listPenilaianKaUpt.map(item => item.Creaby).filter(Boolean))];
+
+    const filteredEmployees = listEmployee.filter(emp =>
       distinctCreaby.includes(emp.username)
     );
 
     setRecordListPenilaian(filteredEmployees);
-  }, [listPenilaian, listEmployee]);
-
+  
+  }, [listPenilaianKaUpt, listEmployee]);
+  
   useEffect(() => {
     if (listRecordPenilaian.length === 0) return;
 
@@ -394,22 +516,17 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           API_LINK + "RencanaSS/GetListStrukturDepartment"
         );
 
-        console.log("LISTT DEPATEMEN: ", data);
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const npkTarget = String(listRecordPenilaian[0]?.npk);
-          const matchingByNpk = data.find(
-            (item) => String(item.Npk) === npkTarget
-          );
-
+          const matchingByNpk = data.find(item => String(item.Npk) === npkTarget);
+  
           const strukturParentTarget = matchingByNpk["Struktur Parent"];
-
-          const finalResult = data.filter(
-            (item) =>
-              item["Struktur Parent"] === strukturParentTarget &&
-              (item.Jabatan === "Kepala Departemen" ||
-                item.Jabatan === "Sekretaris Prodi")
+  
+          const finalResult = data.filter(item =>
+            item["Struktur Parent"] === strukturParentTarget &&
+            (item.Jabatan === "Kepala Departemen" || item.Jabatan === "Sekretaris Prodi")
           );
 
           setAllListDepartment(data);
@@ -422,42 +539,48 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
+        setListCategory({});
       }
     };
     fetchData();
   }, [listRecordPenilaian]);
 
   const kadept = listAllDepartment.find(
-    (detail) => detail["Npk"] === forPenilai.npk
+    (detail) =>
+      detail["Npk"] === forPenilai.npk
   );
   const kaupt = listAllDepartment.find(
-    (detail) => detail["Creaby"] === listPenilaian[0].npk
+    (detail) =>
+      detail["Creaby"] === listPenilaianKaUpt[0].npk
   );
 
   // console.log("DATA ", listEmployee.filter((item) => item.upt === "Prodi MI" ));
-  console.log("RECORD LIST ", forPenilai);
   console.log("KA DEPT ", kadept);
-  console.log("KA UPT ", kaupt);
+  console.log("KA UPT ",kaupt);
   console.log("DeptArrData:", listDepartment);
   console.log("All Dept:", listAllDepartment);
-  console.log("List Penilaian:", listPenilaian);
-  console.log("List Penilaian Update:", listPenilaianUpdate);
+  console.log("List Penilaian Ka Upt:", listPenilaianKaUpt);
+  console.log("For Penilaian:", forPenilai);
+  console.log("List Penilaian Ka Dept:", listPenilaianKaDept);
+  console.log("List Kriteria Penilaian:", listKriteriaPenilaian);
+  console.log("List Detail Kriteria Penilaian:", listDetailKriteriaPenilaian);
   console.log("User Info:", userInfo);
+  console.log("List Values:", listValues);
+  console.log("List Setting Ranking:", listSettingRanking);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "MiniConvention/GetListDetailKriteriaPenilaian"
+          API_LINK + "RencanaSS/GetListDetailKriteriaPenilaian"
         );
 
-        console.log("471: ", data);
-        if (!data) {
+        if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (Poin ${item.Score})`,
+            Text: `${item.Desc} - (Poin: ${item.Score})`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -472,6 +595,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
+        setListCategory({});
       }
     };
 
@@ -489,24 +613,18 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     // handleInputChange({ target: { name: "budget", value: rawValue } });
   };
 
-  const DeptArrData =
-    listDepartment.length > 0 && userInfo?.npk
-      ? listDepartment.find(
-          (detail) => String(detail.Npk) === String(userInfo.npk)
-        )
-      : null;
+  const DeptArrData = listDepartment.length > 0 && userInfo?.npk
+  ? listDepartment.find(detail => String(detail.Npk) === String(userInfo.npk))
+  : null;
 
   const handleTabChange = (e, newValue) => {
     setSelectedTab(newValue);
     setHasUserSelectedTab(true);
   };
-
+  
   useEffect(() => {
     if (!hasUserSelectedTab) {
-      if (
-        userInfo?.jabatan === "Sekretaris Prodi" ||
-        userInfo?.jabatan === "Kepala Departemen"
-      ) {
+      if (userInfo?.jabatan === "Sekretaris Prodi" || userInfo?.jabatan === "Kepala Departemen") {
         setSelectedTab(1);
       } else if (userInfo?.jabatan === "Kepala Seksi") {
         setSelectedTab(0);
@@ -516,13 +634,120 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     }
   }, [userInfo, hasUserSelectedTab]);
 
-  const tabLabels = ["Ka.Unit/Ka.UPT"];
-  if (userInfo?.jabatan === "Sekretaris Prodi") {
-    tabLabels.push("Ka.Prodi/Ka.Dept");
-  } else if (userInfo?.jabatan === "Wakil Direktur") {
-    tabLabels.push("Ka.Prodi/Ka.Dept", "WaDIR/DIR");
-  }
+  const tabLabels = ["Ka.Unit/Ka.UPT", "Ka.Prodi/Ka.Dept", "WaDIR/DIR"];
 
+  const tabIndexUser = tabLabels.findIndex((label) => {
+    if (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen") return label === "Ka.Prodi/Ka.Dept";
+    if (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur") return label === "WaDIR/DIR";
+    return label === "Ka.Unit/Ka.UPT";
+  });
+    
+  const [selectedTab, setSelectedTab] = useState(tabIndexUser);
+
+  const arrTextDataforKaUpt =
+  listPenilaianKaUpt.map(
+    (item) => item
+  );
+  
+  const arrTextDataforKaDept =
+  listPenilaianKaDept.map(
+    (item) => item
+  );
+
+  const arrTextDataforWadir =
+  listPenilaianKaDept.map(
+    (item) => item
+  );
+
+  console.log("ARR TEXT DATA: ", arrTextDataforKaUpt);
+
+  useEffect(() => {
+    let tempTotal1 = 0;
+    let tempTotal2 = 0;
+    let tempTotal3 = 0;
+  
+    listPenilaianKaUpt.forEach((item) => {
+      if(item["Jabatan Penilai"] !== "Kepala Seksi") {
+        tempTotal1 = 0;
+      }
+      else {
+        tempTotal1 += parseFloat(item.Nilai) || 0;
+      }
+    });
+
+    listPenilaianKaDept.forEach((item) => {
+      if(item["Jabatan Penilai"] !== "Sekretaris Prodi") {
+        tempTotal2 = 0;
+      }
+      else {
+        tempTotal2 += parseFloat(item.Nilai) || 0;
+      }
+    });
+
+    listPenilaianWadir.forEach((item) => {
+      if(item["Jabatan Penilai"] !== "Wakil Direktur") {
+        tempTotal3 = 0;
+      }
+      else {
+        tempTotal3 += parseFloat(item.Nilai) || 0;
+      }
+    });
+  
+    setTotalScoreforKaUpt(tempTotal1);
+    setTotalScoreforKaDept(tempTotal2);
+    setTotalScoreforWadir(tempTotal3);
+  }, [listPenilaianKaUpt, listPenilaianKaDept, listPenilaianWadir]);
+
+  useEffect(() => {
+    if (listPenilaianWadir !== null && listPenilaianWadir.length > 0) {
+      const firstData = listPenilaianWadir[0];
+  
+      if (firstData) {
+        setScoringPosition(firstData["Creaby"]);
+        setScoringPositionRole(firstData["Jabatan Penilai"]);
+      }
+    }
+    else if (listPenilaianKaDept !== null & listPenilaianKaDept.length > 0) {
+      const firstData = listPenilaianKaDept[0];
+  
+      if (firstData) {
+        setScoringPosition(firstData["Creaby"]);
+        setScoringPositionRole(firstData["Jabatan Penilai"]);
+      }
+    } else if(listPenilaianKaUpt !== null & listPenilaianKaUpt.length > 0) {
+      const firstData = listPenilaianKaUpt[0];
+  
+      if (firstData) {
+        setScoringPosition(firstData["Creaby"]);
+        setScoringPositionRole(firstData["Jabatan Penilai"]);
+      }
+    }
+  }, [listPenilaianWadir]);  
+
+  const findRanking = (score, listSettingRanking) => {
+    for (const ranking of listSettingRanking) {
+      const rangeText = ranking.Range;
+      
+      if (rangeText.includes("-")) {
+        const [min, max] = rangeText.split("-").map((num) => parseFloat(num.trim()));
+        if (score >= min && score <= max) {
+          return ranking.Ranking;
+        }
+      } else {
+        const singleValue = parseFloat(rangeText.trim());
+        if (score === singleValue) {
+          return ranking.Ranking;
+        }
+      }
+    }
+    return "No Ranking";
+  };
+
+  useEffect(() => {
+    setActiveTab(selectedTab === tabIndexUser);
+  }, [selectedTab, tabIndexUser]);
+  
+  console.log("ACTIVE", activeTab);
   if (isLoading) return <Loading />;
 
   return (
@@ -536,17 +761,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             className="fw-bold"
             style={{ color: "rgb(0, 89, 171)", margin: "0" }}
           >
-            <Icon
-              type="Bold"
-              name="angle-left"
-              cssClass="btn me-1 py-0 text"
-              onClick={() => onChangePage("index")}
-              style={{
-                fontSize: "22px",
-                cursor: "pointer",
-                color: "rgb(0, 89, 171)",
-              }}
-            />
             Scoring Data
           </h2>
         </div>
@@ -603,14 +817,20 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                     </div>
                     <div className="col-lg-12">
                       <div className="card mb-3">
-                        <div className="card-header align-items-center d-flex">
-                          <h5 className="fw-medium">Criteria</h5>
+                      <div className="card-header d-flex align-items-center justify-content-between">
+                        <h5 className="fw-medium m-0">Criteria</h5>
+                          <div className="text-end">
+                            <div className="small">Already Scored by:</div>
+                            {(listPenilaianKaUpt.length > 0 || listPenilaianKaDept.length > 0 || listPenilaianWadir.length > 0) && (
+                              <div className="fw-semibold">{scoringPosition} as {scoringPositionRole}</div>
+                            )}
+                          </div>
                         </div>
                         <div className="card-body d-flex flex-wrap">
-                          <Box sx={{ width: "80%" }}>
+                          <Box sx={{width:'80%'}}>
                             <div>
                               <Box>
-                                <Tabs
+                              <Tabs
                                   value={selectedTab}
                                   className="card rounded-bottom-0"
                                   onChange={handleTabChange}
@@ -622,103 +842,308 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     },
                                   }}
                                 >
-                                  {tabLabels.map((label, index) => (
-                                    <Tab
-                                      key={label}
-                                      label={label}
-                                      sx={{
-                                        backgroundColor:
-                                          selectedTab === index
-                                            ? "#ffffff"
-                                            : "#f0f0f0", // putih saat aktif, abu saat non-aktif
-                                        borderRight:
-                                          index !== 2
-                                            ? "1px solid #ddd"
-                                            : "none",
-                                        fontWeight: "bold",
-                                        color: "black",
-                                        minHeight: "48px",
-                                      }}
-                                    />
-                                  ))}
+                                  {tabLabels.map((label, index) => {
+                                    let jabatanTarget = '';
+
+                                    if (index === 0) jabatanTarget = 'Kepala Seksi';
+                                    else if (index === 1) jabatanTarget = 'Sekretaris Prodi';
+                                    else if (index === 2) jabatanTarget = 'Wakil Direktur';
+
+                                    let isChecked = false;
+                                    if (jabatanTarget === 'Wakil Direktur') {
+                                      isChecked = listAllPenilaian.some(
+                                        (item) =>
+                                          item['Jabatan Penilai'] &&
+                                          (item['Jabatan Penilai'].includes('Wakil Direktur') || item['Jabatan Penilai'].includes('Direktur'))
+                                      );
+                                    } else {
+                                      isChecked = listAllPenilaian.some(
+                                        (item) =>
+                                          item['Jabatan Penilai'] &&
+                                          item['Jabatan Penilai'].includes(jabatanTarget)
+                                      );
+                                    }
+
+                                    return (
+                                      <Tab
+                                        key={index}
+                                        label={isChecked ? (
+                                          <div className="d-flex gap-2">
+                                            <span style={{ color: 'green' }}>✓</span>
+                                            <span style={{ fontSize: '14px' }}>{label}</span>
+                                          </div>
+                                        ) : (
+                                          label
+                                        )}
+                                        sx={{
+                                          backgroundColor: selectedTab === index ? "#ffffff" : "#f0f0f0",
+                                          borderRight: index !== 2 ? '1px solid #ddd' : 'none',
+                                          fontWeight: "bold",
+                                          color: "black",
+                                          minHeight: '48px',
+                                        }}
+                                      />
+                                    );
+                                  })}
                                 </Tabs>
                               </Box>
                             </div>
-                            <div
-                              className="card"
-                              style={{
-                                borderTop: "none",
-                                borderRadius: "0 0 12px 12px",
-                              }}
-                            >
-                              <div className=" card-body pe-4">
+                            <div className="card" style={{ borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
+                              <div
+                                className=" card-body pe-4"
+                              >
                                 {listKriteriaPenilaian.map((item) => {
+                                  let totalNilai = 0;
                                   const filteredArrData =
                                     listDetailKriteriaPenilaian.filter(
                                       (detail) => detail.Id === item.Value
                                     );
 
-                                  const matchingPenilaian = listPenilaian.find(
-                                    (detail) =>
-                                      detail["Jabatan Penilai"] ===
-                                        forPenilai.jabatan &&
-                                      detail.Kriteria === item.Value
-                                  );
+                                    const matchingPenilaianforKaUpt = listPenilaianKaUpt.find(
+                                      (detail) => detail.Kriteria === item.Value
+                                    );
 
-                                  const matchingPenilaian2 = listPenilaian.find(
-                                    (detail) =>
-                                      detail["Jabatan Penilai"] !==
-                                        forPenilai.jabatan &&
-                                      detail.Kriteria === item.Value
-                                  );
-                                  const arrTextData = listPenilaianUpdate.map(
-                                    (item) => item
-                                  );
-                                  return (
-                                    <div className="row mb-3" key={item.Value}>
-                                      <div className="col-lg-4">
-                                        <Label data={item.Text} />
-                                      </div>
-                                      <div className="col-lg-8">
-                                        {selectedTab === 1 &&
-                                        matchingPenilaian ? (
+                                    const matchingPenilaianforKaDept = listPenilaianKaDept.find(
+                                      (detail) => detail.Kriteria === item.Value
+                                    );
+
+                                    const matchingPenilaianforWadir = listPenilaianWadir.find(
+                                      (detail) => detail.Kriteria === item.Value
+                                    );
+
+                                    const rankingKaUpt = findRanking(totalScoreforKaUpt, listSettingRanking);
+                                    const rankingKaDept = findRanking(totalScoreforKaDept, listSettingRanking);
+                                    const rankingWadir = findRanking(totalScoreforWadir, listSettingRanking);
+
+                                    const isKepalaSeksi = forPenilai.jabatan === "Kepala Seksi";
+                                    const isKaDept = forPenilai.jabatan === "Kepala Departemen" || forPenilai.jabatan === "Sekretaris Prodi";
+                                    const isWadir = forPenilai.jabatan === "Wakil Direktur" || forPenilai.jabatan === "Direktur";
+                                    const isFirstTab = selectedTab === tabIndexUser;
+                                    
+                                    console.log("rankingKaUpt", rankingKaUpt);
+                                    console.log("rankingKaDept", rankingKaDept);
+                                    console.log("rankingWadir", rankingWadir);
+                                    console.log("total wadir", totalScoreforWadir);
+                                    console.log("total ka dept", totalScoreforKaDept);
+                                    console.log("total ka upt", totalScoreforKaUpt);
+
+                                    let content = null;
+
+                                    if (isKepalaSeksi) {
+                                      if (!isFirstTab) {
+                                        if (selectedTab === 1) {
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) ? (
+                                            <div className="form-control bg-light">
+                                              The score does not reach the required range.
+                                            </div>
+                                          ) : matchingPenilaianforKaDept ? (
+                                            ((matchingPenilaianforKaDept['Jabatan Penilai'] !== 'Sekretaris Prodi' || matchingPenilaianforKaDept['Jabatan Penilai'] !== 'Kepala Departemen') && (matchingPenilaianforKaDept["Jabatan Penilai"] === 'Kepala Seksi')) ? (
+                                              <div className="form-control bg-light">
+                                                Not yet scored
+                                              </div>
+                                            ) : (
+                                              <div className="form-control bg-light">
+                                                {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                              </div>
+                                            )
+                                          ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        }
+                                         else if (selectedTab === 2) {
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || totalScoreforKaDept < 69 ? (
+                                            <div className="form-control bg-light">
+                                              The score does not reach the required range.
+                                            </div>
+                                          ) : matchingPenilaianforWadir && 
+                                              (matchingPenilaianforWadir['Jabatan Penilai'] === 'Wakil Direktur' || 
+                                                matchingPenilaianforWadir['Jabatan Penilai'] === 'Direktur') ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
+                                            </div>
+                                          ) : <div className="form-control bg-light">
+                                                Not yet scored
+                                              </div>
+                                        }
+                                        else {
+                                          // Selain tab 1 atau 2
+                                          content = (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        }
+                                      } else {
+                                        // Kalau masih first tab (punya dia sendiri)
+                                        content = matchingPenilaianforKaUpt ? (
                                           <div className="form-control bg-light">
-                                            {`${matchingPenilaian.Deskripsi} - (Poin: ${matchingPenilaian.Nilai})`}
-                                          </div>
-                                        ) : selectedTab === 0 &&
-                                          matchingPenilaian2 ? (
-                                          <div className="form-control bg-light">
-                                            {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
-                                          </div>
-                                        ) : selectedTab === 2 &&
-                                          matchingPenilaian2 ? (
-                                          <div className="form-control bg-light">
-                                            {`${matchingPenilaian2.Deskripsi} - (Poin: ${matchingPenilaian2.Nilai})`}
+                                            {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
                                           </div>
                                         ) : (
                                           <SearchDropdown
                                             forInput={item.Value}
                                             arrData={filteredArrData}
                                             isRound
-                                            selectedValued={
-                                              arrTextData[item.Value - 1]
-                                            }
-                                            value={
-                                              formDataRef2.current[
-                                                item.Value
-                                              ] || ""
-                                            }
+                                            value={formDataRef2.current[item.Value] || ""}
                                             onChange={handleInputChange}
                                           />
-                                        )}
+                                        );
+                                      }
+                                    }
+                                    else if (isKaDept) {
+                                      if (!isFirstTab) {
+                                        if (selectedTab === 0) {
+                                          content = matchingPenilaianforKaUpt ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
+                                            </div>
+                                          ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        }
+                                        else if (selectedTab === 1) {
+                                          content = matchingPenilaianforKaDept ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                            </div>
+                                          ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        } else if (selectedTab === 2) {
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || totalScoreforKaDept < 69 ? (
+                                            <div className="form-control bg-light">
+                                              The score does not reach the required range.
+                                            </div>
+                                          ) : matchingPenilaianforWadir && 
+                                              (matchingPenilaianforWadir['Jabatan Penilai'] === 'Wakil Direktur' || 
+                                               matchingPenilaianforWadir['Jabatan Penilai'] === 'Direktur') ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
+                                            </div>
+                                          ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        } else {
+                                          content = (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        }
+                                      } else {
+                                        content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) ? (
+                                          <div className="form-control bg-light">
+                                            The score does not reach the required range.
+                                          </div>
+                                        ) : matchingPenilaianforKaDept ? (
+                                          (matchingPenilaianforKaDept['Jabatan Penilai'] === 'Sekretaris Prodi' || matchingPenilaianforKaDept['Jabatan Penilai'] === 'Kepala Departemen') ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                            </div>
+                                          ) : (
+                                            <SearchDropdown
+                                            forInput={item.Value}
+                                            arrData={filteredArrData}
+                                            isRound
+                                            selectedValued={arrTextDataforKaDept[item.Value - 1]}
+                                            value={formDataRef2.current[item.Value] || ""}
+                                            onChange={handleInputChange}
+                                          />
+                                          )
+                                        ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                        );
+                                      }
+                                    }else if (isWadir) {
+                                      if (!isFirstTab) {
+                                        if (selectedTab === 0) {
+                                          content = matchingPenilaianforKaUpt ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
+                                            </div>
+                                          ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        }
+                                        else if (selectedTab === 1) {
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) ? (
+                                            <div className="form-control bg-light">
+                                              The score does not reach the required range.
+                                            </div>
+                                          ) : matchingPenilaianforKaDept ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                            </div>
+                                          ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        } else if (selectedTab === 2) {
+                                          content = matchingPenilaianforWadir && (matchingPenilaianforWadir['Jabatan Penilai'] === 'Wakil Direktur' || matchingPenilaianforWadir['Jabatan Penilai'] === 'Direktur') ? (
+                                            <div className="form-control bg-light">
+                                              {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
+                                            </div>
+                                          ) : (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        } else {
+                                          content = (
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+                                          );
+                                        }
+                                      } else {
+                                        content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || totalScoreforKaDept < 69 ? (
+                                          <div className="form-control bg-light">
+                                            The score does not reach the required range.
+                                          </div>
+                                        ) : matchingPenilaianforWadir && 
+                                            (matchingPenilaianforWadir['Jabatan Penilai'] === 'Wakil Direktur' || 
+                                              matchingPenilaianforWadir['Jabatan Penilai'] === 'Direktur') ? (
+                                          <div className="form-control bg-light">
+                                            {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
+                                          </div>
+                                        ) : <SearchDropdown
+                                              forInput={item.Value}
+                                              arrData={filteredArrData}
+                                              isRound
+                                              selectedValued={arrTextDataforKaDept[item.Value - 1]}
+                                              value={formDataRef2.current[item.Value] || ""}
+                                              onChange={handleInputChange}
+                                            />
+                                      }
+                                    }
+                                    return (
+                                      <div className="row mb-3" key={item.Value}>
+                                        <div className="col-lg-4">
+                                          <Label data={item.Text} />
+                                        </div>
+                                        <div className="col-lg-8">
+                                          {content}
+                                        </div>
                                       </div>
-                                    </div>
-                                  );
+                                    );                                    
                                 })}
                               </div>
                             </div>
                           </Box>
-                          <Box sx={{ width: "20%" }}>
+                          <Box sx={{width:'20%'}}>
                             <div className="ps-4">
                               <div
                                 className="d-flex flex-column gap-3"
@@ -726,27 +1151,30 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                               >
                                 <div
                                   className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight: "180px" }}
+                                  style={{ width: "200px", minHeight:'180px' }}
                                 >
+                                  Total Score
+                                  <hr />
                                   Ka.Unit/Ka.UPT
-                                  <hr />
-                                  <h5>{totalScore}</h5>
+                                  <h3>{totalScoreforKaUpt}</h3>
                                 </div>
                                 <div
                                   className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight: "180px" }}
+                                  style={{ width: "200px", minHeight:'180px' }}
                                 >
+                                  Total Score
+                                  <hr />
                                   Ka.Prodi/Ka.Dept
-                                  <hr />
-                                  <h5>{0}</h5>
+                                  <h3>{totalScoreforKaDept}</h3>
                                 </div>
                                 <div
                                   className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight: "180px" }}
+                                  style={{ width: "200px", minHeight:'180px' }}
                                 >
-                                  WaDIR/DIR
+                                  Total Score
                                   <hr />
-                                  <h5>{0}</h5>
+                                  WaDIR/DIR
+                                  <h3>{totalScoreforWadir}</h3>
                                 </div>
                               </div>
                             </div>
@@ -754,25 +1182,27 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                         </div>
                       </div>
                     </div>
-                    <div className="col-lg-12 ms-auto">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div className="flex-grow-1 m-2">
-                          <Button
-                            classType="danger me-2 px-4 py-2"
-                            label="CANCEL"
-                            onClick={() => onChangePage("index")}
-                            style={{ width: "100%", borderRadius: "16px" }}
-                          />
+                    <div className="col-lg-12">
+                      {activeTab && (
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="flex-grow-1 m-2">
+                            <Button
+                              classType="danger me-2 px-4 py-2"
+                              label="CANCEL"
+                              onClick={() => onChangePage("index")}
+                              style={{ width: "100%", borderRadius: "16px" }}
+                            />
+                          </div>
+                          <div className="flex-grow-1 m-2">
+                            <Button
+                              classType="primary ms-2 px-4 py-2"
+                              label="SUBMIT"
+                              onClick={handleSubmit}
+                              style={{ width: "100%", borderRadius: "16px" }}
+                            />
+                          </div>
                         </div>
-                        <div className="flex-grow-1 m-2">
-                          <Button
-                            classType="primary ms-2 px-4 py-2"
-                            label="SUBMIT"
-                            onClick={handleSubmit}
-                            style={{ width: "100%", borderRadius: "16px" }}
-                          />
-                        </div>
-                      </div>
+                      )}
                     </div>
                     {/* <div className="d-flex justify-content-end pe-3 mb-3">
                     <sub>
