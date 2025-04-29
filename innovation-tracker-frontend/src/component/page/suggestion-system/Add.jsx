@@ -120,7 +120,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     if (listEmployee.length > 0 && userInfo?.upt) {
       const KepalaSeksiData = listEmployee.find(
         (value) =>
-          value.upt === userInfo.upt && value.jabatan === "Kepala Seksi"
+          value.upt_bagian === userInfo.upt && value.jabatan === "Kepala Seksi"
       );
       setSectionHead(KepalaSeksiData);
     }
@@ -133,7 +133,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   }, [sectionHead]);
   
 
-  console.log("SECTION HEAD NPK:", formDataRef.current.facil_id);
+  console.log("User Info:", userInfo);
 
   // useEffect(() => {
   // }, [sectionHead]);
@@ -271,13 +271,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     
             const data = await response.json();
             setListEmployee(
-              data.map((value) => ({
-                username: value.username,
-                npk: value.npk,
-                name: value.nama,
-                upt: value.upt_bagian,
-                jabatan: value.jabatan,
-              }))
+              data
             );
 
           } catch (error) {
@@ -293,6 +287,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     
         fetchData();
       }, []);   
+
+      console.log("LIST EMPLOYEE ", listEmployee);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;

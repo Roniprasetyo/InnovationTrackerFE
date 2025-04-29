@@ -58,7 +58,13 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-export default function SuggestionSytemIndex({ onChangePage }) {
+// const dataFilterJenis = [
+//   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
+//   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
+//   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
+// ];
+
+export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditScoring }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -77,9 +83,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     role: userInfo.role.slice(0, 5),
     npk: userInfo.npk,
   });
-  const [selectedKeys, setSelectedKeys] = useState([]);
-
-  console.log("user info", userInfo);
+  const [penJabatan, setPenJabatan] = useState([]);
+  // console.log("user info", userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -124,67 +129,68 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     const tempStatus = getStatusByKey(id);
     var alertStatus;
 
-    if (tempStatus === "Approved") {
-      alertStatus =
-        "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
-    } else {
-      alertStatus =
-        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
+    if(tempStatus === "Approved") {
+      alertStatus = "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
     }
-
+    else {
+      alertStatus = "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
+    }
+    
     const confirm = await SweetAlert(
       "Confirm",
-      alertStatus,
+      "Are you sure about this value?",
       "warning",
       "Submit",
-      listCategory,
-      tempStatus,
-      listReviewer,
       null,
       "",
       true
     );
 
+
     if (confirm) {
-      if (tempStatus !== "Approved") {
-        UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
+      console.log(1, id);
+      if(tempStatus !== "Approved") {
+        UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
           id: id,
         })
-          .then((data) => {
-            if (data === "ERROR" || data.length === 0) setIsError(true);
-            else {
-              SweetAlert(
-                "Success",
-                "Thank you for submitting your registration form. Please wait until the next update",
-                "success"
-              );
-              handleSetCurrentPage(currentFilter.page);
-            }
-          })
-          .then(() => setIsLoading(false));
-      } else {
-        const reviewer = confirm.reviewer;
-        const batch = confirm.batch;
-        const category = confirm.category;
-        UseFetch(API_LINK + "RencanaSS/CreateKonvensiSS", {
-          reviewer,
-          batch,
-          id,
-          category,
+        .then((data) => {
+          if (!data) {
+            setIsError(true)
+          }
+          else {
+            SweetAlert(
+              "Success",
+              "Thank you for your rating. Please wait until the next update",
+              "success"
+            );
+            handleSetCurrentPage(currentFilter.page);
+          }
         })
-          .then((data) => {
-            if (data === "ERROR" || data.length === 0) setIsError(true);
-            else {
-              SweetAlert(
-                "Success",
-                "Thank you for submitting your registration form. Please wait until the next update",
-                "success"
-              );
-              handleSetCurrentPage(currentFilter.page);
-            }
-          })
           .then(() => setIsLoading(false));
       }
+      // else {
+      //   const reviewer = confirm.reviewer;
+      //   const batch = confirm.batch;
+      //   const category = confirm.category;
+      //   UseFetch(API_LINK + "RencanaSS/CreateKonvensiSS", {
+      //     reviewer,
+      //     batch,
+      //     id,
+      //     category,
+      //   })
+      //     .then((data) => {
+      //       if (data === "ERROR" || data.length === 0) setIsError(true);
+      //       else {
+      //         SweetAlert(
+      //           "Success",
+      //           "Thank you for submitting your registration form. Please wait until the next update",
+      //           "success"
+      //         );
+      //         handleSetCurrentPage(currentFilter.page);
+      //       }
+      //     })
+      //     .then(() => setIsLoading(false));
+      // }
     }
   };
 
@@ -308,6 +314,7 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             npk: value.npk,
             nama: value.nama,
             upt: value.upt_bagian,
+              jabatan: value.jabatan,
             departmen: value.departemen_jurusan,
           }))
         );
@@ -325,58 +332,89 @@ export default function SuggestionSytemIndex({ onChangePage }) {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListReviewer(data);
+    useEffect(() => {
+      const fetchDataPenilaian = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaian2");
+  
+          // console.log("SIS ID: ", data);
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setPenJabatan({
+              sis_id: data.map((value) => value["Id Sis"]),
+              pen_created_by: data.map((value) => value.CreatedBy)
+            });
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListReviewer({});
         }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListReviewer({});
-      }
-    };
+      };
+      fetchDataPenilaian();
+    }, [])
+    // console.log("Jabatannn: ", penJabatan);
 
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Innovation Category",
-        });
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListCategory(data.filter((item) => item.Text.includes("Batch")));
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListReviewer(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListReviewer({});
         }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      }
-    };
+      };
+  
+      fetchData();
+    }, []);
 
-    fetchData();
-  }, []);
-
+    console.log("DATA ALL ", currentData);
+    
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+            p1: "Innovation Category",
+          });
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListCategory(data.filter((item) => item.Text.includes("Batch")));
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }
+      };
+  
+      fetchData();
+    }, []);
+  
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -386,16 +424,15 @@ export default function SuggestionSytemIndex({ onChangePage }) {
           API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter
         );
+        console.log("DATA SS:", data);
 
         if (data === "ERROR") {
           setIsError(true);
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
-          const hanifData = listEmployee.find(
-            (value) => value.username === currentData.Creaby
-          );
-          console.log("DATA HANIF:", hanifData);
+          const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
+          // console.log("DATA HANIF:", hanifData);
           const role = userInfo.role.slice(0, 5);
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => {
@@ -521,12 +558,14 @@ export default function SuggestionSytemIndex({ onChangePage }) {
         setIsLoading(false);
       }
     };
-
-    console.log("COOKIE", JSON.parse(decryptId(cookie)));
+    
+    // console.log("COOKIE", JSON.parse(decryptId(cookie))); 
     fetchData();
   }, [currentFilter, listEmployee]);
 
   if (isLoading) return <Loading />;
+
+  console.log("DeptArrData:", userInfo);
 
   return (
     <>
@@ -637,6 +676,8 @@ export default function SuggestionSytemIndex({ onChangePage }) {
             onApprove={handleApprove}
             onReject={handleReject}
             onEdit={onChangePage}
+            onScoring={onScoring}
+            onEditScoring={onEditScoring}
           />
           <Paging
             pageSize={PAGE_SIZE}

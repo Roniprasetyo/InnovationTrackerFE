@@ -11,6 +11,7 @@ export default function Table({
   onDetail = () => {},
   onScoring = () => {},
   onEdit = () => {},
+  onEditScoring = () => {},
   onApprove = () => {},
   onReject = () => {},
   onSubmit = () => {},
@@ -120,6 +121,17 @@ export default function Table({
               cssClass="btn px-1 py-0 text-primary"
               title="Modify"
               onClick={() => onEdit("edit", id, rowValue)}
+            />
+          );
+        case "EditScoring":
+          return (
+            <Icon
+              key={key + action}
+              name="edit"
+              type="Bold"
+              cssClass="btn px-1 py-0 text-primary"
+              title="Modify"
+              onClick={() => onEditScoring("editScoring", id, rowValue)}
             />
           );
         case "Approve":
@@ -297,7 +309,8 @@ export default function Table({
                       (value["Status"] === "Draft" ||
                         value["Status"] === "Revision" ||
                         value["Status"] === "Belum Dikonversi" ||
-                        value["Status"] === "Belum Dibuat Penjadwalan")
+                        value["Status"] === "Belum Dibuat Penjadwalan" ||
+                        value["Status"] === "Draft Scoring")
                         ? "fw-bold"
                         : undefined
                     }

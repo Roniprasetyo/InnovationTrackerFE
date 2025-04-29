@@ -4,13 +4,18 @@ import { decodeHtml, formatDate, separator } from "../../util/Formatting";
 import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
+import { date, number, object, string } from "yup";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
+import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
 import Input from "../../part/Input";
+import SearchDropdown from "../../part/SearchDropdown";
+import DropDown from "../../part/Dropdown";
+import Button from "../../part/Button";
 
 const inisialisasiData = [
   {
@@ -21,7 +26,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function MiniConventionScoring({ onChangePage }) {
+export default function MiniConventionScoring({ onChangePage, WithID }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
@@ -32,6 +37,7 @@ export default function MiniConventionScoring({ onChangePage }) {
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] = useState([]);
   const [userData, setUserData] = useState({});
+  const [totalScore, setTotalScore] = useState(0);
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [userInput, setUserInput] = useState("");
@@ -62,6 +68,34 @@ export default function MiniConventionScoring({ onChangePage }) {
     "Alasan Penolakan": "",
   });
 
+  const formDataRef2 = useRef({});
+
+  const userSchema = object({
+    Key: number().required("required"),
+    NPK: string().required("required"),
+
+    ino_category: string().required("required"),
+    know_category: string().required("required"),
+    sis_tanggalmulai: date().typeError("invalid date").required("required"),
+    sis_tanggalakhir: date()
+      .typeError("Invalid date format")
+      .required("Start date is required"),
+    per_id: number().required("required"),
+    sis_ruanglingkup: string().required("required"),
+    sis_kasus: string().required("required"),
+    sis_kasusfile: string().nullable(),
+    sis_masalah: string().required("required"),
+    sis_masalahfile: string().nullable(),
+    sis_tujuan: string().required("required"),
+    sis_tujuanfile: string().nullable(),
+    sis_kualitas: string().max(200, "maximum 200 characters").nullable(),
+    sis_biaya: string().max(200, "maximum 200 characters").nullable(),
+    sis_kemanan: string().max(200, "maximum 200 characters").nullable(),
+    sis_pengiriman: string().max(200, "maximum 200 characters").nullable(),
+    sis_moral: string().max(200, "maximum 200 characters").nullable(),
+      "Alasan Penolakan": string(),
+    });
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -70,10 +104,11 @@ export default function MiniConventionScoring({ onChangePage }) {
         const data = await UseFetch(
           API_LINK + "MiniConvention/GetMiniConventionById",
           {
-            id: id,
+            id: WithID,
           }
         );
 
+        console.log(WithID, data);
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
@@ -103,6 +138,33 @@ export default function MiniConventionScoring({ onChangePage }) {
       setUserData(userData);
     }
   }, [listEmployee, userInfo]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    formDataRef2.current[name] = value;
+  
+    const validationError = validateInput(name, value, userSchema);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [validationError.name]: validationError.error,
+    }));
+
+    let total = 0;
+    Object.values(formDataRef2.current).forEach((val) => {
+      const matched = listDetailKriteriaPenilaian.find((item) => item.Value === val);
+
+      console.log("val dari formDataRef2:", val);
+      console.log("matched item:", matched);
+
+      const parsed = parseFloat(matched?.Score);
+      if (!isNaN(parsed)) total += parsed;
+    });
+
+    setTotalScore(total);
+
+  };
+  
 
   useEffect(() => {
       const fetchData = async () => {
@@ -162,7 +224,6 @@ export default function MiniConventionScoring({ onChangePage }) {
           setListCategory({});
         }
       };
-  
       fetchData();
     }, []);
 
@@ -175,7 +236,14 @@ export default function MiniConventionScoring({ onChangePage }) {
           if (data === "ERROR") {
             throw new Error("Error: Failed to get the category data.");
           } else {
-            setListDetailKriteriaPenilaian(data);
+            const dataDetail = data.map((item) => ({
+              Text: `${item.Desc} - (${item.Score})`,
+              Value: item.Value,
+              Score: item.Score,
+              Id: item.Value2
+            }));
+
+            setListDetailKriteriaPenilaian(dataDetail);
           }
         } catch (error) {
           window.scrollTo(0, 0);
@@ -191,6 +259,7 @@ export default function MiniConventionScoring({ onChangePage }) {
       fetchData();
     }, []);
 
+    console.log("DATA ", listDetailKriteriaPenilaian);
     const formatNumber = (value) => {
       return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     };
@@ -286,132 +355,121 @@ export default function MiniConventionScoring({ onChangePage }) {
                         <div className="card-header align-items-center d-flex">
                           <h5 className="fw-medium">Criteria</h5>
                         </div>
-                        <div className="card-body d-flex flex-row flex-wrap align-items-center">
-                          {listKriteriaPenilaian.map((item, index) => (
-                            <div className="card mb-3 col-lg-12">
-                              <div className="card-header align-items-center d-flex gap-3">
-                                <h5 className="fw-medium">{item["Text"] || "-"}</h5>
-                                <div style={{ width: '1px', height: '30px', backgroundColor: 'black' }}></div>
-                                <h6 className="fw-medium mt-1">{item["Desc"] || "-"}</h6>
-                              </div>
-                              {/* {index === 0 && (
-                                <div>
-                                    <div className="card align-items-center rounded-0 border-0" style={{ fontWeight: 'bold' }}>Scores</div>
-                                    <hr />
-                                </div>
-                                )
-                              } */}
-                              <div className={`card-body d-flex ${index !== 0 ? 'flex-column align-items-left' : 'align-items-center'} `} style={{gap:'25px', marginBottom:'-15px'}} key={index}>
-                                {listDetailKriteriaPenilaian
-                                  .filter(item2 => item["Value"] === item2["Value2"])
-                                  // .reduce((acc, curr) => {
-                                  //   const existing = acc.find(item => item.Desc === curr.Desc);
-                                  //   if (existing) {
-                                  //     existing.Scores.push(curr.Score);
-                                  //   } else {
-                                  //     acc.push({ ...curr, Scores: [curr.Score] });
-                                  //   }
-                                  //   return acc;
-                                  // }, [])
-                                  .map((item2, index2, arr) => {
-                                    const parseNumber = (desc) => {
-                                      const match = desc.match(/\d+/);
-                                      return match ? parseInt(match[0], 10) : 0;
-                                    };
+                        <div className="card-body d-flex flex-wrap">
+                          <div className="pe-4 border-end" style={{ width: '80%' }}>
+                            {listKriteriaPenilaian.map((item) => {
+                              const selectedItem = listDetailKriteriaPenilaian.find(
+                                (detail) => detail.Id === item.Value
+                              );
 
-                                    const angkaBatas = parseNumber(item2["Desc"]);
-                                    const batasBawah = index2 < arr.length - 1 ? parseNumber(arr[index2 + 1]["Desc"]) : Infinity;
-                                    const inputUser = parseInt(userInput || '', 10);
-                                    const isMasuk = (index2 === 0 && inputUser <= angkaBatas) || (inputUser > angkaBatas && inputUser <= batasBawah);
-                                    return (
-                                      <div key={index2}>
-                                        {item["Value"] === item2["Value2"] && (
-                                          <div className=" d-flex row col-lg-12">
-                                            {/* {index === 0 && ( */}
-                                              <>
-                                                <div className={`small card align-items-center ${index2 !== 0 ? '' : ''}`} style={{minWidth:'45px', backgroundColor: isMasuk ? '#d4edda' : 'transparent', marginLeft:'11.5px'}}>
-                                                  <Label
-                                                  data={item2["Score"]}
-                                                  />
-                                                </div>
-                                                {/* <div className={`small card justify-content-center align-items-center ${index2 !== 0 ? '' : ''}`} style={{minWidth:'45px', backgroundColor: isMasuk ? '#d4edda' : 'transparent', width:'58px'}}>
-                                                  <Label
-                                                  data={item2["Desc"]}
-                                                  />
-                                                </div> */}
-                                              </>
-                                            {/* )} */}
-                                          </div>
-                                        )}
-                                        {isMasuk && index === 0 && (
-                                          <div className="align-items-center d-flex justify-content-center" style={{ color: 'green', fontWeight: 'bold' }}>✓</div>
-                                        )}
-                                        {/* {index !== 0 && (
-                                          <div className="d-flex">
-                                            <div className="hover-card col-lg-12" style={{cursor: 'pointer'}} 
-                                            // onMouseEnter={(e) => {
-                                            //   e.currentTarget.style.backgroundColor = '#e9ecef';
-                                            //   e.currentTarget.style.fontWeight = 'bold';
-                                            // }}
-                                            // onMouseLeave={(e) => {
-                                            //   e.currentTarget.style.backgroundColor = '';
-                                            //   e.currentTarget.style.fontWeight = '';
-                                            // }}
-                                            >
-                                              <div className="d-flex justify-content-between border-bottom">
-                                                <div>
-                                                  <Label
-                                                  data={item2["Desc"]}
-                                                  />
-                                                </div>
-                                                <div>
-                                                  <Label
-                                                  data={item2["Score"]}
-                                                  />
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        )} */}
-                                      </div>
-                                    )
-                                  })}
-                              </div>
-                              {index === 0 && (<hr />) }
-                              {index === 0 && ((
-                                <div className="d-flex justify-content-between">
-                                  <div className="d-flex align-items-center mb-3 ms-3 gap-3 flex-wrap flex-sm-nowrap" style={{width:'350px'}}>
-                                      <div>
-                                        <Input
-                                        type="text"
-                                        value={formattedValue}
-                                        onChange={handleChange}
-                                        />
-                                      </div>
-                                      <div style={{width:'200px', marginTop:'15px'}}>
-                                        <Label
-                                        data="X Rp. 1000/bulan"
-                                        />
-                                      </div>
+                              const filteredArrData = listDetailKriteriaPenilaian.filter(
+                                (detail) => detail.Id === item.Value
+                              );
+
+                              return (
+                                <div className="row mb-3" key={item.Value}>
+                                  <div className="col-lg-4">
+                                    <Label data={item.Text} />
                                   </div>
-                                  <div className="card d-flex text-center me-3" style={{width:'150px', marginBottom:'15px'}}>
-                                    <Label
-                                    title="Score"
+                                  <div className="col-lg-8">
+                                    <SearchDropdown
+                                      forInput={item.Value}
+                                      arrData={filteredArrData}
+                                      isRound
+                                      value={formDataRef2.current[item.Value] || ""}
+                                      onChange={handleInputChange}
                                     />
                                   </div>
                                 </div>
-                              ))}
+                              );
+                            })}
+                          </div>
+                          <div className="ps-4 d-flex flex-column gap-3" style={{ width: '20%' }}>
+                            <div className="card text-center">
+                              <div className="card-header">
+                                <h8 className="fw-medium">Score</h8>
+                              </div>
+                              <div className="card-body d-flex flex-column gap-3">
+                                <div className="card fw-medium text-center">
+                                  Ka.Unit/Ka.UPT
+                                  <hr />
+                                  <h5>{totalScore}</h5>
+                                </div>
+                                <div className="card fw-medium text-center">
+                                  Ka.Prodi/Ka.Dept
+                                  <hr />
+                                  <h5>{0}</h5>
+                                </div>
+                                <div className="card fw-medium text-center">
+                                  WaDIR/DIR
+                                  <hr />
+                                  <h5>{0}</h5>
+                                </div>
+                              </div>
                             </div>
-                          ))}
+                            <div className="card fw-medium text-center">
+                              <div className="card-header">
+                                <h7 className="fw-medium">Total Scores</h7>
+                              </div>
+                              <h5>{totalScore}</h5>
+                            </div>
+                            {/* {listKriteriaPenilaian.slice(Math.ceil(listKriteriaPenilaian.length / 2)).map((item) => {
+                              const selectedItem = listDetailKriteriaPenilaian.find(
+                                (detail) => detail.Id === item.Value
+                              );
+
+                              const filteredArrData = listDetailKriteriaPenilaian.filter(
+                                (detail) => detail.Id === item.Value
+                              );
+
+                              return (
+                                <div className="row mb-3" key={item.Value}>
+                                  <div className="col-lg-4">
+                                    <Label data={item.Text} />
+                                  </div>
+                                  <div className="col-lg-8">
+                                    <SearchDropdown
+                                      forInput={item.Value}
+                                      arrData={filteredArrData}
+                                      isRound
+                                      value={formDataRef2.current[item.Value] || ""}
+                                      onChange={handleInputChange}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })} */}
+                          </div>
+                          
                         </div>
                       </div>
                   </div>
-                  <div className="d-flex justify-content-end pe-3 mb-3">
+                  <div className="col-lg-12 ms-auto">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div className="flex-grow-1 m-2">
+                        <Button
+                          classType="danger me-2 px-4 py-2"
+                          label="CANCEL"
+                          onClick={() => onChangePage("index")}
+                          style={{ width: "100%", borderRadius: "16px" }}
+                        />
+                      </div>
+                      <div className="flex-grow-1 m-2">
+                        <Button
+                          classType="primary ms-2 px-4 py-2"
+                          type="submit"
+                          label="SUBMIT"
+                          style={{ width: "100%", borderRadius: "16px" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {/* <div className="d-flex justify-content-end pe-3 mb-3">
                     <sub>
                       Submitted by{" "}
                       <strong>{formDataRef.current["Creaby"] || "-"}</strong>
                     </sub>
-                  </div>
+                  </div> */}
                 </div>
               )}
             </div>
