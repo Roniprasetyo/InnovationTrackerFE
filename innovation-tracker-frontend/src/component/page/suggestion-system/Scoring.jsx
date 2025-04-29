@@ -882,8 +882,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         <Tab
                                           key={index}
                                           label={isChecked ? (
-                                            <div className="d-flex gap-2">
-                                              <span style={{ color: 'green' }}>✓</span>
+                                            <div className="d-flex gap-2 align-items-center">
+                                              <span style={{ color: 'green', fontSize:'20px' }}>✓</span>
                                               <span style={{ fontSize: '14px' }}>{label}</span>
                                             </div>
                                           ) : (
@@ -1159,38 +1159,84 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                             </div>
                           </Box>
                           <Box sx={{width:'20%'}}>
-                            <div className="ps-4">
+                          <div className="ps-4">
                               <div
                                 className="d-flex flex-column gap-3"
                                 style={{ height: "100px" }}
                               >
-                                <div
-                                  className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
-                                >
-                                  Total Score
-                                  <hr />
-                                  Ka.Unit/Ka.UPT/SekProdi
-                                  <h3>{totalScoreforKaUpt}</h3>
-                                </div>
-                                <div
-                                  className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
-                                >
-                                  Total Score
-                                  <hr />
-                                  Ka.Prodi/Ka.Dept
-                                  <h3>{totalScoreforKaDept}</h3>
-                                </div>
-                                <div
-                                  className="card fw-medium text-center"
-                                  style={{ width: "200px", minHeight:'180px' }}
-                                >
-                                  Total Score
-                                  <hr />
-                                  WaDIR/DIR
-                                  <h3>{totalScoreforWadir}</h3>
-                                </div>
+                                  <>
+                                  {/* Ka.Unit/Ka.UPT/SekProdi */}
+                                  <div
+                                    className="card fw-medium text-center"
+                                    style={{
+                                      width: "200px",
+                                      minHeight: "180px",
+                                      color: selectedTab === 0 ? "white" : "black",                                                                          
+                                      backgroundColor: selectedTab === 0 ? "#0d6efd" : "white",
+                                      boxShadow:
+                                        selectedTab === 0
+                                          ? "0 2px 10px rgba(13, 110, 253, 0.75)"
+                                          : "none",
+                                          transform: selectedTab === 0
+                                          ? "scale(1.05)"
+                                          : "scale(1)",      
+                                      transition: "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+                                    }}
+                                  >
+                                    <div className="mt-2">Total Score</div>
+                                    <hr />
+                                    Ka.Unit/Ka.UPT/SekProdi
+                                    <h1>{totalScoreforKaUpt}</h1>
+                                  </div>
+
+                                  {/* Ka.Prodi/Ka.Dept */}
+                                  <div
+                                    className="card fw-medium text-center"
+                                    style={{
+                                      width: "200px",
+                                      minHeight: "180px",
+                                      color: selectedTab === 1 ? "white" : "black",                                                                          
+                                      backgroundColor: selectedTab === 1 ? "#0d6efd" : "white",
+                                      boxShadow:
+                                        selectedTab === 1
+                                          ? "0 2px 10px rgba(13, 110, 253, 0.75)"
+                                          : "none",
+                                          transform: selectedTab === 1
+                                          ? "scale(1.05)"
+                                          : "scale(1)",      
+                                      transition: "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+                                    }}
+                                  >
+                                    <div className="mt-2">Total Score</div>
+                                    <hr />
+                                    Ka.Prodi/Ka.Dept
+                                    <h1>{totalScoreforKaDept}</h1>
+                                  </div>
+
+                                  {/* WaDIR/DIR */}
+                                  <div
+                                    className="card fw-medium text-center"
+                                    style={{
+                                      width: "200px",
+                                      minHeight: "180px",
+                                      color: selectedTab === 2 ? "white" : "black",                                                                          
+                                      backgroundColor: selectedTab === 2 ? "#0d6efd" : "white",
+                                      boxShadow:
+                                        selectedTab === 2
+                                          ? "0 2px 10px rgba(13, 110, 253, 0.75)"
+                                          : "none",
+                                          transform: selectedTab === 2
+                                          ? "scale(1.05)"
+                                          : "scale(1)",      
+                                      transition: "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+                                    }}
+                                  >
+                                    <div className="mt-2">Total Score</div>
+                                    <hr />
+                                    WaDIR/DIR
+                                    <h1>{totalScoreforWadir}</h1>
+                                  </div>
+                                </>
                               </div>
                             </div>
                           </Box>

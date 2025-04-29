@@ -235,6 +235,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
 
   useEffect(() => {
       const fetchData = async () => {
+        setIsLoading(true);
         setIsError((prevError) => ({ ...prevError, error: false }));
         try {
           const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
@@ -270,6 +271,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
 
     useEffect(() => {
       const fetchDataPenilaian = async () => {
+        setIsLoading(true);
         setIsError((prevError) => ({ ...prevError, error: false }));
         try {
           const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaian2");
@@ -299,6 +301,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
 
     useEffect(() => {
       const fetchData = async () => {
+        setIsLoading(true);
         setIsError((prevError) => ({ ...prevError, error: false }));
         try {
           const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
@@ -326,6 +329,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
     
     useEffect(() => {
       const fetchData = async () => {
+        setIsLoading(true);
         setIsError((prevError) => ({ ...prevError, error: false }));
         try {
           const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
@@ -354,6 +358,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
+      setIsLoading(true);
 
       try {
         const data = await UseFetch(
@@ -438,8 +443,8 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
                 "center",
                 "left",
                 "left",
-                "left",
-                "right",
+                "center",
+                "center",
                 "center",
                 "center",
                 "center",
@@ -547,16 +552,18 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
       </div>
       <div className="mt-3 mb-5">
         <div className="d-flex flex-column">
-          <Table
-            data={currentData}
-            onDetail={onChangePage}
-            onSubmit={handleSubmit}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onEdit={onChangePage}
-            onScoring={onScoring}
-            onEditScoring={onEditScoring}
-          />
+          {!isLoading && (
+            <Table
+              data={currentData}
+              onDetail={onChangePage}
+              onSubmit={handleSubmit}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onEdit={onChangePage}
+              onScoring={onScoring}
+              onEditScoring={onEditScoring}
+            />
+          )}
           <Paging
             pageSize={PAGE_SIZE}
             pageCurrent={currentFilter.page}
