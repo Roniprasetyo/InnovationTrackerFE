@@ -27,12 +27,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
   useEffect(() => {
     if (!value || value === null || value === "") {
       setSearchTerm("");
-      if (selectedValued != null) {
-        setSearchTerm(
-          selectedValued.Text.length > 75
-            ? selectedValued.Text.substring(0, 70) + "..."+ selectedValued.Text.substring(selectedValued.Text.length-9,selectedValued.Text.length)
-            : selectedValued.Text
-        );
+      if (selectedValued != null) { 
         value = selectedValued.Value;
         if (arrData != null) {
           onChange({ target: { name: forInput, value: selectedValued.Value } });
@@ -42,7 +37,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
       const matchedData = arrData.find((data) => data.Value === value);
       setSearchTerm(matchedData ? (
         matchedData.Text.length > 75
-          ? matchedData.Text.substring(0, 70) + "..."+ matchedData.Text.substring(matchedData.Text.length-9,matchedData.Text.length)
+          ? matchedData.Text.substring(0, 75) + "... "
           : matchedData.Text
       ) : "");
       

@@ -18,6 +18,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import { Tabs, Tab, Box, Paper, List } from "@mui/material";
+import * as Yup from "yup";
 import PropTypes from "prop-types";
 
 const inisialisasiData = [
@@ -229,14 +230,20 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
-    
-    console.log("tessss",tabIndexUser)
 
-    if (userInfo.jabatan === "Kepala Seksi" || userInfo.jabatan === "Sekretaris Prodi"){
+    console.log("tessss", tabIndexUser);
+
+    if (
+      userInfo.jabatan === "Kepala Seksi" ||
+      userInfo.jabatan === "Sekretaris Prodi"
+    ) {
       setTotalScoreforKaUpt(total);
-    }else if(userInfo.jabatan == "Kepala Departemen"){
+    } else if (userInfo.jabatan == "Kepala Departemen") {
       setTotalScoreforKaDept(total);
-    }else if(userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur" ){
+    } else if (
+      userInfo.jabatan === "Wakil Direktur" ||
+      userInfo.jabatan === "Direktur"
+    ) {
       setTotalScoreforWadir(total);
     }
   };
@@ -289,51 +296,92 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       sis_id: id,
       pen_nilai: Object.values(formDataRef3.current).join(", "),
       jabatan: userInfo.jabatan,
-      status: "-",
+      statusPN: "-",
+      created: userInfo.username,
     };
 
-    // const validationErrors = await validateAllInputs(
-    //   formDataRef2.current,
-    //   userSchema,
-    //   setErrors
-    // );
+    const payloadSchema = Yup.object().shape({
+      dkp_id: Yup.string()
+        .required("dkp_id is required")
+        .matches(
+          /^(\d+\s*,\s*)*\d+$/,
+          "dkp_id must be a comma-separated list of numbers"
+        )
+        .test(
+          "length-9",
+          "All Assessment Schemes must be filled!",
+          function (value) {
+            if (!value) return false;
+            const items = value
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v !== "");
+            return items.length === listKriteriaPenilaian.length;
+          }
+        ),
+
+      sis_id: Yup.string().required("sis_id is required"),
+
+      pen_nilai: Yup.string()
+        .required("pen_nilai is required")
+        .matches(
+          /^(\d+\s*,\s*)*\d+$/,
+          "pen_nilai must be a comma-separated list of numbers"
+        ),
+
+      jabatan: Yup.string().required("jabatan is required"),
+
+      statusPN: Yup.string().required("statusPN is required"),
+
+      created: Yup.string().required("created is required"),
+    });
+
+    console.log("Payload ", payload);
+    const validationErrors = await validateAllInputs(
+      payload,
+      payloadSchema,
+      setErrors
+    );
 
     // console.log("FormDataRef: ", formDataRef2.current);
     // console.log("Payload: ", payload);
     // console.log("Payload nilai: ", formDataRef3);
 
-    // if (Object.values(validationErrors).every((error) => !error)) {
-    //   setIsLoading(true);
-    //   setIsError((prevError) => ({ ...prevError, error: false }));
-    //   setErrors({});
+    if (Object.values(validationErrors).every((error) => !error)) {
+      setIsLoading(true);
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
 
-    try {
-      const data = await UseFetch(
-        API_LINK + "RencanaSS/CreatePenilaian",
-        payload
-      );
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/CreatePenilaian",
+          payload
+        );
 
-      // console.log("tes", data);
-      if (!data) {
-        throw new Error("Error: Failed to Submit the data.");
-      } else {
-        SweetAlert("Success", "Data Successfully Submitted", "success");
-        setTimeout(function () {
-          localStorage.setItem("refreshAfterSubmit", "true");
-          window.close();
-        }, 2000);
+        // console.log("tes", data);
+        if (!data) {
+          throw new Error("Error: Failed to Submit the data.");
+        } else {
+          SweetAlert("Success", "Data Successfully Submitted", "success");
+          setTimeout(function () {
+            localStorage.setItem("refreshAfterSubmit", "true");
+            window.close();
+          }, 2000);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      window.scrollTo(0, 0);
-      setIsError((prevError) => ({
-        ...prevError,
-        error: true,
-        message: error.message,
-      }));
-    } finally {
-      setIsLoading(false);
+    } else {
+      SweetAlert("Error", Object.values(validationErrors).join("\n"), "error");
+      // } window.scrollTo(0, 0);
     }
-    // } else window.scrollTo(0, 0);
   };
 
   useEffect(() => {
@@ -511,6 +559,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           API_LINK + "RencanaSS/GetListSettingRanking"
         );
 
+        console.log("Rankings: ", data);
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the GetListSettingRanking.");
         } else {
@@ -628,7 +677,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           );
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (Poin: ${item.Score})`,
+            Text: `(Poin: ${item.Score}) - ${item.Desc}`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -687,7 +736,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     // );
     // console.log("tesss", newValue);
     // console.log("tes", isChecked);
-    // setReadOnly(isChecked);  
+    // setReadOnly(isChecked);
 
     setHasUserSelectedTab(true);
   };
@@ -741,7 +790,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
     listPenilaianKaUpt.forEach((item) => {
       if (
-        item["Jabatan Penilai"] !== "Kepala Seksi" ||
+        item["Jabatan Penilai"] !== "Kepala Seksi" &&
         item["Jabatan Penilai"] !== "Sekretaris Prodi"
       ) {
         tempTotal1 = 0;
@@ -832,7 +881,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     else if (selectedTab === 1) jabatanTarget = ["Kepala Departemen"];
     else if (selectedTab === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
     let isChecked = false;
-    if(listAllPenilaian.length != 0){
+    if (listAllPenilaian.length != 0) {
       isChecked = listAllPenilaian.some(
         (item) =>
           item["Jabatan Penilai"] &&
@@ -844,12 +893,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     }
 
     console.log("tesss", selectedTab);
-    console.log("tessss",listAllPenilaian)
+    console.log("tessss", listAllPenilaian);
     console.log("tes", isChecked);
 
-    console.log("dsfs",selectedTab);
+    console.log("dsfs", selectedTab);
     setActiveTab(selectedTab === tabIndexUser);
-  }, [selectedTab, tabIndexUser,listAllPenilaian]);
+  }, [selectedTab, tabIndexUser, listAllPenilaian]);
 
   console.log("ACTIVE", activeTab);
   if (isLoading) return <Loading />;
@@ -1374,8 +1423,46 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                   return (
                                     <div className="row mb-3" key={item.Value}>
                                       <div className="col-lg-4">
-                                        <Label data={item.Text} />
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "flex-start",
+                                            gap: "4px",
+                                          }}
+                                        >
+                                          <Label
+                                            data={
+                                              item.Text === "Reduksi Biaya"
+                                                ? `${item.Text} \t (IDR)`
+                                                : item.Text
+                                            }
+                                          />
+                                          <span
+                                            style={{
+                                              color: "red",
+                                              fontSize: "1rem",
+                                              lineHeight: "1",
+                                            }}
+                                          >
+                                            *
+                                          </span>
+                                        </div>
+
+                                        {item.Text === "Reduksi Biaya" && (
+                                          <div style={{ marginTop: "-20px" }}>
+                                            <small
+                                              style={{
+                                                fontSize: "0.75rem",
+                                                color: "#6c757d",
+                                              }}
+                                            >
+                                              material, consumable, man hour,
+                                              dll...
+                                            </small>
+                                          </div>
+                                        )}
                                       </div>
+
                                       <div className="col-lg-8">{content}</div>
                                     </div>
                                   );

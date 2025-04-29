@@ -249,6 +249,10 @@ export default function MiniConventionScoring({ onChangePage }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    console.log("P, punya saya", errors);
+  }, [errors]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -269,9 +273,9 @@ export default function MiniConventionScoring({ onChangePage }) {
       pen_createdate: listPenilaian[0].creadate,
       pen_modif_by: userInfo.username,
       pen_comment:
-        formComment.current != ""
+        formComment.current && formComment.current.trim() !== ""
           ? `${formComment.current} - ${userInfo.username}`
-          : "",
+          : undefined,
     };
 
     const payloadSchema = Yup.object().shape({
@@ -280,7 +284,18 @@ export default function MiniConventionScoring({ onChangePage }) {
           /^(\d+\s*,\s*)*\d+$/,
           "dkp_id must be a comma-separated list of numbers"
         )
-        .required("dkp_id is required"),
+        .test(
+          "length-9",
+          "All Assessment schemes must be filled!",
+          function (value) {
+            if (!value) return false;
+            const items = value
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v !== "");
+            return items.length === listKriteriaPenilaian.length;
+          }
+        ),
 
       sis_id: Yup.string().required("sis_id is required"),
 
@@ -289,7 +304,18 @@ export default function MiniConventionScoring({ onChangePage }) {
           /^(\d+\s*,\s*)*\d+$/,
           "pen_nilai must be a comma-separated list of numbers"
         )
-        .required("pen_nilai is required"),
+        .test(
+          "length-9",
+          "All Assessment schemes must be filled!",
+          function (value) {
+            if (!value) return false;
+            const items = value
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v !== "");
+            return items.length === listKriteriaPenilaian.length;
+          }
+        ),
 
       jabatan: Yup.string().required("jabatan is required"),
 
@@ -303,7 +329,7 @@ export default function MiniConventionScoring({ onChangePage }) {
 
       pen_modif_by: Yup.string().required("pen_modif_by is required"),
 
-      pen_comment: Yup.string().nullable(),
+      pen_comment: Yup.string().required("ISI DONG"),
     });
 
     console.log("payload: ", payload);
@@ -314,7 +340,12 @@ export default function MiniConventionScoring({ onChangePage }) {
       setErrors
     );
 
-    // console.log("VALIDASI: ", validationErrors);
+    console.log(
+      "VALIDASI: ",
+      Object.values(validationErrors).every((error) => !error)
+    );
+    console.log("VALIDASI: ", validationErrors);
+    console.log("VALIDASI: ", errors);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
@@ -353,8 +384,9 @@ export default function MiniConventionScoring({ onChangePage }) {
         setIsLoading(false);
       }
     } else {
-      // SweetAlert("")
-      window.scrollTo(0, 0);
+      console.log("356 error", errors);
+      SweetAlert("Error", Object.values(validationErrors).join('\n'), "error");
+      // window.scrollTo(0, 0);
     }
   };
 
@@ -656,16 +688,18 @@ export default function MiniConventionScoring({ onChangePage }) {
                               </h3>
 
                               <hr
-                                // style={{
-                                //   width: "100%",
-                                //   borderColor: "white",
-                                //   margin: "0.5rem 0",
-                                // }}
+                              // style={{
+                              //   width: "100%",
+                              //   borderColor: "white",
+                              //   margin: "0.5rem 0",
+                              // }}
                               />
 
                               {/* ISI DI TENGAH */}
                               <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
-                                <h1 className="fw-medium fw-bold">{totalScore}</h1>
+                                <h1 className="fw-medium fw-bold">
+                                  {totalScore}
+                                </h1>
                               </div>
                             </div>
                           </div>
