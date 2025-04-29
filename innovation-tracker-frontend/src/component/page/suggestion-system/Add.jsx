@@ -118,13 +118,18 @@ export default function SuggestionSystemAdd({ onChangePage }) {
 
   useEffect(() => {
     if (listEmployee.length > 0 && userInfo?.upt) {
+      const jabatanTarget =
+        userInfo.upt === "Pusat Sistem Informasi" ? "Kepala Departemen" : "Kepala Seksi";
+  
       const KepalaSeksiData = listEmployee.find(
-        (value) =>
-          value.upt_bagian === userInfo.upt && value.jabatan === "Kepala Seksi"
+        (value) => value.upt_bagian === userInfo.upt && value.jabatan === jabatanTarget
       );
+  
       setSectionHead(KepalaSeksiData);
     }
-  }, [listEmployee, userInfo]);
+  }, [listEmployee, userInfo]);  
+
+  console.log("SECTION HEAD", sectionHead);
 
   useEffect(() => {
     if (sectionHead?.npk) {

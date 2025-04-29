@@ -380,6 +380,10 @@ export default function SuggestionSytemIndex({
               (emp) => emp.username === value["Creaby"]
             );
 
+            const jabatanTarget = userInfo.upt === "Pusat Sistem Informasi" 
+            ? "Kepala Departemen" 
+            : userInfo.jabatan;
+          
             // console.log("FOUND KEY: ", listEmployee);
             // console.log("1",userInfo)
             console.log("v", value);
@@ -416,30 +420,22 @@ export default function SuggestionSytemIndex({
                     value["Status"] === "Rejected" &&
                     value["Creaby"] === userInfo.username
                   ? ["Detail", "Edit", "Submit"]
-                  : userInfo.upt === foundEmployee.upt &&
-                    userInfo.jabatan === "Kepala Seksi" &&
-                    value["Status"] === "Waiting Approval"
+                  : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Kepala Departemen") && value["Status"] === "Waiting Approval"
                   ? ["Detail", "Reject", "Approve"]
                   : role === "ROL01" && value["Status"] === "Approved"
                   ? ["Detail", "Submit"]
-                  : // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring")
-                  // ? ["Detail", "Scoring"]
-                  userInfo.jabatan === "Sekretaris Prodi" ||
-                    userInfo.jabatan === "Kepala Departemen"
+                  : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
                   ? ["Detail", "Scoring"]
-                  : userInfo.jabatan === "Wakil Direktur" ||
-                    userInfo.jabatan === "Direktur"
+                  : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
                   ? ["Detail", "Scoring"]
-                  : // Status Approved By Role 03
-                  // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
-                  userInfo.upt === foundEmployee.upt &&
-                    userInfo.jabatan === "Kepala Seksi" &&
-                    value["Status"] === "Approved"
+                  : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] !== "Draft Scoring")
                   ? ["Detail", "Scoring"]
-                  : userInfo.upt === foundEmployee.upt &&
-                    userInfo.jabatan === "Kepala Seksi" &&
-                    value["Status"] === "Draft Scoring"
-                  ? ["Detail", "EditScoring", "Submit"]
+                  : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] === "Scoring")
+                  ? ["Detail", "Scoring"]
+                  : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
+                  : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
+                  : jabatanTarget === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                  : jabatanTarget === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                   : ["Detail"],
               Alignment: [
                 "center",
@@ -469,6 +465,16 @@ export default function SuggestionSytemIndex({
     fetchData();
   }, [currentFilter, listEmployee]);
 
+  useEffect(() => {
+    const shouldRefresh = localStorage.getItem('refreshAfterSubmit');
+  
+    if (shouldRefresh === 'true') {
+      localStorage.removeItem('refreshAfterSubmit');
+      window.location.reload();
+    }
+  }, []);
+  
+  
   if (isLoading) return <Loading />;
 
   console.log("DeptArrData:", userInfo);
