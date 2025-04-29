@@ -78,6 +78,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [listSettingRanking, setListSettingRanking] = useState([]);
   const [listPenilaianKaDept, setListPenilaianKaDept] = useState([]);
   const [listPenilaianWadir, setListPenilaianWadir] = useState([]);
+  const [submitOnly, setReadOnly] = useState(false);
   const [listKaDept, setKaDept] = useState([]);
   const [listRecordPenilaian, setRecordListPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
@@ -636,6 +637,23 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   const handleTabChange = (e, newValue) => {
     setSelectedTab(newValue);
+    // let jabatanTarget = [];
+
+    // if (newValue === 0) jabatanTarget = ["Kepala Seksi", "Sekretaris Prodi"];
+    // else if (newValue === 1) jabatanTarget = ["Kepala Departemen"];
+    // else if (newValue === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
+
+    // let isChecked = listAllPenilaian.some(
+    //   (item) =>
+    //     item["Jabatan Penilai"] &&
+    //     jabatanTarget.some((jabatan) =>
+    //       item["Jabatan Penilai"].includes(jabatan)
+    //     )
+    // );
+    // console.log("tesss", newValue);
+    // console.log("tes", isChecked);
+    // setReadOnly(isChecked);
+
     setHasUserSelectedTab(true);
   };
   
@@ -759,11 +777,36 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     }
     return "No Ranking";
   };
-
-  useEffect(() => {
-    setActiveTab(selectedTab === tabIndexUser);
-  }, [selectedTab, tabIndexUser]);
   
+  useEffect(() => {
+    let jabatanTarget = [];
+
+    if (selectedTab === 0) jabatanTarget = ["Kepala Seksi", "Sekretaris Prodi"];
+    else if (selectedTab === 1) jabatanTarget = ["Kepala Departemen"];
+    else if (selectedTab === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
+    let isChecked = false;
+    if(listAllPenilaian.length === 0){
+      console.log("tess","kosong bang")
+      setReadOnly(true);
+    }else{
+      isChecked = listAllPenilaian.some(
+        (item) =>
+          item["Jabatan Penilai"] &&
+          jabatanTarget.some((jabatan) =>
+            item["Jabatan Penilai"].includes(jabatan)
+          )
+      );
+      setReadOnly(isChecked);
+    }
+
+    console.log("tesss", selectedTab);
+    console.log("tessss",listAllPenilaian)
+    console.log("tes", isChecked);
+
+    console.log("dsfs",selectedTab);
+    setActiveTab(selectedTab === tabIndexUser);
+  }, [selectedTab, tabIndexUser, listAllPenilaian]);
+
   console.log("ACTIVE", activeTab);
   if (isLoading) return <Loading />;
 
@@ -1244,7 +1287,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                       </div>
                     </div>
                     <div className="col-lg-12">
-                      {activeTab && (
+                      {activeTab && !submitOnly && (
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="flex-grow-1 m-2">
                             <Button
