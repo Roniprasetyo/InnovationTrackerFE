@@ -37,14 +37,6 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
-  // { Value: "[Team Name] asc", Text: "Team Name [↑]" },
-  // { Value: "[Team Name] desc", Text: "Team Name [↓]" },
-  // { Value: "[Circle Title] asc", Text: "[Circle Title] [↑]" },
-  // { Value: "[Circle Title] desc", Text: "[Circle Title] [↓]" },
-  { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
-  { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
-=======
   { Value: "[Circle Name] asc", Text: "Circle Name [↑]" },
   { Value: "[Circle Name] desc", Text: "Circle Name [↓]" },
   { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
@@ -53,7 +45,6 @@ const dataFilterSort = [
   { Value: "[Project Benefit] desc", Text: "[Project Benefit] [↓]" },
   { Value: "[Category] asc", Text: "[Category] [↑]" },
   { Value: "[Category] desc", Text: "[Category] [↓]" },
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
   { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
   { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
   { Value: "[End Date] asc", Text: "[End Date] [↑]" },
@@ -69,17 +60,7 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
-// const dataFilterJenis = [
-//   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-//   { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-//   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
-// ];
-
-export default function SuggestionSytemIndex({ onChangePage }) {
-=======
 export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -137,11 +118,7 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
     );
 
     if (confirm) {
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
-      UseFetch(API_LINK + "RencanaSS/SentRencanaSS", {
-=======
       UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
         id: id,
       })
         .then((data) => {
@@ -160,60 +137,6 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
   };
 
   const handleApprove = async (id) => {
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
-      setIsError(false);
-      const confirm = await SweetAlert(
-        "Confirm",
-        "Are you sure you want to approve this submission?",
-        "warning",
-        "APPROVE",
-        null,
-        "",
-        true
-      );
-  
-      if (confirm) {
-        UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
-          id: id,
-          set: "Approved",
-        })
-          .then((data) => {
-            if (data === "ERROR" || data.length === 0) setIsError(true);
-            else {
-              handleSetCurrentPage(currentFilter.page);
-            }
-          })
-          .then(() => setIsLoading(false));
-      }
-    };
-
-    const handleReject = async (id) => {
-      setIsError(false);
-      const confirm = await SweetAlert(
-        "Confirm",
-        "Are you sure you want to reject this submission?",
-        "warning",
-        "REJECT",
-        null,
-        "",
-        true
-      );
-  
-      if (confirm) {
-        UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
-          id: id,
-          set: "Rejected",
-        })
-          .then((data) => {
-            if (data === "ERROR" || data.length === 0) setIsError(true);
-            else {
-              handleSetCurrentPage(currentFilter.page);
-            }
-          })
-          .then(() => setIsLoading(false));
-      }
-    };
-=======
     setIsError(false);
     const confirm = await SweetAlert(
       "Confirm",
@@ -267,7 +190,6 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
         .then(() => setIsLoading(false));
     }
   };
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
 
   useEffect(() => {
     const fetchData = async () => {
@@ -275,13 +197,8 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
 
       try {
         const data = await UseFetch(
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
-          API_LINK + "RencanaSS/GetRencanaSS",
-          currentFilter 
-=======
           API_LINK + "RencanaCircle/GetRencanaQCP",
           currentFilter
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
         );
 
         if (data === "ERROR") {
@@ -293,12 +210,8 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
-<<<<<<< HEAD:innovation-tracker-frontend/src/component/page/suggestion_system/Index.jsx
-            No: index + 1,
-=======
             No: value["No"],
             "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
->>>>>>> 1b02ac54dc63f7377094e00edf015b634726be11:innovation-tracker-frontend/src/component/page/business-performance-improvement/Index.jsx
             "Project Title": maxCharDisplayed(
               decodeHtml(
                 decodeHtml(decodeHtml(value["Project Title"]))

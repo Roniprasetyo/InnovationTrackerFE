@@ -35,7 +35,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [listEmployee, setListEmployee] = useState([]);
   const [sectionHead, setSectionHead] = useState({});
@@ -79,7 +79,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     sis_pengiriman: "",
     sis_kemanan: "",
     sis_moral: "",
-    facil_id: sectionHead.npk,
+    facil_id: sectionHead?.npk,
   });
 
   const periodDataRef = useRef({
@@ -122,8 +122,20 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         (value) =>
           value.upt_bagian === userInfo.upt && value.jabatan === "Kepala Seksi"
       );
-      setSectionHead(KepalaSeksiData);
+      if (KepalaSeksiData !== undefined) {
+        console.log(KepalaSeksiData);
+        setSectionHead(KepalaSeksiData);
+      } else {
+        const SekProd = listEmployee.find(
+          (value) =>
+            value.upt_bagian === userInfo.upt &&
+            value.jabatan === "Sekretaris Prodi"
+        );
+        console.log(SekProd);
+        setSectionHead(SekProd);
+      }
     }
+    setIsLoading(false);
   }, [listEmployee, userInfo]);
 
   useEffect(() => {
@@ -131,7 +143,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       formDataRef.current.facil_id = sectionHead.npk;
     }
   }, [sectionHead]);
-  
 
   console.log("User Info:", userInfo);
 
@@ -258,37 +269,34 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   }, [selectedPeriod]);
 
   useEffect(() => {
-        const fetchData = async () => {
-          setIsError((prevError) => ({ ...prevError, error: false }));
-          try {
-            const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-              },
-            });
-    
-            const data = await response.json();
-            setListEmployee(
-              data
-            );
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
 
-          } catch (error) {
-            window.scrollTo(0, 0);
-            setIsError((prevError) => ({
-              ...prevError,
-              error: true,
-              message: error.message,
-            }));
-            setListEmployee({});
-          }
-        };
-    
-        fetchData();
-      }, []);   
+        const data = await response.json();
+        setListEmployee(data);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
 
-      console.log("LIST EMPLOYEE ", listEmployee);
+    fetchData();
+  }, []);
+
+  console.log("LIST EMPLOYEE ", listEmployee);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;

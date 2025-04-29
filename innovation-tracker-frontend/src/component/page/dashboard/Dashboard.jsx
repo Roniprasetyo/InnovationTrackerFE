@@ -173,8 +173,8 @@ export default function Dashboard() {
           throw new Error("Error: Failed to get the period data.");
         } else {
           let userData = [];
-          let departmentCount = {};
-          let departments = new Set();
+          let sectionsCount = {};
+          let sections = new Set();
           let categorySet = new Set();
 
           data.forEach((element) => {
@@ -182,24 +182,23 @@ export default function Dashboard() {
               (item) => item.username === element["Creaby"]
             );
             if (usr !== undefined) {
-              const fullData = { ...element, departmen: usr.departmen };
+              const fullData = { ...element, upt: usr.upt };
               userData.push(fullData);
-
-              const dept = usr.departmen;
-              departmentCount[dept] = (departmentCount[dept] || 0) + 1;
-              departments.add(dept);
+              const dept = usr.upt;
+              sectionsCount[dept] = (sectionsCount[dept] || 0) + 1;
+              sections.add(dept);
 
               categorySet.add(element.Submission);
             }
           });
 
-          const departmentsArray = [...departments];
+          const sectionsArray = [...sections];
           const categoryArray = [...categorySet];
 
-          const tableData = departmentsArray
+          const tableData = sectionsArray
             .map((dept, index) => ({
               Department: dept,
-              Total: departmentCount[dept],
+              Total: sectionsCount[dept],
               Alignment: ["center", "left", "right"],
             }))
             .sort((a, b) => b.Total - a.Total);
@@ -214,12 +213,17 @@ export default function Dashboard() {
 
           const formatted = categoryArray.map((category, index) => ({
             label: category,
-            data: departmentsArray.map((dept) => departmentCount[dept] || 0),
+            data: sectionsArray.map(
+              (dept) =>
+                userData.filter(
+                  (value) => value.Submission === category && value.upt === dept
+                ).length
+            ),
             backgroundColor: index % 2 === 0 ? "#3B82F6" : "#59D2FE",
           }));
 
           const formattedData = {
-            labels: departmentsArray,
+            labels: sectionsArray,
             datasets: formatted,
           };
 
