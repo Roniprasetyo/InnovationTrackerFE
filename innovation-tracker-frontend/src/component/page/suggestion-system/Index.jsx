@@ -26,8 +26,8 @@ const inisialisasiData = [
     "Project Title": null,
     "Start Date": null,
     "End Date": null,
-    "Period": null,
-    "Category": null,
+    Period: null,
+    Category: null,
     Status: null,
     Creaby: null,
     Count: 0,
@@ -60,7 +60,11 @@ const dataFilterStatus = [
 //   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
 // ];
 
-export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditScoring }) {
+export default function SuggestionSytemIndex({
+  onChangePage,
+  onScoring,
+  onEditScoring,
+}) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -111,14 +115,14 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   }
 
   const getStatusByKey = (key) => {
-    const data = currentData.find(item => item.Key === key);
+    const data = currentData.find((item) => item.Key === key);
     return data ? data.Status : null;
   };
 
   const handleSubmit = async (id) => {
     setIsError(false);
     const tempStatus = getStatusByKey(id);
-    
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure about this value?",
@@ -129,26 +133,24 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
       true
     );
 
-
     if (confirm) {
       console.log(1, id);
-      if(tempStatus !== "Approved") {
+      if (tempStatus !== "Approved") {
         UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
           id: id,
         })
-        .then((data) => {
-          if (!data) {
-            setIsError(true)
-          }
-          else {
-            SweetAlert(
-              "Success",
-              "Thank you for your rating. Please wait until the next update",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
+          .then((data) => {
+            if (!data) {
+              setIsError(true);
+            } else {
+              SweetAlert(
+                "Success",
+                "Thank you for your rating. Please wait until the next update",
+                "success"
+              );
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
           .then(() => setIsLoading(false));
       }
       // else {
@@ -234,123 +236,123 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   };
 
   useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            },
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            username: value.username,
+            npk: value.npk,
+            upt: value.upt_bagian,
+            jabatan: value.jabatan,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchDataPenilaian = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaian2");
+
+        // console.log("SIS ID: ", data);
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setPenJabatan({
+            sis_id: data.map((value) => value["Id Sis"]),
+            pen_created_by: data.map((value) => value.CreatedBy),
           });
-  
-          const data = await response.json();
-          setListEmployee(
-            data.map((value) => ({
-              username: value.username,
-              npk: value.npk,
-              upt: value.upt_bagian,
-              jabatan: value.jabatan,
-            }))
-          );
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListEmployee({});
         }
-      };
-  
-      fetchData();
-    }, []);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListReviewer({});
+      }
+    };
+    fetchDataPenilaian();
+  }, []);
+  // console.log("Jabatannn: ", penJabatan);
 
-    useEffect(() => {
-      const fetchDataPenilaian = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaian2");
-  
-          // console.log("SIS ID: ", data);
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the category data.");
-          } else {
-            setPenJabatan({
-              sis_id: data.map((value) => value["Id Sis"]),
-              pen_created_by: data.map((value) => value.CreatedBy)
-            });
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListReviewer({});
-        }
-      };
-      fetchDataPenilaian();
-    }, [])
-    // console.log("Jabatannn: ", penJabatan);
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
 
-    useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
-  
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the category data.");
-          } else {
-            setListReviewer(data);
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListReviewer({});
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListReviewer(data);
         }
-      };
-  
-      fetchData();
-    }, []);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListReviewer({});
+      }
+    };
 
-    console.log("User Info ", userInfo);
-    
-    useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-            p1: "Innovation Category",
-          });
-  
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the category data.");
-          } else {
-            setListCategory(data.filter((item) => item.Text.includes("Batch")));
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListCategory({});
+    fetchData();
+  }, []);
+
+  console.log("User Info ", userInfo);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+          p1: "Innovation Category",
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListCategory(data.filter((item) => item.Text.includes("Batch")));
         }
-      };
-  
-      fetchData();
-    }, []);
-  
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -367,7 +369,9 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
-          const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
+          const hanifData = listEmployee.find(
+            (value) => value.username === currentData.Creaby
+          );
           // console.log("DATA HANIF:", hanifData);
           const role = userInfo.role.slice(0, 5);
           const inorole = userInfo.inorole;
@@ -375,16 +379,16 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
-          
+
             // console.log("FOUND KEY: ", listEmployee);
             // console.log("1",userInfo)
-            console.log("v",value);
-            console.log("us",userInfo);
-            console.log("2",foundEmployee)
-            console.log("3",penJabatan)
-            console.log("4",data)
-            const uniqueKeys = [...new Set(data.map(item => item.Key))];
-// console.log("Unique Keys:", uniqueKeys);
+            console.log("v", value);
+            console.log("us", userInfo);
+            console.log("2", foundEmployee);
+            console.log("3", penJabatan);
+            console.log("4", data);
+            const uniqueKeys = [...new Set(data.map((item) => item.Key))];
+            // console.log("Unique Keys:", uniqueKeys);
             return {
               Key: value.Key,
               No: value["No"],
@@ -412,21 +416,30 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
                     value["Status"] === "Rejected" &&
                     value["Creaby"] === userInfo.username
                   ? ["Detail", "Edit", "Submit"]
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Waiting Approval"
+                  : userInfo.upt === foundEmployee.upt &&
+                    userInfo.jabatan === "Kepala Seksi" &&
+                    value["Status"] === "Waiting Approval"
                   ? ["Detail", "Reject", "Approve"]
-                  : role === "ROL01" &&
-                  value["Status"] === "Approved"
+                  : role === "ROL01" && value["Status"] === "Approved"
                   ? ["Detail", "Submit"]
-                  // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
+                  : // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Scoring")
                   // ? ["Detail", "Scoring"]
-                  : (userInfo.jabatan === "Sekretaris Prodi" || userInfo.jabatan === "Kepala Departemen")
+                  userInfo.jabatan === "Sekretaris Prodi" ||
+                    userInfo.jabatan === "Kepala Departemen"
                   ? ["Detail", "Scoring"]
-                  : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur")
+                  : userInfo.jabatan === "Wakil Direktur" ||
+                    userInfo.jabatan === "Direktur"
                   ? ["Detail", "Scoring"]
-                  // Status Approved By Role 03
-                  // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"] 
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
-                  : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                  : // Status Approved By Role 03
+                  // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
+                  userInfo.upt === foundEmployee.upt &&
+                    userInfo.jabatan === "Kepala Seksi" &&
+                    value["Status"] === "Approved"
+                  ? ["Detail", "Scoring"]
+                  : userInfo.upt === foundEmployee.upt &&
+                    userInfo.jabatan === "Kepala Seksi" &&
+                    value["Status"] === "Draft Scoring"
+                  ? ["Detail", "EditScoring", "Submit"]
                   : ["Detail"],
               Alignment: [
                 "center",
@@ -442,7 +455,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
               ],
             };
           });
-          // console.log(406, formattedData);          
+          // console.log(406, formattedData);
           setCurrentData(formattedData);
         }
       } catch {
@@ -451,11 +464,11 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
         setIsLoading(false);
       }
     };
-    
-    // console.log("COOKIE", JSON.parse(decryptId(cookie))); 
+
+    // console.log("COOKIE", JSON.parse(decryptId(cookie)));
     fetchData();
   }, [currentFilter, listEmployee]);
-  
+
   if (isLoading) return <Loading />;
 
   console.log("DeptArrData:", userInfo);
