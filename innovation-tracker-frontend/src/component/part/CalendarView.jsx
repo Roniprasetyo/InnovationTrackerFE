@@ -39,7 +39,7 @@ function CalendarView() {
               <div className="card-body p-2 small" style={{width:'250px', color:'white'}}>
                 <Calendar onChange={setDate} value={date} className="react-calendar"/>
                 <hr />
-                <h7 className="text-nowrap">{formatDate(date)} : {newsData[date.toISOString().split("T")[0]] || "Tidak ada berita."}</h7>
+                <h6 className="text-nowrap">{formatDate(date)} : {newsData[date.toISOString().split("T")[0]] || "Tidak ada berita."}</h6>
               </div>
               <div className="card-body">
                 <h6 className="text-uppercase text-white">Task</h6>
@@ -47,7 +47,7 @@ function CalendarView() {
                   {/* Item 1 */}
                   <div className="d-flex border-start border-danger small border-4 ps-3">
                     <div>
-                      <h7 className="fw-bold text-danger">Daily Challenge - 38</h7>
+                      <h6 className="fw-bold text-danger">Daily Challenge - 38</h6>
                       <p className="text-white m-0">Day: 38 Creative Connect challenge calendar.</p>
                     </div>
                   </div>
@@ -55,7 +55,7 @@ function CalendarView() {
                   {/* Item 2 */}
                   <div className="d-flex border-start border-danger small border-4 ps-3">
                     <div>
-                      <h7 className="fw-bold text-danger">Daily Challenge - 39</h7>
+                      <h6 className="fw-bold text-danger">Daily Challenge - 39</h6>
                       <p className="text-white m-0">Day: 39 Creative Connect challenge calendar.</p>
                     </div>
                   </div>
@@ -63,7 +63,7 @@ function CalendarView() {
                   {/* Item 3 */}
                   <div className="d-flex border-start border-danger small border-4 ps-3">
                     <div>
-                      <h7 className="fw-bold text-danger">Daily Challenge - 40</h7>
+                      <h6 className="fw-bold text-danger">Daily Challenge - 40</h6>
                       <p className="text-white m-0">Day: 40 Creative Connect challenge calendar.</p>
                     </div>
                   </div>

@@ -484,10 +484,19 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
 
   const handleDelete = (id) => {
     if (memberData.length === 1) setCurrentData(inisialisasiData);
-    else
-      setCurrentData((prevData) =>
-        prevData.filter((member) => member.Key !== id)
+    else {
+      const prevData = memberData.filter((member) => member.Key !== id);
+      setCurrentData(
+        prevData.map((item, index) => ({
+          Key: item.Key,
+          No: index + 1,
+          Name: item.Name,
+          Count: prevData.length,
+          Action: ["Delete"],
+          Alignment: ["center", "left", "center", "center"],
+        }))
       );
+    }
   };
 
   const handleFileChange = (ref, extAllowed) => {
@@ -564,12 +573,12 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
         return;
       }
 
-      if (eDate >= innovationEndPeriod) {
+      if (eDate > innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected end date outrange the innovation period end date",
+            "Invalid date: Selected end date exceeds the innovation period end date",
         });
         return;
       }
@@ -788,6 +797,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="rciTitle"
                               label="Title"
                               isRequired
+                              placeholder="Contains a brief explanation of the idea <i>(memuat penjelasan singkat tentang ide yang akan disampaikan)</i>"
                               value={formDataRef.current.rciTitle}
                               onChange={handleInputChange}
                               errorMessage={errors.rciTitle}
@@ -875,6 +885,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="rciScope"
                               label="Circle Scope"
                               isRequired
+                              placeholder="Designing a plan with a focus on processes, results, and impact on the team <i>(merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team)</i>"
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
@@ -896,6 +907,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="rciCase"
                               label="Bussiness Case"
                               isRequired
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
@@ -920,6 +932,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="rciProblem"
                               label="Problem Statement​"
                               isRequired
+                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
@@ -944,6 +957,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                               forInput="rciGoal"
                               label="Goal Statement​"
                               isRequired
+                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}

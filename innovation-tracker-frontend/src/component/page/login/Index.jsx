@@ -108,8 +108,9 @@ export default function Login() {
               InoRole: "-",
             }
           ];
-          setListRole(adminRoleData);
       
+          setListRole(adminRoleData);
+
           console.log(listRole);
           setUserDetail({
             username: "Superadmin",
@@ -118,6 +119,7 @@ export default function Login() {
             departemen: "IT",
             upt: "-",
           });
+      
           modalRef.current.open();
           return;
         }
@@ -163,8 +165,7 @@ export default function Login() {
       }
     } else window.scrollTo(0, 0);
   };
-  
-  
+
   async function handleLoginWithRole(
     role,
     nama,
@@ -224,6 +225,11 @@ export default function Login() {
                   new Date().toISOString().split("T")[1],
             };
 
+            const cookie = Cookies.get("activeUser");
+            console.log(cookie);
+            if (cookie != null) {
+              Cookies.remove("activeUser");
+            }
             let user = encryptId(JSON.stringify(userInfo));
             Cookies.set("activeUser", user, { expires: 1 });
             window.location.href = ROOT_LINK;

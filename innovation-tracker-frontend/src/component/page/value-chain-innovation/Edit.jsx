@@ -455,10 +455,20 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
 
   const handleDelete = (id) => {
     if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else
-      setCurrentData((prevData) =>
-        prevData.filter((member) => member.Key !== id)
+    else {
+      const prevData = currentData.filter((member) => member.Key !== id);
+      setCurrentData(
+        prevData.map((item, index) => ({
+          Key: item.Key,
+          No: index + 1,
+          Name: item.Name,
+          Section: item.Section,
+          Count: prevData.length,
+          Action: ["Delete"],
+          Alignment: ["center", "left", "left", "center", "center"],
+        }))
       );
+    }
   };
 
   const handleFileChange = (ref, extAllowed) => {
@@ -535,12 +545,12 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         return;
       }
 
-      if (eDate >= innovationEndPeriod) {
+      if (eDate > innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected end date outrange the innovation period end date",
+            "Invalid date: Selected end date exceeds the innovation period end date",
         });
         return;
       }

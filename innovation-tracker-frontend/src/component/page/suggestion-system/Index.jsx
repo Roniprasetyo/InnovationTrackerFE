@@ -18,6 +18,8 @@ import {
 } from "../../util/Formatting";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
+import { exportExcel } from "../../util/ExportExcel";
+import Modal from "../../part/Modal";
 
 const inisialisasiData = [
   {
@@ -26,8 +28,8 @@ const inisialisasiData = [
     "Project Title": null,
     "Start Date": null,
     "End Date": null,
-    "Period": null,
-    "Category": null,
+    Period: null,
+    Category: null,
     Status: null,
     Creaby: null,
     Count: 0,
@@ -35,12 +37,14 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
+  { Value: "[NPK] asc", Text: "[NPK] [↑]" },
+  { Value: "[NPK] desc", Text: "[NPK] [↓]" },
+  { Value: "[Name] asc", Text: "[Name] [↑]" },
+  { Value: "[Name] desc", Text: "[Name] [↓]" },
   { Value: "[Project Title] asc", Text: "[Project Title] [↑]" },
   { Value: "[Project Title] desc", Text: "[Project Title] [↓]" },
-  { Value: "[Start Date] asc", Text: "[Start Date] [↑]" },
-  { Value: "[Start Date] desc", Text: "[Start Date] [↓]" },
-  { Value: "[End Date] asc", Text: "[End Date] [↑]" },
-  { Value: "[End Date] desc", Text: "[End Date] [↓]" },
+  { Value: "[Creadate] asc", Text: "[Submit Time] [↑]" },
+  { Value: "[Creadate] desc", Text: "[Submit Time] [↓]" },
   { Value: "[Period] asc", Text: "[Period] [↑]" },
   { Value: "[Period] desc", Text: "[Period] [↓]" },
   { Value: "[Category] asc", Text: "[Category] [↑]" },
@@ -60,7 +64,11 @@ const dataFilterStatus = [
 //   { Value: "Kategori Peran Inovasi", Text: "Kategori Peran Inovasi" },
 // ];
 
-export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditScoring }) {
+export default function SuggestionSytemIndex({
+  onChangePage,
+  onScoring,
+  onEditScoring,
+}) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -69,14 +77,15 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   const [listEmployee, setListEmployee] = useState([]);
   const [listCategory, setListCategory] = useState([]);
   const [listReviewer, setListReviewer] = useState([]);
+  const [selectedKeys, setSelectedKeys] = useState([]);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Category] asc",
+    sort: "[Creadate] desc",
     status: "",
     jenis: "SS",
-    role: userInfo.role,
+    role: userInfo.role.slice(0, 5),
     npk: userInfo.npk,
   });
   const [penJabatan, setPenJabatan] = useState([]);
@@ -85,7 +94,13 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
+  const modalRef = useRef();
+  const batchRef = useRef();
+
+  const handleSelectionChange = (data = []) => {
+    setSelectedKeys(data);
+    console.log(data);
+  };
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -111,14 +126,23 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   }
 
   const getStatusByKey = (key) => {
-    const data = currentData.find(item => item.Key === key);
+    const data = currentData.find((item) => item.Key === key);
     return data ? data.Status : null;
   };
 
   const handleSubmit = async (id) => {
     setIsError(false);
     const tempStatus = getStatusByKey(id);
-    
+    var alertStatus;
+
+    if (tempStatus === "Approved") {
+      alertStatus =
+        "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
+    } else {
+      alertStatus =
+        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
+    }
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure about this value?",
@@ -129,26 +153,24 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
       true
     );
 
-
     if (confirm) {
       console.log(1, id);
-      if(tempStatus !== "Approved") {
+      if (tempStatus !== "Approved") {
         UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
           id: id,
         })
-        .then((data) => {
-          if (!data) {
-            setIsError(true)
-          }
-          else {
-            SweetAlert(
-              "Success",
-              "Thank you for your rating. Please wait until the next update",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
+          .then((data) => {
+            if (!data) {
+              setIsError(true);
+            } else {
+              SweetAlert(
+                "Success",
+                "Thank you for your rating. Please wait until the next update",
+                "success"
+              );
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
           .then(() => setIsLoading(false));
       }
       // else {
@@ -204,6 +226,80 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
         .then(() => setIsLoading(false));
     }
   };
+  const handleSubmitBatch = (id) => {
+    setIsError(false);
+    setIsLoading(true);
+    let arrId = [];
+    selectedKeys.map((value) => {
+      arrId.push(value.Key);
+    });
+    const param = {
+      id: Object.values(arrId).join(","),
+      batch: batchRef.current,
+    };
+    console.log(param);
+    UseFetch(API_LINK + "RencanaSS/SetBatchRencanaSS", param)
+      .then((data) => {
+        if (data === "ERROR" || data.length === 0) setIsError(true);
+        else {
+          handleSetCurrentPage(currentFilter.page);
+          batchRef.current = "";
+          setSelectedKeys([]);
+          SweetAlert(
+            "Success",
+            "Successfully assign batch the submissions",
+            "success"
+          );
+        }
+      })
+      .then(() => setIsLoading(false));
+    modalRef.current.close();
+  };
+
+  const handleAssign = (arrData) => {
+    console.log(arrData);
+    if (arrData.length === 0) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: "Please select one or more data!",
+      }));
+    } else {
+      modalRef.current.open();
+    }
+  };
+
+  const handleExport = async (param) => {
+    setIsError(false);
+    const response = await UseFetch(API_LINK + "RencanaSS/getAllDataSS", param);
+    console.log(response);
+    if (response === "ERROR") {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: "Failed to download data",
+      }));
+    } else {
+      const byteCharacters = atob(response.fileContents);
+      const byteNumbers = new Array(byteCharacters.length)
+        .fill()
+        .map((_, i) => byteCharacters.charCodeAt(i));
+      const byteArray = new Uint8Array(byteNumbers);
+
+      const blob = new Blob([byteArray], { type: response.contentType });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = response.fileDownloadName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  };
 
   const handleReject = async (id) => {
     setIsError(false);
@@ -234,40 +330,70 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   };
 
   useEffect(() => {
-      const fetchData = async () => {
-        setIsLoading(true);
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            },
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            username: value.username,
+            npk: value.npk,
+            nama: value.nama,
+            upt: value.upt_bagian,
+            jabatan: value.jabatan,
+            departmen: value.departemen_jurusan,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchDataPenilaian = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaian2");
+
+        // console.log("SIS ID: ", data);
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setPenJabatan({
+            sis_id: data.map((value) => value["Id Sis"]),
+            pen_created_by: data.map((value) => value.CreatedBy),
           });
-  
-          const data = await response.json();
-          setListEmployee(
-            data.map((value) => ({
-              username: value.username,
-              npk: value.npk,
-              upt: value.upt_bagian,
-              jabatan: value.jabatan,
-            }))
-          );
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListEmployee({});
         }
-      };
-  
-      fetchData();
-    }, []);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListReviewer({});
+      }
+    };
+    fetchDataPenilaian();
+  }, []);
+  // console.log("Jabatannn: ", penJabatan);
 
     useEffect(() => {
       const fetchDataPenilaian = async () => {
@@ -320,8 +446,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
           }));
           setListReviewer({});
         }
-      };
-  
+      }
       fetchData();
     }, []);
 
@@ -349,12 +474,12 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
             message: error.message,
           }));
           setListCategory({});
-        }
-      };
-  
-      fetchData();
-    }, []);
-  
+      }
+    };
+
+    fetchData();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -368,11 +493,13 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
         console.log("DATA SS:", data);
 
         if (data === "ERROR") {
-          // setIsError(true);
+          setIsError(true);
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
-          const hanifData = listEmployee.find((value) => value.username === currentData.Creaby);
+          const hanifData = listEmployee.find(
+            (value) => value.username === currentData.Creaby
+          );
           // console.log("DATA HANIF:", hanifData);
           const role = userInfo.role.slice(0, 5);
           const inorole = userInfo.inorole;
@@ -393,67 +520,219 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
             console.log("3",penJabatan)
             console.log("4",data)
             const uniqueKeys = [...new Set(data.map(item => item.Key))];
-// console.log("Unique Keys:", uniqueKeys);
-            return {
-              Key: value.Key,
-              No: value["No"],
-              "Project Title": maxCharDisplayed(
-                decodeHtml(
-                  decodeHtml(decodeHtml(value["Project Title"]))
-                ).replace(/<\/?[^>]+(>|$)/g, ""),
-                50
-              ),
-              Category: value["Category"],
-              "Start Date": formatDate(value["Start Date"], true),
-              "End Date": formatDate(value["End Date"], true),
-              Period: value["Period"],
-              Status: value["Status"],
-              Count: value["Count"],
-              Action:
-                role === "ROL03" &&
-                value["Status"] === "Draft" &&
-                value["Creaby"] === userInfo.username
-                  ? ["Detail", "Edit", "Submit"]
-                  : inorole === "Facilitator" &&
-                    value["Status"] === "Waiting Approval"
-                  ? ["Detail", "Reject", "Approve"]
-                  : role === "ROL03" &&
-                    value["Status"] === "Rejected" &&
-                    value["Creaby"] === userInfo.username
-                  ? ["Detail", "Edit", "Submit"]
-                  : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Kepala Departemen") && value["Status"] === "Waiting Approval"
-                  ? ["Detail", "Reject", "Approve"]
-                  : role === "ROL01" &&
-                  value["Status"] === "Approved"
-                  ? ["Detail", "Submit"]
-                  : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
-                  ? ["Detail", "Scoring"]
-                  : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
-                  ? ["Detail", "Scoring"]
-                  : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] !== "Draft Scoring")
-                  ? ["Detail", "Scoring"]
-                  : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] === "Scoring")
-                  ? ["Detail", "Scoring"]
-                  : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
-                  : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
-                  : jabatanTarget === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
-                  : jabatanTarget === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
-                  : ["Detail"],
-              Alignment: [
-                "center",
-                "left",
-                "left",
-                "center",
-                "center",
-                "center",
-                "center",
-                "center",
-                "center",
-                "center",
-              ],
-            };
+
+            if (role === "ROL01") {
+              return {
+                Key: value.Key,
+                No: value["No"],
+                NPK: value["NPK"] || "-",
+                Name: value["Name"] || "-",
+                "Project Title": maxCharDisplayed(
+                  decodeHtml(
+                    decodeHtml(decodeHtml(value["Project Title"]))
+                  ).replace(/<\/?[^>]+(>|$)/g, ""),
+                  50
+                ),
+                Category: value["Category"],
+                Period: value["Period"],
+                Batch: value["Batch"] || "-",
+                "Submitted On": formatDate(value["Creadate"]),
+                Score: value["Score"] || 0,
+                "Scoring Position": value["Scoring Position"] || "-",
+                Status: value["Status"],
+                Count: value["Count"],
+                Action:
+                  role === "ROL03" &&
+                  value["Status"] === "Draft" &&
+                  value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : inorole === "Facilitator" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL03" &&
+                      value["Status"] === "Rejected" &&
+                      value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL01" && value["Status"] === "Approved"
+                    ? ["Detail", "Submit"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      (value["Status"] === "Approved" ||
+                        value["Status"] === "Scoring")
+                    ? ["Detail", "Scoring"]
+                    : userInfo.jabatan === "Sekretaris Prodi" ||
+                      userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Wakil Direktur" ||
+                      userInfo.jabatan === "Direktur"
+                    ? ["Detail", "Scoring"]
+                    : // Status Approved By Role 03
+                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
+                    userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Approved"
+                    ? ["Detail", "Scoring"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Draft Scoring"
+                    ? ["Detail", "EditScoring", "Submit"]
+                    : ["Detail"],
+                Alignment: [
+                  "center",
+                  "left",
+                  "left",
+                  "left",
+                  "left",
+                  "right",
+                  "left",
+                  "left",
+                  "right",
+                  "center",
+                  "center",
+                ],
+              };
+            } else if (
+              userInfo.jabatan === "Kepala Departemen" ||
+              userInfo.jabatan === "Sekretaris Prodi" ||
+              userInfo.jabatan === "Direktur" ||
+              userInfo.jabatan === "Wakil Direktur" ||
+              userInfo.jabatan === "Kepala Seksi"
+            ) {
+              return {
+                Key: value.Key,
+                No: value["No"],
+                NPK: value["NPK"] || "-",
+                Name: value["Name"] || "-",
+                "Project Title": maxCharDisplayed(
+                  decodeHtml(
+                    decodeHtml(decodeHtml(value["Project Title"]))
+                  ).replace(/<\/?[^>]+(>|$)/g, ""),
+                  50
+                ),
+                Category: value["Category"],
+                Period: value["Period"],
+                Batch: value["Batch"] || "-",
+                "Submitted On": formatDate(value["Creadate"]),
+                Score: value["Score"] || 0,
+                Status: value["Status"],
+                Count: value["Count"],
+                Action:
+                  role === "ROL03" &&
+                  value["Status"] === "Draft" &&
+                  value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : inorole === "Facilitator" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL03" &&
+                      value["Status"] === "Rejected" &&
+                      value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL01" && value["Status"] === "Approved"
+                    ? ["Detail", "Submit"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      (value["Status"] === "Approved" ||
+                        value["Status"] === "Scoring")
+                    ? ["Detail", "Scoring"]
+                    : userInfo.jabatan === "Sekretaris Prodi" ||
+                      userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Wakil Direktur" ||
+                      userInfo.jabatan === "Direktur"
+                    ? ["Detail", "Scoring"]
+                    : // Status Approved By Role 03
+                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
+                    userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Approved"
+                    ? ["Detail", "Scoring"]
+                    : userInfo.upt === foundEmployee.upt &&
+                      userInfo.jabatan === "Kepala Seksi" &&
+                      value["Status"] === "Draft Scoring"
+                    ? ["Detail", "EditScoring", "Submit"]
+                    : ["Detail"],
+                Alignment: [
+                  "center",
+                  "left",
+                  "left",
+                  "left",
+                  "left",
+                  "right",
+                  "left",
+                  "left",
+                  "right",
+                  "center",
+                  "center",
+                ],
+              };
+            }else {
+              return {
+                Key: value.Key,
+                No: value["No"],
+                "Project Title": maxCharDisplayed(
+                  decodeHtml(
+                    decodeHtml(decodeHtml(value["Project Title"]))
+                  ).replace(/<\/?[^>]+(>|$)/g, ""),
+                  50
+                ),
+                Category: value["Category"],
+                Batch: value["Batch"] || "-",
+                Period: value["Period"],
+                Status: value["Status"],
+                Count: value["Count"],
+                Action:
+                  role === "ROL03" &&
+                  value["Status"] === "Draft" &&
+                  value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : inorole === "Facilitator" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL03" &&
+                      value["Status"] === "Rejected" &&
+                      value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Kepala Departemen") && value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : role === "ROL01" &&
+                    value["Status"] === "Approved"
+                    ? ["Detail", "Submit"]
+                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
+                    ? ["Detail", "Scoring"]
+                    : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
+                    ? ["Detail", "Scoring"]
+                    : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] !== "Draft Scoring")
+                    ? ["Detail", "Scoring"]
+                    : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] === "Scoring")
+                    ? ["Detail", "Scoring"]
+                    : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
+                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
+                    : jabatanTarget === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : jabatanTarget === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : ["Detail"],
+                Alignment: [
+                  "center",
+                  "left",
+                  "left",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                  "center",
+                ],
+              };
+            }
           });
-          // console.log(406, formattedData);          
+          console.log(formattedData);
           setCurrentData(formattedData);
         }
       } catch {
@@ -462,8 +741,8 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
         setIsLoading(false);
       }
     };
-    
-    // console.log("COOKIE", JSON.parse(decryptId(cookie))); 
+
+    // console.log("COOKIE", JSON.parse(decryptId(cookie)));
     fetchData();
   }, [currentFilter, listEmployee]);
 
@@ -476,7 +755,6 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
     }
   }, []);
   
-  
   if (isLoading) return <Loading />;
 
   console.log("DeptArrData:", userInfo);
@@ -484,6 +762,15 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
   return (
     <>
       <div className="my-3">
+        {isError.error && (
+          <div className="flex-fill ">
+            <Alert
+              type="danger"
+              message={isError.message}
+              handleClose={() => setIsError({ error: false, message: "" })}
+            />
+          </div>
+        )}
         <div className="mb-4 color-primary text-center">
           <div className="d-flex gap-3 justify-content-center">
             <h2 className="display-1 fw-bold">Suggestion</h2>
@@ -493,15 +780,6 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
           </div>
         </div>
       </div>
-      {isError.error && (
-        <div className="flex-fill ">
-          <Alert
-            type="danger"
-            message={isError.message}
-            handleClose={() => setIsError({ error: false, message: "" })}
-          />
-        </div>
-      )}
       <div className="flex-fill">
         <div className="input-group">
           {userInfo.role.slice(0, 5) !== "ROL01" ? (
@@ -510,6 +788,24 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
               label="Register"
               classType="success"
               onClick={() => onChangePage("add")}
+            />
+          ) : userInfo.peran === "Innovation Coordinator" ? (
+            <Button
+              iconName="file-excel"
+              label="Export"
+              classType="success"
+              onClick={() => {
+                const param = {
+                  query: currentFilter.query,
+                  sort: currentFilter.sort,
+                  status: currentFilter.status,
+                  jenis: "SS",
+                  role: userInfo.role.slice(0, 5),
+                  npk: userInfo.npk,
+                  kryData: listEmployee,
+                };
+                handleExport(param);
+              }}
             />
           ) : (
             ""
@@ -533,7 +829,7 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Team Name] asc"
+              defaultValue="[Creadate] desc"
             />
             <DropDown
               ref={searchFilterStatus}
@@ -548,12 +844,26 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
               defaultValue=""
             />
           </Filter>
+          {userInfo.role.slice(0, 5) === "ROL01" ? (
+            <Button
+              iconName="paper-plane-top"
+              classType="primary px-3 border-start"
+              title="Assign"
+              onClick={() => handleAssign(selectedKeys)}
+            />
+          ) : (
+            ""
+          )}
         </div>
       </div>
       <div className="mt-3 mb-5">
         <div className="d-flex flex-column">
           {!isLoading && (
             <Table
+              checkboxTable={
+                userInfo.role.slice(0, 5) === "ROL01" 
+                // || userInfo.jabatan === "Kepala Departemen"
+              }
               data={currentData}
               onDetail={onChangePage}
               onSubmit={handleSubmit}
@@ -572,6 +882,60 @@ export default function SuggestionSytemIndex({ onChangePage, onScoring, onEditSc
           />
         </div>
       </div>
+      <Modal
+        title="Select Submission Batch"
+        ref={modalRef}
+        centered
+        size="small"
+        Button1={
+          <Button
+            title="Assign to batch..."
+            classType="primary ms-2"
+            label="SUBMIT"
+            onClick={handleSubmitBatch}
+          />
+        }
+      >
+        <div
+          className="mb-3"
+          style={{
+            maxHeight: "250px",
+            overflowY: "auto",
+            scrollbarWidth: "none", // Firefox
+            msOverflowStyle: "none",
+          }}
+        >
+          <table className="table table-hover table-striped border">
+            <thead className="text-center">
+              <tr>
+                <th>No</th>
+                <th>NPK</th>
+                <th>Name</th>
+                <th>Title</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedKeys.map((item, index) => (
+                <tr key={index}>
+                  <td className="text-center">{index + 1}</td>
+                  <td>{item.NPK}</td>
+                  <td>{maxCharDisplayed(item.Name, 10)}</td>
+                  <td>{maxCharDisplayed(item["Project Title"], 20)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-center">Assign To</p>
+        <DropDown
+          arrData={listCategory}
+          forInput="batch"
+          value={batchRef.current}
+          onChange={(e) => (batchRef.current = e.target.value)}
+          showLabel={false}
+        />
+      </Modal>
     </>
   );
 }

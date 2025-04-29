@@ -67,11 +67,7 @@ export default function Submission() {
       <div className="container mb-5">
         <div className="p-3 mt-3">
           <div className="row bg-second rounded-5 shadow-sm mb-3">
-            <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/ss")}
-            >
+            <div className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3">
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">SS</div>
                 <div className="fw-medium">
@@ -106,11 +102,7 @@ export default function Submission() {
             </div>
           </div>
           <div className="row bg-second rounded-5 shadow-sm mb-3">
-            <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/qcc")}
-            >
+            <div className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3">
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">QCC</div>
                 <div className="fw-medium">
@@ -143,11 +135,7 @@ export default function Submission() {
             </div>
           </div>
           <div className="row bg-second rounded-5 shadow-sm mb-3">
-            <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/qcp")}
-            >
+            <div className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3">
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">QCP</div>
                 <div className="fw-medium">
@@ -216,9 +204,7 @@ export default function Submission() {
           </div>
           <div className="row bg-second rounded-5 shadow-sm mb-3">
             <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3 sub"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate("/submission/vci")}
+              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
             >
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">VCI</div>

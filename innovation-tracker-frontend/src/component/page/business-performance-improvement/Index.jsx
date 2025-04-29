@@ -202,7 +202,7 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
         );
 
         if (data === "ERROR") {
-          setIsError(true);
+          // setIsError(true);
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
@@ -219,7 +219,6 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
               50
             ),
             Category: value["Category"],
-            "Project Benefit": separator(value["Project Benefit"]),
             "Start Date": formatDate(value["Start Date"], true),
             "End Date": formatDate(value["End Date"], true),
             Period: value["Period"],
@@ -262,6 +261,8 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
 
     fetchData();
   }, [currentFilter]);
+
+  console.log(currentData);
 
   if (isLoading) return <Loading />;
 

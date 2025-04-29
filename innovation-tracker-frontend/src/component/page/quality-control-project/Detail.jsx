@@ -56,6 +56,8 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
     Creaby: "",
     "Alasan Penolakan": "",
     member: [{}],
+    Nama: "",
+    Section: "",
   });
 
   useEffect(() => {
@@ -71,12 +73,7 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
         });
 
         const data = await response.json();
-        setListEmployee(
-          data.map((value) => ({
-            npk: value.npk,
-            upt: value.upt_bagian,
-          }))
-        );
+        setListEmployee(data);
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -117,14 +114,24 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                   No: index + 1,
                   Name: item.Name,
                   Section:
-                    listEmployee.find((value) => value.npk === item.Npk)?.upt ||
-                    "",
+                    listEmployee.find((value) => value.npk === item.Npk)
+                      ?.upt_bagian || "",
                   Count: memberCount,
                   Alignment: ["center", "left", "left"],
                 }))
               )
             : setCurrentData(inisialisasiData);
         }
+        formDataRef.current = {
+          ...formDataRef.current,
+          Section: listEmployee.find(
+            (member) =>
+              member.npk ===
+              formDataRef.current.member.find(
+                (pos) => pos.Position === "Leader"
+              )?.Npk
+          )?.upt_bagian,
+        };
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -199,7 +206,10 @@ export default function QualityControlProjectDetail({ onChangePage, withID }) {
                           />
                         </div>
                         <div className="col-md-6">
-                          <Label title="Section" data={userInfo.upt} />
+                          <Label
+                            title="Section"
+                            data={formDataRef.current.Section}
+                          />
                         </div>
                         <div className="col-md-6">
                           <Label
