@@ -349,6 +349,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           message: error.message,
         }));
         setListCategory({});
+      }finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -375,6 +377,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
+      }finally {
+        setIsLoading(false);
       }
     };
     fetchDataDetailByID();
@@ -402,6 +406,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
+      }finally {
+        setIsLoading(false);
       }
     };
     fetchDataDetailByID();
@@ -432,6 +438,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           message: error.message,
         }));
         setListCategory({});
+      }finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -462,6 +470,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           message: error.message,
         }));
         setListCategory({});
+      }finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -489,6 +499,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           message: error.message,
         }));
         setListCategory({});
+      }finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -541,6 +553,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           message: error.message,
         }));
         setListCategory({});
+      }finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -597,6 +611,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           message: error.message,
         }));
         setListCategory({});
+      }finally {
+        setIsLoading(false);
       }
     };
 
@@ -831,63 +847,60 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                           <Box sx={{width:'80%'}}>
                             <div>
                               <Box>
-                              <Tabs
-                                  value={selectedTab}
-                                  className="card rounded-bottom-0"
-                                  onChange={handleTabChange}
-                                  variant="fullWidth"
-                                  sx={{
-                                    "& .MuiTabs-indicator": {
-                                      height: "3px",
-                                      backgroundColor: "#1976d2",
-                                    },
-                                  }}
-                                >
-                                  {tabLabels.map((label, index) => {
-                                    let jabatanTarget = '';
+                                {isLoading ? (
+                                  <Loading />
+                                ) : (
 
-                                    if (index === 0) jabatanTarget = 'Kepala Seksi ';
-                                    if (index === 0) jabatanTarget = 'Sekretaris Prodi';
-                                    else if (index === 1) jabatanTarget = 'Kepala Departemen';
-                                    else if (index === 2) jabatanTarget = 'Wakil Direktur';
+                                <Tabs
+                                    value={selectedTab}
+                                    className="card rounded-bottom-0"
+                                    onChange={handleTabChange}
+                                    variant="fullWidth"
+                                    sx={{
+                                      "& .MuiTabs-indicator": {
+                                        height: "3px",
+                                        backgroundColor: "#1976d2",
+                                      },
+                                    }}
+                                  >
+                                    {tabLabels.map((label, index) => {
+                                      let jabatanTarget = [];
 
-                                    let isChecked = false;
-                                    if (jabatanTarget === 'Wakil Direktur') {
-                                      isChecked = listAllPenilaian.some(
+                                      if (index === 0) jabatanTarget = ['Kepala Seksi', 'Sekretaris Prodi'];
+                                      else if (index === 1) jabatanTarget = ['Kepala Departemen'];
+                                      else if (index === 2) jabatanTarget = ['Wakil Direktur', 'Direktur'];
+                                      
+                                      let isChecked = listAllPenilaian.some(
                                         (item) =>
                                           item['Jabatan Penilai'] &&
-                                          (item['Jabatan Penilai'].includes('Wakil Direktur') || item['Jabatan Penilai'].includes('Direktur'))
-                                      );
-                                    } else {
-                                      isChecked = listAllPenilaian.some(
-                                        (item) =>
-                                          item['Jabatan Penilai'] &&
-                                          item['Jabatan Penilai'].includes(jabatanTarget)
-                                      );
-                                    }
+                                          jabatanTarget.some((jabatan) =>
+                                            item['Jabatan Penilai'].includes(jabatan)
+                                          )
+                                      );                                      
 
-                                    return (
-                                      <Tab
-                                        key={index}
-                                        label={isChecked ? (
-                                          <div className="d-flex gap-2">
-                                            <span style={{ color: 'green' }}>✓</span>
-                                            <span style={{ fontSize: '14px' }}>{label}</span>
-                                          </div>
-                                        ) : (
-                                          label
-                                        )}
-                                        sx={{
-                                          backgroundColor: selectedTab === index ? "#ffffff" : "#f0f0f0",
-                                          borderRight: index !== 2 ? '1px solid #ddd' : 'none',
-                                          fontWeight: "bold",
-                                          color: "black",
-                                          minHeight: '48px',
-                                        }}
-                                      />
-                                    );
-                                  })}
-                                </Tabs>
+                                      return (
+                                        <Tab
+                                          key={index}
+                                          label={isChecked ? (
+                                            <div className="d-flex gap-2">
+                                              <span style={{ color: 'green' }}>✓</span>
+                                              <span style={{ fontSize: '14px' }}>{label}</span>
+                                            </div>
+                                          ) : (
+                                            label
+                                          )}
+                                          sx={{
+                                            backgroundColor: selectedTab === index ? "#ffffff" : "#f0f0f0",
+                                            borderRight: index !== 2 ? '1px solid #ddd' : 'none',
+                                            fontWeight: "bold",
+                                            color: "black",
+                                            minHeight: '48px',
+                                          }}
+                                        />
+                                      );
+                                    })}
+                                  </Tabs>
+                                )}
                               </Box>
                             </div>
                             <div className="card" style={{ borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
@@ -955,7 +968,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           );
                                         }
                                          else if (selectedTab === 2) {
-                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || totalScoreforKaDept < 69 ? (
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || (totalScoreforKaDept < 69 && totalScoreforKaDept !== 0) ? (
                                             <div className="form-control bg-light">
                                               The score does not reach the required range.
                                             </div>
@@ -1018,7 +1031,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                             </div>
                                           );
                                         } else if (selectedTab === 2) {
-                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || totalScoreforKaDept < 69 ? (
+                                          content = (totalScoreforKaUpt < 41 && totalScoreforKaUpt !== 0) || (totalScoreforKaDept < 69 && totalScoreforKaDept !== 0) ? (
                                             <div className="form-control bg-light">
                                               The score does not reach the required range.
                                             </div>
