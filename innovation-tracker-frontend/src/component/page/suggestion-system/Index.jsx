@@ -80,6 +80,7 @@ export default function SuggestionSytemIndex({
   const [isLoading, setIsLoading] = useState(true);
   const [listEmployee, setListEmployee] = useState([]);
   const [listCategory, setListCategory] = useState([]);
+  const [listSettingRanking, setListSettingRanking] = useState([]);
   const [listReviewer, setListReviewer] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [currentData, setCurrentData] = useState(inisialisasiData);
