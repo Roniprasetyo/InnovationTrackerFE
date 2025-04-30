@@ -23,12 +23,10 @@ const DropDownSearch = forwardRef(function DropDownSearch(
     value: item.Value,
     label: item.Text,
   }));
-
   // console.log("Options in DropDownSearch:", Options);
 
   const handleChange = (selectedOption) => {
     // console.log("Selected option from dropdown:", selectedOption);
-
     setSelectedValue(selectedOption ? selectedOption.value : "");
     onChange && onChange(selectedOption ? selectedOption.value : "");
   };

@@ -136,14 +136,22 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           },
         });
 
+        if (!response.ok)
+          setIsError({ error: true, message: "Failed to fetch data" });
+
         const data = await response.json();
-        const filteredData =
-          data?.filter((item) => item.upt_bagian === userInfo.upt) || [];
+
+        if (!Array.isArray(data))
+          setIsError({ error: true, message: "Invalid data format" });
+
+        const filteredData = data.filter(
+          (item) => item?.upt_bagian === userInfo?.upt
+        );
 
         setListEmployee(
           filteredData.map(({ npk, nama }) => ({
-            Value: npk,
-            Text: `${npk} - ${nama}`,
+            Value: npk ?? "", 
+            Text: npk && nama ? `${npk} - ${nama}` : "",
           }))
         );
       } catch (error) {
@@ -154,7 +162,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     };
 
     fetchData();
-  }, [userInfo.upt]);
+  }, [userInfo?.upt]);
 
   useEffect(() => {
     const fetchData = async () => {

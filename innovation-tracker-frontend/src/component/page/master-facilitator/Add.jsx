@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { number, object, string } from "yup";
-import { API_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -32,6 +32,36 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
     perID: string().required("required"),
     role: string().max(100, "maximum 100 characters").required("required"),
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prev) => ({ ...prev, error: false }));
+
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
+
+        const data = await response.json();
+        setListEmployee(
+          data.map((value) => ({
+            Value: value.npk,
+            Text: value.npk + " - " + value.nama,
+          }))
+        );
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError({ error: true, message: error.message });
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,39 +123,7 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
 
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetListKaryawan",
-          {}
-        );
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListEmployee(data);
-          window.scrollTo(0, 0);
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const validationError = validateInput(name, value, userSchema);

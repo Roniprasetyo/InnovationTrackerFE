@@ -139,7 +139,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to approve this submission?",
       "warning",
-      "APPROVE",
+      "Approve",
       null,
       "",
       true
@@ -166,7 +166,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       "Confirm",
       "Are you sure you want to reject this submission?",
       "warning",
-      "REJECT",
+      "Reject",
       null,
       "",
       true
@@ -176,6 +176,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       UseFetch(API_LINK + "RencanaCircle/SetApproveRencanaCircle", {
         id: id,
         set: "Rejected",
+        reason: confirm,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -206,7 +207,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
           const inorole = userInfo.inorole;
           const formattedData = data.map((value, index) => ({
             Key: value.Key,
-            No: index + 1,
+            No: value["No"],
             "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
             "Project Title": maxCharDisplayed(
               decodeHtml(value["Project Title"]).replace(/<\/?[^>]+(>|$)/g, ""),
@@ -228,7 +229,11 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : ["Detail"],
+                : role === "ROL03" &&
+                value["Status"] === "Rejected" &&
+                value["Creaby"] === userInfo.username
+                  ? ["Detail", "Edit", "Submit"]
+                  : ["Detail"],
             Alignment: [
               "center",
               "left",
@@ -282,7 +287,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role !== "ROL01" ? (
+          {userInfo.role.slice(0, 5) !== "ROL01" ? (
             <Button
               iconName="add"
               label="Register"
@@ -318,7 +323,11 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               forInput="ddStatus"
               label="Status"
               type="semua"
-              arrData={dataFilterStatus}
+              arrData={
+                userInfo.role.slice(0, 5) === "ROL01"
+                  ? dataFilterStatus.filter((item) => item.Value != "Draft")
+                  : dataFilterStatus
+              }
               defaultValue=""
             />
           </Filter>

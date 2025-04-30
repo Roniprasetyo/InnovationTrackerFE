@@ -101,9 +101,6 @@ export default function MasterPeriodAdd({ onChangePage }) {
           setIsLoading(false);
         }
       } else window.scrollTo(0, 0);
-    } else {
-      // If user cancels, do nothing
-      console.log("Data submission cancelled.");
     }
   };
   

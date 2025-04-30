@@ -417,7 +417,6 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
       setErrors
     );
 
-    console.log(formDataRef.current);
     if (Object.values(validationErrors).every((error) => !error)) {
       if (currentData.length < 2) {
         window.scrollTo(0, 0);

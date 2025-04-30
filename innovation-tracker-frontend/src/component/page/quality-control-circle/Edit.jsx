@@ -19,6 +19,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
+import Label from "../../part/Label";
 
 const inisialisasiData = [
   {
@@ -85,6 +86,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciFacil: "",
     rciLeader: "",
     setId2: "",
+    rciStatus: "",
+    rciReasonforRejection:"",
   });
 
   const memberDataRef = useRef({
@@ -128,6 +131,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     setId2: string().required("required"),
+    rciStatus: string().required("required"),
+    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({
@@ -147,14 +152,22 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           },
         });
 
+        if (!response.ok)
+          setIsError({ error: true, message: "Failed to fetch data" });
+
         const data = await response.json();
-        const filteredData =
-          data?.filter((item) => item.upt_bagian === userInfo.upt) || [];
+
+        if (!Array.isArray(data))
+          setIsError({ error: true, message: "Invalid data format" });
+
+        const filteredData = data.filter(
+          (item) => item?.upt_bagian === userInfo?.upt
+        );
 
         setListEmployee(
           filteredData.map(({ npk, nama }) => ({
-            Value: npk,
-            Text: `${npk} - ${nama}`,
+            Value: npk ?? "",
+            Text: npk && nama ? `${npk} - ${nama}` : "",
           }))
         );
       } catch (error) {
@@ -165,7 +178,7 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, [userInfo.upt]);
+  }, [userInfo?.upt]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -323,6 +336,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
             setId2: data["CategoryIdImp"],
+            rciStatus: data["Status"],
+            rciReasonforRejection: data["Alasan Penolakan"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -526,8 +541,6 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
       userSchema,
       setErrors
     );
-
-    console.log(formDataRef.current);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       if (memberData.length < 2) {
@@ -1091,6 +1104,15 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
+                    {formDataRef.current.rciStatus === "Rejected" && (
+                      <>
+                        <hr />
+                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <Label
+                        data={formDataRef.current.rciReasonforRejection}/>
+                        <hr />
+                      </>
+                    )}
                   </div>
                 </div>
               )}

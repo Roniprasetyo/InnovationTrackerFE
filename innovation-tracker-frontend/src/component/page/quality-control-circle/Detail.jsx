@@ -42,7 +42,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Goal: "",
     GoalFile: "",
     Scope: "",
-    "Start Date": "",
+    "Start Date": "", 
     "End Date": "",
     Quality: "",
     Cost: null,
@@ -51,6 +51,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Moral: "",
     Status: "",
     Creaby: "",
+    "Alasan Penolakan": "",
     member: [{}],
   });
 
@@ -377,6 +378,15 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
+                  {formDataRef.current.Status === "Rejected" && (
+                    <div>
+                      <hr />
+                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                      <Label
+                      data={formDataRef.current["Alasan Penolakan"]}/>
+                      <hr />
+                    </div>
+                  )}
                 </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>

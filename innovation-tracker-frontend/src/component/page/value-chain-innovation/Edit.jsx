@@ -19,6 +19,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
+import Label from "../../part/Label";
 
 const inisialisasiData = [
   {
@@ -33,7 +34,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
-  console.log(userInfo);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
@@ -93,6 +93,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciLeader: "",
     rciPerusahaan1: "",
     rciPerusahaan2: "",
+    rciReasonforRejection: ""
   });
 
   const memberDataRef = useRef({
@@ -132,6 +133,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciFacil: string().required("required"),
     rciPerusahaan1: string().required("required"),
     rciPerusahaan2: string(),
+    rciStatus: string().required("required"),
+    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({
@@ -300,6 +303,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
               .Npk,
             rciPerusahaan1: data["Company 1"],
             rciPerusahaan2: data["Company 2"] || "",
+            rciStatus: data["Status"],
+            rciReasonforRejection: data["Alasan Penolakan"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -414,6 +419,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
       ];
       const formattedData = data.map((value) => ({
         ...value,
+        Section:
+          listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
         Action: ["Delete"],
         Alignment: ["center", "left", "left", "center", "center"],
       }));
@@ -435,6 +442,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           Key: id,
           No: prevData.length + 1,
           Name: Name,
+          Section:
+            listEmployeeFull.find((item) => item.npk === id)?.upt_bagian || "",
           Count: prevData.length + 1,
           Action: ["Delete"],
           Alignment: ["center", "left", "left", "center", "center"],
@@ -549,7 +558,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
         rciProjBenefit: clearSeparator(formDataRef.current.rciProjBenefit),
         member: newMemData,
       };
-      console.log(body);
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
@@ -593,7 +601,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           onChangePage("index");
         }
       } catch (error) {
-        console.log(error);
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
           ...prevError,
@@ -1031,6 +1038,15 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
+                    {formDataRef.current.rciStatus === "Rejected" && (
+                      <>
+                        <hr />
+                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <Label
+                        data={formDataRef.current.rciReasonforRejection}/>
+                        <hr />
+                      </>
+                    )}
                   </div>
                 </div>
               )}

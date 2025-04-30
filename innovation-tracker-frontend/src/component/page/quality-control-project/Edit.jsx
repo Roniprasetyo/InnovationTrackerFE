@@ -19,6 +19,7 @@ import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
+import Label from "../../part/Label";
 
 const inisialisasiData = [
   {
@@ -86,6 +87,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciFacil: "",
     rciLeader: "",
     setId2: "",
+    rciStatus: "",
+    rciReasonforRejection: "",
   });
 
   const memberDataRef = useRef({
@@ -129,6 +132,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     rciLeader: string().required("required"),
     rciFacil: string().required("required"),
     setId2: string().required("required"),
+    rciStatus: string().required("required"),
+    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({
@@ -323,6 +328,8 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
             rciLeader: data["member"].find((item) => item.Position === "Leader")
               .Npk,
             setId2: data["CategoryIdImp"],
+            rciReasonforRejection: data["Alasan Penolakan"],
+            rciStatus: data["Status"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -532,7 +539,6 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
       setErrors
     );
 
-    console.log(formDataRef.current);
     if (Object.values(validationErrors).every((error) => !error)) {
       if (currentData.length < 2) {
         window.scrollTo(0, 0);
@@ -814,6 +820,15 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciStartDate"
                               label="Start Date"
                               isRequired
+                              placeholder={
+                                periodDataRef.current.startPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.startPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               value={formDataRef.current.rciStartDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciStartDate}
@@ -825,6 +840,15 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                               forInput="rciEndDate"
                               label="End Date"
                               isRequired
+                              placeholder={
+                                periodDataRef.current.endPeriod
+                                  ? "Innovation period ends on " +
+                                    formatDate(
+                                      periodDataRef.current.endPeriod,
+                                      true
+                                    )
+                                  : ""
+                              }
                               value={formDataRef.current.rciEndDate}
                               onChange={handleInputChange}
                               errorMessage={errors.rciEndDate}
@@ -1074,6 +1098,15 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
+                    {formDataRef.current.rciStatus === "Rejected" && (
+                      <>
+                        <hr />
+                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <Label
+                        data={formDataRef.current.rciReasonforRejection}/>
+                        <hr />
+                      </>
+                    )}
                   </div>
                 </div>
               )}

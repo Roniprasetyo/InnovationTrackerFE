@@ -114,7 +114,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
                 <div className="col-lg-12">
                   <Label
                     forLabel="setDesc"
-                    title="Type"
+                    title="Description"
                     data={formDataRef.current.setDesc}
                   />
                 </div>

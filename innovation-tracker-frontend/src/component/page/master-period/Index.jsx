@@ -48,7 +48,6 @@ export default function MasterPeriodIndex({ onChangePage }) {
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
 
-  // Set current page
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
     setCurrentFilter((prevFilter) => {
@@ -59,7 +58,6 @@ export default function MasterPeriodIndex({ onChangePage }) {
     });
   }
 
-  // Handle search filter
   function handleSearch() {
     setIsLoading(true);
     setCurrentFilter((prevFilter) => {
@@ -73,7 +71,6 @@ export default function MasterPeriodIndex({ onChangePage }) {
     });
   }
 
-  // Handle status toggle
   function handleSetStatus(id) {
     setIsLoading(true);
     setIsError(false);
@@ -94,7 +91,6 @@ export default function MasterPeriodIndex({ onChangePage }) {
       .then(() => setIsLoading(false));
   }
 
-  // Fetch data with current filters
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
