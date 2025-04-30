@@ -33,7 +33,6 @@ const inisialisasiData = [
     Count: 0,
   },
 ];
-
 function deobfuscateId(obfuscated) {
   const parts = obfuscated.split(".");
   if (parts.length === 2) {
@@ -259,6 +258,10 @@ export default function MiniConventionScoring({ onChangePage }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    console.log("P, punya saya", errors);
+  }, [errors]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -278,7 +281,10 @@ export default function MiniConventionScoring({ onChangePage }) {
       pen_createby: listPenilaian[0].creaby,
       pen_createdate: listPenilaian[0].creadate,
       pen_modif_by: userInfo.username,
-      pen_comment: formComment.current != "" ? `${formComment.current} - ${userInfo.username}` : "",
+      pen_comment:
+        formComment.current && formComment.current.trim() !== ""
+          ? `${formComment.current} - ${userInfo.username}`
+          : undefined,
     };
 
     const payloadSchema = Yup.object().shape({
@@ -287,7 +293,18 @@ export default function MiniConventionScoring({ onChangePage }) {
           /^(\d+\s*,\s*)*\d+$/,
           "dkp_id must be a comma-separated list of numbers"
         )
-        .required("dkp_id is required"),
+        .test(
+          "length-9",
+          "All Assessment schemes must be filled!",
+          function (value) {
+            if (!value) return false;
+            const items = value
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v !== "");
+            return items.length === listKriteriaPenilaian.length;
+          }
+        ),
 
       sis_id: Yup.string().required("sis_id is required"),
 
@@ -296,7 +313,18 @@ export default function MiniConventionScoring({ onChangePage }) {
           /^(\d+\s*,\s*)*\d+$/,
           "pen_nilai must be a comma-separated list of numbers"
         )
-        .required("pen_nilai is required"),
+        .test(
+          "length-9",
+          "All Assessment schemes must be filled!",
+          function (value) {
+            if (!value) return false;
+            const items = value
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v !== "");
+            return items.length === listKriteriaPenilaian.length;
+          }
+        ),
 
       jabatan: Yup.string().required("jabatan is required"),
 
@@ -321,7 +349,12 @@ export default function MiniConventionScoring({ onChangePage }) {
       setErrors
     );
 
-    // console.log("VALIDASI: ", validationErrors);
+    console.log(
+      "VALIDASI: ",
+      Object.values(validationErrors).every((error) => !error)
+    );
+    console.log("VALIDASI: ", validationErrors);
+    console.log("VALIDASI: ", errors);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
@@ -360,8 +393,9 @@ export default function MiniConventionScoring({ onChangePage }) {
         setIsLoading(false);
       }
     } else {
-      // SweetAlert("")
-      window.scrollTo(0, 0);
+      console.log("356 error", errors);
+      SweetAlert("Error", Object.values(validationErrors).join("\n"), "error");
+      // window.scrollTo(0, 0);
     }
   };
 
@@ -405,15 +439,22 @@ export default function MiniConventionScoring({ onChangePage }) {
         if (!data) {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          const dataDetail = data.map((item) => ({
-            Keys: item.Key,
-            Text: `${item.Deskripsi} - (${item.Nilai})`,
-            Value: item.Value,
-            Score: item.Nilai,
-            KrpId: item.Kriteria,
-            creaby: item.Creaby,
-            creadate: item.Creadate,
-          }));
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 70
+                ? item.Deskripsi.substring(0, 71) + "...."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Text: `${item.Deskripsi} - (Point ${item.Nilai})`,
+              Value: item.Value,
+              Score: item.Nilai,
+              KrpId: item.Kriteria,
+              creaby: item.Creaby,
+              creadate: item.Creadate,
+            };
+          });
 
           setListPenilaian(dataDetail);
         }
@@ -443,7 +484,7 @@ export default function MiniConventionScoring({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (${item.Score})`,
+            Text:`(Poin: ${item.Score}) - ${item.Desc}`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -591,7 +632,43 @@ export default function MiniConventionScoring({ onChangePage }) {
                               return (
                                 <div className="row mb-3" key={item.Value}>
                                   <div className="col-lg-4">
-                                    <Label data={item.Text} />
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "flex-start",
+                                        gap: "4px",
+                                      }}
+                                    >
+                                      <Label
+                                        data={
+                                          item.Text === "Reduksi Biaya"
+                                            ? `${item.Text} \t (IDR)`
+                                            : item.Text
+                                        }
+                                      />
+                                      <span
+                                        style={{
+                                          color: "red",
+                                          fontSize: "1rem",
+                                          lineHeight: "1",
+                                        }}
+                                      >
+                                        *
+                                      </span>
+                                    </div>
+
+                                    {item.Text === "Reduksi Biaya" && (
+                                      <div style={{ marginTop: "-20px" }}>
+                                        <small
+                                          style={{
+                                            fontSize: "0.75rem",
+                                            color: "#6c757d",
+                                          }}
+                                        >
+                                          material, consumable, man hour, dll...
+                                        </small>
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="col-lg-8">
                                     <SearchDropdown
@@ -599,13 +676,14 @@ export default function MiniConventionScoring({ onChangePage }) {
                                       // placeholder={arrTextData[item.Value] || ''}
                                       arrData={filteredArrData}
                                       isRound
-                                      // isRequired
+                                      isRequired
                                       value={
                                         formDataRef2.current[item.Value] || ""
                                       }
                                       selectedValued={
                                         arrTextData[item.Value - 1]
                                       }
+                                      disableTyping
                                       onChange={handleInputChange}
                                       // errorMessage={errors.formDataRef2.current[item.Value]}
                                     />
@@ -623,6 +701,7 @@ export default function MiniConventionScoring({ onChangePage }) {
                                 // ref={formComment}
                                 // isRequired
                                 onChange={handleComment}
+                                selectedValued={listPenilaian.komment || ""}
                                 value={formComment.current}
                                 errorMessage={errors.formComment}
                               />
@@ -630,60 +709,35 @@ export default function MiniConventionScoring({ onChangePage }) {
                           </div>
                           <div className="ps-4" style={{ width: "20%" }}>
                             <div
-                              className="d-flex flex-column gap-3"
-                              style={{ height: "100px" }}
+                              className="card fw-medium text-center"
+                              style={{
+                                width: "200px",
+                                minHeight: "180px",
+                              }}
                             >
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
+                              {/* HEADER DI ATAS */}
+                              <h3
+                                className="w-100 text-center"
+                                style={{
+                                  textAlign: "center",
+                                  background: "transparent",
+                                  // border: "none",
+                                  padding: 0,
+                                  fontWeight: "bold",
+                                }}
                               >
-                                Ka.Unit/Ka.UPT
-                                <hr />
-                                <h5>{totalScore}</h5>
-                              </div>
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
-                              >
-                                Ka.Prodi/Ka.Dept
-                                <hr />
-                                <h5>{0}</h5>
-                              </div>
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
-                              >
-                                WaDIR/DIR
-                                <hr />
-                                <h5>{0}</h5>
+                                Total Score
+                              </h3>
+
+                              <hr />
+
+                              {/* ISI DI TENGAH */}
+                              <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+                                <h1 className="fw-medium fw-bold">
+                                  {totalScore}
+                                </h1>
                               </div>
                             </div>
-                            {/* {listKriteriaPenilaian.slice(Math.ceil(listKriteriaPenilaian.length / 2)).map((item) => {
-                              const selectedItem = listDetailKriteriaPenilaian.find(
-                                (detail) => detail.Id === item.Value
-                              );
-
-                              const filteredArrData = listDetailKriteriaPenilaian.filter(
-                                (detail) => detail.Id === item.Value
-                              );
-
-                              return (
-                                <div className="row mb-3" key={item.Value}>
-                                  <div className="col-lg-4">
-                                    <Label data={item.Text} />
-                                  </div>
-                                  <div className="col-lg-8">
-                                    <SearchDropdown
-                                      forInput={item.Value}
-                                      arrData={filteredArrData}
-                                      isRound
-                                      value={formDataRef2.current[item.Value] || ""}
-                                      onChange={handleInputChange}
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            })} */}
                           </div>
                         </div>
                       </div>
