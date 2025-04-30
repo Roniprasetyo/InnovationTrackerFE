@@ -722,11 +722,12 @@ export default function SuggestionSytemIndex({
       </div>
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role.slice(0, 5) !== "ROL01" &&
+          {
+          // userInfo.role.slice(0, 5) !== "ROL01" &&
           type === "mySubmission" &&
-          ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
-            userInfo.jabatan
-          ) &&
+          // ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
+          //   userInfo.jabatan
+          // ) &&
           userInfo.role.slice(0, 5) !== "ROL01" ? (
             <Button
               iconName="add"

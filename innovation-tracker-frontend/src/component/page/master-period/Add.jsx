@@ -18,11 +18,13 @@ export default function MasterPeriodAdd({ onChangePage }) {
   const formDataRef = useRef({
     perAwal: "",
     perAkhir: "",
+    perPeriode: "",
   });
 
   const userSchema = object({
     perAwal: date().required("harus diisi").nullable(),
     perAkhir: date().required("harus diisi").nullable(),
+    perPeriode: string().max(20, "20 chars max").required("harus diisi"),
   });
 
   const handleInputChange = (e) => {
@@ -41,18 +43,16 @@ export default function MasterPeriodAdd({ onChangePage }) {
     const perAwalYear = new Date(formDataRef.current.perAwal).getFullYear();
     const perAkhirYear = new Date(formDataRef.current.perAkhir).getFullYear();
 
-    // Jika tahun tidak sama, tampilkan SweetAlert
     if (perAwalYear !== perAkhirYear) {
-        SweetAlert(
-            "ERROR",
-            "The Activity Start Date and Activity End Date must be in the same year.",
-            "error",
-            "OK"
-        );
-        return; // Menghentikan proses lebih lanjut
+      SweetAlert(
+        "ERROR",
+        "The Activity Start Date and Activity End Date must be in the same year.",
+        "error",
+        "OK"
+      );
+      return;
     }
-  
-    // Display SweetAlert for confirmation before proceeding
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to submit this registration form? Once submitted, it will make the previous active period data inactive.",
@@ -62,26 +62,25 @@ export default function MasterPeriodAdd({ onChangePage }) {
       "",
       true
     );
-  
-    // If user confirms, proceed with validation and submission
+
     if (confirm) {
       const validationErrors = await validateAllInputs(
         formDataRef.current,
         userSchema,
         setErrors
       );
-  
+
       if (Object.values(validationErrors).every((error) => !error)) {
         setIsLoading(true);
         setIsError((prevError) => ({ ...prevError, error: false }));
         setErrors({});
-  
+
         try {
           const data = await UseFetch(
             API_LINK + "MasterPeriod/CreatePeriod",
             formDataRef.current
           );
-  
+
           if (data === "ERROR") {
             throw new Error("Error: Failed to submit the data.");
           } else if (data[0].hasil === "EXIST") {
@@ -103,7 +102,6 @@ export default function MasterPeriodAdd({ onChangePage }) {
       } else window.scrollTo(0, 0);
     }
   };
-  
 
   if (isLoading) return <Loading />;
 
@@ -148,7 +146,7 @@ export default function MasterPeriodAdd({ onChangePage }) {
             </div>
             <div className="card-body">
               <div className="row p-4">
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Input
                     type="date"
                     forInput="perAwal"
@@ -159,7 +157,7 @@ export default function MasterPeriodAdd({ onChangePage }) {
                     errorMessage={errors.perAwal}
                   />
                 </div>
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Input
                     type="date"
                     forInput="perAkhir"
@@ -169,7 +167,18 @@ export default function MasterPeriodAdd({ onChangePage }) {
                     onChange={handleInputChange}
                     errorMessage={errors.perAkhir}
                   />
-                </div>                
+                </div>
+                <div className="col-lg-4">
+                  <Input
+                    type="text"
+                    forInput="perPeriode"
+                    label="Period Name"
+                    isRequired
+                    value={formDataRef.current.perPeriode}
+                    onChange={handleInputChange}
+                    errorMessage={errors.perPeriode}
+                  />
+                </div>
               </div>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="flex-grow-1 m-2">

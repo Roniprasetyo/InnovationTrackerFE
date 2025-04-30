@@ -217,11 +217,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.per_id = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.per_id = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);

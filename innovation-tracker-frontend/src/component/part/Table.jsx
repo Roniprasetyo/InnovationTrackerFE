@@ -307,8 +307,7 @@ export default function Table({
                     className={
                       value["Status"] &&
                       (value["Status"] === "Draft" ||
-                        value["Status"] === "Revision" ||
-                        value["Status"] === "Belum Dikonversi" ||
+                        value["Status"] === "Waiting Approval" ||
                         value["Status"] === "Belum Dibuat Penjadwalan" ||
                         value["Status"] === "Draft Scoring")
                         ? "fw-bold"

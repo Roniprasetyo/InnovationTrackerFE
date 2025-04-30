@@ -31,7 +31,6 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
             "Terjadi kesalahan: Gagal mengambil data periode."
           );
         } else {
-          // Mengisi form data dengan data yang diambil
           formDataRef.current = { ...formDataRef.current, ...data[0] };
         }
       } catch (error) {
