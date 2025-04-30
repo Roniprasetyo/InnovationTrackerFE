@@ -1152,9 +1152,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           />
                                           )
                                         ) : (
-                                            <div className="form-control bg-light">
-                                              Not yet scored
-                                            </div>
+                                          <SearchDropdown
+                                          forInput={item.Value}
+                                          arrData={filteredArrData}
+                                          isRound
+                                          selectedValued={arrTextDataforKaDept[item.Value - 1]}
+                                          value={formDataRef2.current[item.Value] || ""}
+                                          onChange={handleInputChange}
+                                        />  
                                         );
                                       }
                                     }else if (isWadir) {
