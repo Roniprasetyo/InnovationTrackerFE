@@ -12,9 +12,17 @@ export default function SuggestionSystem() {
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <SuggestionSytemIndex onChangePage={handleSetPageMode} onScoring={handleScoring} onEditScoring={handleEditScoring} />;
+        return (
+          <SuggestionSytemIndex
+            onChangePage={handleSetPageMode}
+            onScoring={handleScoring}
+            onEditScoring={handleEditScoring}
+          />
+        );
       case "add":
         return <SuggestionSystemAdd onChangePage={handleSetPageMode} />;
+      case "edit":
+        return <SuggestionSystemEdit onChangePage={handleSetPageMode} withID={dataID} />;
       case "detail":
         // console.log("ini Root: ", dataID);
         return (

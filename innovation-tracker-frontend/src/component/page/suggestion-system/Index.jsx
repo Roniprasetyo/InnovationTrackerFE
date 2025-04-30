@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { PAGE_SIZE, API_LINK, EMP_API_LINK } from "../../util/Constants";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -72,6 +73,9 @@ export default function SuggestionSytemIndex({
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  const location = useLocation();
+  const type = location.state?.type;
+  // console.log(location.state);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [listEmployee, setListEmployee] = useState([]);
@@ -452,10 +456,12 @@ export default function SuggestionSytemIndex({
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
-
+      console.log(location.state);
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaSS/GetRencanaSS",
+          type === "mySubmission"
+            ? API_LINK + "RencanaSS/GetMyRencanaSS"
+            : API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter
         );
         console.log("DATA SS:", data);
@@ -551,11 +557,12 @@ export default function SuggestionSytemIndex({
                 ],
               };
             } else if (
-              userInfo.jabatan === "Kepala Departemen" ||
-              userInfo.jabatan === "Sekretaris Prodi" ||
-              userInfo.jabatan === "Direktur" ||
-              userInfo.jabatan === "Wakil Direktur" ||
-              userInfo.jabatan === "Kepala Seksi"
+              (userInfo.jabatan === "Kepala Departemen" ||
+                userInfo.jabatan === "Sekretaris Prodi" ||
+                userInfo.jabatan === "Direktur" ||
+                userInfo.jabatan === "Wakil Direktur" ||
+                userInfo.jabatan === "Kepala Seksi") &&
+              type !== "mySubmission"
             ) {
               return {
                 Key: value.Key,
@@ -596,7 +603,7 @@ export default function SuggestionSytemIndex({
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
                       (value["Status"] === "Approved" ||
-                        value["Status"] === "Scoring")
+                        value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
                     : userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
@@ -641,6 +648,7 @@ export default function SuggestionSytemIndex({
                 Category: value["Category"],
                 Batch: value["Batch"] || "-",
                 Period: value["Period"],
+                "Submitted On": formatDate(value["Creadate"]),
                 Status: value["Status"],
                 Count: value["Count"],
                 Action:
@@ -714,7 +722,12 @@ export default function SuggestionSytemIndex({
       </div>
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role.slice(0, 5) !== "ROL01" ? (
+          {userInfo.role.slice(0, 5) !== "ROL01" &&
+          type === "mySubmission" &&
+          ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
+            userInfo.jabatan
+          ) &&
+          userInfo.role.slice(0, 5) !== "ROL01" ? (
             <Button
               iconName="add"
               label="Register"
@@ -792,8 +805,8 @@ export default function SuggestionSytemIndex({
         <div className="d-flex flex-column">
           <Table
             checkboxTable={
-              userInfo.role.slice(0, 5) === "ROL01" ||
-              userInfo.jabatan === "Kepala Departemen"
+              userInfo.role.slice(0, 5) === "ROL01"
+              // || userInfo.jabatan === "Kepala Departemen"
             }
             onCheckedChange={handleSelectionChange}
             data={currentData}

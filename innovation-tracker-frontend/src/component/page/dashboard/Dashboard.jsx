@@ -197,7 +197,7 @@ export default function Dashboard() {
 
           const tableData = sectionsArray
             .map((dept, index) => ({
-              Department: dept,
+              Section: dept,
               Total: sectionsCount[dept],
               Alignment: ["center", "left", "right"],
             }))
