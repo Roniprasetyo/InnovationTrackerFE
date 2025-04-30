@@ -1489,10 +1489,25 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         selectedTab === 0 ? "#0d6efd" : "white",
                                     }}
                                   >
-                                    Total Score
+                                    <h3
+                                      className="w-100 text-center"
+                                      style={{
+                                        marginBottom: "0.5rem",
+                                        background: "transparent",
+                                        // border: "none",
+                                        padding: 0,
+                                        fontWeight: "bold",
+                                      }}
+                                    >
+                                      Total Score
+                                    </h3>
                                     <hr />
                                     Ka.Unit/Ka.UPT/SekProdi
-                                    <h1>{totalScoreforKaUpt}</h1>
+                                    <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+                                      <h1 className="fw-medium fw-bold">
+                                        {totalScore}
+                                      </h1>
+                                    </div>
                                   </div>
 
                                   {/* Ka.Prodi/Ka.Dept */}

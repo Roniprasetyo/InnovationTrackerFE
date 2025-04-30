@@ -329,7 +329,7 @@ export default function MiniConventionScoring({ onChangePage }) {
 
       pen_modif_by: Yup.string().required("pen_modif_by is required"),
 
-      pen_comment: Yup.string().required("ISI DONG"),
+      pen_comment: Yup.string().nullable(),
     });
 
     console.log("payload: ", payload);
@@ -385,7 +385,7 @@ export default function MiniConventionScoring({ onChangePage }) {
       }
     } else {
       console.log("356 error", errors);
-      SweetAlert("Error", Object.values(validationErrors).join('\n'), "error");
+      SweetAlert("Error", Object.values(validationErrors).join("\n"), "error");
       // window.scrollTo(0, 0);
     }
   };
@@ -475,7 +475,7 @@ export default function MiniConventionScoring({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (${item.Score})`,
+            Text:`(Poin: ${item.Score}) - ${item.Desc}`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -623,7 +623,43 @@ export default function MiniConventionScoring({ onChangePage }) {
                               return (
                                 <div className="row mb-3" key={item.Value}>
                                   <div className="col-lg-4">
-                                    <Label data={item.Text} />
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "flex-start",
+                                        gap: "4px",
+                                      }}
+                                    >
+                                      <Label
+                                        data={
+                                          item.Text === "Reduksi Biaya"
+                                            ? `${item.Text} \t (IDR)`
+                                            : item.Text
+                                        }
+                                      />
+                                      <span
+                                        style={{
+                                          color: "red",
+                                          fontSize: "1rem",
+                                          lineHeight: "1",
+                                        }}
+                                      >
+                                        *
+                                      </span>
+                                    </div>
+
+                                    {item.Text === "Reduksi Biaya" && (
+                                      <div style={{ marginTop: "-20px" }}>
+                                        <small
+                                          style={{
+                                            fontSize: "0.75rem",
+                                            color: "#6c757d",
+                                          }}
+                                        >
+                                          material, consumable, man hour, dll...
+                                        </small>
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="col-lg-8">
                                     <SearchDropdown
@@ -664,20 +700,17 @@ export default function MiniConventionScoring({ onChangePage }) {
                           </div>
                           <div className="ps-4" style={{ width: "20%" }}>
                             <div
-                              className="card d-flex flex-column "
+                              className="card fw-medium text-center"
                               style={{
-                                width: "220px",
-                                height: "100%",
-                                padding: "1rem",
-                                // backgroundColor: "#0d6efd",
-                                // border: "none",
+                                width: "200px",
+                                minHeight: "180px",
                               }}
                             >
                               {/* HEADER DI ATAS */}
                               <h3
                                 className="w-100 text-center"
                                 style={{
-                                  marginBottom: "0.5rem",
+                                  textAlign: "center",
                                   background: "transparent",
                                   // border: "none",
                                   padding: 0,
@@ -687,13 +720,7 @@ export default function MiniConventionScoring({ onChangePage }) {
                                 Total Score
                               </h3>
 
-                              <hr
-                              // style={{
-                              //   width: "100%",
-                              //   borderColor: "white",
-                              //   margin: "0.5rem 0",
-                              // }}
-                              />
+                              <hr />
 
                               {/* ISI DI TENGAH */}
                               <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
