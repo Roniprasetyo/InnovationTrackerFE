@@ -115,7 +115,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
     sisDelivery: string().max(200, "maximum 200 characters").nullable(),
     sisMoral: string().max(200, "maximum 200 characters").nullable(),
     sisStatus: string().required("required"),
-    sisReasonforRejection: string().required("required"),
+    sisReasonforRejection: string().nullable(),
   });
 
   useEffect(() => {
@@ -202,6 +202,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log(withID);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setIsLoading(true);
       try {
@@ -236,7 +237,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
             sisSafety: data[0]["Safety"],
             sisMoral: data[0]["Moral"],
             sisStatus: data[0]["Status"],
-            sisReasonforRejection: data[0]["Alasan Penolakan"]
+            sisReasonforRejection: data[0]["Alasan Penolakan"],
           };
 
           setCheckedStates({
@@ -301,6 +302,8 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
       userSchema,
       setErrors
     );
+
+    console.log(validationErrors);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       const sDate = new Date(formDataRef.current.sis_tanggalmulai);
@@ -781,9 +784,12 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                     {formDataRef.current.sisStatus === "Rejected" && (
                       <>
                         <hr />
-                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <h5 className="fw-medium fw-bold">
+                          Reason for Rejection
+                        </h5>
                         <Label
-                        data={formDataRef.current.sisReasonforRejection}/>
+                          data={formDataRef.current.sisReasonforRejection}
+                        />
                         <hr />
                       </>
                     )}

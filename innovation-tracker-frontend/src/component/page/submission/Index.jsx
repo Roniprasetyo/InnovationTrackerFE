@@ -12,6 +12,8 @@ import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Label from "../../part/Label";
 import Icon from "../../part/Icon";
+import Cookies from "js-cookie";
+import { decryptId } from "../../util/Encryptor";
 
 const listTypeSetting = [
   { Value: "Jenis Improvement", Text: "Jenis Improvement" },
@@ -19,9 +21,14 @@ const listTypeSetting = [
 ];
 
 export default function Submission() {
+  const cookie = Cookies.get("activeUser");
+
+  let userInfo = "";
+  if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
+  const [count, setCount] = useState(0);
   const navigate = useNavigate();
 
   const formDataRef = useRef({
@@ -36,16 +43,19 @@ export default function Submission() {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingById", {
-          id: withID,
-        });
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetCountSSNeedAction",
+          {
+            id: userInfo.npk,
+            role: userInfo.role.slice(0, 5),
+          }
+        );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data setting."
-          );
+          throw new Error("Terjadi kesalahan: Gagal mengambil data setting.");
         } else {
-          formDataRef.current = { ...formDataRef.current, ...data[0] };
+          console.log(data[0].Value);
+          setCount(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -60,7 +70,7 @@ export default function Submission() {
     };
 
     fetchData();
-  }, []);
+  }, [userInfo.npk]);
 
   return (
     <>
@@ -82,21 +92,61 @@ export default function Submission() {
                   carried out by individuals within the scope of their work and
                   the benefits of Instantly felt by changemakers
                 </p>
-                <div className="row">
-                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/ss")}>
-                  <div
-                    className="d-flex align-items-center mx-3"
-                    style={{ cursor: "pointer" }}
-                  >
-                    
-                    <p className="fw-small text-white my-1">
-                      <small>
-                        <Icon name="plus me-2 text-white" />
-                        <i>System Suggestion </i>
-                      </small>
-                    </p>
-                  </div>
-                </div>
+                <div className="row gap-2">
+                  {[
+                    "Kepala Seksi",
+                    "Kepala Departemen",
+                    "Sekretaris Prodi",
+                  ].includes(userInfo.jabatan) && (
+                    <div
+                      className="col-sm-3 bg-success rounded-5"
+                      onClick={() => navigate("/submission/ss")}
+                    >
+                      <div
+                        className="d-flex align-items-center"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <p className="fw-small text-white my-1">
+                          <small>
+                            <Icon name="memo-circle-check me-2 text-white" />
+                            <i>Submission need Action </i>
+                            <span
+                              className="badge rounded-pill bg-danger ms-1"
+                              style={{
+                                fontSize: ".8em",
+                              }}
+                            >
+                              {count > 0 ? count : ""}
+                            </span>
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {userInfo.role.slice(0, 5) !== "ROL01" && (
+                    <div
+                      className="col-sm-3 bg-success rounded-5"
+                      onClick={() =>
+                        navigate("/submission/ss", {
+                          state: {
+                            type: "mySubmission",
+                          },
+                        })
+                      }
+                    >
+                      <div
+                        className="d-flex align-items-center mx-3"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <p className="fw-small text-white my-1">
+                          <small>
+                            <Icon name="plus me-2 text-white" />
+                            <i>System Suggestion </i>
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -117,12 +167,14 @@ export default function Submission() {
                   Study Program/UPT/Unit, where the target project is relate
                   with the KPIs of each Study Program/UPT/Unit.
                 </p>
-                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/qcc")}>
+                <div
+                  className="col-sm-4 bg-success rounded-5"
+                  onClick={() => navigate("/submission/qcc")}
+                >
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                  
                     <p className="fw-small text-white my-1">
                       <small>
                         <Icon name="plus me-2 text-white" />
@@ -150,12 +202,14 @@ export default function Submission() {
                   across Study Programs/UPTs/Units where the project target is
                   in accordance with the KPIs of each WaDir.
                 </p>
-                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/qcp")}>
+                <div
+                  className="col-sm-4 bg-success rounded-5"
+                  onClick={() => navigate("/submission/qcp")}
+                >
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    
                     <p className="fw-small text-white my-1">
                       <small>
                         <Icon name="plus me-2 text-white" />
@@ -183,14 +237,20 @@ export default function Submission() {
             <div className="col-sm-9">
               <div className="p-4">
                 <p className="lead fw-medium">
-                Business Performance Improvement (BPI) is an innovation that is cross-Division/Vice Director in ASTRAtech, which is a new business that impacts the increase of tangible value at Poltek ASTRA as an educational institution that is part of the ASTRA business unit.
+                  Business Performance Improvement (BPI) is an innovation that
+                  is cross-Division/Vice Director in ASTRAtech, which is a new
+                  business that impacts the increase of tangible value at Poltek
+                  ASTRA as an educational institution that is part of the ASTRA
+                  business unit.
                 </p>
-                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/bpi")}>
+                <div
+                  className="col-sm-4 bg-success rounded-5"
+                  onClick={() => navigate("/submission/bpi")}
+                >
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    
                     <p className="fw-small text-white my-1">
                       <small>
                         <Icon name="plus me-2 text-white" />
@@ -203,9 +263,7 @@ export default function Submission() {
             </div>
           </div>
           <div className="row bg-second rounded-5 shadow-sm mb-3">
-            <div
-              className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3"
-            >
+            <div className="col-lg-3 bg-main rounded-5 d-flex align-items-center p-3">
               <div className="mb-2 ms-3">
                 <div className="display-3 fw-bold">VCI</div>
                 <div className="fw-medium">
@@ -222,15 +280,17 @@ export default function Submission() {
                   including ASTRA Polytechnic as an educational institution that
                   is part of ASTRA's business unit
                 </p>
-                <div className="col-sm-4 bg-success rounded-5" onClick={() => navigate("/submission/vci")}>
+                <div
+                  className="col-sm-4 bg-success rounded-5"
+                  onClick={() => navigate("/submission/vci")}
+                >
                   <div
                     className="d-flex align-items-center mx-3"
                     style={{ cursor: "pointer" }}
                   >
-                    
                     <p className="fw-small text-white my-1">
                       <small>
-                      <Icon name="plus me-2 text-white" />
+                        <Icon name="plus me-2 text-white" />
                         <i>Value Chain Innovation </i>
                       </small>
                     </p>
