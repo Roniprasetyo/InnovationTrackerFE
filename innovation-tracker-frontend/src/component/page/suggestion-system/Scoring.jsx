@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { decodeHtml, formatDate, separator } from "../../util/Formatting";
+import { decodeHtml, formatDate, maxCharDisplayed, separator } from "../../util/Formatting";
 import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
@@ -228,7 +228,13 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       if (!isNaN(parsed)) total += parsed;
     });
 
-    // setTotalScoreforKaUpt(total);
+    if (userInfo.jabatan === "Kepala Seksi" || userInfo.jabatan === "Sekretaris Prodi"){
+      setTotalScoreforKaUpt(total);
+    }else if(userInfo.jabatan == "Kepala Departemen"){
+      setTotalScoreforKaDept(total);
+    }else if(userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur" ){
+      setTotalScoreforWadir(total);
+    }
   };
 
   useEffect(() => {
@@ -273,15 +279,49 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    let ranking = 0;
+    let status1 = null;
+
+    if (userInfo.jabatan === "Kepala Seksi" || userInfo.jabatan === "Sekretaris Prodi") {
+      const item = listSettingRanking.find(s => s.Ranking === "Ranking 5");
+      if (item && item.Range) {
+        const parts = item.Range.split('-').map(p => parseInt(p.trim(), 10));
+        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
+      }
+      if(totalScoreforKaUpt < ranking){
+        status1 = "Final";
+      }else{
+        status1 = "Scoring"
+      }
+    }else if(userInfo.jabatan === "Kepala Departemen"){
+      const item = listSettingRanking.find(s => s.Ranking === "Ranking 4");
+      if (item && item.Range) {
+        const parts = item.Range.split('-').map(p => parseInt(p.trim(), 10));
+        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
+      }
+      if(totalScoreforKaDept < ranking){
+        status1 = "Final";
+      }else{
+        status1 = "Scoring"
+      }
+    }else if(userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur"){
+      status1 = "Final"
+    }
+
+    
 
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "),
       sis_id: id,
       pen_nilai: Object.values(formDataRef3.current).join(", "),
       jabatan: userInfo.jabatan,
-      status: "-",
+      statusPN: "-",
+      created: userInfo.username,
+      statusSR: status1
     };
 
+    console.log("Payload ", payload);
     // const validationErrors = await validateAllInputs(
     //   formDataRef2.current,
     //   userSchema,
@@ -297,34 +337,32 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     //   setIsError((prevError) => ({ ...prevError, error: false }));
     //   setErrors({});
 
-      try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/CreatePenilaian",
-          payload
-        );
+    try {
+      const data = await UseFetch(
+        API_LINK + "RencanaSS/CreatePenilaian",
+        payload
+      );
 
-        // console.log("tes", data);
-        if (!data) {
-          throw new Error("Error: Failed to Submit the data.");
-        } else {
-          SweetAlert("Success", "Data Successfully Submitted", "success");
-
-        setTimeout(function() {
-          localStorage.setItem('refreshAfterSubmit', 'true');
-          window.close();  
-        }, 2000);  
-
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
+      // console.log("tes", data);
+      if (!data) {
+        throw new Error("Error: Failed to Submit the data.");
+      } else {
+        SweetAlert("Success", "Data Successfully Submitted", "success");
+        setTimeout(function () {
+          localStorage.setItem("refreshAfterSubmit", "true");
+          window.close();
+        }, 2000);
       }
+    } catch (error) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: error.message,
+      }));
+    } finally {
+      setIsLoading(false);
+    }
     // } else window.scrollTo(0, 0);
   };
 
@@ -596,7 +634,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (Poin: ${item.Score})`,
+            Text: `(Poin: ${item.Score}) - ${item.Desc}`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -785,10 +823,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     else if (selectedTab === 1) jabatanTarget = ["Kepala Departemen"];
     else if (selectedTab === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
     let isChecked = false;
-    if(listAllPenilaian.length === 0){
-      console.log("tess","kosong bang")
-      setReadOnly(true);
-    }else{
+    if(listAllPenilaian.length !== 0){
       isChecked = listAllPenilaian.some(
         (item) =>
           item["Jabatan Penilai"] &&
@@ -1190,8 +1225,44 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     return (
                                       <div className="row mb-3" key={item.Value}>
                                         <div className="col-lg-4">
-                                          <Label data={item.Text} />
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "flex-start",
+                                            gap: "4px",
+                                          }}
+                                        >
+                                          <Label
+                                            data={
+                                              item.Text === "Reduksi Biaya"
+                                                ? `${item.Text} \t (IDR)`
+                                                : item.Text
+                                            }
+                                          />
+                                          <span
+                                            style={{
+                                              color: "red",
+                                              fontSize: "1rem",
+                                              lineHeight: "1",
+                                            }}
+                                          >
+                                            *
+                                          </span>
                                         </div>
+
+                                        {item.Text === "Reduksi Biaya" && (
+                                          <div style={{ marginTop: "-20px" }}>
+                                            <small
+                                              style={{
+                                                fontSize: "0.75rem",
+                                                color: "#6c757d",
+                                              }}
+                                            >
+                                              {maxCharDisplayed(item.Desc, 60)}
+                                            </small>
+                                          </div>
+                                        )}
+                                      </div>
                                         <div className="col-lg-8">
                                           {content}
                                         </div>

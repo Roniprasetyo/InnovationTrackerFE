@@ -120,6 +120,7 @@ export default function Dashboard() {
   const [listEmployee, setListEmployee] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [listPeriod, setListPeriod] = useState(true);
 
   const [currentFilter, setCurrentFilter] = useState({
     jenis: selectedLomba,
@@ -236,7 +237,7 @@ export default function Dashboard() {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
+        setCurrentData({});
       } finally {
         setIsLoading(false);
       }

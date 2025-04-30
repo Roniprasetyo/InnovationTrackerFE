@@ -39,6 +39,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [listEmployee, setListEmployee] = useState([]);
   const [sectionHead, setSectionHead] = useState({});
+  const [listDepartment, setListDepartment] = useState([]);
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
@@ -117,17 +118,16 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   });
 
   useEffect(() => {
-    if (listEmployee.length > 0 && userInfo?.upt) {
+    if (
+      listEmployee.length > 0 &&
+      userInfo?.upt &&
+      listDepartment.length > 0
+    ) {
       const kepalaSeksi = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
           value.jabatan === "Kepala Seksi"
       );
-  
-      if (kepalaSeksi) {
-        setSectionHead(kepalaSeksi);
-        return;
-      }
   
       const sekProdi = listEmployee.find(
         (value) =>
@@ -135,25 +135,108 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           value.jabatan === "Sekretaris Prodi"
       );
   
-      if (sekProdi) {
-        setSectionHead(sekProdi);
-        return;
-      }
-  
       const kepalaDepartemen = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
           value.jabatan === "Kepala Departemen"
       );
   
-      if (kepalaDepartemen) {
-        setSectionHead(kepalaDepartemen);
+      let selected = kepalaSeksi || sekProdi || kepalaDepartemen;
+  
+      if (
+        selected?.npk === userInfo.npk &&
+        (selected.jabatan === "Kepala Seksi" || selected.jabatan === "Sekretaris Prodi")
+      ) {
+        const userStruktur = listDepartment.find(
+          (item) => item.Npk === userInfo.npk
+        );
+  
+        if (userStruktur) {
+          const parent = userStruktur["Struktur Parent"];
+  
+          const parentDept = listDepartment.find(
+            (item) =>
+              item["Struktur Parent"] === parent &&
+              item.Jabatan === "Kepala Departemen"
+          );
+  
+          if (parentDept) {
+            const matchingEmployee = listEmployee.find(
+              (emp) => emp.npk === parentDept.Npk
+            );
+  
+            if (matchingEmployee) {
+              setSectionHead(matchingEmployee);
+              return;
+            }
+          }
+        }
+      }else if(
+        selected?.npk === userInfo.npk &&
+        (selected.jabatan === "Kepala Departemen")
+      ) {
+        const userStruktur = listDepartment.find(
+          (item) => item.Npk === userInfo.npk
+        );
+  
+        if (userStruktur) {
+          const parent = userStruktur["Struktur Parent"];
+  
+          const wakilDirect = listDepartment.find(
+            (item) =>
+              item.Struktur === parent &&
+              item.Jabatan === "Wakil Direktur"
+          );
+  
+          if (wakilDirect) {
+            const matchingEmployee = listEmployee.find(
+              (emp) => emp.npk === wakilDirect.Npk
+            );
+  
+            if (matchingEmployee) {
+              setSectionHead(matchingEmployee);
+              return;
+            }
+          }
+        }
+      }
+  
+      if (selected) {
+        setSectionHead(selected);
       }
     }
-  }, [listEmployee, userInfo]);  
+  }, [listEmployee, userInfo, listDepartment]);  
 
   console.log("SECTION HEAD", sectionHead);
 
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(
+            API_LINK + "RencanaSS/GetListStrukturDepartment"
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+  
+            setListDepartment(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, []);
 
   useEffect(() => {
     if (sectionHead?.npk) {
@@ -162,6 +245,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   }, [sectionHead]);
 
   console.log("User Info:", userInfo);
+  console.log("ListDepartment:", listDepartment);
 
   // useEffect(() => {
   // }, [sectionHead]);

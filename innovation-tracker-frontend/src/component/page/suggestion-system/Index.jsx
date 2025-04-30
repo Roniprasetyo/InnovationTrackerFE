@@ -132,21 +132,229 @@ export default function SuggestionSytemIndex({
 
   const handleSubmit = async (id) => {
     setIsError(false);
-    const tempStatus = getStatusByKey(id);
-    var alertStatus;
 
-    if (tempStatus === "Approved") {
-      alertStatus =
-        "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
-    } else {
-      alertStatus =
-        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
+    setIsError((prevError) => ({ ...prevError, error: false }));
+
+    let tempTotal1 = 0;
+    let tempTotal2 = 0;
+    let tempTotal3 = 0;
+
+    let statusKupt = [];
+    let statusKdept = [];
+    let statusDir = [];
+
+    let totalScore1 = 0;
+    let totalScore2 = 0;
+    let totalScore3 = 0;
+
+    if (
+      userInfo.jabatan === "Kepala Seksi" ||
+      userInfo.jabatan === "Sekretaris Prodi"
+    ) {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          id: id,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPT: ", data);
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 65
+                ? item.Deskripsi.substring(0, 65) + "..."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Deskripsi: `${deskripsiPendek}`,
+              Value: item.Value,
+              Nilai: item.Nilai,
+              Kriteria: item.Kriteria,
+              jab : item["Jabatan Penilai"], 
+              Creaby: item.Creaby,
+              Creadate: item.Creadate,
+            };
+          });
+
+          statusKupt = dataDetail;
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+
+      statusKupt.forEach((item) => {
+        if (
+          item.jab !== "Kepala Seksi" &&
+          item.jab !== "Sekretaris Prodi"
+        ) {
+          console.log("kddd", statusKupt);
+          tempTotal1 = 0;
+        } else {
+          console.log("total nilai k sek: ", item.Nilai);
+          tempTotal1 += parseFloat(item.Nilai) || 0;
+        }
+      });
+    } else if (userInfo.jabatan === "Kepala Departemen") {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          id: id,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPT: ", data);
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 65
+                ? item.Deskripsi.substring(0, 65) + "..."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Deskripsi: `${deskripsiPendek}`,
+              Value: item.Value,
+              Nilai: item.Nilai,
+              Kriteria: item.Kriteria,
+              jab: item["Jabatan Penilai"], 
+              Creaby: item.Creaby,
+              Creadate: item.Creadate,
+            };
+          });
+
+          statusKdept =dataDetail;
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+
+      statusKdept.forEach((item) => {
+        if (item.jab !== "Kepala Departemen") {
+          tempTotal2 = 0;
+        } else {
+          tempTotal2 += parseFloat(item.Nilai) || 0;
+        }
+      });
+    } else if (
+      userInfo.jabatan === "Wakil Direktur" ||
+      userInfo.jabatan === "Direktur"
+    ) {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          id: id,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPT: ", data);
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 65
+                ? item.Deskripsi.substring(0, 65) + "..."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Deskripsi: `${deskripsiPendek}`,
+              Value: item.Value,
+              Nilai: item.Nilai,
+              Kriteria: item.Kriteria,
+              jab: item["Jabatan Penilai"], 
+              Creaby: item.Creaby,
+              Creadate: item.Creadate,
+            };
+          });
+
+          statusDir = dataDetail;
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+
+      statusDir.forEach((item) => {
+        if (item.jab !== "Wakil Direktur") {
+          tempTotal3 = 0;
+        } else {
+          tempTotal3 += parseFloat(item.Nilai) || 0;
+        }
+      });
     }
+
+    totalScore1 = tempTotal1;
+    totalScore2 = tempTotal2;
+    totalScore3 = tempTotal3;
+
+    let ranking = 0;
+    let status1 = null;
+
+    if (
+      userInfo.jabatan === "Kepala Seksi" ||
+      userInfo.jabatan === "Sekretaris Prodi"
+    ) {
+      const item = listSettingRanking.find((s) => s.Ranking === "Ranking 5");
+      // console.log("TRR", statusKupt);
+      if (item && item.Range) {
+        const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
+      }
+      // console.log("AA ", totalScore1);
+      if (totalScore1 < ranking) {
+        status1 = "Final";
+      } else {
+        status1 = "Scoring";
+      }
+    } else if (userInfo.jabatan === "Kepala Departemen") {
+      const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
+      if (item && item.Range) {
+        const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
+      }
+      if (totalScore2 < ranking) {
+        status1 = "Final";
+      } else {
+        status1 = "Scoring";
+      }
+    } else if (
+      userInfo.jabatan === "Wakil Direktur" ||
+      userInfo.jabatan === "Direktur"
+    ) {
+      status1 = "Final";
+    }
+
+    console.log("Status", status1);
+    const tempStatus = getStatusByKey(id);
 
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure about this value?",
-      "warning",
+      "info",
       "Submit",
       null,
       "",
@@ -158,6 +366,7 @@ export default function SuggestionSytemIndex({
       if (tempStatus !== "Approved") {
         UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
           id: id,
+          status: status1,
         })
           .then((data) => {
             if (!data) {
@@ -642,6 +851,8 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Scoring")
                     ? ["Detail", "Scoring"]
+                    : userInfo.jabatan === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.jabatan === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                     : userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
                       userInfo.jabatan === "Wakil Direktur" ||
