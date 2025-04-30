@@ -59,11 +59,21 @@ function a11yProps(index) {
   };
 }
 
+function deobfuscateId(obfuscated) {
+  const parts = obfuscated.split(".");
+  if (parts.length === 2) {
+    return atob(parts[1]); // hanya ambil bagian Base64
+  }
+  return null;
+}
+
 export default function MiniConventionScoring({ onChangePage, WithID }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
-  const id = searchParams.get("id");
+  const encodedId = searchParams.get("id");
   let userInfo = "";
+  const id = deobfuscateId(encodedId);
+  console.log("ID", id);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
@@ -1489,23 +1499,13 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         selectedTab === 0 ? "#0d6efd" : "white",
                                     }}
                                   >
-                                    <h3
-                                      className="w-100 text-center"
-                                      style={{
-                                        marginBottom: "0.5rem",
-                                        background: "transparent",
-                                        // border: "none",
-                                        padding: 0,
-                                        fontWeight: "bold",
-                                      }}
-                                    >
                                       Total Score
-                                    </h3>
+                                    {/* </h3> */}
                                     <hr />
                                     Ka.Unit/Ka.UPT/SekProdi
                                     <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
                                       <h1 className="fw-medium fw-bold">
-                                        {totalScore}
+                                        {totalScoreforKaUpt}
                                       </h1>
                                     </div>
                                   </div>

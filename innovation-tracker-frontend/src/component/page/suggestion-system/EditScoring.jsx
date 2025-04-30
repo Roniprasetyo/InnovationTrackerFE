@@ -33,12 +33,21 @@ const inisialisasiData = [
     Count: 0,
   },
 ];
+function deobfuscateId(obfuscated) {
+  const parts = obfuscated.split(".");
+  if (parts.length === 2) {
+    return atob(parts[1]); // hanya ambil bagian Base64
+  }
+  return null;
+}
 
 export default function MiniConventionScoring({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
-  const id = searchParams.get("id");
+  const encodedId = searchParams.get("id");
   let userInfo = "";
+  const id = deobfuscateId(encodedId);
+  console.log("ID", id);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
