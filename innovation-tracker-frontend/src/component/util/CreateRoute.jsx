@@ -17,6 +17,8 @@ const MasterPerusahaan = lazy(() => import("../page/master-perusahaan/Root"));
 const MasterStep = lazy(() => import("../page/master-step/Root"));
 const MiniKonvensi = lazy(() => import("../page/mini-convention/Root"));
 const Scoring = lazy(() => import("../page/mini-convention/Scoring"));
+const KriteriaNilai = lazy(() => import("../page/master-kriteria-nilai/Root"));
+
 
 const routeList = [
   {
@@ -86,6 +88,10 @@ const routeList = [
   {
     path: "/scoring",
     element: <Scoring />,
+  },
+  {
+    path: "/kriteria_nilai",
+    element: <KriteriaNilai />,
   },
 ];
 
