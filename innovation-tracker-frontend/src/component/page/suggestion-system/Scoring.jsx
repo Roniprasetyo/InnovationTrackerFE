@@ -1152,6 +1152,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           />
                                           )
                                         ) : (
+<<<<<<< Updated upstream
                                           <SearchDropdown
                                           forInput={item.Value}
                                           arrData={filteredArrData}
@@ -1160,6 +1161,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           value={formDataRef2.current[item.Value] || ""}
                                           onChange={handleInputChange}
                                         />  
+=======
+                                            <div className="form-control bg-light">
+                                              Not yet scored
+                                            </div>
+>>>>>>> Stashed changes
                                         );
                                       }
                                     }else if (isWadir) {
