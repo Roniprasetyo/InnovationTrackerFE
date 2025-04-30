@@ -115,6 +115,7 @@ const initialChart = {
 
 export default function Dashboard() {
   const [selectedLomba, setSelectedLomba] = useState("SS");
+  const [selectedPeriod, setSelectedPeriod] = useState("2025");
   const [isError, setIsError] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
@@ -123,6 +124,7 @@ export default function Dashboard() {
 
   const [currentFilter, setCurrentFilter] = useState({
     jenis: selectedLomba,
+    period: selectedPeriod,
   });
 
   useEffect(() => {
@@ -268,7 +270,8 @@ export default function Dashboard() {
       )}
 
       <div className="container">
-        <div className="w-25 mb-3">
+      <div className="d-flex gap-3 mb-3">
+        <div className="w-25">
           <DropDown
             forInput="ddSubmission"
             label="Submission"
@@ -281,17 +284,35 @@ export default function Dashboard() {
             ]}
             value={currentFilter.jenis}
             onChange={(e) =>
-              setCurrentFilter((prevFilter) => {
-                return {
-                  ...prevFilter,
-                  jenis: e.target.value,
-                };
-              })
+              setCurrentFilter((prevFilter) => ({
+                ...prevFilter,
+                jenis: e.target.value,
+              }))
             }
           />
         </div>
+
+        <div className="w-25">
+          <DropDown
+            forInput="ddPeriod"
+            label="Period"
+            arrData={[
+              { Text: "2024", Value: "2024" },
+              { Text: "2025", Value: "2025" },
+              { Text: "2026", Value: "2026" },
+            ]}
+            value={currentFilter.period}
+            onChange={(e) => setCurrentFilter((prevFilter) => ({
+              ...prevFilter,
+              period: e.target.value,
+            }))
+          }
+        />
+        </div>
+      </div>
+
         {currentData.length !== 0 ? (
-          <Bar data={currentData} options={{ responsive: true }} />
+          <Bar data={currentData} options={{ responsive: true, indexAxis: 'y' }} />
         ) : (
           <Label data="No data Available" />
         )}
