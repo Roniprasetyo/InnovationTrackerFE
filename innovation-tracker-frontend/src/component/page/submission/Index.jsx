@@ -97,6 +97,7 @@ export default function Submission() {
                     "Kepala Seksi",
                     "Kepala Departemen",
                     "Sekretaris Prodi",
+                    "Wakil Direktur",
                   ].includes(userInfo.jabatan) && (
                     <div
                       className="col-sm-3 bg-success rounded-5"

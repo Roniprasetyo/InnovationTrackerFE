@@ -861,7 +861,9 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "Scoring"]
                     : userInfo.jabatan === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                     : userInfo.jabatan === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
-                    : userInfo.jabatan === "Sekretaris Prodi" ||
+                    : userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.jabatan === "Kepala Seksi" ||
+                      userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
                       userInfo.jabatan === "Wakil Direktur" ||
                       userInfo.jabatan === "Direktur"
@@ -1002,11 +1004,10 @@ export default function SuggestionSytemIndex({
       </div>
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role.slice(0, 5) !== "ROL01" &&
-          type === "mySubmission" &&
-          ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
-            userInfo.jabatan
-          ) &&
+          {type === "mySubmission" &&
+          // ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
+          //   userInfo.jabatan
+          // ) &&
           userInfo.role.slice(0, 5) !== "ROL01" ? (
             <Button
               iconName="add"
