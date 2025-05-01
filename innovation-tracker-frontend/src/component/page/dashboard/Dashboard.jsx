@@ -46,7 +46,7 @@ export default function Dashboard() {
 
   const [currentFilter, setCurrentFilter] = useState({
     jenis: "SS",
-    period: "",
+    period: 1,
   });
 
   useEffect(() => {
@@ -115,6 +115,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      // setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "Chart/GetAllSubbmision",
@@ -162,6 +163,8 @@ export default function Dashboard() {
               ...prev,
             }))
           );
+
+          console.log(tableData);
 
           const formatted = categoryArray.map((category, index) => ({
             label: category,
