@@ -271,7 +271,7 @@ export default function SuggestionSytemIndex({
             };
           });
 
-          statusKdept =dataDetail;
+          statusKdept = dataDetail;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -397,7 +397,7 @@ export default function SuggestionSytemIndex({
       if(detailSS.Status === "Draft"){
         status1 = "Waiting Approval";
       }
-      if (totalScore1 < ranking ) {
+      else if (totalScore1 < ranking ) {
         status1 = "Final";
       }
       else {
@@ -414,7 +414,7 @@ export default function SuggestionSytemIndex({
         status1 = "Waiting Approval";
       } 
 
-      if (totalScore2 < ranking) {
+      else if (totalScore2 < ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";

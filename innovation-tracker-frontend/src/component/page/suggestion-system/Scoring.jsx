@@ -117,11 +117,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const [listValues, setListValues] = useState([]);
 
-  let rankingKUpt = "";
-  let rankingKDept = "";
-  let rankingKDir = "";
-
-  let detailSS = [];
+  const [detailSS, setDetailSS] = useState([]);
 
   useEffect(() => {
     if (listKriteriaPenilaian.length > 0) {
@@ -187,23 +183,20 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
-      // console.log("ID: ", id);
-
       try {
         const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
           id: id,
         });
 
-        // console.log("Data SS: ", id, data);
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
-          detailSS = data[0];
+          setDetailSS(data[0]);
           formDataRef.current = data[0];
-          console.log("detaiiiiiiiiilllllllf",detailSS.Facil);
-          console.log("detaiiiiiiiiillllllln",userInfo.npk);
-          console.log("detaiiiiiiiiilllllllt",selectedTab);
-          console.log("detaiiiiiiiiilllllllk");
+
+          console.log("Facil:", data[0].Facil);
+          console.log("NPK:", userInfo.npk);
+          console.log("Compare:", data[0].Facil === userInfo.npk);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -301,7 +294,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         );
 
         const temp = data.find((value) => value.npk === userInfo.npk);
-        console.log("detaiiiiii",response)
+        console.log("detaiiiiiiqqq", temp);
         setForPenilai(temp);
       } catch (error) {
         window.scrollTo(0, 0);
@@ -319,10 +312,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("RANKING 1: ", rankingKUpt);
-    console.log("RANKING 2: ", rankingKDept);
-    console.log("RANKING 3: ", rankingKDir);
 
     let status1 = "";
 
@@ -609,24 +598,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          const rank5 = data.find((s) => s.Ranking === "Ranking 5");
-          const rank4 = data.find((s) => s.Ranking === "Ranking 4");
-          const rank3 = data.find((s) => s.Ranking === "Ranking 3");
-
-          const parts5 = rank5.Range.split("-").map((p) =>
-            parseInt(p.trim(), 10)
-          );
-          const parts4 = rank4.Range.split("-").map((p) =>
-            parseInt(p.trim(), 10)
-          );
-          const parts3 = rank3.Range.split("-").map((p) =>
-            parseInt(p.trim(), 10)
-          );
-
-          rankingKUpt = parts5.length > 1 ? parts5[1] : parts5[0]; // ambil nilai terakhir
-          rankingKDept = parts4.length > 1 ? parts4[1] : parts4[0]; // ambil nilai terakhir
-          rankingKDir = parts3.length > 1 ? parts3[1] : parts3[0]; // ambil nilai terakhir
-
           setListSettingRanking(data);
         }
       } catch (error) {
@@ -647,7 +618,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   // useEffect(()=>{
   // console.log("RANKSSS: ", listSettingRanking);
 
-  // }, [rankingKUpt, rankingKDept, rankingKDir])
+  // }, [ranking5, rankingKDept, rankingKDir])
 
   useEffect(() => {
     if (listPenilaianKaUpt.length === 0 || listEmployee.length === 0) return;
@@ -1158,6 +1129,33 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       (detail) => detail.Id === item.Value
                                     );
 
+                                  const range3End =
+                                    listSettingRanking
+                                      .find(
+                                        (item) => item.Ranking === "Ranking 3"
+                                      )
+                                      ?.Range.split("-")
+                                      .map((r) => parseInt(r.trim(), 10))[1] +
+                                    1; // ambil nilai akhir
+
+                                  const range5End =
+                                    listSettingRanking
+                                      .find(
+                                        (item) => item.Ranking === "Ranking 5"
+                                      )
+                                      ?.Range.split("-")
+                                      .map((r) => parseInt(r.trim(), 10))[1] +
+                                    1; // ambil nilai akhir
+
+                                  const range4End =
+                                    listSettingRanking
+                                      .find(
+                                        (item) => item.Ranking === "Ranking 4"
+                                      )
+                                      ?.Range.split("-")
+                                      .map((r) => parseInt(r.trim(), 10))[1] +
+                                    1; // ambil nilai akhir
+
                                   const matchingPenilaianforKaUpt =
                                     listPenilaianKaUpt.find(
                                       (detail) => detail.Kriteria === item.Value
@@ -1219,7 +1217,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     if (!isFirstTab) {
                                       if (selectedTab === 1) {
                                         content =
-                                          totalScoreforKaUpt < 41 &&
+                                          totalScoreforKaUpt < { range5End } &&
                                           totalScoreforKaUpt !== 0 ? (
                                             <div className="form-control bg-light">
                                               The score does not reach the
@@ -1240,7 +1238,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               </div>
                                             ) : (
                                               <div className="form-control bg-light">
-                                                {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                                {`(Poin: ${matchingPenilaianforKaDept.Nilai}) - ${matchingPenilaianforKaDept.Deskripsi}`}
                                               </div>
                                             )
                                           ) : (
@@ -1250,9 +1248,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           );
                                       } else if (selectedTab === 2) {
                                         content =
-                                          (totalScoreforKaUpt < 41 &&
+                                          (totalScoreforKaUpt < range5End &&
                                             totalScoreforKaUpt !== 0) ||
-                                          (totalScoreforKaDept < 69 &&
+                                          (totalScoreforKaDept < range4End &&
                                             totalScoreforKaDept !== 0) ? (
                                             <div className="form-control bg-light">
                                               The score does not reach the
@@ -1266,7 +1264,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                                 "Jabatan Penilai"
                                               ] === "Direktur") ? (
                                             <div className="form-control bg-light">
-                                              {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
+                                              {`(Poin: ${matchingPenilaianforWadir.Nilai}) - ${matchingPenilaianforWadir.Deskripsi}`}
                                             </div>
                                           ) : (
                                             <div className="form-control bg-light">
@@ -1285,7 +1283,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       // Kalau masih first tab (punya dia sendiri)
                                       content = matchingPenilaianforKaUpt ? (
                                         <div className="form-control bg-light">
-                                          {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
+                                          {`(Poin: ${matchingPenilaianforKaUpt.Nilai}) - ${matchingPenilaianforKaUpt.Deskripsi}`}
                                         </div>
                                       ) : (
                                         <SearchDropdown
@@ -1305,7 +1303,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       if (selectedTab === 0) {
                                         content = matchingPenilaianforKaUpt ? (
                                           <div className="form-control bg-light">
-                                            {`${matchingPenilaianforKaUpt.Deskripsi} - (Poin: ${matchingPenilaianforKaUpt.Nilai})`}
+                                            {`(Poin: ${matchingPenilaianforKaUpt.Nilai}) - ${matchingPenilaianforKaUpt.Deskripsi}`}
                                           </div>
                                         ) : (
                                           <div className="form-control bg-light">
@@ -1315,8 +1313,20 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       } else if (selectedTab === 1) {
                                         content = matchingPenilaianforKaDept ? (
                                           <div className="form-control bg-light">
-                                            {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                            {`(Poin: ${matchingPenilaianforKaDept.Nilai}) - ${matchingPenilaianforKaDept.Deskripsi}`}
                                           </div>
+                                        ) : detailSS.Facil === userInfo.npk ? (
+                                          <SearchDropdown
+                                            forInput={item.Value}
+                                            arrData={filteredArrData}
+                                            isRound
+                                            value={
+                                              formDataRef2.current[
+                                                item.Value
+                                              ] || ""
+                                            }
+                                            onChange={handleInputChange}
+                                          />
                                         ) : (
                                           <div className="form-control bg-light">
                                             Not yet scored
@@ -1324,9 +1334,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         );
                                       } else if (selectedTab === 2) {
                                         content =
-                                          (totalScoreforKaUpt < 41 &&
+                                          (totalScoreforKaUpt < range5End &&
                                             totalScoreforKaUpt !== 0) ||
-                                          (totalScoreforKaDept < 69 &&
+                                          (totalScoreforKaDept < range4End &&
                                             totalScoreforKaDept !== 0) ? (
                                             <div className="form-control bg-light">
                                               The score does not reach the
@@ -1344,7 +1354,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                             </div>
                                           ) : (
                                             <div className="form-control bg-light">
-                                              Not yet scored
+                                              Not yet scoredd
                                             </div>
                                           );
                                       } else {
@@ -1356,7 +1366,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       }
                                     } else {
                                       content =
-                                        totalScoreforKaUpt < 41 &&
+                                        totalScoreforKaUpt < range5End &&
                                         totalScoreforKaUpt !== 0 ? (
                                           <div className="form-control bg-light">
                                             The score does not reach the
@@ -1401,7 +1411,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           />
                                         ) : (
                                           <div className="form-control bg-light">
-                                            Not yet scoredds
+                                            Not yet scored
                                           </div>
                                         );
                                     }
@@ -1419,7 +1429,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         );
                                       } else if (selectedTab === 1) {
                                         content =
-                                          totalScoreforKaUpt < 41 &&
+                                          totalScoreforKaUpt < range5End &&
                                           totalScoreforKaUpt !== 0 ? (
                                             <div className="form-control bg-light">
                                               The score does not reach the
@@ -1460,15 +1470,27 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       } else {
                                         content = (
                                           <div className="form-control bg-light">
-                                            Not yet scored
+                                            Not yet scoreds
                                           </div>
                                         );
                                       }
                                     } else {
                                       content =
-                                        (totalScoreforKaUpt < 41 &&
+                                      (detailSS.Facil === userInfo.npk) ? (
+                                        <SearchDropdown
+                                          forInput={item.Value}
+                                          arrData={filteredArrData}
+                                          isRound
+                                          value={
+                                            formDataRef2.current[
+                                              item.Value
+                                            ] || ""
+                                          }
+                                          onChange={handleInputChange}
+                                        />
+                                      ) : (totalScoreforKaUpt < range5End &&
                                           totalScoreforKaUpt !== 0) ||
-                                        totalScoreforKaDept < 69 ? (
+                                        totalScoreforKaDept < range4End ? (
                                           <div className="form-control bg-light">
                                             The score does not reach the
                                             required range.
