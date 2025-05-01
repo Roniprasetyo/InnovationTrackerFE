@@ -21,7 +21,6 @@ const inisialisasiData = [
 
 export default function QualityControlCircleDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
-  let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });

@@ -7,7 +7,6 @@ import Label from "../../part/Label";
 import Icon from "../../part/Icon";
 
 export default function MasterPeriodDetail({ onChangePage, withID }) {
-  const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -15,6 +14,7 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
     perId: "",
     perAwal: "",
     perAkhir: "",
+    perPeriode: "",
   });
 
   useEffect(() => {
@@ -91,18 +91,25 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
               <Loading />
             ) : (
               <div className="row">
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Label
                     forLabel="perAwal"
                     title="Activity Start Date"
                     data={formDataRef.current.perAwal}
                   />
                 </div>
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                   <Label
                     forLabel="perAkhir"
                     title="Activity End Date"
                     data={formDataRef.current.perAkhir}
+                  />
+                </div>
+                <div className="col-lg-4">
+                  <Label
+                    forLabel="perPeriode"
+                    title="Period"
+                    data={formDataRef.current.perPeriode}
                   />
                 </div>
               </div>

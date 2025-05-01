@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { date, number, object, string } from "yup";
+import { date, object, string } from "yup";
 import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";

@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
-import { separator, clearSeparator } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
@@ -11,23 +10,13 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
-import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
-import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
 import Label from "../../part/Label";
-
-const inisialisasiData = [
-  {
-    Key: null,
-    Name: null,
-    Count: 0,
-  },
-];
 
 export default function SuggestionSystemEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
@@ -36,11 +25,9 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
-
   const [checkedStates, setCheckedStates] = useState({
     sisQuality: false,
     sisCost: false,
@@ -202,7 +189,6 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(withID);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setIsLoading(true);
       try {
@@ -302,8 +288,6 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
       userSchema,
       setErrors
     );
-
-    console.log(validationErrors);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       const sDate = new Date(formDataRef.current.sis_tanggalmulai);

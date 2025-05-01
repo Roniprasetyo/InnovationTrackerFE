@@ -25,10 +25,10 @@ export default function ListKriteriaEdit({ onChangePage, withID }) {
   });
 
   const userSchema = object({
-    id: string().required("harus diisi"),
-    kriId: string().required("harus diisi"),
-    kriScore: number().required("harus diisi"),
-    kriDesk: string().max(100, "maksimum 100 karakter"),
+    id: string().required("required"),
+    kriId: string().required("required"),
+    kriScore: number().required("required"),
+    kriDesk: string().max(100, "100 characters max"),
   });
 
   useEffect(() => {

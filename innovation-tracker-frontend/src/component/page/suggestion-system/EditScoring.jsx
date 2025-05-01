@@ -1,11 +1,9 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { decodeHtml, formatDate, separator } from "../../util/Formatting";
+import { decodeHtml } from "../../util/Formatting";
 import {
   API_LINK,
-  ROOT_LINK,
   EMP_API_LINK,
-  FILE_LINK,
 } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
@@ -13,30 +11,19 @@ import { date, number, object, Schema, string } from "yup";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
-import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
 import Input from "../../part/Input";
-import TextArea from "../../part/TextArea";
 import SearchDropdown from "../../part/SearchDropdown";
-import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import SweetAlert from "../../util/SweetAlert";
 import * as Yup from "yup";
 
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    Name: null,
-    Count: 0,
-  },
-];
 function deobfuscateId(obfuscated) {
   const parts = obfuscated.split(".");
   if (parts.length === 2) {
-    return atob(parts[1]); // hanya ambil bagian Base64
+    return atob(parts[1]);
   }
   return null;
 }
@@ -47,13 +34,11 @@ export default function EditScoring({ onChangePage }) {
   const encodedId = searchParams.get("id");
 
   if (parseInt(encodedId)) {
-    // Redirect ke halaman lain jika tidak bisa dikonversi ke integer
-    window.location.href = "/*"; // ganti "/" dengan URL tujuanmu
+    window.location.href = "/*";
   }
 
   let userInfo = "";
   const id = deobfuscateId(encodedId);
-  console.log("ID", id);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
@@ -66,8 +51,6 @@ export default function EditScoring({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userInput, setUserInput] = useState("");
   const [formattedValue, setFormattedValue] = useState("");
-
-  // VARIABLE UNTUK UPDATE LIST DETAIL KRITERIA PENILIAN
   const [listPenilaian, setListPenilaian] = useState([]);
 
   const formDataRef = useRef({
@@ -128,14 +111,10 @@ export default function EditScoring({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
-      // console.log("ID: ", id);
       try {
         const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
           id: id,
         });
-
-        // console.log("Data SS: ", id, data);
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
@@ -168,37 +147,25 @@ export default function EditScoring({ onChangePage }) {
   useEffect(() => {
     let total = 0;
     let data = [];
-    // console.log("DATA", formDataRef2.current);
-    console.log("Key", key.current);
     let i = 0;
     Object.values(listPenilaian).forEach((d) => {
-      console.log("ssd", d);
       key.current[i] = d.Keys;
-      i++; // increment i
+      i++;
     });
 
     Object.values(formDataRef2.current).forEach((val) => {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
-
       formDataRef3.current[val] = matched?.Score;
-
-      // console.log(listDetailKriteriaPenilaian);
-      // console.log("val dari formDataRef2:", formDataRef3.current);
-      // console.log("matched score:", matched?.Score);
-
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
-    console.log("Key", key.current);
-
     setTotalScore(total);
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // console.log(name, value);
     formDataRef2.current[name] = value;
 
     const validationError = validateInput(name, value, userSchema);
@@ -213,18 +180,10 @@ export default function EditScoring({ onChangePage }) {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
-
       formDataRef3.current[val] = matched?.Score;
-
-      console.log("val:", val);
-      console.log("matched item:", matched?.Score);
-      console.log("formdataref3:", formDataRef3.current);
-
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
-
-    // formComment.current = e.target.value;
     setTotalScore(total);
   };
 
@@ -264,20 +223,8 @@ export default function EditScoring({ onChangePage }) {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log("P, punya saya", errors);
-  }, [errors]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("Comment: ", decodeHtml(formComment.current));
-    console.log(
-      "Comment value: ",
-      `${formComment.current}  - ${userInfo.username}`
-    );
-    // console.log(formComment.current.value);
-
     let status1 = ""; 
 
     if (
@@ -309,12 +256,10 @@ export default function EditScoring({ onChangePage }) {
       }
     }
 
-    console.log("STATUS", status1);
-
     const payload = {
-      dkp_id: Object.values(formDataRef2.current).join(", "), // "12, 2, 4,  7"
+      dkp_id: Object.values(formDataRef2.current).join(", "), 
       sis_id: id,
-      pen_nilai: Object.values(formDataRef3.current).join(", "), // "34, 44, 66, 12"
+      pen_nilai: Object.values(formDataRef3.current).join(", "),
       jabatan: userInfo.jabatan,
       status: "-",
       pen_createby: listPenilaian[0].creaby,
@@ -345,9 +290,7 @@ export default function EditScoring({ onChangePage }) {
             return items.length === listKriteriaPenilaian.length;
           }
         ),
-
       sis_id: Yup.string().required("sis_id is required"),
-
       pen_nilai: Yup.string()
         .matches(
           /^(\d+\s*,\s*)*\d+$/,
@@ -365,24 +308,16 @@ export default function EditScoring({ onChangePage }) {
             return items.length === listKriteriaPenilaian.length;
           }
         ),
-
       jabatan: Yup.string().required("jabatan is required"),
-
       status: Yup.string()
         .oneOf(["-"], 'status must be "-"')
         .required("status is required"),
-
       pen_createby: Yup.string().required("pen_created is required"),
-
       pen_createdate: Yup.string().required("pen_createdate is required"),
-
       pen_modif_by: Yup.string().required("pen_modif_by is required"),
-
       pen_comment: Yup.string().nullable(),
       sis_status: Yup.string().nullable()
     });
-
-    console.log("payload: ", payload);
 
     const validationErrors = await validateAllInputs(
       payload,
@@ -390,21 +325,10 @@ export default function EditScoring({ onChangePage }) {
       setErrors
     );
 
-    console.log(
-      "VALIDASI: ",
-      Object.values(validationErrors).every((error) => !error)
-    );
-    console.log("VALIDASI: ", validationErrors);
-    console.log("VALIDASI: ", errors);
-
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
-
-      console.log("FormDataRef: ", formDataRef2.current);
-      console.log("Payload: ", payload);
-      console.log("Payload nilai: ", formDataRef3.current);
 
       try {
         const data = await UseFetch(
@@ -412,11 +336,9 @@ export default function EditScoring({ onChangePage }) {
           payload
         );
 
-        // console.log("tes", data);
         if (!data) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
-          // window.location.href = ROOT_LINK + "/submission/ss";
           SweetAlert("Success", "Data Successfully Submitted", "success");
 
           setTimeout(function () {
@@ -434,9 +356,7 @@ export default function EditScoring({ onChangePage }) {
         setIsLoading(false);
       }
     } else {
-      console.log("356 error", errors);
       SweetAlert("Error", Object.values(validationErrors).join("\n"), "error");
-      // window.scrollTo(0, 0);
     }
   };
 
@@ -448,7 +368,6 @@ export default function EditScoring({ onChangePage }) {
           API_LINK + "MiniConvention/GetListKriteriaPenilaian"
         );
 
-        // console.log("")
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
@@ -476,16 +395,10 @@ export default function EditScoring({ onChangePage }) {
           creaby: userInfo.username,
         });
 
-        console.log("INI DATA SISIA: ", data);
         if (!data) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => {
-            const deskripsiPendek =
-              item.Deskripsi.length > 70
-                ? item.Deskripsi.substring(0, 71) + "...."
-                : item.Deskripsi;
-
             return {
               Keys: item.Key,
               Text: `${item.Deskripsi} - (Point ${item.Nilai})`,
@@ -511,7 +424,6 @@ export default function EditScoring({ onChangePage }) {
     fetchDataDetailByID();
   }, []);
 
-  // console.log("INI DATA 377: ", listDetailKriteriaPenilaian);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -540,15 +452,13 @@ export default function EditScoring({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        // setListCategory({});
+        setListDetailKriteriaPenilaian({});
       }
     };
 
     fetchData();
   }, []);
 
-  // const arrTextData = listDetailKriteriaPenilaian.map(item => item.Text);
-  // console.log("TEXT ", listDetailKriteriaPenilaian);
   const formatNumber = (value) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
@@ -557,15 +467,11 @@ export default function EditScoring({ onChangePage }) {
     const rawValue = e.target.value.replace(/[^\d]/g, "");
     setFormattedValue(formatNumber(rawValue));
     setUserInput(rawValue);
-    // handleInputChange({ target: { name: "budget", value: rawValue } });
   };
 
   const handleComment = (e) => {
     formComment.current = e.target.value;
   };
-
-  // console.log("NILAI: ", listPenilaian);
-  // console.log("LIST KRITERIA ", listDetailKriteriaPenilaian);
 
   if (isLoading) return <Loading />;
 
@@ -714,7 +620,6 @@ export default function EditScoring({ onChangePage }) {
                                   <div className="col-lg-8">
                                     <SearchDropdown
                                       forInput={item.Value}
-                                      // placeholder={arrTextData[item.Value] || ''}
                                       arrData={filteredArrData}
                                       isRound
                                       isRequired
@@ -726,7 +631,7 @@ export default function EditScoring({ onChangePage }) {
                                       }
                                       disableTyping
                                       onChange={handleInputChange}
-                                      // errorMessage={errors.formDataRef2.current[item.Value]}
+                                      errorMessage={errors[formDataRef2.current[item.Value]]}
                                     />
                                   </div>
                                 </div>
@@ -739,8 +644,6 @@ export default function EditScoring({ onChangePage }) {
                               <Input
                                 type="textarea"
                                 forInput="comment"
-                                // ref={formComment}
-                                // isRequired
                                 onChange={handleComment}
                                 selectedValued={listPenilaian.komment || ""}
                                 value={formComment.current}
@@ -756,23 +659,18 @@ export default function EditScoring({ onChangePage }) {
                                 minHeight: "180px",
                               }}
                             >
-                              {/* HEADER DI ATAS */}
                               <h3
                                 className="w-100 text-center"
                                 style={{
                                   textAlign: "center",
                                   background: "transparent",
-                                  // border: "none",
                                   padding: 0,
                                   fontWeight: "bold",
                                 }}
                               >
                                 Total Score
                               </h3>
-
                               <hr />
-
-                              {/* ISI DI TENGAH */}
                               <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
                                 <h1 className="fw-medium fw-bold">
                                   {totalScore}
@@ -803,12 +701,6 @@ export default function EditScoring({ onChangePage }) {
                         </div>
                       </div>
                     </div>
-                    {/* <div className="d-flex justify-content-end pe-3 mb-3">
-                    <sub>
-                      Submitted by{" "}
-                      <strong>{formDataRef.current["Creaby"] || "-"}</strong>
-                    </sub>
-                  </div> */}
                   </div>
                 </form>
               )}

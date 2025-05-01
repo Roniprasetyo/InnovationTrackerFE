@@ -1,31 +1,15 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
-import { validateAllInputs, validateInput } from "../../util/ValidateForm";
-import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
-import Button from "../../part/Button";
-import DropDown from "../../part/Dropdown";
-import Input from "../../part/Input";
-import Loading from "../../part/Loading";
-import Alert from "../../part/Alert";
-import Label from "../../part/Label";
 import Icon from "../../part/Icon";
 import Cookies from "js-cookie";
 import { decryptId } from "../../util/Encryptor";
 
-const listTypeSetting = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-];
-
 export default function Submission() {
   const cookie = Cookies.get("activeUser");
-
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
-  const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [count, setCount] = useState(0);
@@ -54,7 +38,6 @@ export default function Submission() {
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Terjadi kesalahan: Gagal mengambil data setting.");
         } else {
-          console.log(data[0].Value);
           setCount(data[0].Value);
         }
       } catch (error) {
@@ -82,7 +65,6 @@ export default function Submission() {
             "Terjadi kesalahan: Gagal mengambil data setting."
           );
         } else {
-          console.log("data",data)
           setNeedScoring(data[0]["Need Scoring"])
           setWaitingApproval(data[0]["Waiting Approval"])
         }

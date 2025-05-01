@@ -23,7 +23,6 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [admin, setAdmin] = useState("");
   const [listRole, setListRole] = useState([]);
   const [userDetail, setUserDetail] = useState({});
 
@@ -66,18 +65,10 @@ export default function Login() {
       setErrors({});
 
       try {
-        // const login = await UseFetch(
-        //   EMP_API_LINK + "login",
-        //   formDataRef.current
-        // );
-        // if (login === "ERROR") throw new Error("Error: Failed to authenticate.");
-        // else if (!login)
-        //   throw new Error("Wrong username or password.");
-        // else {
-        //   setListRole(data);
-        //   modalRef.current.open();
-        // }
-        if(formDataRef.current.username == "superadmin" && formDataRef.current.password == "superadmin"){
+        if (
+          formDataRef.current.username == "superadmin" &&
+          formDataRef.current.password == "superadmin"
+        ) {
           const adminRoleData = [
             {
               RoleID: "ROL02",
@@ -106,12 +97,10 @@ export default function Login() {
               Nama: "Employee",
               Npk: "000000",
               InoRole: "-",
-            }
+            },
           ];
-      
-          setListRole(adminRoleData);
 
-          console.log(listRole);
+          setListRole(adminRoleData);
           setUserDetail({
             username: "Superadmin",
             nama: "Superadmin",
@@ -119,7 +108,7 @@ export default function Login() {
             departemen: "IT",
             upt: "-",
           });
-      
+
           modalRef.current.open();
           return;
         }
@@ -189,6 +178,7 @@ export default function Login() {
       else {
         const token = await UseFetch(API_LINK + "Utilities/CreateJWTToken", {
           username: formDataRef.current.username,
+          password: formDataRef.current.password,
           role: role,
           nama: nama,
         });
@@ -226,8 +216,7 @@ export default function Login() {
             };
 
             const cookie = Cookies.get("activeUser");
-            console.log(cookie);
-            if (cookie != null) {
+            if (cookie !== null || cookie !== undefined) {
               Cookies.remove("activeUser");
             }
             let user = encryptId(JSON.stringify(userInfo));

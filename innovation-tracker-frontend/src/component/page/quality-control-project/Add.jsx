@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { date, number, object, string } from "yup";
+import { date, object, string } from "yup";
 import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -13,7 +13,6 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
-import DropDownSearch from "../../part/DropDownSearch";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";

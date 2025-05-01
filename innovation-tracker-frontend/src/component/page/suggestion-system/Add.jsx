@@ -11,23 +11,12 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
-import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
-import { clearSeparator, separator } from "../../util/Formatting";
-
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    Name: null,
-    Count: 0,
-  },
-];
 
 export default function SuggestionSystemAdd({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
@@ -207,8 +196,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     }
   }, [listEmployee, userInfo, listDepartment]);  
 
-  console.log("SECTION HEAD", sectionHead);
-
   useEffect(() => {
     const userStruktur = listDepartment.find(
       (item) => item.Npk === userInfo.npk
@@ -219,7 +206,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         (item) =>
           item.Struktur === parent
       );
-      console.log("Isi dari wakilDirect:", wakilDirect);
     }
   }, [listDepartment]);
   
@@ -259,12 +245,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     }
   }, [sectionHead]);
 
-  console.log("User Info:", userInfo);
-  console.log("ListDepartment:", listDepartment);
-
-  // useEffect(() => {
-  // }, [sectionHead]);
-
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -287,7 +267,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }));
         setListCategory({});
       }
-      console.log("COOKIE", JSON.parse(decryptId(cookie)));
     };
 
     fetchData();
@@ -408,8 +387,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
 
     fetchData();
   }, []);
-
-  console.log("LIST EMPLOYEE ", listEmployee);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;

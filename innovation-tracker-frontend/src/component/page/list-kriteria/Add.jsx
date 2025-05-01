@@ -24,9 +24,9 @@ export default function ListKriteriaAdd({ onChangePage }) {
   });
 
   const userSchema = object({
-    kriId: string().required("harus diisi"),
-    kriScore: number().required("harus diisi"),
-    kriDesk: string().max(100, "maksimum 100 karakter").nullable(),
+    kriId: string().required("required"),
+    kriScore: number().required("required"),
+    kriDesk: string().max(100, "100 characters max").nullable(),
   });
 
   const handleInputChange = (e) => {
@@ -75,14 +75,10 @@ export default function ListKriteriaAdd({ onChangePage }) {
       setErrors
     );
 
-    console.log(validationErrors);
-
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
-
-      console.log(formDataRef.current);
       try {
         const data = await UseFetch(
           API_LINK + "MasterKriteriaNilai/CreateListKriteria",

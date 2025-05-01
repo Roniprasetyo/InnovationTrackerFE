@@ -6,13 +6,7 @@ import Alert from "../../part/Alert";
 import Label from "../../part/Label";
 import Icon from "../../part/Icon";
 
-const listTypeFacilitator = [
-  { Value: "Jenis Improvement", Text: "Jenis Improvement" },
-  { Value: "Kategori Keilmuan", Text: "Kategori Keilmuan" },
-];
-
 export default function MasterFacilitatorDetail({ onChangePage, withID }) {
-  const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 

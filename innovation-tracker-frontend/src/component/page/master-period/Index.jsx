@@ -16,8 +16,8 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    StartDate: null,
-    EndDate: null,
+    "Start Date": null,
+    "End Date": null,
     Period: null,
     Status: null,
     Count: 0,
@@ -25,8 +25,10 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
-  { Value: "[StartDate] asc", Text: "StartDate [↑]" },
-  { Value: "[EndDate] desc", Text: "EndDate [↓]" },
+  { Value: "[Start Date] asc", Text: "Start Date [↑]" },
+  { Value: "[Start Date] desc", Text: "Start Date [↓]" },
+  { Value: "[End Date] asc", Text: "End Date [↑]" },
+  { Value: "[End Date] desc", Text: "End Date [↓]" },
 ];
 
 const dataFilterStatus = [

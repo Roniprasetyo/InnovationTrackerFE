@@ -22,9 +22,9 @@ export default function MasterPeriodAdd({ onChangePage }) {
   });
 
   const userSchema = object({
-    perAwal: date().required("harus diisi").nullable(),
-    perAkhir: date().required("harus diisi").nullable(),
-    perPeriode: string().max(20, "20 chars max").required("harus diisi"),
+    perAwal: date().required("required").nullable(),
+    perAkhir: date().required("required").nullable(),
+    perPeriode: string().max(20, "20 characters max").required("required"),
   });
 
   const handleInputChange = (e) => {

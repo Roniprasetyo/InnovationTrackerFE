@@ -262,8 +262,6 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
     fetchData();
   }, [currentFilter]);
 
-  console.log(currentData);
-
   if (isLoading) return <Loading />;
 
   return (
