@@ -5,6 +5,7 @@ import { useEffect } from "react";
 export default function Table({
   data,
   checkboxTable = false,
+  userInfo,
   onToggle = () => {},
   onCancel = () => {},
   onDelete = () => {},
@@ -307,9 +308,10 @@ export default function Table({
                     className={
                       value["Status"] &&
                       (value["Status"] === "Draft" ||
-                        value["Status"] === "Waiting Approval" ||
+                        (value["Status"] === "Waiting Approval" && value["Creaby"] === userInfo) ||
                         value["Status"] === "Belum Dibuat Penjadwalan" ||
-                        value["Status"] === "Draft Scoring")
+                        value["Status"] === "Draft Scoring" || 
+                        (value["Status"] === "Approved" && value["Creaby"] === userInfo))
                         ? "fw-bold"
                         : undefined
                     }
