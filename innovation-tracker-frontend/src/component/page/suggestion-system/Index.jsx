@@ -340,7 +340,7 @@ export default function SuggestionSytemIndex({
       if(detailSS.Status === "Draft"){
         status1 = "Waiting Approval";
       }
-      if (totalScore1 < ranking ) {
+      else if (totalScore1 < ranking ) {
         status1 = "Final";
       }
       else {
@@ -356,8 +356,7 @@ export default function SuggestionSytemIndex({
       if(detailSS.Status === "Draft"){
         status1 = "Waiting Approval";
       } 
-
-      if (totalScore2 < ranking) {
+      else if (totalScore2 < ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";
@@ -748,7 +747,7 @@ export default function SuggestionSytemIndex({
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
                       (value["Status"] === "Approved" ||
-                        value["Status"] === "Awaiting Assesment")
+                        value["Status"] === "Scoring")
                     ? ["Detail", "Scoring"]
                     : userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
@@ -839,12 +838,10 @@ export default function SuggestionSytemIndex({
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Kepala Seksi" ||
-                        userInfo.jabatan === "Sekretaris Prodi" ||
-                        userInfo.jabatan === "Kepala Departemen" ||
-                        userInfo.jabatan === "Wakil Direktur" ||
-                        userInfo.jabatan === "Direktur") &&
-                      (value["Status"] === "Awaiting Assesment" ||
-                        value["Status"] === "Approved")
+                      userInfo.jabatan === "Sekretaris Prodi" ||
+                      userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Wakil Direktur" ||
+                      userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring" || value["Status"] === "Approved")
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
@@ -905,7 +902,7 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "Edit", "Submit"]
                     : role === "ROL01" && value["Status"] === "Approved"
                     ? ["Detail", "Submit"]
-                    // : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Awaiting Assesment") 
+                    // : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring") 
                     // ? ["Detail", "Scoring"]
                     // : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
                     // ? ["Detail", "Scoring"]
@@ -915,9 +912,7 @@ export default function SuggestionSytemIndex({
                         jabatanTarget === "Direktur") &&
                       value["Status"] !== "Draft Scoring"
                     ? ["Detail", "Scoring"]
-                    : (jabatanTarget === "Wakil Direktur" ||
-                        jabatanTarget === "Direktur") &&
-                      value["Status"] === "Awaiting Assesment"
+                    : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] === "Scoring")
                     ? ["Detail", "Scoring"]
                     // : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
                     : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]

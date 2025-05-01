@@ -31,7 +31,6 @@ export default function Submission() {
           API_LINK + "RencanaSS/GetCountSSNeedAction",
           {
             id: userInfo.npk,
-            role: userInfo.role.slice(0, 5),
           }
         );
 
@@ -52,35 +51,36 @@ export default function Submission() {
       }
     };
 
-    const fetchDataInfo = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
+    // const fetchDataInfo = async () => {
+    //   setIsError((prevError) => ({ ...prevError, error: false }));
 
-      try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetCountStatusSS", {
-          id: userInfo.jabatan,
-        });
+    //   try {
+    //     const data = await UseFetch(API_LINK + "RencanaSS/GetCountStatusSS", {
+    //       id: userInfo.jabatan,
+    //     });
 
-        if (data === "ERROR" || data.length === 0) {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil data setting."
-          );
-        } else {
-          setNeedScoring(data[0]["Need Scoring"])
-          setWaitingApproval(data[0]["Waiting Approval"])
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    //     if (data === "ERROR" || data.length === 0) {
+    //       throw new Error(
+    //         "Terjadi kesalahan: Gagal mengambil data setting."
+    //       );
+    //     } else {
+    //       console.log("data",data)
+    //       setNeedScoring(data[0]["Need Scoring"])
+    //       setWaitingApproval(data[0]["Waiting Approval"])
+    //     }
+    //   } catch (error) {
+    //     window.scrollTo(0, 0);
+    //     setIsError((prevError) => ({
+    //       ...prevError,
+    //       error: true,
+    //       message: error.message,
+    //     }));
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
 
-    fetchDataInfo();
+    // fetchDataInfo();
     fetchData();
   }, [userInfo.npk]);
 
