@@ -19,11 +19,14 @@ export default function SuggestionSystem() {
       case "detail":
         // console.log("ini Root: ", dataID);
         return (
-          <SuggestionSystemDetail
+          <SuggestionSystemDetail 
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
+      case "edit":
+        return<SuggestionSystemEdit
+        onChangePage={handleSetPageMode} withID={dataID}/>
     }
   }
 
@@ -67,4 +70,4 @@ export default function SuggestionSystem() {
   }
 
   return <div className="container min-vh-100">{getPageMode()}</div>;
-}``
+}
