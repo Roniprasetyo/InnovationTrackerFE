@@ -308,10 +308,10 @@ export default function Table({
                     className={
                       value["Status"] &&
                       (value["Status"] === "Draft" ||
-                        (value["Status"] === "Waiting Approval" && value["Creaby"] === userInfo) ||
+                        (value["Status"] === "Waiting Approval" && value["Creaby"] !== userInfo) ||
                         value["Status"] === "Belum Dibuat Penjadwalan" ||
                         value["Status"] === "Draft Scoring" || 
-                        (value["Status"] === "Approved" && value["Creaby"] === userInfo))
+                        (value["Status"] === "Approved" && value["Creaby"] !== userInfo))
                         ? "fw-bold"
                         : undefined
                     }

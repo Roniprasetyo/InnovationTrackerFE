@@ -135,6 +135,33 @@ export default function SuggestionSytemIndex({
     return data ? data.Status : null;
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetListSettingRanking", {});
+  
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPTddd: ", data);
+          setListSettingRanking(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+
   const handleSubmit = async (id) => {
     setIsError(false);
     console.log("rankingnnnn", listSettingRanking);
@@ -243,7 +270,7 @@ export default function SuggestionSytemIndex({
             };
           });
 
-          statusKdept =dataDetail;
+          statusKdept = dataDetail;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -385,6 +412,7 @@ export default function SuggestionSytemIndex({
       if(detailSS.Status === "Draft"){
         status1 = "Waiting Approval";
       } 
+
       else if (totalScore2 < ranking) {
         status1 = "Final";
       } else {
@@ -398,7 +426,9 @@ export default function SuggestionSytemIndex({
     }
 
     console.log("Status", status1);
-    console.log("total score", totalScore1);
+    console.log("total score1", totalScore1);
+    console.log("total score2", totalScore2);
+    console.log("total score3", totalScore3);
     console.log("ranking", ranking);
     const tempStatus = getStatusByKey(id);
 

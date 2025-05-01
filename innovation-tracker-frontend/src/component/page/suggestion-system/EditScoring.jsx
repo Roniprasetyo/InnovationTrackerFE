@@ -236,7 +236,7 @@ export default function EditScoring({ onChangePage }) {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: Bearer `${localStorage.getItem("jwtToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
           },
         });
 
@@ -302,7 +302,7 @@ export default function EditScoring({ onChangePage }) {
       userInfo.jabatan === "Direktur"
     ) {
       if (
-        formDataRef.current.Status === "Scoring - Ka.Prodi/Ka.Dept" ||
+        formDataRef.current.Status === "Scoring" ||
         formDataRef.current.Status.includes("Draft Scoring")
       ) {
         status1 = "Draft Scoring";
@@ -412,7 +412,7 @@ export default function EditScoring({ onChangePage }) {
           payload
         );
 
-        // console.log("tes", data);
+        console.log("tes", data);
         if (!data) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
