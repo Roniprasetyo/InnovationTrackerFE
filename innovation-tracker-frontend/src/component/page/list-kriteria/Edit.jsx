@@ -9,44 +9,80 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
+import SearchDropdown from "../../part/SearchDropdown";
 
-export default function MasterPeriodEdit({ onChangePage, withID }) {
+export default function ListKriteriaEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
+  const [listKriteria, setListKriteria] = useState([]);
 
   const formDataRef = useRef({
-    perId: "",
-    perAwal: "",
-    perAkhir: "",
-    perPeriode: "",
+    id: withID,
+    kriId: "",
+    kriScore: "",
+    kriDesk: "",
   });
 
   const userSchema = object({
-    perId: number(),
-    perAwal: string().required("Harus dipilih"),
-    perAkhir: string().required("Harus dipilih"),
-    perPeriode: string().max(20, "20 chars max").required("harus diisi"),
+    id: string().required("harus diisi"),
+    kriId: string().required("harus diisi"),
+    kriScore: number().required("harus diisi"),
+    kriDesk: string().max(100, "maksimum 100 karakter"),
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterKriteriaNilai/GetListKriteriaNilai",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListKriteria(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListKriteria({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-          id: withID,
-        });
+        const data = await UseFetch(
+          API_LINK + "MasterKriteriaNilai/GetListKriteriaById",
+          {
+            id: withID,
+          }
+        );
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Terjadi kesalahan: Gagal mengambil data periode.");
         } else {
+          // Format tanggal ke format yyyy-MM-dd
           const formattedData = {
-            perId: data[0].perId,
-            perAwal: new Date(data[0].perAwal).toLocaleDateString("en-CA"), 
-            perAkhir: new Date(data[0].perAkhir).toLocaleDateString("en-CA"),
-            perPeriode: data[0].perPeriode,
+            id: withID,
+            kriId: data[0].CriteriaId,
+            kriScore: data[0].Score,
+            kriDesk: data[0].Description,
           };
+
+          // Update formDataRef dengan data yang sudah diformat
           formDataRef.current = formattedData;
         }
       } catch (error) {
@@ -83,13 +119,15 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
       setErrors
     );
 
+    console.log(validationErrors);
+
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
       try {
         const data = await UseFetch(
-          API_LINK + "MasterPeriod/UpdatePeriod",
+          API_LINK + "MasterKriteriaNilai/UpdateListKriteria",
           formDataRef.current
         );
 
@@ -149,44 +187,45 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
         <form onSubmit={handleUpdate}>
           <div className="card mb-5">
             <div className="card-header p-2">
-              <h2 className="fw-bold text-center">Setting Form</h2>
+              <h2 className="fw-bold text-center">Kriteria Nilai Form</h2>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
                 <Loading />
               ) : (
                 <div className="row mt-4">
-                  <div className="col-lg-4">
-                    <Input
-                      type="date"
-                      forInput="perAwal"
-                      label="Activity Start Date"
+                  <div className="col-lg-6">
+                    <SearchDropdown
+                      forInput="kriId"
+                      label="Knowledge Category"
+                      placeHolder="Knowledge Category"
+                      arrData={listKriteria}
                       isRequired
-                      value={formDataRef.current.perAwal}
+                      isRound
+                      value={formDataRef.current.kriId}
                       onChange={handleInputChange}
-                      errorMessage={errors.perAwal}
+                      errorMessage={errors.kriId}
                     />
                   </div>
-                  <div className="col-lg-4">
+                  <div className="col-lg-6">
                     <Input
-                      type="date"
-                      forInput="perAkhir"
-                      label="Activity End Date"
+                      type="number"
+                      forInput="kriScore"
+                      label="Name"
                       isRequired
-                      value={formDataRef.current.perAkhir}
+                      value={formDataRef.current.kriScore}
                       onChange={handleInputChange}
-                      errorMessage={errors.perAkhir}
+                      errorMessage={errors.kriScore}
                     />
                   </div>
-                  <div className="col-lg-4">
+                  <div className="col-lg-12">
                     <Input
-                      type="text"
-                      forInput="perPeriode"
-                      label="Period Name"
-                      isRequired
-                      value={formDataRef.current.perPeriode}
+                      type="textarea"
+                      forInput="kriDesk"
+                      label="Description"
+                      value={formDataRef.current.kriDesk}
                       onChange={handleInputChange}
-                      errorMessage={errors.perPeriode}
+                      errorMessage={errors.kriDesk}
                     />
                   </div>
                 </div>

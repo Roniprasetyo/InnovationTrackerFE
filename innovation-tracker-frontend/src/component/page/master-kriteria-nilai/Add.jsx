@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { object, string, date } from "yup";
+import { object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -10,21 +10,19 @@ import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 
-export default function MasterPeriodAdd({ onChangePage }) {
+export default function MasterKriteriaNilaiAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
 
   const formDataRef = useRef({
-    perAwal: "",
-    perAkhir: "",
-    perPeriode: "",
+    kriNama: "",
+    kriDesk: "",
   });
 
   const userSchema = object({
-    perAwal: date().required("harus diisi").nullable(),
-    perAkhir: date().required("harus diisi").nullable(),
-    perPeriode: string().max(20, "20 chars max").required("harus diisi"),
+    kriNama: string().max(50, "maksimum 50 karakter").required("harus diisi"),
+    kriDesk: string().max(100, "maksimum 100 karakter"),
   });
 
   const handleInputChange = (e) => {
@@ -40,67 +38,42 @@ export default function MasterPeriodAdd({ onChangePage }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const perAwalYear = new Date(formDataRef.current.perAwal).getFullYear();
-    const perAkhirYear = new Date(formDataRef.current.perAkhir).getFullYear();
-
-    if (perAwalYear !== perAkhirYear) {
-      SweetAlert(
-        "ERROR",
-        "The Activity Start Date and Activity End Date must be in the same year.",
-        "error",
-        "OK"
-      );
-      return;
-    }
-
-    const confirm = await SweetAlert(
-      "Confirm",
-      "Are you sure you want to submit this registration form? Once submitted, it will make the previous active period data inactive.",
-      "warning",
-      "SUBMIT",
-      null,
-      "",
-      true
+    const validationErrors = await validateAllInputs(
+      formDataRef.current,
+      userSchema,
+      setErrors
     );
 
-    if (confirm) {
-      const validationErrors = await validateAllInputs(
-        formDataRef.current,
-        userSchema,
-        setErrors
-      );
+    if (Object.values(validationErrors).every((error) => !error)) {
+      setIsLoading(true);
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
 
-      if (Object.values(validationErrors).every((error) => !error)) {
-        setIsLoading(true);
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        setErrors({});
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterKriteriaNilai/CreateKriteriaNilai",
+          formDataRef.current
+        );
 
-        try {
-          const data = await UseFetch(
-            API_LINK + "MasterPeriod/CreatePeriod",
-            formDataRef.current
-          );
-
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to submit the data.");
-          } else if (data[0].hasil === "EXIST") {
-            throw new Error("Data already exists.");
-          } else {
-            SweetAlert("Success", "Data successfully submitted", "success");
-            onChangePage("index");
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-        } finally {
-          setIsLoading(false);
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to submit the data.");
+        } else if (data[0].hasil === "EXIST") {
+          throw new Error("Data already exists.");
+        } else {
+          SweetAlert("Success", "Data successfully submitted", "success");
+          onChangePage("index");
         }
-      } else window.scrollTo(0, 0);
-    }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    } else window.scrollTo(0, 0);
   };
 
   if (isLoading) return <Loading />;
@@ -142,41 +115,29 @@ export default function MasterPeriodAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header py-3">
-              <h3 className="fw-bold text-center">SETTING FORM</h3>
+              <h3 className="fw-bold text-center">KRITERIA NILAI FORM</h3>
             </div>
             <div className="card-body">
               <div className="row p-4">
-                <div className="col-lg-4">
-                  <Input
-                    type="date"
-                    forInput="perAwal"
-                    label="Activity Start Date"
-                    isRequired
-                    value={formDataRef.current.perAwal}
-                    onChange={handleInputChange}
-                    errorMessage={errors.perAwal}
-                  />
-                </div>
-                <div className="col-lg-4">
-                  <Input
-                    type="date"
-                    forInput="perAkhir"
-                    label="Activity End Date"
-                    isRequired
-                    value={formDataRef.current.perAkhir}
-                    onChange={handleInputChange}
-                    errorMessage={errors.perAkhir}
-                  />
-                </div>
-                <div className="col-lg-4">
+                <div className="col-lg-6">
                   <Input
                     type="text"
-                    forInput="perPeriode"
-                    label="Period Name"
+                    forInput="kriNama"
+                    label="Name"
                     isRequired
-                    value={formDataRef.current.perPeriode}
+                    value={formDataRef.current.kriNama}
                     onChange={handleInputChange}
-                    errorMessage={errors.perPeriode}
+                    errorMessage={errors.kriNama}
+                  />
+                </div>
+                <div className="col-lg-12">
+                  <Input
+                    type="textarea"
+                    forInput="kriDesk"
+                    label="Description"
+                    value={formDataRef.current.kriDesk}
+                    onChange={handleInputChange}
+                    errorMessage={errors.kriDesk}
                   />
                 </div>
               </div>

@@ -10,23 +10,21 @@ import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 
-export default function MasterPeriodEdit({ onChangePage, withID }) {
+export default function MasterKriteriaNilaiEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
-    perId: "",
-    perAwal: "",
-    perAkhir: "",
-    perPeriode: "",
+    kriId: "",
+    kriNama: "",
+    kriDesk: "",
   });
 
   const userSchema = object({
-    perId: number(),
-    perAwal: string().required("Harus dipilih"),
-    perAkhir: string().required("Harus dipilih"),
-    perPeriode: string().max(20, "20 chars max").required("harus diisi"),
+    kriId: number(),
+    kriNama: string().max(50, "maksimum 50 karakter").required("harus diisi"),
+    kriDesk: string().max(100, "maksimum 100 karakter"),
   });
 
   useEffect(() => {
@@ -34,19 +32,24 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
-          id: withID,
-        });
+        const data = await UseFetch(
+          API_LINK + "MasterKriteriaNilai/GetKriteriaNilaiById",
+          {
+            id: withID,
+          }
+        );
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Terjadi kesalahan: Gagal mengambil data periode.");
         } else {
+          // Format tanggal ke format yyyy-MM-dd
           const formattedData = {
-            perId: data[0].perId,
-            perAwal: new Date(data[0].perAwal).toLocaleDateString("en-CA"), 
-            perAkhir: new Date(data[0].perAkhir).toLocaleDateString("en-CA"),
-            perPeriode: data[0].perPeriode,
+            kriId: withID,
+            kriNama: data[0].Name,
+            kriDesk: data[0].Description,
           };
+
+          // Update formDataRef dengan data yang sudah diformat
           formDataRef.current = formattedData;
         }
       } catch (error) {
@@ -89,7 +92,7 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
       setErrors({});
       try {
         const data = await UseFetch(
-          API_LINK + "MasterPeriod/UpdatePeriod",
+          API_LINK + "MasterKriteriaNilai/UpdateKriteriaNilai",
           formDataRef.current
         );
 
@@ -149,44 +152,32 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
         <form onSubmit={handleUpdate}>
           <div className="card mb-5">
             <div className="card-header p-2">
-              <h2 className="fw-bold text-center">Setting Form</h2>
+              <h2 className="fw-bold text-center">Kriteria Nilai Form</h2>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
                 <Loading />
               ) : (
                 <div className="row mt-4">
-                  <div className="col-lg-4">
-                    <Input
-                      type="date"
-                      forInput="perAwal"
-                      label="Activity Start Date"
-                      isRequired
-                      value={formDataRef.current.perAwal}
-                      onChange={handleInputChange}
-                      errorMessage={errors.perAwal}
-                    />
-                  </div>
-                  <div className="col-lg-4">
-                    <Input
-                      type="date"
-                      forInput="perAkhir"
-                      label="Activity End Date"
-                      isRequired
-                      value={formDataRef.current.perAkhir}
-                      onChange={handleInputChange}
-                      errorMessage={errors.perAkhir}
-                    />
-                  </div>
-                  <div className="col-lg-4">
+                  <div className="col-lg-6">
                     <Input
                       type="text"
-                      forInput="perPeriode"
-                      label="Period Name"
+                      forInput="kriNama"
+                      label="Name"
                       isRequired
-                      value={formDataRef.current.perPeriode}
+                      value={formDataRef.current.kriNama}
                       onChange={handleInputChange}
-                      errorMessage={errors.perPeriode}
+                      errorMessage={errors.kriNama}
+                    />
+                  </div>
+                  <div className="col-lg-12">
+                    <Input
+                      type="textarea"
+                      forInput="kriDesk"
+                      label="Description"
+                      value={formDataRef.current.kriDesk}
+                      onChange={handleInputChange}
+                      errorMessage={errors.kriDesk}
                     />
                   </div>
                 </div>

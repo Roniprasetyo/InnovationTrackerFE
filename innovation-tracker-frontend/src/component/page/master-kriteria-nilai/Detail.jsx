@@ -6,15 +6,15 @@ import Alert from "../../part/Alert";
 import Label from "../../part/Label";
 import Icon from "../../part/Icon";
 
-export default function MasterPeriodDetail({ onChangePage, withID }) {
+export default function MasterKriteriaNilaiDetail({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
-    perId: "",
-    perAwal: "",
-    perAkhir: "",
+    kriId: "",
+    kriNama: "",
+    kriDesk: "",
   });
 
   useEffect(() => {
@@ -31,6 +31,7 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
             "Terjadi kesalahan: Gagal mengambil data periode."
           );
         } else {
+          // Mengisi form data dengan data yang diambil
           formDataRef.current = { ...formDataRef.current, ...data[0] };
         }
       } catch (error) {
@@ -84,7 +85,7 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header p-2">
-            <h2 className="fw-bold text-center">Period Detail</h2>
+            <h2 className="fw-bold text-center">Kriteria Nilai Detail</h2>
           </div>
           <div className="card-body p-4">
             {isLoading ? (
@@ -93,16 +94,16 @@ export default function MasterPeriodDetail({ onChangePage, withID }) {
               <div className="row">
                 <div className="col-lg-6">
                   <Label
-                    forLabel="perAwal"
-                    title="Activity Start Date"
-                    data={formDataRef.current.perAwal}
+                    forLabel="kriNama"
+                    title="Name"
+                    data={formDataRef.current.kriNama}
                   />
                 </div>
                 <div className="col-lg-6">
                   <Label
-                    forLabel="perAkhir"
-                    title="Activity End Date"
-                    data={formDataRef.current.perAkhir}
+                    forLabel="kriDesk"
+                    title="Description"
+                    data={formDataRef.current.kriDesk}
                   />
                 </div>
               </div>

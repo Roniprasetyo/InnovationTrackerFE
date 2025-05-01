@@ -31,99 +31,23 @@ ChartJS.register(
   Legend
 );
 
-const dataLomba = {
-  SS: {
-    labels: ["Departemen IF", "Departemen TPM", "Departemen MK"],
-    datasets: [
-      {
-        label: "SS Technic",
-        data: [40, 30, 20],
-        backgroundColor: "#3B82F6",
-      },
-      {
-        label: "SS Non Technic",
-        data: [35, 25, 15],
-        backgroundColor: "#10B981",
-      },
-    ],
-    totalSubmit: [
-      { departemen: "Departemen IF", technic: 10, nonTechnic: 8 },
-      { departemen: "Departemen TPM", technic: 6, nonTechnic: 4 },
-      { departemen: "Departemen MK", technic: 5, nonTechnic: 3 },
-    ],
-  },
-  QCC: {
-    labels: ["Departemen IF", "Departemen TPM", "Departemen MK"],
-    datasets: [
-      {
-        label: "QCC Technic",
-        data: [50, 70, 90],
-        backgroundColor: "#3B82F6",
-      },
-      {
-        label: "QCC Non Technic",
-        data: [45, 65, 85],
-        backgroundColor: "#10B981",
-      },
-    ],
-    totalSubmit: [
-      { departemen: "Departemen IF", technic: 15, nonTechnic: 12 },
-      { departemen: "Departemen TPM", technic: 18, nonTechnic: 10 },
-      { departemen: "Departemen MK", technic: 13, nonTechnic: 8 },
-    ],
-  },
-  QCP: {
-    labels: ["Departemen IF", "Departemen TPM", "Departemen MK"],
-    datasets: [
-      {
-        label: "QCP Technic",
-        data: [60, 50, 40],
-        backgroundColor: "#3B82F6",
-      },
-      {
-        label: "QCP Non Technic",
-        data: [55, 45, 35],
-        backgroundColor: "#10B981",
-      },
-    ],
-    totalSubmit: [
-      { departemen: "Departemen IF", technic: 10, nonTechnic: 6 },
-      { departemen: "Departemen TPM", technic: 8, nonTechnic: 5 },
-      { departemen: "Departemen MK", technic: 7, nonTechnic: 4 },
-    ],
-  },
-  VCI: {
-    labels: ["Departemen IF", "Departemen TPM", "Departemen MK"],
-    datasets: [
-      {
-        label: "VCI",
-        data: [25, 40, 60],
-        backgroundColor: "#6366F1",
-      },
-    ],
-    totalSubmit: [
-      { departemen: "Departemen IF", total: 5 },
-      { departemen: "Departemen TPM", total: 7 },
-      { departemen: "Departemen MK", total: 9 },
-    ],
-  },
-};
 const initialChart = {
   labels: [],
   datasets: [],
 };
 
 export default function Dashboard() {
-  const [selectedLomba, setSelectedLomba] = useState("SS");
   const [isError, setIsError] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [listEmployee, setListEmployee] = useState([]);
-  const [tableData, setTableData] = useState([]);
+  const [listPeriod, setListPeriod] = useState([]);
+  const [tableData, setTableData] = useState(initialChart);
   const [isLoading, setIsLoading] = useState(true);
   const [listPeriod, setListPeriod] = useState(true);
 
   const [currentFilter, setCurrentFilter] = useState({
-    jenis: selectedLomba,
+    jenis: "SS",
+    period: 1,
   });
 
   useEffect(() => {
@@ -164,6 +88,35 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterPeriod/GetListPeriod",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          setListPeriod(data);
+          setCurrentFilter((prev) => ({ ...prev, period: data[0].Value }));
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      // setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "Chart/GetAllSubbmision",
@@ -211,6 +164,8 @@ export default function Dashboard() {
               ...prev,
             }))
           );
+
+          console.log(tableData);
 
           const formatted = categoryArray.map((category, index) => ({
             label: category,
@@ -269,30 +224,49 @@ export default function Dashboard() {
       )}
 
       <div className="container">
-        <div className="w-25 mb-3">
-          <DropDown
-            forInput="ddSubmission"
-            label="Submission"
-            arrData={[
-              { Text: "SS", Value: "SS" },
-              { Text: "QCC", Value: "QCC" },
-              { Text: "QCP", Value: "QCP" },
-              { Text: "VCI", Value: "VCI" },
-              { Text: "BPI", Value: "BPI" },
-            ]}
-            value={currentFilter.jenis}
-            onChange={(e) =>
-              setCurrentFilter((prevFilter) => {
-                return {
+        <div className="d-flex gap-3 mb-3">
+          <div className="w-25">
+            <DropDown
+              forInput="ddSubmission"
+              label="Submission"
+              arrData={[
+                { Text: "SS", Value: "SS" },
+                { Text: "QCC", Value: "QCC" },
+                { Text: "QCP", Value: "QCP" },
+                { Text: "VCI", Value: "VCI" },
+                { Text: "BPI", Value: "BPI" },
+              ]}
+              value={currentFilter.jenis}
+              onChange={(e) =>
+                setCurrentFilter((prevFilter) => ({
                   ...prevFilter,
                   jenis: e.target.value,
-                };
-              })
-            }
-          />
+                }))
+              }
+            />
+          </div>
+
+          <div className="w-25">
+            <DropDown
+              forInput="ddPeriod"
+              label="Period"
+              arrData={listPeriod}
+              value={currentFilter.period}
+              onChange={(e) =>
+                setCurrentFilter((prevFilter) => ({
+                  ...prevFilter,
+                  period: e.target.value,
+                }))
+              }
+            />
+          </div>
         </div>
+
         {currentData.length !== 0 ? (
-          <Bar data={currentData} options={{ responsive: true }} />
+          <Bar
+            data={currentData}
+            options={{ responsive: true, indexAxis: "y" }}
+          />
         ) : (
           <Label data="No data Available" />
         )}

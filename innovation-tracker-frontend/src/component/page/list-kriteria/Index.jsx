@@ -10,23 +10,23 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
-import { formatDate } from "../../util/Formatting";
 
 const inisialisasiData = [
   {
     Key: null,
     No: null,
-    StartDate: null,
-    EndDate: null,
-    Period: null,
+    Criteria: null,
+    Description: null,
     Status: null,
     Count: 0,
   },
 ];
 
 const dataFilterSort = [
-  { Value: "[StartDate] asc", Text: "StartDate [↑]" },
-  { Value: "[EndDate] desc", Text: "EndDate [↓]" },
+  { Value: "[Criteria] asc", Text: "Criteria [↑]" },
+  { Value: "[Criteria] desc", Text: "Criteria [↓]" },
+  { Value: "[Score] asc", Text: "Score [↑]" },
+  { Value: "[Score] desc", Text: "Score [↓]" },
 ];
 
 const dataFilterStatus = [
@@ -34,14 +34,14 @@ const dataFilterStatus = [
   { Value: "Tidak Aktif", Text: "Tidak Aktif" },
 ];
 
-export default function MasterPeriodIndex({ onChangePage }) {
+export default function ListKriteriaIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Start Date] asc",
+    sort: "[Criteria] asc",
     status: "Aktif",
   });
 
@@ -75,7 +75,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
   function handleSetStatus(id) {
     setIsLoading(true);
     setIsError(false);
-    UseFetch(API_LINK + "MasterPeriod/SetStatusPeriod", {
+    UseFetch(API_LINK + "MasterKriteriaNilai/SetStatusListKriteria", {
       idPeriod: id,
     })
       .then((data) => {
@@ -97,7 +97,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
       setIsError(false);
       try {
         const data = await UseFetch(
-          API_LINK + "MasterPeriod/GetPeriod",
+          API_LINK + "MasterKriteriaNilai/GetListKriteria",
           currentFilter
         );
 
@@ -108,10 +108,9 @@ export default function MasterPeriodIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            "Start Date": formatDate(value["Start Date"].split("T")[0], true),
-            "End Date": formatDate(value["End Date"].split("T")[0], true),
+            Description: value["Description"] || "-",
             Action: ["Toggle", "Edit"],
-            Alignment: ["center", "center", "center", "right", "center", "center"],
+            Alignment: ["center", "left", "right", "left", "center", "center"],
           }));
           setCurrentData(formattedData);
         }
@@ -132,17 +131,19 @@ export default function MasterPeriodIndex({ onChangePage }) {
           <div className="d-flex gap-3 justify-content-center">
             <h2 className="display-1 fw-bold">Manage</h2>
             <div className="d-flex align-items-end mb-2">
-              <h2 className="display-5 fw-bold align-items-end">Period</h2>
+              <h2 className="display-5 fw-bold align-items-end">
+                List Kriteria
+              </h2>
             </div>
           </div>
         </div>
       </div>
-      {isError.error && (
+      {isError && (
         <div className="flex-fill ">
           <Alert
             type="danger"
-            message={isError.message}
-            handleClose={() => setIsError({ error: false, message: "" })}
+            message="Terjadi kesalahan saat memuat data."
+            handleClose={() => setIsError(false)}
           />
         </div>
       )}
@@ -155,7 +156,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
           />
           <Input
             ref={searchQuery}
-            forInput="pencarianPeriod"
+            forInput="pencarianKriteriaNilai"
             placeholder="Search"
           />
           <Button
@@ -171,7 +172,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Start Date] asc"
+              defaultValue="[Criteria] asc"
             />
             <DropDown
               ref={searchFilterStatus}
