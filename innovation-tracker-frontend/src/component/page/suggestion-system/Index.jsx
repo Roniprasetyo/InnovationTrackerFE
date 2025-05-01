@@ -135,8 +135,37 @@ export default function SuggestionSytemIndex({
     return data ? data.Status : null;
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetListSettingRanking", {});
+  
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPTddd: ", data);
+          setListSettingRanking(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+
   const handleSubmit = async (id) => {
     setIsError(false);
+    console.log("rankingnnnn", listSettingRanking);
 
     setIsError((prevError) => ({ ...prevError, error: false }));
 
@@ -148,6 +177,8 @@ export default function SuggestionSytemIndex({
     let statusKdept = [];
     let statusDir = [];
 
+    let detailSS = [];
+
     let totalScore1 = 0;
     let totalScore2 = 0;
     let totalScore3 = 0;
@@ -157,8 +188,9 @@ export default function SuggestionSytemIndex({
       userInfo.jabatan === "Sekretaris Prodi"
     ) {
       try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianByIDScoring", {
           id: id,
+          jab: userInfo.jabatan
         });
 
         if (data === "ERROR") {
@@ -211,10 +243,12 @@ export default function SuggestionSytemIndex({
       });
     } else if (userInfo.jabatan === "Kepala Departemen") {
       try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianByIDScoring", {
           id: id,
+          jab: userInfo.jabatan
         });
 
+        console.log("2999", data);
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the GetPenilaianById.");
         } else {
@@ -252,9 +286,13 @@ export default function SuggestionSytemIndex({
       }
 
       statusKdept.forEach((item) => {
-        if (item.jab !== "Kepala Departemen") {
+        if (
+          item.jab !== "Kepala Departemen"
+        ) {
+          console.log("kddd", statusKdept);
           tempTotal2 = 0;
         } else {
+          console.log("total nilai k sek: ", item.Nilai);
           tempTotal2 += parseFloat(item.Nilai) || 0;
         }
       });
@@ -263,8 +301,9 @@ export default function SuggestionSytemIndex({
       userInfo.jabatan === "Direktur"
     ) {
       try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianByIDScoring", {
           id: id,
+          jab: userInfo.jabatan
         });
 
         if (data === "ERROR") {
@@ -312,6 +351,31 @@ export default function SuggestionSytemIndex({
       });
     }
 
+    try {
+      const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
+        id: id,
+      });
+
+      if (data === "ERROR") {
+        throw new Error("Error: Failed to get the GetPenilaianById.");
+      } else {
+        console.log("INI DATA KA UPTddd: ", data);
+        detailSS = data[0];
+      }
+    } catch (error) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: error.message,
+      }));
+      setListCategory({});
+    } finally {
+      setIsLoading(false);
+    }
+    
+
+    console.log("NIHH", detailSS);
     totalScore1 = tempTotal1;
     totalScore2 = tempTotal2;
     totalScore3 = tempTotal3;
@@ -329,18 +393,27 @@ export default function SuggestionSytemIndex({
         const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
         ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
       }
-      // console.log("AA ", totalScore1);
-      if (totalScore1 < ranking) {
+      console.log("AA ", totalScore1, listSettingRanking);
+      if(detailSS.Status === "Draft"){
+        status1 = "Waiting Approval";
+      }
+      if (totalScore1 < ranking ) {
         status1 = "Final";
-      } else {
+      }
+      else {
         status1 = "Scoring";
       }
+
     } else if (userInfo.jabatan === "Kepala Departemen") {
       const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
       if (item && item.Range) {
         const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
         ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
       }
+      if(detailSS.Status === "Draft"){
+        status1 = "Waiting Approval";
+      } 
+
       if (totalScore2 < ranking) {
         status1 = "Final";
       } else {
@@ -354,6 +427,8 @@ export default function SuggestionSytemIndex({
     }
 
     console.log("Status", status1);
+    console.log("total score", totalScore1);
+    console.log("ranking", ranking);
     const tempStatus = getStatusByKey(id);
 
     const confirm = await SweetAlert(
@@ -387,29 +462,6 @@ export default function SuggestionSytemIndex({
           })
           .then(() => setIsLoading(false));
       }
-      // else {
-      //   const reviewer = confirm.reviewer;
-      //   const batch = confirm.batch;
-      //   const category = confirm.category;
-      //   UseFetch(API_LINK + "RencanaSS/CreateKonvensiSS", {
-      //     reviewer,
-      //     batch,
-      //     id,
-      //     category,
-      //   })
-      //     .then((data) => {
-      //       if (data === "ERROR" || data.length === 0) setIsError(true);
-      //       else {
-      //         SweetAlert(
-      //           "Success",
-      //           "Thank you for submitting your registration form. Please wait until the next update",
-      //           "success"
-      //         );
-      //         handleSetCurrentPage(currentFilter.page);
-      //       }
-      //     })
-      //     .then(() => setIsLoading(false));
-      // }
     }
   };
 
@@ -786,14 +838,14 @@ export default function SuggestionSytemIndex({
                       userInfo.jabatan === "Direktur"
                     ? ["Detail", "Scoring"]
                     : // Status Approved By Role 03
-                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
+                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"].includes("Draft Scoring")) && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
                     userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Approved"
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Draft Scoring"
+                      value["Status"].includes("Draft Scoring")
                     ? ["Detail", "EditScoring", "Submit"]
                     : ["Detail"],
                 Alignment: [
@@ -859,9 +911,9 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
-                    : userInfo.jabatan === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
-                    : userInfo.jabatan === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
-                    : userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.jabatan === "Kepala Departemen" && value["Status"].includes("Draft Scoring") ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.jabatan === "Wakil Direktur" && value["Status"].includes("Draft Scoring") ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.jabatan === "Kepala Seksi" && value["Status"].includes("Draft Scoring") ? ["Detail", "EditScoring", "Submit"] 
                     : userInfo.jabatan === "Kepala Seksi" ||
                       userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
@@ -869,14 +921,14 @@ export default function SuggestionSytemIndex({
                       userInfo.jabatan === "Direktur"
                     ? ["Detail", "Scoring"]
                     : // Status Approved By Role 03
-                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
+                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"].includes("Draft Scoring")) && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
                     userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Approved"
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Draft Scoring"
+                      value["Status"].includes("Draft Scoring")
                     ? ["Detail", "EditScoring", "Submit"]
                     : ["Detail"],
                 Alignment: [
@@ -935,9 +987,9 @@ export default function SuggestionSytemIndex({
                     : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] === "Scoring")
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
-                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
-                    : jabatanTarget === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
-                    : jabatanTarget === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && value["Status"].includes("Draft Scoring") ? ["Detail", "EditScoring", "Submit"]
+                    : jabatanTarget === "Kepala Departemen" && value["Status"].includes("Draft Scoring") ? ["Detail", "EditScoring", "Submit"] 
+                    : jabatanTarget === "Wakil Direktur" && value["Status"].includes("Draft Scoring") ? ["Detail", "EditScoring", "Submit"] 
                     : ["Detail"],
                 Alignment: [
                   "center",

@@ -67,4 +67,4 @@ export default function SuggestionSystem() {
   }
 
   return <div className="container min-vh-100">{getPageMode()}</div>;
-}
+}``

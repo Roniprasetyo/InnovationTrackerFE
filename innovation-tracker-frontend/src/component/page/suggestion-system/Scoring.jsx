@@ -76,6 +76,13 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const encodedId = searchParams.get("id");
+  
+  
+  if (parseInt(encodedId)) {
+    // Redirect ke halaman lain jika tidak bisa dikonversi ke integer
+    window.location.href = "/*"; // ganti "/" dengan URL tujuanmu
+  }
+  
   let userInfo = "";
   const id = deobfuscateId(encodedId);
   console.log("ID", id);
@@ -110,6 +117,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [forPenilai, setForPenilai] = useState("");
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const [listValues, setListValues] = useState([]);
+
+  let rankingKUpt = "";
+  let rankingKDept = "";
+  let rankingKDir = "";
 
   useEffect(() => {
     if (listKriteriaPenilaian.length > 0) {
@@ -302,39 +313,40 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let ranking = 0;
-    let status1 = null;
+
+    console.log("RANKING 1: ", rankingKUpt);
+    console.log("RANKING 2: ", rankingKDept);
+    console.log("RANKING 3: ", rankingKDir);
+
+    let status1 = "";
 
     if (
       userInfo.jabatan === "Kepala Seksi" ||
       userInfo.jabatan === "Sekretaris Prodi"
     ) {
-      const item = listSettingRanking.find((s) => s.Ranking === "Ranking 5");
-      if (item && item.Range) {
-        const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
-        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
-      }
-      if (totalScoreforKaUpt < ranking) {
-        status1 = "Final";
-      } else {
-        status1 = "Scoring";
+      if (
+        formDataRef.current.Status === "Approved" ||
+        formDataRef.current.Status.includes("Draft Scoring")
+      ) {
+        status1 = "Draft Scoring";
       }
     } else if (userInfo.jabatan === "Kepala Departemen") {
-      const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
-      if (item && item.Range) {
-        const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
-        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
-      }
-      if (totalScoreforKaDept < ranking) {
-        status1 = "Final";
-      } else {
-        status1 = "Scoring";
+      if (
+        formDataRef.current.Status === "Approved" ||
+        formDataRef.current.Status.includes("Draft Scoring")
+      ) {
+        status1 = "Draft Scoring";
       }
     } else if (
       userInfo.jabatan === "Wakil Direktur" ||
       userInfo.jabatan === "Direktur"
     ) {
-      status1 = "Final";
+      if (
+        formDataRef.current.Status === "Scoring - Ka.Prodi/Ka.Dept" ||
+        formDataRef.current.Status.includes("Draft Scoring")
+      ) {
+        status1 = "Draft Scoring";
+      }
     }
 
     const payload = {
@@ -344,6 +356,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       jabatan: userInfo.jabatan,
       statusPN: "-",
       created: userInfo.username,
+      statusSS: status1
     };
 
     const payloadSchema = Yup.object().shape({
@@ -380,6 +393,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       statusPN: Yup.string().required("statusPN is required"),
 
       created: Yup.string().required("created is required"),
+      statusSS: Yup.string().nullable()
     });
 
     console.log("Payload ", payload);
@@ -589,6 +603,18 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
+          const rank5 = data.find((s) => s.Ranking === "Ranking 5");
+          const rank4 = data.find((s) => s.Ranking === "Ranking 4");
+          const rank3 = data.find((s) => s.Ranking === "Ranking 3");
+          
+          const parts5 = rank5.Range.split("-").map((p) => parseInt(p.trim(), 10));
+          const parts4 = rank4.Range.split("-").map((p) => parseInt(p.trim(), 10));
+          const parts3 = rank3.Range.split("-").map((p) => parseInt(p.trim(), 10));
+          
+          rankingKUpt = parts5.length > 1 ? parts5[1] : parts5[0]; // ambil nilai terakhir
+          rankingKDept = parts4.length > 1 ? parts4[1] : parts4[0]; // ambil nilai terakhir
+          rankingKDir = parts3.length > 1 ? parts3[1] : parts3[0]; // ambil nilai terakhir
+
           setListSettingRanking(data);
         }
       } catch (error) {
@@ -605,6 +631,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     };
     fetchData();
   }, []);
+
+  // useEffect(()=>{
+    // console.log("RANKSSS: ", listSettingRanking);
+
+
+  // }, [rankingKUpt, rankingKDept, rankingKDir])
 
   useEffect(() => {
     if (listPenilaianKaUpt.length === 0 || listEmployee.length === 0) return;
@@ -1378,7 +1410,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                                 "Jabatan Penilai"
                                               ] !== "Direktur") ? (
                                             <div className="form-control bg-light">
-                                              {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
+                                              {`(Poin: ${matchingPenilaianforKaDept.Nilai}) - ${matchingPenilaianforKaDept.Deskripsi}`}
                                             </div>
                                           ) : (
                                             <div className="form-control bg-light">
@@ -1395,7 +1427,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               "Jabatan Penilai"
                                             ] === "Direktur") ? (
                                             <div className="form-control bg-light">
-                                              {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
+                                              {`(Poin: ${matchingPenilaianforWadir.Nilai}) - ${matchingPenilaianforWadir.Deskripsi}`}
                                             </div>
                                           ) : (
                                             <div className="form-control bg-light">
@@ -1426,7 +1458,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               "Jabatan Penilai"
                                             ] === "Direktur") ? (
                                           <div className="form-control bg-light">
-                                            {`${matchingPenilaianforWadir.Deskripsi} - (Poin: ${matchingPenilaianforWadir.Nilai})`}
+                                            {`(Poin: ${matchingPenilaianforWadir.Nilai})- ${matchingPenilaianforWadir.Deskripsi}`}
                                           </div>
                                         ) : (
                                           <SearchDropdown
