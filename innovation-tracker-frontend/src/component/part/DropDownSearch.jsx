@@ -39,7 +39,7 @@ const DropDownSearch = forwardRef(function DropDownSearch(
 
   return (
     <>
-      <div className="mb-3">
+      <div className="">
         {showLabel && (
           <label className="form-label fw-bold">
             {label}

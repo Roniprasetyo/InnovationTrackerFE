@@ -23,6 +23,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import SweetAlert from "../../util/SweetAlert";
+import * as Yup from "yup";
 
 const inisialisasiData = [
   {
@@ -32,12 +33,21 @@ const inisialisasiData = [
     Count: 0,
   },
 ];
+function deobfuscateId(obfuscated) {
+  const parts = obfuscated.split(".");
+  if (parts.length === 2) {
+    return atob(parts[1]); // hanya ambil bagian Base64
+  }
+  return null;
+}
 
 export default function MiniConventionScoring({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
-  const id = searchParams.get("id");
+  const encodedId = searchParams.get("id");
   let userInfo = "";
+  const id = deobfuscateId(encodedId);
+  console.log("ID", id);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
@@ -79,10 +89,10 @@ export default function MiniConventionScoring({ onChangePage }) {
     "Alasan Penolakan": "",
   });
 
-  const formDataRef2 = useRef({});
-  const formDataRef3 = useRef({});
+  const formDataRef2 = useRef([]);
+  const formDataRef3 = useRef([]);
   const key = useRef({});
-  const formComment = useRef();
+  const formComment = useRef(null);
 
   const userSchema = object({
     Key: number().required("required"),
@@ -160,7 +170,7 @@ export default function MiniConventionScoring({ onChangePage }) {
       key.current[i] = d.Keys;
       i++; // increment i
     });
-    
+
     Object.values(formDataRef2.current).forEach((val) => {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
@@ -178,7 +188,7 @@ export default function MiniConventionScoring({ onChangePage }) {
     console.log("Key", key.current);
 
     setTotalScore(total);
-  })
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -192,20 +202,23 @@ export default function MiniConventionScoring({ onChangePage }) {
     }));
 
     let total = 0;
+    formDataRef3.current = [];
     Object.values(formDataRef2.current).forEach((val) => {
       const matched = listDetailKriteriaPenilaian.find(
         (item) => item.Value === val
       );
 
-      // formDataRef3.current[name] = matched?.Score;
+      formDataRef3.current[val] = matched?.Score;
 
-      // console.log("val dari formDataRef2:", val);
-      // console.log("matched item:", formDataRef3);
+      console.log("val:", val);
+      console.log("matched item:", matched?.Score);
+      console.log("formdataref3:", formDataRef3.current);
 
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
 
+    // formComment.current = e.target.value;
     setTotalScore(total);
   };
 
@@ -217,7 +230,7 @@ export default function MiniConventionScoring({ onChangePage }) {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            Authorization: Bearer `${localStorage.getItem("jwtToken")}`,
           },
         });
 
@@ -245,73 +258,145 @@ export default function MiniConventionScoring({ onChangePage }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    console.log("P, punya saya", errors);
+  }, [errors]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formDataRef3.current);
+    console.log("Comment: ", decodeHtml(formComment.current));
+    console.log(
+      "Comment value: ",
+      `${formComment.current}  - ${userInfo.username}`
+    );
     // console.log(formComment.current.value);
 
     const payload = {
-      dkp_id: Object.values(formDataRef2.current).join(", "),
+      dkp_id: Object.values(formDataRef2.current).join(", "), // "12, 2, 4,  7"
       sis_id: id,
-      pen_nilai: Object.values(formDataRef3.current).join(", "),
+      pen_nilai: Object.values(formDataRef3.current).join(", "), // "34, 44, 66, 12"
       jabatan: userInfo.jabatan,
       status: "-",
-      pen_created: userInfo.username,
-      pen_id: Object.values(key.current).join(", ")
+      pen_createby: listPenilaian[0].creaby,
+      pen_createdate: listPenilaian[0].creadate,
+      pen_modif_by: userInfo.username,
+      pen_comment:
+        formComment.current && formComment.current.trim() !== ""
+          ? `${formComment.current} - ${userInfo.username}`
+          : undefined,
     };
 
-    // console.log("payload: ", payload);
+    const payloadSchema = Yup.object().shape({
+      dkp_id: Yup.string()
+        .matches(
+          /^(\d+\s*,\s*)*\d+$/,
+          "dkp_id must be a comma-separated list of numbers"
+        )
+        .test(
+          "length-9",
+          "All Assessment schemes must be filled!",
+          function (value) {
+            if (!value) return false;
+            const items = value
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v !== "");
+            return items.length === listKriteriaPenilaian.length;
+          }
+        ),
 
-    // const SchemaPayload = object({
-    //   dkp_id: array().required("Field Wajib Diisi"),
-    //   sis_id: number().required(),
-    //   pen_nilai: required("Field Wajib Diisi"),
-    //   jabatan: string().required(),
-    //   status: string().nullable()
-    // })
+      sis_id: Yup.string().required("sis_id is required"),
 
-    // const validationErrors = await validateAllInputs(
-    //   payload,
-    //   SchemaPayload,
-    //   setErrors
-    // );
+      pen_nilai: Yup.string()
+        .matches(
+          /^(\d+\s*,\s*)*\d+$/,
+          "pen_nilai must be a comma-separated list of numbers"
+        )
+        .test(
+          "length-9",
+          "All Assessment schemes must be filled!",
+          function (value) {
+            if (!value) return false;
+            const items = value
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v !== "");
+            return items.length === listKriteriaPenilaian.length;
+          }
+        ),
 
-    // console.log("VALIDASI: ", validationErrors);
+      jabatan: Yup.string().required("jabatan is required"),
 
-    // if (Object.values(validationErrors).every((error) => !error)) {
-    //   setIsLoading(true);
-    //   setIsError((prevError) => ({ ...prevError, error: false }));
-    //   setErrors({});
+      status: Yup.string()
+        .oneOf(["-"], 'status must be "-"')
+        .required("status is required"),
+
+      pen_createby: Yup.string().required("pen_created is required"),
+
+      pen_createdate: Yup.string().required("pen_createdate is required"),
+
+      pen_modif_by: Yup.string().required("pen_modif_by is required"),
+
+      pen_comment: Yup.string().nullable(),
+    });
+
+    console.log("payload: ", payload);
+
+    const validationErrors = await validateAllInputs(
+      payload,
+      payloadSchema,
+      setErrors
+    );
+
+    console.log(
+      "VALIDASI: ",
+      Object.values(validationErrors).every((error) => !error)
+    );
+    console.log("VALIDASI: ", validationErrors);
+    console.log("VALIDASI: ", errors);
+
+    if (Object.values(validationErrors).every((error) => !error)) {
+      setIsLoading(true);
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
 
       console.log("FormDataRef: ", formDataRef2.current);
       console.log("Payload: ", payload);
       console.log("Payload nilai: ", formDataRef3.current);
 
-    try {
-      const data = await UseFetch(
-        API_LINK + "RencanaSS/CreatePenilian",
-        payload
-      );
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/UpdateNilaiSS",
+          payload
+        );
 
-      // console.log("tes", data);
-      if (!data) {
-        throw new Error("Error: Failed to Submit the data.");
-      } else {
-        SweetAlert("Success", "Data Successfully Submitted", "success");
-        window.location.href = ROOT_LINK + "/submission/ss";
+        // console.log("tes", data);
+        if (!data) {
+          throw new Error("Error: Failed to Submit the data.");
+        } else {
+          // window.location.href = ROOT_LINK + "/submission/ss";
+          SweetAlert("Success", "Data Successfully Submitted", "success");
+
+          setTimeout(function () {
+            window.close();
+          }, 2000);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      window.scrollTo(0, 0);
-      setIsError((prevError) => ({
-        ...prevError,
-        error: true,
-        message: error.message,
-      }));
-    } finally {
-      setIsLoading(false);
+    } else {
+      console.log("356 error", errors);
+      SweetAlert("Error", Object.values(validationErrors).join("\n"), "error");
+      // window.scrollTo(0, 0);
     }
-    // } else window.scrollTo(0, 0);
   };
 
   useEffect(() => {
@@ -322,6 +407,7 @@ export default function MiniConventionScoring({ onChangePage }) {
           API_LINK + "MiniConvention/GetListKriteriaPenilaian"
         );
 
+        // console.log("")
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
@@ -349,17 +435,26 @@ export default function MiniConventionScoring({ onChangePage }) {
           creaby: userInfo.username,
         });
 
-        // console.log("INI DATA SISIA: ", data);
+        console.log("INI DATA SISIA: ", data);
         if (!data) {
-          // throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the category data.");
         } else {
-          const dataDetail = data.map((item) => ({
-            Keys: item.Key,
-            Text: `${item.Deskripsi} - (${item.Nilai})`,
-            Value: item.Value,
-            Score: item.Nilai,
-            KrpId: item.Kriteria,
-          }));
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 70
+                ? item.Deskripsi.substring(0, 71) + "...."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Text: `(Point ${item.Nilai}) - ${item.Deskripsi}`,
+              Value: item.Value,
+              Score: item.Nilai,
+              KrpId: item.Kriteria,
+              creaby: item.Creaby,
+              creadate: item.Creadate,
+            };
+          });
 
           setListPenilaian(dataDetail);
         }
@@ -389,7 +484,7 @@ export default function MiniConventionScoring({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `${item.Desc} - (${item.Score})`,
+            Text:`(Poin: ${item.Score}) - ${item.Desc}`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -422,6 +517,10 @@ export default function MiniConventionScoring({ onChangePage }) {
     setFormattedValue(formatNumber(rawValue));
     setUserInput(rawValue);
     // handleInputChange({ target: { name: "budget", value: rawValue } });
+  };
+
+  const handleComment = (e) => {
+    formComment.current = e.target.value;
   };
 
   // console.log("NILAI: ", listPenilaian);
@@ -526,16 +625,50 @@ export default function MiniConventionScoring({ onChangePage }) {
                                   (detail) => detail.Id === item.Value
                                 );
 
-                              const arrTextData =
-                                listPenilaian.map(
-                                  (item) => item
-                                  
-                                );
+                              const arrTextData = listPenilaian.map(
+                                (item) => item
+                              );
 
                               return (
                                 <div className="row mb-3" key={item.Value}>
                                   <div className="col-lg-4">
-                                    <Label data={item.Text} />
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "flex-start",
+                                        gap: "4px",
+                                      }}
+                                    >
+                                      <Label
+                                        data={
+                                          item.Text === "Reduksi Biaya"
+                                            ? `${item.Text} \t (IDR)`
+                                            : item.Text
+                                        }
+                                      />
+                                      <span
+                                        style={{
+                                          color: "red",
+                                          fontSize: "1rem",
+                                          lineHeight: "1",
+                                        }}
+                                      >
+                                        *
+                                      </span>
+                                    </div>
+
+                                    {item.Text === "Reduksi Biaya" && (
+                                      <div style={{ marginTop: "-20px" }}>
+                                        <small
+                                          style={{
+                                            fontSize: "0.75rem",
+                                            color: "#6c757d",
+                                          }}
+                                        >
+                                          material, consumable, man hour, dll...
+                                        </small>
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="col-lg-8">
                                     <SearchDropdown
@@ -543,11 +676,14 @@ export default function MiniConventionScoring({ onChangePage }) {
                                       // placeholder={arrTextData[item.Value] || ''}
                                       arrData={filteredArrData}
                                       isRound
-                                      // isRequired
+                                      isRequired
                                       value={
                                         formDataRef2.current[item.Value] || ""
                                       }
-                                      selectedValued ={arrTextData[item.Value-1]}
+                                      selectedValued={
+                                        arrTextData[item.Value - 1]
+                                      }
+                                      disableTyping
                                       onChange={handleInputChange}
                                       // errorMessage={errors.formDataRef2.current[item.Value]}
                                     />
@@ -558,73 +694,50 @@ export default function MiniConventionScoring({ onChangePage }) {
                             <div className="col-lg-4">
                               <Label data="Comment" />
                             </div>
-                            <div className="col-lg-8">
+                            <div className="col-lg-12">
                               <Input
                                 type="textarea"
                                 forInput="comment"
-                                ref={formComment}
+                                // ref={formComment}
                                 // isRequired
-                                handleChange
+                                onChange={handleComment}
+                                selectedValued={listPenilaian.komment || ""}
+                                value={formComment.current}
                                 errorMessage={errors.formComment}
                               />
                             </div>
                           </div>
                           <div className="ps-4" style={{ width: "20%" }}>
                             <div
-                              className="d-flex flex-column gap-3"
-                              style={{ height: "100px" }}
+                              className="card fw-medium text-center"
+                              style={{
+                                width: "200px",
+                                minHeight: "180px",
+                              }}
                             >
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
+                              {/* HEADER DI ATAS */}
+                              <h3
+                                className="w-100 text-center"
+                                style={{
+                                  textAlign: "center",
+                                  background: "transparent",
+                                  // border: "none",
+                                  padding: 0,
+                                  fontWeight: "bold",
+                                }}
                               >
-                                Ka.Unit/Ka.UPT
-                                <hr />
-                                <h5>{totalScore}</h5>
-                              </div>
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
-                              >
-                                Ka.Prodi/Ka.Dept
-                                <hr />
-                                <h5>{0}</h5>
-                              </div>
-                              <div
-                                className="card fw-medium text-center"
-                                style={{ width: "200px" }}
-                              >
-                                WaDIR/DIR
-                                <hr />
-                                <h5>{0}</h5>
+                                Total Score
+                              </h3>
+
+                              <hr />
+
+                              {/* ISI DI TENGAH */}
+                              <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+                                <h1 className="fw-medium fw-bold">
+                                  {totalScore}
+                                </h1>
                               </div>
                             </div>
-                            {/* {listKriteriaPenilaian.slice(Math.ceil(listKriteriaPenilaian.length / 2)).map((item) => {
-                              const selectedItem = listDetailKriteriaPenilaian.find(
-                                (detail) => detail.Id === item.Value
-                              );
-
-                              const filteredArrData = listDetailKriteriaPenilaian.filter(
-                                (detail) => detail.Id === item.Value
-                              );
-
-                              return (
-                                <div className="row mb-3" key={item.Value}>
-                                  <div className="col-lg-4">
-                                    <Label data={item.Text} />
-                                  </div>
-                                  <div className="col-lg-8">
-                                    <SearchDropdown
-                                      forInput={item.Value}
-                                      arrData={filteredArrData}
-                                      isRound
-                                      value={formDataRef2.current[item.Value] || ""}
-                                      onChange={handleInputChange}
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            })} */}
                           </div>
                         </div>
                       </div>

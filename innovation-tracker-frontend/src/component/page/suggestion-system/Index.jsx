@@ -80,6 +80,7 @@ export default function SuggestionSytemIndex({
   const [isLoading, setIsLoading] = useState(true);
   const [listEmployee, setListEmployee] = useState([]);
   const [listCategory, setListCategory] = useState([]);
+  const [listSettingRanking, setListSettingRanking] = useState([]);
   const [listReviewer, setListReviewer] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [currentData, setCurrentData] = useState(inisialisasiData);
@@ -136,21 +137,229 @@ export default function SuggestionSytemIndex({
 
   const handleSubmit = async (id) => {
     setIsError(false);
-    const tempStatus = getStatusByKey(id);
-    var alertStatus;
 
-    if (tempStatus === "Approved") {
-      alertStatus =
-        "Are you sure you want to assign this data to a reviewer? Once assigned, this action cannot be undone.";
-    } else {
-      alertStatus =
-        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
+    setIsError((prevError) => ({ ...prevError, error: false }));
+
+    let tempTotal1 = 0;
+    let tempTotal2 = 0;
+    let tempTotal3 = 0;
+
+    let statusKupt = [];
+    let statusKdept = [];
+    let statusDir = [];
+
+    let totalScore1 = 0;
+    let totalScore2 = 0;
+    let totalScore3 = 0;
+
+    if (
+      userInfo.jabatan === "Kepala Seksi" ||
+      userInfo.jabatan === "Sekretaris Prodi"
+    ) {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          id: id,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPT: ", data);
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 65
+                ? item.Deskripsi.substring(0, 65) + "..."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Deskripsi: `${deskripsiPendek}`,
+              Value: item.Value,
+              Nilai: item.Nilai,
+              Kriteria: item.Kriteria,
+              jab : item["Jabatan Penilai"], 
+              Creaby: item.Creaby,
+              Creadate: item.Creadate,
+            };
+          });
+
+          statusKupt = dataDetail;
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+
+      statusKupt.forEach((item) => {
+        if (
+          item.jab !== "Kepala Seksi" &&
+          item.jab !== "Sekretaris Prodi"
+        ) {
+          console.log("kddd", statusKupt);
+          tempTotal1 = 0;
+        } else {
+          console.log("total nilai k sek: ", item.Nilai);
+          tempTotal1 += parseFloat(item.Nilai) || 0;
+        }
+      });
+    } else if (userInfo.jabatan === "Kepala Departemen") {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          id: id,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPT: ", data);
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 65
+                ? item.Deskripsi.substring(0, 65) + "..."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Deskripsi: `${deskripsiPendek}`,
+              Value: item.Value,
+              Nilai: item.Nilai,
+              Kriteria: item.Kriteria,
+              jab: item["Jabatan Penilai"], 
+              Creaby: item.Creaby,
+              Creadate: item.Creadate,
+            };
+          });
+
+          statusKdept =dataDetail;
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+
+      statusKdept.forEach((item) => {
+        if (item.jab !== "Kepala Departemen") {
+          tempTotal2 = 0;
+        } else {
+          tempTotal2 += parseFloat(item.Nilai) || 0;
+        }
+      });
+    } else if (
+      userInfo.jabatan === "Wakil Direktur" ||
+      userInfo.jabatan === "Direktur"
+    ) {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaianById", {
+          id: id,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPT: ", data);
+          const dataDetail = data.map((item) => {
+            const deskripsiPendek =
+              item.Deskripsi.length > 65
+                ? item.Deskripsi.substring(0, 65) + "..."
+                : item.Deskripsi;
+
+            return {
+              Keys: item.Key,
+              Deskripsi: `${deskripsiPendek}`,
+              Value: item.Value,
+              Nilai: item.Nilai,
+              Kriteria: item.Kriteria,
+              jab: item["Jabatan Penilai"], 
+              Creaby: item.Creaby,
+              Creadate: item.Creadate,
+            };
+          });
+
+          statusDir = dataDetail;
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+
+      statusDir.forEach((item) => {
+        if (item.jab !== "Wakil Direktur") {
+          tempTotal3 = 0;
+        } else {
+          tempTotal3 += parseFloat(item.Nilai) || 0;
+        }
+      });
     }
+
+    totalScore1 = tempTotal1;
+    totalScore2 = tempTotal2;
+    totalScore3 = tempTotal3;
+
+    let ranking = 0;
+    let status1 = null;
+
+    if (
+      userInfo.jabatan === "Kepala Seksi" ||
+      userInfo.jabatan === "Sekretaris Prodi"
+    ) {
+      const item = listSettingRanking.find((s) => s.Ranking === "Ranking 5");
+      // console.log("TRR", statusKupt);
+      if (item && item.Range) {
+        const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
+      }
+      // console.log("AA ", totalScore1);
+      if (totalScore1 < ranking) {
+        status1 = "Final";
+      } else {
+        status1 = "Awaiting Assesment";
+      }
+    } else if (userInfo.jabatan === "Kepala Departemen") {
+      const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
+      if (item && item.Range) {
+        const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+        ranking = parts.length > 1 ? parts[1] : parts[0]; // ambil nilai terakhir
+      }
+      if (totalScore2 < ranking) {
+        status1 = "Final";
+      } else {
+        status1 = "Awaiting Assesment";
+      }
+    } else if (
+      userInfo.jabatan === "Wakil Direktur" ||
+      userInfo.jabatan === "Direktur"
+    ) {
+      status1 = "Final";
+    }
+
+    console.log("Status", status1);
+    const tempStatus = getStatusByKey(id);
 
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure about this value?",
-      "warning",
+      "info",
       "Submit",
       null,
       "",
@@ -162,6 +371,7 @@ export default function SuggestionSytemIndex({
       if (tempStatus !== "Approved") {
         UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
           id: id,
+          status: status1,
         })
           .then((data) => {
             if (!data) {
@@ -399,54 +609,85 @@ export default function SuggestionSytemIndex({
   }, []);
   // console.log("Jabatannn: ", penJabatan);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListReviewer(data);
+    useEffect(() => {
+      const fetchDataPenilaian = async () => {
+        setIsLoading(true);
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "RencanaSS/GetPenilaian2");
+  
+          // console.log("SIS ID: ", data);
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setPenJabatan({
+              sis_id: data.map((value) => value["Id Sis"]),
+              pen_created_by: data.map((value) => value.CreatedBy)
+            });
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListReviewer({});
         }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListReviewer({});
+      };
+      fetchDataPenilaian();
+    }, [])
+    // console.log("Jabatannn: ", penJabatan);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsLoading(true);
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "RencanaSS/GetListReviewer");
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListReviewer(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListReviewer({});
+        }
       }
-    };
+      fetchData();
+    }, []);
 
-    fetchData();
-  }, []);
-
-  console.log("DATA ALL ", currentData);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Innovation Category",
-        });
-
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
-        } else {
-          setListCategory(data.filter((item) => item.Text.includes("Batch")));
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-        setListCategory({});
+    console.log("User Info ", userInfo);
+    
+    useEffect(() => {
+      const fetchData = async () => {
+        setIsLoading(true);
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
+            p1: "Innovation Category",
+          });
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListCategory(data.filter((item) => item.Text.includes("Batch")));
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
       }
     };
 
@@ -456,7 +697,8 @@ export default function SuggestionSytemIndex({
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
-      console.log(location.state);
+      setIsLoading(true);
+
       try {
         const data = await UseFetch(
           type === "mySubmission"
@@ -484,7 +726,19 @@ export default function SuggestionSytemIndex({
               (emp) => emp.username === value["Creaby"]
             );
 
-            console.log("FOND", foundEmployee);
+            const jabatanTarget = userInfo.upt === "Pusat Sistem Informasi" 
+            ? "Kepala Departemen" 
+            : userInfo.jabatan;
+          
+            // console.log("FOUND KEY: ", listEmployee);
+            // console.log("1",userInfo)
+            console.log("v",value);
+            console.log("us",userInfo);
+            console.log("2",foundEmployee)
+            console.log("3",penJabatan)
+            console.log("4",data)
+            const uniqueKeys = [...new Set(data.map(item => item.Key))];
+
             if (role === "ROL01") {
               return {
                 Key: value.Key,
@@ -607,14 +861,16 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
-                    : userInfo.jabatan === "Sekretaris Prodi" ||
+                    : userInfo.jabatan === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.jabatan === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : (userInfo.jabatan === "Kepala Seksi" ||
+                      userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
                       userInfo.jabatan === "Wakil Direktur" ||
-                      userInfo.jabatan === "Direktur"
+                      userInfo.jabatan === "Direktur") && (value["Status"] === "Awaiting Assesment" || value["Status"] === "Approved")
                     ? ["Detail", "Scoring"]
-                    : // Status Approved By Role 03
-                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
-                    userInfo.upt === foundEmployee.upt &&
+                    :userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Approved"
                     ? ["Detail", "Scoring"]
@@ -622,7 +878,13 @@ export default function SuggestionSytemIndex({
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
-                    : ["Detail"],
+                    : userInfo.jabatan === "Kepala Departemen" &&
+                    value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    :userInfo.jabatan === "Wakil Direktur" &&
+                    value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    :["Detail"],
                 Alignment: [
                   "center",
                   "left",
@@ -637,7 +899,7 @@ export default function SuggestionSytemIndex({
                   "center",
                 ],
               };
-            } else {
+            }else {
               return {
                 Key: value.Key,
                 No: value["No"],
@@ -658,23 +920,38 @@ export default function SuggestionSytemIndex({
                   value["Status"] === "Draft" &&
                   value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
+                    : inorole === "Facilitator" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
                     : role === "ROL03" &&
                       value["Status"] === "Rejected" &&
                       value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL01" && value["Status"] === "Approved"
+                    : role === "ROL01" &&
+                    value["Status"] === "Approved"
                     ? ["Detail", "Submit"]
+                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Awaiting Assesment") 
+                    ? ["Detail", "Scoring"]
+                    : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
+                    ? ["Detail", "Scoring"]
+                    : (jabatanTarget === "Kepala Departemen") && (value["Status"] === "Waiting Approval")
+                    ? ["Detail"]
+                    : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] !== "Draft Scoring")
+                    ? ["Detail", "Scoring"]
+                    : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] === "Awaiting Assesment")
+                    ? ["Detail", "Scoring"]
+                    : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"] 
+                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"]
+                    : jabatanTarget === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
+                    : jabatanTarget === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                     : ["Detail"],
                 Alignment: [
                   "center",
                   "left",
                   "left",
-                  "left",
-                  "right",
+                  "center",
+                  "center",
+                  "center",
                   "center",
                   "center",
                   "center",
@@ -697,6 +974,15 @@ export default function SuggestionSytemIndex({
     fetchData();
   }, [currentFilter, listEmployee]);
 
+  useEffect(() => {
+    const shouldRefresh = localStorage.getItem('refreshAfterSubmit');
+  
+    if (shouldRefresh === 'true') {
+      localStorage.removeItem('refreshAfterSubmit');
+      window.location.reload();
+    }
+  }, []);
+  
   if (isLoading) return <Loading />;
 
   console.log("DeptArrData:", userInfo);
@@ -725,40 +1011,38 @@ export default function SuggestionSytemIndex({
       <div className="flex-fill">
         <div className="input-group">
           {
-            // userInfo.role.slice(0, 5) !== "ROL01" &&
-            type === "mySubmission" &&
-            // ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
-            //   userInfo.jabatan
-            // ) &&
-            userInfo.role.slice(0, 5) !== "ROL01" ? (
-              <Button
-                iconName="add"
-                label="Register"
-                classType="success"
-                onClick={() => onChangePage("add")}
-              />
-            ) : userInfo.peran === "Innovation Coordinator" ? (
-              <Button
-                iconName="file-excel"
-                label="Export"
-                classType="success"
-                onClick={() => {
-                  const param = {
-                    query: currentFilter.query,
-                    sort: currentFilter.sort,
-                    status: currentFilter.status,
-                    jenis: "SS",
-                    role: userInfo.role.slice(0, 5),
-                    npk: userInfo.npk,
-                    kryData: listEmployee,
-                  };
-                  handleExport(param);
-                }}
-              />
-            ) : (
-              ""
-            )
-          }
+          // type === "mySubmission" &&
+          // // ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
+          // //   userInfo.jabatan
+          // // ) &&
+          userInfo.role.slice(0, 5) !== "ROL01" ? (
+            <Button
+              iconName="add"
+              label="Register"
+              classType="success"
+              onClick={() => onChangePage("add")}
+            />
+          ) : userInfo.peran === "Innovation Coordinator" ? (
+            <Button
+              iconName="file-excel"
+              label="Export"
+              classType="success"
+              onClick={() => {
+                const param = {
+                  query: currentFilter.query,
+                  sort: currentFilter.sort,
+                  status: currentFilter.status,
+                  jenis: "SS",
+                  role: userInfo.role.slice(0, 5),
+                  npk: userInfo.npk,
+                  kryData: listEmployee,
+                };
+                handleExport(param);
+              }}
+            />
+          ) : (
+            ""
+          )}
           <Input
             ref={searchQuery}
             forInput="pencarianSetting"
@@ -807,21 +1091,22 @@ export default function SuggestionSytemIndex({
       </div>
       <div className="mt-3 mb-5">
         <div className="d-flex flex-column">
-          <Table
-            checkboxTable={
-              userInfo.role.slice(0, 5) === "ROL01"
-              // || userInfo.jabatan === "Kepala Departemen"
-            }
-            onCheckedChange={handleSelectionChange}
-            data={currentData}
-            onDetail={onChangePage}
-            onSubmit={handleSubmit}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onEdit={onChangePage}
-            onScoring={onScoring}
-            onEditScoring={onEditScoring}
-          />
+          {!isLoading && (
+            <Table
+              checkboxTable={
+                userInfo.role.slice(0, 5) === "ROL01" 
+                // || userInfo.jabatan === "Kepala Departemen"
+              }
+              data={currentData}
+              onDetail={onChangePage}
+              onSubmit={handleSubmit}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onEdit={onChangePage}
+              onScoring={onScoring}
+              onEditScoring={onEditScoring}
+            />
+          )}
           <Paging
             pageSize={PAGE_SIZE}
             pageCurrent={currentFilter.page}

@@ -146,7 +146,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          etListKriteriaPenilaian(data);
+          setListKriteriaPenilaian(data);
         }
       } catch (error) {
         window.scrollTo(0, 0);

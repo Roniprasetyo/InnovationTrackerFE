@@ -43,6 +43,7 @@ export default function Dashboard() {
   const [listPeriod, setListPeriod] = useState([]);
   const [tableData, setTableData] = useState(initialChart);
   const [isLoading, setIsLoading] = useState(true);
+  const [listPeriod, setListPeriod] = useState(true);
 
   const [currentFilter, setCurrentFilter] = useState({
     jenis: "SS",
@@ -191,7 +192,7 @@ export default function Dashboard() {
           error: true,
           message: error.message,
         }));
-        setListPeriod({});
+        setCurrentData({});
       } finally {
         setIsLoading(false);
       }
