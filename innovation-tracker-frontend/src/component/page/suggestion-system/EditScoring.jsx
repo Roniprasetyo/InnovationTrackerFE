@@ -41,10 +41,16 @@ function deobfuscateId(obfuscated) {
   return null;
 }
 
-export default function MiniConventionScoring({ onChangePage }) {
+export default function EditScoring({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const encodedId = searchParams.get("id");
+
+  if (parseInt(encodedId)) {
+    // Redirect ke halaman lain jika tidak bisa dikonversi ke integer
+    window.location.href = "/*"; // ganti "/" dengan URL tujuanmu
+  }
+
   let userInfo = "";
   const id = deobfuscateId(encodedId);
   console.log("ID", id);
@@ -272,6 +278,39 @@ export default function MiniConventionScoring({ onChangePage }) {
     );
     // console.log(formComment.current.value);
 
+    let status1 = ""; 
+
+    if (
+      userInfo.jabatan === "Kepala Seksi" ||
+      userInfo.jabatan === "Sekretaris Prodi"
+    ) {
+      if (
+        formDataRef.current.Status === "Approved" ||
+        formDataRef.current.Status.includes("Draft Scoring")
+      ) {
+        status1 = "Draft Scoring";
+      }
+    } else if (userInfo.jabatan === "Kepala Departemen") {
+      if (
+        formDataRef.current.Status === "Approved" ||
+        formDataRef.current.Status.includes("Draft Scoring")
+      ) {
+        status1 = "Draft Scoring";
+      }
+    } else if (
+      userInfo.jabatan === "Wakil Direktur" ||
+      userInfo.jabatan === "Direktur"
+    ) {
+      if (
+        formDataRef.current.Status === "Scoring - Ka.Prodi/Ka.Dept" ||
+        formDataRef.current.Status.includes("Draft Scoring")
+      ) {
+        status1 = "Draft Scoring";
+      }
+    }
+
+    console.log("STATUS", status1);
+
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "), // "12, 2, 4,  7"
       sis_id: id,
@@ -284,7 +323,8 @@ export default function MiniConventionScoring({ onChangePage }) {
       pen_comment:
         formComment.current && formComment.current.trim() !== ""
           ? `${formComment.current} - ${userInfo.username}`
-          : undefined,
+          : "",
+      sis_status: status1
     };
 
     const payloadSchema = Yup.object().shape({
@@ -339,6 +379,7 @@ export default function MiniConventionScoring({ onChangePage }) {
       pen_modif_by: Yup.string().required("pen_modif_by is required"),
 
       pen_comment: Yup.string().nullable(),
+      sis_status: Yup.string().nullable()
     });
 
     console.log("payload: ", payload);
@@ -447,7 +488,7 @@ export default function MiniConventionScoring({ onChangePage }) {
 
             return {
               Keys: item.Key,
-              Text: `(Point ${item.Nilai}) - ${item.Deskripsi}`,
+              Text: `${item.Deskripsi} - (Point ${item.Nilai})`,
               Value: item.Value,
               Score: item.Nilai,
               KrpId: item.Kriteria,
