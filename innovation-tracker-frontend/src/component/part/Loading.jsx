@@ -1,4 +1,4 @@
-import { HashLoader, PropagateLoader } from "react-spinners";
+import { HashLoader } from "react-spinners";
 
 export default function Loading() {
   return (

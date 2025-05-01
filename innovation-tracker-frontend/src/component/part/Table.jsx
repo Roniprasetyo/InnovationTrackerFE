@@ -9,9 +9,7 @@ export default function Table({
   onCancel = () => {},
   onDelete = () => {},
   onDetail = () => {},
-  onScoring = () => {},
   onEdit = () => {},
-  onEditScoring = () => {},
   onApprove = () => {},
   onReject = () => {},
   onSubmit = () => {},
@@ -19,6 +17,8 @@ export default function Table({
   onFinal = () => {},
   onPrint = () => {},
   onRemove = () => {},
+  onScoring = () => {},
+  onEditScoring = () => {},
   onCheckedChange = () => {},
 }) {
   const [selectedKeys, setSelectedKeys] = useState([]);
@@ -123,17 +123,6 @@ export default function Table({
               onClick={() => onEdit("edit", id, rowValue)}
             />
           );
-        case "EditScoring":
-          return (
-            <Icon
-              key={key + action}
-              name="edit"
-              type="Bold"
-              cssClass="btn px-1 py-0 text-primary"
-              title="Modify"
-              onClick={() => onEditScoring("editScoring", id, rowValue)}
-            />
-          );
         case "Approve":
           return (
             <Icon
@@ -209,6 +198,17 @@ export default function Table({
               cssClass="btn px-1 py-0 text-primary"
               title="Print"
               onClick={() => onPrint(id)}
+            />
+          );
+        case "EditScoring":
+          return (
+            <Icon
+              key={key + action}
+              name="edit"
+              type="Bold"
+              cssClass="btn px-1 py-0 text-primary"
+              title="Modify"
+              onClick={() => onEditScoring("editScoring", id, rowValue)}
             />
           );
         case "Scoring":
@@ -307,8 +307,13 @@ export default function Table({
                     className={
                       value["Status"] &&
                       (value["Status"] === "Draft" ||
-                        value["Status"] === "Waiting Approval" ||
+                        value["Status"] === "Revision" ||
+                        value["Status"] === "Belum Dikonversi" ||
                         value["Status"] === "Belum Dibuat Penjadwalan" ||
+                        value["Status"] === "Rejected" ||
+                        value["Status"] === "Approved" ||
+                        value["Status"] === "Scoring" ||
+                        value["Status"] === "Waiting Approval" ||
                         value["Status"] === "Draft Scoring")
                         ? "fw-bold"
                         : undefined

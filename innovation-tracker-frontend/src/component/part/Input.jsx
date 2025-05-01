@@ -1,5 +1,4 @@
-import { forwardRef, useState } from "react";
-import { separator } from "../util/Formatting";
+import { forwardRef } from "react";
 
 const Input = forwardRef(function Input(
   {
