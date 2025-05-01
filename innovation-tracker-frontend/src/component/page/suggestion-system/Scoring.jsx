@@ -76,13 +76,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const encodedId = searchParams.get("id");
-  
-  
+
   if (parseInt(encodedId)) {
     // Redirect ke halaman lain jika tidak bisa dikonversi ke integer
     window.location.href = "/*"; // ganti "/" dengan URL tujuanmu
   }
-  
+
   let userInfo = "";
   const id = deobfuscateId(encodedId);
   console.log("ID", id);
@@ -121,6 +120,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   let rankingKUpt = "";
   let rankingKDept = "";
   let rankingKDir = "";
+
+  let detailSS = [];
 
   useEffect(() => {
     if (listKriteriaPenilaian.length > 0) {
@@ -197,7 +198,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
+          detailSS = data[0];
           formDataRef.current = data[0];
+          console.log("detaiiiiiiiiilllllllf",detailSS.Facil);
+          console.log("detaiiiiiiiiillllllln",userInfo.npk);
+          console.log("detaiiiiiiiiilllllllt",selectedTab);
+          console.log("detaiiiiiiiiilllllllk");
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -295,6 +301,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         );
 
         const temp = data.find((value) => value.npk === userInfo.npk);
+        console.log("detaiiiiii",response)
         setForPenilai(temp);
       } catch (error) {
         window.scrollTo(0, 0);
@@ -312,7 +319,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
 
     console.log("RANKING 1: ", rankingKUpt);
     console.log("RANKING 2: ", rankingKDept);
@@ -356,7 +362,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       jabatan: userInfo.jabatan,
       statusPN: "-",
       created: userInfo.username,
-      statusSS: status1
+      statusSS: status1,
     };
 
     const payloadSchema = Yup.object().shape({
@@ -393,7 +399,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       statusPN: Yup.string().required("statusPN is required"),
 
       created: Yup.string().required("created is required"),
-      statusSS: Yup.string().nullable()
+      statusSS: Yup.string().nullable(),
     });
 
     console.log("Payload ", payload);
@@ -606,11 +612,17 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           const rank5 = data.find((s) => s.Ranking === "Ranking 5");
           const rank4 = data.find((s) => s.Ranking === "Ranking 4");
           const rank3 = data.find((s) => s.Ranking === "Ranking 3");
-          
-          const parts5 = rank5.Range.split("-").map((p) => parseInt(p.trim(), 10));
-          const parts4 = rank4.Range.split("-").map((p) => parseInt(p.trim(), 10));
-          const parts3 = rank3.Range.split("-").map((p) => parseInt(p.trim(), 10));
-          
+
+          const parts5 = rank5.Range.split("-").map((p) =>
+            parseInt(p.trim(), 10)
+          );
+          const parts4 = rank4.Range.split("-").map((p) =>
+            parseInt(p.trim(), 10)
+          );
+          const parts3 = rank3.Range.split("-").map((p) =>
+            parseInt(p.trim(), 10)
+          );
+
           rankingKUpt = parts5.length > 1 ? parts5[1] : parts5[0]; // ambil nilai terakhir
           rankingKDept = parts4.length > 1 ? parts4[1] : parts4[0]; // ambil nilai terakhir
           rankingKDir = parts3.length > 1 ? parts3[1] : parts3[0]; // ambil nilai terakhir
@@ -633,8 +645,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   }, []);
 
   // useEffect(()=>{
-    // console.log("RANKSSS: ", listSettingRanking);
-
+  // console.log("RANKSSS: ", listSettingRanking);
 
   // }, [rankingKUpt, rankingKDept, rankingKDir])
 
@@ -1376,9 +1387,21 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               onChange={handleInputChange}
                                             />
                                           )
+                                        ) : detailSS.Facil === userInfo.npk ? (
+                                          <SearchDropdown
+                                            forInput={item.Value}
+                                            arrData={filteredArrData}
+                                            isRound
+                                            value={
+                                              formDataRef2.current[
+                                                item.Value
+                                              ] || ""
+                                            }
+                                            onChange={handleInputChange}
+                                          />
                                         ) : (
                                           <div className="form-control bg-light">
-                                            Not yet scored
+                                            Not yet scoredds
                                           </div>
                                         );
                                     }
