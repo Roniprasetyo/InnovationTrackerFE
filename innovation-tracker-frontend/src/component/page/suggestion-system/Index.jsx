@@ -461,6 +461,8 @@ export default function SuggestionSytemIndex({
         const data = await UseFetch(
           type === "mySubmission"
             ? API_LINK + "RencanaSS/GetMyRencanaSS"
+            : userInfo.role.slice(0, 5) === "ROL01"
+            ? API_LINK + "RencanaSS/GetRencanaSSforInnoCoor"
             : API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter
         );
@@ -524,7 +526,7 @@ export default function SuggestionSytemIndex({
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
                       (value["Status"] === "Approved" ||
-                        value["Status"] === "Scoring")
+                        value["Status"] === "Awaiting Assesment")
                     ? ["Detail", "Scoring"]
                     : userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
@@ -723,39 +725,40 @@ export default function SuggestionSytemIndex({
       <div className="flex-fill">
         <div className="input-group">
           {
-          // userInfo.role.slice(0, 5) !== "ROL01" &&
-          type === "mySubmission" &&
-          // ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
-          //   userInfo.jabatan
-          // ) &&
-          userInfo.role.slice(0, 5) !== "ROL01" ? (
-            <Button
-              iconName="add"
-              label="Register"
-              classType="success"
-              onClick={() => onChangePage("add")}
-            />
-          ) : userInfo.peran === "Innovation Coordinator" ? (
-            <Button
-              iconName="file-excel"
-              label="Export"
-              classType="success"
-              onClick={() => {
-                const param = {
-                  query: currentFilter.query,
-                  sort: currentFilter.sort,
-                  status: currentFilter.status,
-                  jenis: "SS",
-                  role: userInfo.role.slice(0, 5),
-                  npk: userInfo.npk,
-                  kryData: listEmployee,
-                };
-                handleExport(param);
-              }}
-            />
-          ) : (
-            ""
-          )}
+            // userInfo.role.slice(0, 5) !== "ROL01" &&
+            type === "mySubmission" &&
+            // ["Kepala Seksi", "Kepala Departemen", "Sekretaris Prodi"].includes(
+            //   userInfo.jabatan
+            // ) &&
+            userInfo.role.slice(0, 5) !== "ROL01" ? (
+              <Button
+                iconName="add"
+                label="Register"
+                classType="success"
+                onClick={() => onChangePage("add")}
+              />
+            ) : userInfo.peran === "Innovation Coordinator" ? (
+              <Button
+                iconName="file-excel"
+                label="Export"
+                classType="success"
+                onClick={() => {
+                  const param = {
+                    query: currentFilter.query,
+                    sort: currentFilter.sort,
+                    status: currentFilter.status,
+                    jenis: "SS",
+                    role: userInfo.role.slice(0, 5),
+                    npk: userInfo.npk,
+                    kryData: listEmployee,
+                  };
+                  handleExport(param);
+                }}
+              />
+            ) : (
+              ""
+            )
+          }
           <Input
             ref={searchQuery}
             forInput="pencarianSetting"
