@@ -126,22 +126,22 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       const kepalaSeksi = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
-          value.jabatan === "Kepala Seksi"
+          (value.jabatan === "Kepala Seksi" || value.jabatan === "Kepala Departemen")
       );
   
       const sekProdi = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
-          value.jabatan === "Sekretaris Prodi"
+          (value.jabatan === "Sekretaris Prodi" || value.jabatan === "Kepala Departemen")
       );
   
       const kepalaDepartemen = listEmployee.find(
         (value) =>
-          value.upt_bagian === userInfo.upt &&
+          value.npk === userInfo.npk &&
           value.jabatan === "Kepala Departemen"
       );
   
-      let selected = kepalaSeksi || sekProdi || kepalaDepartemen;
+      let selected = kepalaDepartemen || kepalaSeksi || sekProdi;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -171,7 +171,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
             }
           }
         }
-      }else if(
+      }
+      else if(
         selected?.npk === userInfo.npk &&
         (selected.jabatan === "Kepala Departemen")
       ) {
@@ -182,19 +183,18 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         if (userStruktur) {
           const parent = userStruktur["Struktur Parent"];
   
-          const wakilDirect = listDepartment.find(
+          const Kadept = listDepartment.find(
             (item) =>
-              item.Struktur === parent &&
-              item.Jabatan === "Wakil Direktur"
+              item.Struktur === parent
           );
   
-          if (wakilDirect) {
-            const matchingEmployee = listEmployee.find(
-              (emp) => emp.npk === wakilDirect.Npk
+          if (Kadept) {
+            const matchingDirect = listEmployee.find(
+              (emp) => emp.npk === Kadept.Npk
             );
   
-            if (matchingEmployee) {
-              setSectionHead(matchingEmployee);
+            if (Kadept) {
+              setSectionHead(matchingDirect);
               return;
             }
           }
@@ -208,6 +208,21 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   }, [listEmployee, userInfo, listDepartment]);  
 
   console.log("SECTION HEAD", sectionHead);
+
+  useEffect(() => {
+    const userStruktur = listDepartment.find(
+      (item) => item.Npk === userInfo.npk
+    );
+    if(userStruktur) {
+      const parent = userStruktur["Struktur Parent"];
+      const wakilDirect = listDepartment.find(
+        (item) =>
+          item.Struktur === parent
+      );
+      console.log("Isi dari wakilDirect:", wakilDirect);
+    }
+  }, [listDepartment]);
+  
 
   useEffect(() => {
       const fetchData = async () => {
@@ -318,11 +333,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.per_id = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.per_id = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);

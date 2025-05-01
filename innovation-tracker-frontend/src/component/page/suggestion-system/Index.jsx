@@ -333,7 +333,7 @@ export default function SuggestionSytemIndex({
       if (totalScore1 < ranking) {
         status1 = "Final";
       } else {
-        status1 = "Scoring";
+        status1 = "Awaiting Assesment";
       }
     } else if (userInfo.jabatan === "Kepala Departemen") {
       const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
@@ -344,7 +344,7 @@ export default function SuggestionSytemIndex({
       if (totalScore2 < ranking) {
         status1 = "Final";
       } else {
-        status1 = "Scoring";
+        status1 = "Awaiting Assesment";
       }
     } else if (
       userInfo.jabatan === "Wakil Direktur" ||
@@ -862,15 +862,13 @@ export default function SuggestionSytemIndex({
                     : userInfo.jabatan === "Kepala Departemen" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                     : userInfo.jabatan === "Wakil Direktur" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
                     : userInfo.jabatan === "Kepala Seksi" && value["Status"] === "Draft Scoring" ? ["Detail", "EditScoring", "Submit"] 
-                    : userInfo.jabatan === "Kepala Seksi" ||
+                    : (userInfo.jabatan === "Kepala Seksi" ||
                       userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
                       userInfo.jabatan === "Wakil Direktur" ||
-                      userInfo.jabatan === "Direktur"
+                      userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring" || value["Status"] === "Approved")
                     ? ["Detail", "Scoring"]
-                    : // Status Approved By Role 03
-                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
-                    userInfo.upt === foundEmployee.upt &&
+                    :userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Approved"
                     ? ["Detail", "Scoring"]
@@ -878,7 +876,10 @@ export default function SuggestionSytemIndex({
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
-                    : ["Detail"],
+                    : userInfo.jabatan === "Kepala Departemen" &&
+                    value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    :["Detail"],
                 Alignment: [
                   "center",
                   "left",
@@ -921,8 +922,6 @@ export default function SuggestionSytemIndex({
                       value["Status"] === "Rejected" &&
                       value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
-                    : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Kepala Departemen") && value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
                     : role === "ROL01" &&
                     value["Status"] === "Approved"
                     ? ["Detail", "Submit"]
@@ -930,6 +929,8 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "Scoring"]
                     : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
                     ? ["Detail", "Scoring"]
+                    : (jabatanTarget === "Kepala Departemen") && (value["Status"] === "Waiting Approval")
+                    ? ["Detail"]
                     : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] !== "Draft Scoring")
                     ? ["Detail", "Scoring"]
                     : (jabatanTarget === "Wakil Direktur" || jabatanTarget === "Direktur") && (value["Status"] === "Scoring")
