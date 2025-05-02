@@ -127,12 +127,14 @@ export default function SuggestionSytemIndex({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetListSettingRanking", {});
-  
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetListSettingRanking",
+          {}
+        );
+
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the GetPenilaianById.");
         } else {
-          console.log("INI DATA KA UPTddd: ", data);
           setListSettingRanking(data);
         }
       } catch (error) {
@@ -147,7 +149,7 @@ export default function SuggestionSytemIndex({
         setIsLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 
@@ -386,9 +388,7 @@ export default function SuggestionSytemIndex({
       }
       if (detailSS.Status === "Draft") {
         status1 = "Waiting Approval";
-      } 
-
-      else if (totalScore2 <= ranking) {
+      } else if (totalScore2 <= ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";
@@ -786,6 +786,12 @@ export default function SuggestionSytemIndex({
                 "Scoring Position": value["Scoring Position"] || "-",
                 Status: value["Status"],
                 Count: value["Count"],
+                IsBold: [
+                  "Scoring",
+                  "Waiting Approval",
+                  "Draft Scoring",
+                  "Approved",
+                ].includes(value["Status"]),
                 Action: ["Waiting Approval", "Approved", "Rejected"].includes(
                   value["Status"]
                 )
@@ -833,7 +839,7 @@ export default function SuggestionSytemIndex({
                 Count: value["Count"],
                 IsBold:
                   (value["Status"] === "Scoring" &&
-                    value["Creaby Score"] === userInfo.username) ||
+                    value["Creaby Score"] !== userInfo.username) ||
                   (value["Status"] === "Draft Scoring" &&
                     value["Creaby Score"] === userInfo.username) ||
                   (value["Status"] === "Waiting Approval" &&
@@ -873,10 +879,13 @@ export default function SuggestionSytemIndex({
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Kepala Seksi" ||
-                      userInfo.jabatan === "Sekretaris Prodi" ||
-                      userInfo.jabatan === "Kepala Departemen" ||
-                      userInfo.jabatan === "Wakil Direktur" ||
-                      userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring" || value["Status"] === "Approved" || value["Status"] === "Final")
+                        userInfo.jabatan === "Sekretaris Prodi" ||
+                        userInfo.jabatan === "Kepala Departemen" ||
+                        userInfo.jabatan === "Wakil Direktur" ||
+                        userInfo.jabatan === "Direktur") &&
+                      (value["Status"] === "Scoring" ||
+                        value["Status"] === "Approved" ||
+                        value["Status"] === "Final")
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
@@ -923,6 +932,7 @@ export default function SuggestionSytemIndex({
                 "Submitted On": formatDate(value["Creadate"]),
                 Status: value["Status"],
                 Count: value["Count"],
+                IsBold: ["Draft", "Rejected"].includes(value["Status"]),
                 Action:
                   role === "ROL03" &&
                   value["Status"] === "Draft" &&

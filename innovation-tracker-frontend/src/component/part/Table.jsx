@@ -276,6 +276,7 @@ export default function Table({
                   value !== "Alignment" &&
                   value !== "IsBold"
                 ) {
+                  if (checkboxTable) colCount++;
                   colCount++;
                   return (
                     <th key={"Header" + index} className="text-center">
@@ -337,7 +338,8 @@ export default function Table({
                       if (
                         column !== "Key" &&
                         column !== "Count" &&
-                        column !== "Alignment"
+                        column !== "Alignment" &&
+                        column !== "IsBold"
                       ) {
                         colPosition++;
                         return (

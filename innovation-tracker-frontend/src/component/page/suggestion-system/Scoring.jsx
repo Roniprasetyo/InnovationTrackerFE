@@ -76,7 +76,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   }
   let userInfo = "";
   const id = deobfuscateId(encodedId);
-  console.log("ID", id);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
@@ -184,10 +183,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         } else {
           setDetailSS(data[0]);
           formDataRef.current = data[0];
-
-          console.log("Facil:", data[0].Facil);
-          console.log("NPK:", userInfo.npk);
-          console.log("Compare:", data[0].Facil === userInfo.npk);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -234,12 +229,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       if (matched) {
         formDataRef3.current[val] = matched.Score;
       } else {
-        console.warn("Data tidak ditemukan untuk value:", val);
         formDataRef3.current[val] = null;
       }
-
-      // console.log("val dari formDataRef2:", val);
-      // console.log("matched item:", formDataRef3);
 
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
@@ -375,16 +366,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       statusSS: Yup.string().nullable()
     });
 
-    console.log("Payload ", payload);
     const validationErrors = await validateAllInputs(
       payload,
       payloadSchema,
       setErrors
     );
-
-    // console.log("FormDataRef: ", formDataRef2.current);
-    // console.log("Payload: ", payload);
-    // console.log("Payload nilai: ", formDataRef3);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
@@ -461,7 +447,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           sis_id: id,
         });
 
-        // console.log("INI DATA SISIA: ", data);
         if (!data) {
           // throw new Error("Error: Failed to get the category data.");
         } else {
@@ -490,7 +475,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           sis_id: id,
         });
 
-        // console.log("INI DATA SISIA: ", data);
         if (!data) {
           // throw new Error("Error: Failed to get the category data.");
         } else {
@@ -667,21 +651,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       detail["Creaby"] === listPenilaianKaUpt[0].npk
   );
 
-  // console.log("DATA ", listEmployee.filter((item) => item.upt === "Prodi MI" ));
-  console.log("KA DEPT ", kadept);
-  console.log("List Employee ", listEmployee);
-  console.log("KA UPT ",kaupt);
-  console.log("DeptArrData:", listDepartment);
-  console.log("All Dept:", listAllDepartment);
-  console.log("List Penilaian Ka Upt:", listPenilaianKaUpt);
-  console.log("For Penilaian:", forPenilai);
-  console.log("List Penilaian Ka Dept:", listPenilaianKaDept);
-  console.log("List Kriteria Penilaian:", listKriteriaPenilaian);
-  console.log("List Detail Kriteria Penilaian:", listDetailKriteriaPenilaian);
-  console.log("User Info:", userInfo);
-  console.log("List Values:", listValues);
-  console.log("List Setting Ranking:", listSettingRanking);
-
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -748,8 +717,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     //       item["Jabatan Penilai"].includes(jabatan)
     //     )
     // );
-    // console.log("tesss", newValue);
-    // console.log("tes", isChecked);
     // setReadOnly(isChecked);
 
     setHasUserSelectedTab(true);
@@ -791,8 +758,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   listPenilaianKaDept.map(
     (item) => item
   );
-
-  console.log("ARR TEXT DATA: ", arrTextDataforKaUpt);
 
   useEffect(() => {
     let tempTotal1 = 0;
@@ -896,16 +861,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       );
       setReadOnly(isChecked);
     }
-
-    console.log("tesss", selectedTab);
-    console.log("tessss",listAllPenilaian)
-    console.log("tes", isChecked);
-
-    console.log("dsfs",selectedTab);
     setActiveTab(selectedTab === tabIndexUser);
   }, [selectedTab, tabIndexUser, listAllPenilaian]);
 
-  console.log("ACTIVE", activeTab);
   if (isLoading) return <Loading />;
 
   return (
@@ -1075,14 +1033,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     const isKaDept = forPenilai.jabatan === "Kepala Departemen";
                                     const isWadir = forPenilai.jabatan === "Wakil Direktur" || forPenilai.jabatan === "Direktur";
                                     const isFirstTab = selectedTab === tabIndexUser;
-                                    
-                                    console.log("rankingKaUpt", rankingKaUpt);
-                                    console.log("rankingKaDept", rankingKaDept);
-                                    console.log("rankingWadir", rankingWadir);
-                                    console.log("total wadir", totalScoreforWadir);
-                                    console.log("total ka dept", totalScoreforKaDept);
-                                    console.log("total ka upt", totalScoreforKaUpt);
-
                                     const range3End =
                                     listSettingRanking
                                       .find(
