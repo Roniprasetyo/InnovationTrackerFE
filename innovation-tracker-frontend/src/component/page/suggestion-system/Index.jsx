@@ -533,6 +533,32 @@ export default function SuggestionSytemIndex({
     }
   };
 
+  const handleDelete = async (id) => {
+    setIsError(false);
+    const confirm = await SweetAlert(
+      "Confirm",
+      "Are you sure you want to delete this submission?",
+      "warning",
+      "Delete",
+      null,
+      "",
+      true
+    );
+
+    if (confirm) {
+      UseFetch(API_LINK + "RencanaSS/SetNonActiveRencanaSS", {
+        id: id,
+      })
+        .then((data) => {
+          if (data === "ERROR" || data.length === 0) setIsError(true);
+          else {
+            handleSetCurrentPage(currentFilter.page);
+          }
+        })
+        .then(() => setIsLoading(false));
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -731,45 +757,7 @@ export default function SuggestionSytemIndex({
                 "Scoring Position": value["Scoring Position"] || "-",
                 Status: value["Status"],
                 Count: value["Count"],
-                Action:
-                  role === "ROL03" &&
-                  value["Status"] === "Draft" &&
-                  value["Creaby"] === userInfo.username
-                    ? ["Detail", "Edit", "Submit"]
-                    : inorole === "Facilitator" &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL03" &&
-                      value["Status"] === "Rejected" &&
-                      value["Creaby"] === userInfo.username
-                    ? ["Detail", "Edit", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL01" && value["Status"] === "Approved"
-                    ? ["Detail", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      (value["Status"] === "Approved" ||
-                        value["Status"] === "Scoring")
-                    ? ["Detail", "Scoring"]
-                    : userInfo.jabatan === "Sekretaris Prodi" ||
-                      userInfo.jabatan === "Kepala Departemen" ||
-                      userInfo.jabatan === "Wakil Direktur" ||
-                      userInfo.jabatan === "Direktur"
-                    ? ["Detail", "Scoring"]
-                    : // Status Approved By Role 03
-                    // : userInfo.upt === foundEmployee.upt && userInfo.jabatan === "Kepala Seksi" && (value["Status"] === "Approved" || value["Status"] === "Draft Scoring") && uniqueKeys.some(key => penJabatan.sis_id.includes(key)) && value.Creaby === userInfo.username ? ["Detail"]
-                    userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Approved"
-                    ? ["Detail", "Scoring"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : ["Detail"],
+                Action: ["Detail", "Delete"],
                 Alignment: [
                   "center",
                   "left",
@@ -1087,6 +1075,7 @@ export default function SuggestionSytemIndex({
               onEdit={onChangePage}
               onScoring={onScoring}
               onEditScoring={onEditScoring}
+              onDelete={handleDelete}
             />
           )}
           <Paging
