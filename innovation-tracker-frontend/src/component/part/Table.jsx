@@ -5,6 +5,7 @@ import { useEffect } from "react";
 export default function Table({
   data,
   checkboxTable = false,
+  userInfo,
   onToggle = () => {},
   onCancel = () => {},
   onDelete = () => {},

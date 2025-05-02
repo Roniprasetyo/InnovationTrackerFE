@@ -27,9 +27,9 @@ export default function BerandaIndex() {
       <div className="container p-3">
         <div className="row">
           <div className="d-flex justify-content-between container-sm my-3">
-            <div className="mb-4 color-primary align-items-center justify-content-center text-left">
-              <div className="gap-3 justify-content-left">
-                <h2 className="display-5 fw-bold">WELCOME</h2>
+            <div className="mb-4 color-primary align-items-center justify-content-center text-center">
+              <div className="gap-3 justify-content-center">
+                <h2 className="display-5 text-center fw-bold">WELCOME</h2>
                 <div className="d-flex align-items-end mb-2">
                   <h2 className="display-10 fw-medium align-items-end text-start">
                     TO ASTRATECH
@@ -40,12 +40,12 @@ export default function BerandaIndex() {
                 INNOVATION LIBRARY
               </div>
             </div>
-            <div className="row">
+            {/* <div className="row">
               <div className="d-flex gap-4">
                 <NewsListView />
                 <CalendarView />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

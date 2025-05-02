@@ -124,6 +124,33 @@ export default function SuggestionSytemIndex({
     return data ? data.Status : null;
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await UseFetch(API_LINK + "RencanaSS/GetListSettingRanking", {});
+  
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the GetPenilaianById.");
+        } else {
+          console.log("INI DATA KA UPTddd: ", data);
+          setListSettingRanking(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+
   const handleSubmit = async (id) => {
     setIsError(false);
     setIsError((prevError) => ({ ...prevError, error: false }));
@@ -346,7 +373,7 @@ export default function SuggestionSytemIndex({
       }
       if (detailSS.Status === "Draft") {
         status1 = "Waiting Approval";
-      } else if (totalScore1 < ranking) {
+      } else if (totalScore1 <= ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";
@@ -359,7 +386,9 @@ export default function SuggestionSytemIndex({
       }
       if (detailSS.Status === "Draft") {
         status1 = "Waiting Approval";
-      } else if (totalScore2 < ranking) {
+      } 
+
+      else if (totalScore2 <= ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";
@@ -395,7 +424,7 @@ export default function SuggestionSytemIndex({
             } else {
               SweetAlert(
                 "Success",
-                "Thank you for your rating. Please wait until the next update",
+                "Thank you for your submission. Please wait until the next update",
                 "success"
               );
               handleSetCurrentPage(currentFilter.page);
@@ -411,7 +440,7 @@ export default function SuggestionSytemIndex({
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to approve this submission?",
-      "success",
+      "info",
       "Approve",
       null,
       "",
@@ -844,12 +873,10 @@ export default function SuggestionSytemIndex({
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Kepala Seksi" ||
-                        userInfo.jabatan === "Sekretaris Prodi" ||
-                        userInfo.jabatan === "Kepala Departemen" ||
-                        userInfo.jabatan === "Wakil Direktur" ||
-                        userInfo.jabatan === "Direktur") &&
-                      (value["Status"] === "Scoring" ||
-                        value["Status"] === "Approved")
+                      userInfo.jabatan === "Sekretaris Prodi" ||
+                      userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Wakil Direktur" ||
+                      userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring" || value["Status"] === "Approved" || value["Status"] === "Final")
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
@@ -1087,6 +1114,7 @@ export default function SuggestionSytemIndex({
               onReject={handleReject}
               onEdit={onChangePage}
               onScoring={onScoring}
+              userInfo={userInfo?.username}
               onEditScoring={onEditScoring}
               onDelete={handleDelete}
             />

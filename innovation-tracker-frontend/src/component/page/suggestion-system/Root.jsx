@@ -31,11 +31,14 @@ export default function SuggestionSystem() {
         );
       case "detail":
         return (
-          <SuggestionSystemDetail
+          <SuggestionSystemDetail 
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
         );
+      case "edit":
+        return<SuggestionSystemEdit
+        onChangePage={handleSetPageMode} withID={dataID}/>
     }
   }
 
