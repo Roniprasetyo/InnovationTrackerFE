@@ -919,7 +919,7 @@ export default function SuggestionSytemIndex({
                       userInfo.jabatan === "Sekretaris Prodi" ||
                       userInfo.jabatan === "Kepala Departemen" ||
                       userInfo.jabatan === "Wakil Direktur" ||
-                      userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring" || value["Status"] === "Approved")
+                      userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring" || value["Status"] === "Approved" || value["Status"] === "Final")
                     ? ["Detail", "Scoring"]
                     :userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
