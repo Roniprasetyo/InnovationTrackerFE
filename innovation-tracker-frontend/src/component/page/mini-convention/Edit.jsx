@@ -33,7 +33,7 @@ export default function MiniConventionEdit({ onChangePage, withID }) {
     setId: number(),
     setName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
     setType: string().required("harus dipilih"),
-    setDesc: string().max(100, "maksimum 100 karakter").required("harus diisi"),
+    setDesc: string().max(100, "100 characters max").required("harus diisi"),
   });
 
   useEffect(() => {

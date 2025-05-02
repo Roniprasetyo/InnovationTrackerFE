@@ -247,7 +247,7 @@ export default function Header({ displayName, roleName, listMenu }) {
                         style={{
                           width: "1px",
                           height: "30px",
-                          backgroundColor: "#ffffff80", // putih transparan, bisa kamu ubah
+                          backgroundColor: "#ffffff80",
                         }}
                       ></div>
                       <div className="">

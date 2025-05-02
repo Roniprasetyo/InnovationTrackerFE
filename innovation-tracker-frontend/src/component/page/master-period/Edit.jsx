@@ -24,9 +24,9 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
 
   const userSchema = object({
     perId: number(),
-    perAwal: string().required("Harus dipilih"),
-    perAkhir: string().required("Harus dipilih"),
-    perPeriode: string().max(20, "20 chars max").required("harus diisi"),
+    perAwal: string().required("required"),
+    perAkhir: string().required("required"),
+    perPeriode: string().max(20, "20 chars max").required("required"),
   });
 
   useEffect(() => {

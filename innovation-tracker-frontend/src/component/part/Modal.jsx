@@ -35,39 +35,22 @@ const Modal = forwardRef(function Modal(
   });
 
   return (
-    <dialog
-      ref={dialog}
-      style={
-        centered === false
-          ? { maxWidth: maxSize }
-          : {
-              maxWidth: maxSize,
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              margin: 0,
-              border: "none",
-              borderRadius: "8px",
-              zIndex: 1000,
-            }
-      }
-    >
+    <dialog ref={dialog} style={{ maxWidth: maxSize }}>
       <div className="modal-header lead fw-medium p-3">{title}</div>
       <hr className="m-0" />
       <div className="modal-body p-3">{children}</div>
       <hr className="m-0" />
       <div className="modal-footer p-3">
         <form method="dialog">
+          {Button1}
+          {Button2}
           <Button
             classType="secondary"
-            label="Cancel"
+            label="Tutup"
             onClick={() => {
               dialog.current.close();
             }}
           />
-          {Button1}
-          {Button2}
         </form>
       </div>
     </dialog>

@@ -31,9 +31,9 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
 
   const userSchema = object({
     setId: number(),
-    setName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
-    setType: string().required("harus dipilih"),
-    setDesc: string().max(100, "maksimum 100 karakter").required("harus diisi"),
+    setName: string().max(50, "50 characters max").required("required"),
+    setType: string().required("required"),
+    setDesc: string().max(100, "100 characters max").required("required"),
   });
 
   useEffect(() => {

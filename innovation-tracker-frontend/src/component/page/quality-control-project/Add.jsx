@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { date, number, object, string } from "yup";
+import { date, object, string } from "yup";
 import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -13,7 +13,6 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
-import DropDownSearch from "../../part/DropDownSearch";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
@@ -227,11 +226,8 @@ export default function QualityControlProjectAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.perId = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -461,6 +457,9 @@ export default function QualityControlProjectAdd({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
+
       if (currentData.length < 2) {
         window.scrollTo(0, 0);
         setIsError({

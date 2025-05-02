@@ -3,7 +3,6 @@ import Icon from "../part/Icon";
 import { Link } from "react-router-dom";
 
 let active_menu;
-// let active_collapse;
 
 const activeURL = location.protocol + "//" + location.host + location.pathname;
 
@@ -26,16 +25,10 @@ function setActiveMenu(menu) {
   active_menu = menu;
 }
 
-// function setActiveCollapse(id) {
-//   active_collapse = id;
-// }
-
 export default function Menu({ listMenu }) {
   useEffect(() => {
     if (document.getElementById("spanMenu")) {
       document.getElementById("spanMenu").innerHTML = active_menu;
-      // if (active_collapse)
-      //   document.getElementById(active_collapse).classList.add("show");
     }
   }, [listMenu]);
 

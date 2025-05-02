@@ -145,7 +145,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           setIsError({ error: true, message: "Invalid data format" });
 
         const filteredData = data.filter(
-          (item) => item?.upt_bagian === userInfo?.upt
+          (item) =>
+            item?.upt_bagian === userInfo?.upt ||
+            item?.departemen_jurusan === userInfo?.upt
         );
 
         setListEmployee(
@@ -236,11 +238,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.perId = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -470,6 +469,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
+
       if (memberData.length < 2) {
         window.scrollTo(0, 0);
         setIsError({
@@ -862,13 +864,13 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                 handleFileChange(problemFileRef, "pdf")
                               }
                               errorMessage={errors.rciProblemFile}
-                            />    
+                            />
                           </div>
                           <hr />
                           <div className="col-lg-12">
                             <TextArea
                               forInput="rciGoal"
-                              label="Goal Statement​" 
+                              label="Goal Statement​"
                               isRequired
                               placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.rciGoal}

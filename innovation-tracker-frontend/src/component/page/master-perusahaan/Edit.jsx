@@ -27,8 +27,8 @@ export default function EditPerusahaan({ onChangePage, withID }) {
   });
 
   const userSchema = object({
-    prs_nama: string().max(100, "Maksimum 100 karakter").required("Harus diisi"),
-    prs_alamat: string().max(255, "Maksimum 255 karakter").required("Harus diisi"),
+    prs_nama: string().max(100, "100 characters max").required("required"),
+    prs_alamat: string().max(255, "200 characters max").required("required"),
   });
 
   useEffect(() => {
@@ -36,15 +36,19 @@ export default function EditPerusahaan({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterPerusahaan/GetPerusahaanById", { id: withID });
-   
+        const data = await UseFetch(
+          API_LINK + "MasterPerusahaan/GetPerusahaanById",
+          { id: withID }
+        );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data perusahaan.");
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil data perusahaan."
+          );
         } else {
-          formDataRef.current.prs_id=withID;
-          formDataRef.current.prs_alamat=data[0].prs_alamat;
-          formDataRef.current.prs_nama=data[0].prs_nama;
+          formDataRef.current.prs_id = withID;
+          formDataRef.current.prs_alamat = data[0].prs_alamat;
+          formDataRef.current.prs_nama = data[0].prs_nama;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -69,13 +73,22 @@ export default function EditPerusahaan({ onChangePage, withID }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = await validateAllInputs(formDataRef.current, userSchema, setErrors);
-      
-    setIsLoading(true);
+
+    const validationErrors = await validateAllInputs(
+      formDataRef.current,
+      userSchema,
+      setErrors
+    );
+
+    if (Object.values(validationErrors).every((error) => !error)) {
+      setIsLoading(true);
       setIsError({ error: false, message: "" });
       setErrors({});
       try {
-        const data = await UseFetch(API_LINK + "MasterPerusahaan/UpdatePerusahaan", formDataRef.current);
+        const data = await UseFetch(
+          API_LINK + "MasterPerusahaan/UpdatePerusahaan",
+          formDataRef.current
+        );
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to submit the data.");
@@ -89,75 +102,93 @@ export default function EditPerusahaan({ onChangePage, withID }) {
       } finally {
         setIsLoading(false);
       }
-
-  }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  };
 
   return (
     <>
-      <div className="row my-3" style={{ display: "flex", alignItems: "center" }}>
-        <h2 className="fw-bold" style={{ color: "rgb(0, 89, 171)", margin: "0" }}>
+      <div
+        className="row my-3"
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <h2
+          className="fw-bold"
+          style={{ color: "rgb(0, 89, 171)", margin: "0" }}
+        >
           <Icon
             type="Bold"
             name="angle-left"
             cssClass="btn me-1 py-0 text"
             onClick={() => onChangePage("index")}
-            style={{ fontSize: "22px", cursor: "pointer", color: "rgb(0, 89, 171)" }}
+            style={{
+              fontSize: "22px",
+              cursor: "pointer",
+              color: "rgb(0, 89, 171)",
+            }}
           />
           Update Data Perusahaan
         </h2>
       </div>
       <div className="mt-3">
-        {isError.error && <Alert type="danger" message={isError.message} handleClose={() => setIsError({ error: false, message: "" })} />}
+        {isError.error && (
+          <Alert
+            type="danger"
+            message={isError.message}
+            handleClose={() => setIsError({ error: false, message: "" })}
+          />
+        )}
         <form onSubmit={handleSubmit}>
-  <div className="card mb-5">
-    <div className="card-header p-2">
-      <h2 className="fw-bold text-center">Company Form</h2>
-    </div>
-    <div className="card-body p-4">
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <div className="row mt-4">
-          <div className="col-lg-6">
-            <Input 
-              type="text" 
-              forInput="prs_nama" 
-              label="Company Name" 
-              isRequired 
-              value={formDataRef.current.prs_nama} 
-              onChange={handleInputChange} 
-              errorMessage={errors.prs_nama} 
-            />
+          <div className="card mb-5">
+            <div className="card-header p-2">
+              <h2 className="fw-bold text-center">Company Form</h2>
+            </div>
+            <div className="card-body p-4">
+              {isLoading ? (
+                <Loading />
+              ) : (
+                <div className="row mt-4">
+                  <div className="col-lg-6">
+                    <Input
+                      type="text"
+                      forInput="prs_nama"
+                      label="Company Name"
+                      isRequired
+                      value={formDataRef.current.prs_nama}
+                      onChange={handleInputChange}
+                      errorMessage={errors.prs_nama}
+                    />
+                  </div>
+                  <div className="col-lg-12">
+                    <Input
+                      type="textarea"
+                      forInput="prs_alamat"
+                      label="Address"
+                      value={formDataRef.current.prs_alamat}
+                      onChange={handleInputChange}
+                      errorMessage={errors.prs_alamat}
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="d-flex justify-content-between align-items-center">
+                <Button
+                  classType="danger me-2 px-4 py-2"
+                  label="CANCEL"
+                  onClick={() => onChangePage("index")}
+                  style={{ width: "100%", borderRadius: "16px" }}
+                />
+                <Button
+                  classType="primary ms-2 px-4 py-2"
+                  type="submit"
+                  label="SUBMIT"
+                  style={{ width: "100%", borderRadius: "16px" }}
+                />
+              </div>
+            </div>
           </div>
-          <div className="col-lg-12">
-            <Input 
-              type="textarea" 
-              forInput="prs_alamat" 
-              label="Address" 
-              value={formDataRef.current.prs_alamat} 
-              onChange={handleInputChange} 
-              errorMessage={errors.prs_alamat} 
-            />
-          </div>
-        </div>
-      )}
-      <div className="d-flex justify-content-between align-items-center">
-        <Button 
-        classType="danger me-2 px-4 py-2"
-          label="CANCEL" 
-          onClick={() => onChangePage("index")} 
-          style={{ width: "100%", borderRadius: "16px" }} 
-        />
-        <Button 
-          classType="primary ms-2 px-4 py-2" 
-          type="submit" 
-          label="SUBMIT" 
-          style={{ width: "100%", borderRadius: "16px" }} 
-        />
-      </div>
-    </div>
-  </div>
-</form>
+        </form>
       </div>
     </>
   );

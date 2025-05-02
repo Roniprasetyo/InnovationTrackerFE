@@ -5,7 +5,6 @@ import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
-import DropDown from "../../part/Dropdown";
 import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -29,7 +28,7 @@ export default function MasterStepEdit({ onChangePage, withID }) {
 
   const userSchema = object({
     steId: number(),
-    steName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
+    steName: string().max(50, "50 characters max").required("required"),
   });
 
   useEffect(() => {

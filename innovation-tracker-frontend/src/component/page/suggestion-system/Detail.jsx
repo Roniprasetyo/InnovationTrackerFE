@@ -5,20 +5,9 @@ import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
-import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
-import SearchDropdown from "../../part/SearchDropdown";
-
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    Name: null,
-    Count: 0,
-  },
-];
 
 export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
@@ -27,8 +16,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const [listEmployee, setListEmployee] = useState([]);
   const [userData, setUserData] = useState({});
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
-  const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
-    useState([]);
+  const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] = useState([]);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
@@ -194,35 +182,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
 
     fetchData();
   }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    formDataRef2.current[name] = value;
-
-    const validationError = validateInput(name, value, userSchema);
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
-
-    let total = 0;
-    Object.values(formDataRef2.current).forEach((val) => {
-      const matched = listDetailKriteriaPenilaian.find(
-        (item) => item.Value === val
-      );
-
-      formDataRef3.current[name] = matched.Score;
-
-      console.log("val dari formDataRef2:", val);
-      console.log("matched item:", formDataRef3);
-
-      const parsed = parseFloat(matched?.Score);
-      if (!isNaN(parsed)) total += parsed;
-    });
-
-    setTotalScore(total);
-  };
 
   if (isLoading) return <Loading />;
 

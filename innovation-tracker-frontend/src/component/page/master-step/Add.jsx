@@ -27,7 +27,7 @@ export default function MasterStepAdd({ onChangePage }) {
   });
 
   const userSchema = object({
-    setName: string().max(50, "maksimum 50 karakter").required("harus diisi"),
+    setName: string().max(50, "50 characters max").required("required"),
   });
 
   const handleInputChange = (e) => {
