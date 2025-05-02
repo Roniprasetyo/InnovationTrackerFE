@@ -424,7 +424,7 @@ export default function SuggestionSytemIndex({
             } else {
               SweetAlert(
                 "Success",
-                "Thank you for your rating. Please wait until the next update",
+                "Thank you for your submission. Please wait until the next update",
                 "success"
               );
               handleSetCurrentPage(currentFilter.page);
@@ -440,7 +440,7 @@ export default function SuggestionSytemIndex({
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to approve this submission?",
-      "success",
+      "info",
       "Approve",
       null,
       "",

@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { redirect, useSearchParams } from "react-router-dom";
 import { decodeHtml, formatDate, maxCharDisplayed, separator } from "../../util/Formatting";
-import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK, ROOT_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, string } from "yup";
@@ -396,16 +396,17 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           API_LINK + "RencanaSS/CreatePenilaian",
           payload
         );
-
-        // console.log("tes", data);
         if (!data) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
           SweetAlert("Success", "Data Successfully Submitted", "success");
-          setTimeout(function () {
-            localStorage.setItem("refreshAfterSubmit", "true");
-            // window.close();
-            window.href.url("/submission/ss")
+          setTimeout(function() {
+            if (window.opener) {
+              window.opener.location.href = ROOT_LINK + "/submission/ss";
+              window.close();
+            } else {
+              window.location.href = ROOT_LINK + "/submission/ss";
+            }
           }, 2000);
         }
       } catch (error) {
@@ -797,34 +798,34 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     let tempTotal1 = 0;
     let tempTotal2 = 0;
     let tempTotal3 = 0;
-  
+
     listPenilaianKaUpt.forEach((item) => {
-      if(item["Jabatan Penilai"] !== "Kepala Seksi" && item["Jabatan Penilai"] !== "Sekretaris Prodi") {
+      if (
+        item["Jabatan Penilai"] !== "Kepala Seksi" &&
+        item["Jabatan Penilai"] !== "Sekretaris Prodi"
+      ) {
         tempTotal1 = 0;
-      }
-      else {
+      } else {
         tempTotal1 += parseFloat(item.Nilai) || 0;
       }
     });
 
     listPenilaianKaDept.forEach((item) => {
-      if(item["Jabatan Penilai"] !== "Kepala Departemen") {
+      if (item["Jabatan Penilai"] !== "Kepala Departemen" && userInfo.jabatan !== "Kepala Departemen") {
         tempTotal2 = 0;
-      }
-      else {
+      } else {
         tempTotal2 += parseFloat(item.Nilai) || 0;
       }
     });
 
     listPenilaianWadir.forEach((item) => {
-      if(item["Jabatan Penilai"] !== "Wakil Direktur") {
+      if (item["Jabatan Penilai"] !== "Wakil Direktur" && userInfo.jabatan !== "Wakil Direktur") {
         tempTotal3 = 0;
-      }
-      else {
+      } else {
         tempTotal3 += parseFloat(item.Nilai) || 0;
       }
     });
-  
+
     setTotalScoreforKaUpt(tempTotal1);
     setTotalScoreforKaDept(tempTotal2);
     setTotalScoreforWadir(tempTotal3);

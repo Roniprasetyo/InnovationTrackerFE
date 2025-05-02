@@ -27,10 +27,12 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [listEmployee, setListEmployee] = useState([]);
+  const [emp, setEmp] = useState([]);
   const [sectionHead, setSectionHead] = useState({});
   const [listDepartment, setListDepartment] = useState([]);
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
+  const [listAllDepartment, setAllListDepartment] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
 
   const [checkedStates, setCheckedStates] = useState({
@@ -76,10 +78,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     startPeriod: "",
     endPeriod: "",
   });
-
-  console.log("Section Head:", sectionHead);
-  console.log("User Info:", userInfo);
-  console.log("List Employee:", listEmployee.find((item)=> item.departemen));
 
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
@@ -134,13 +132,17 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           value.jabatan === "Kepala Departemen"
       );
 
-      const Direktur = listEmployee.find(
+      const lgsungDirektur = listEmployee.find(
         (value) =>
-          value.npk === userInfo.npk &&
-          value.jabatan === "Direktur"
+          value.npk === userInfo.npk
       );
   
-      let selected = kepalaDepartemen || kepalaSeksi || sekProdi || Direktur;
+      const Direktur = listDepartment.find(
+        (value) =>
+          value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
+      );
+  
+      let selected = Direktur || kepalaDepartemen || sekProdi || kepalaSeksi;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -173,7 +175,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       }
       else if(
         selected?.npk === userInfo.npk &&
-        (selected.jabatan === "Kepala Departemen")
+        (selected.jabatan === "Kepala Departemen" && selected.jabatan !== "Sekretaris Prodi")
       ) {
         const userStruktur = listDepartment.find(
           (item) => item.Npk === userInfo.npk
@@ -199,9 +201,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           }
         }
       }
-      else if(selected.jabatan === "Kepala Departemen") {
-
-      }
   
       if (selected) {
         setSectionHead(selected);
@@ -221,6 +220,43 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       );
     }
   }, [listDepartment]);
+  
+  useEffect(() => {
+    const userStruktur = listEmployee.find(
+      (item) => item.npk === userInfo.npk
+    );
+    setEmp(userStruktur);
+
+  }, [listEmployee]);
+
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(
+            API_LINK + "RencanaSS/GetListStrukturDepartment"
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+  
+            setAllListDepartment(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, []);
   
 
   useEffect(() => {
@@ -255,6 +291,9 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   useEffect(() => {
     if (sectionHead?.npk) {
       formDataRef.current.facil_id = sectionHead.npk;
+    }
+    else if (sectionHead?.Npk) {
+      formDataRef.current.facil_id = sectionHead.Npk;
     }
   }, [sectionHead]);
 
