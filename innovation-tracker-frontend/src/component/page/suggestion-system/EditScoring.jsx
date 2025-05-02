@@ -419,9 +419,18 @@ export default function EditScoring({ onChangePage }) {
           // window.location.href = ROOT_LINK + "/submission/ss";
           SweetAlert("Success", "Data Successfully Submitted", "success");
 
-          setTimeout(function () {
-            window.close();
-          }, 2000);
+          // alert("Data berhasil disimpan!");
+
+          // Tunggu 2 detik sebelum close + redirect
+          setTimeout(function() {
+            if (window.opener) {
+              window.opener.location.href = ROOT_LINK + "/submission/ss";
+              window.close();
+            } else {
+              window.location.href = ROOT_LINK + "/submission/ss";
+            }
+          }, 2000); // 2000 milidetik = 2 detik
+          
         }
       } catch (error) {
         window.scrollTo(0, 0);

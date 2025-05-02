@@ -6,7 +6,7 @@ import {
   maxCharDisplayed,
   separator,
 } from "../../util/Formatting";
-import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, EMP_API_LINK, FILE_LINK, ROOT_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, string } from "yup";
@@ -418,10 +418,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
           SweetAlert("Success", "Data Successfully Submitted", "success");
-          setTimeout(function () {
-            localStorage.setItem("refreshAfterSubmit", "true");
-            window.close();
-          }, 2000);
+          setTimeout(function() {
+            if (window.opener) {
+              window.opener.location.href = ROOT_LINK + "/submission/ss";
+              window.close();
+            } else {
+              window.location.href = ROOT_LINK + "/submission/ss";
+            }
+          }, 2000); // 2000 milidetik = 2 detik
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -615,11 +619,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     fetchData();
   }, []);
 
-  // useEffect(()=>{
-  // console.log("RANKSSS: ", listSettingRanking);
-
-  // }, [ranking5, rankingKDept, rankingKDir])
-
   useEffect(() => {
     if (listPenilaianKaUpt.length === 0 || listEmployee.length === 0) return;
 
@@ -685,20 +684,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const kaupt = listAllDepartment.find(
     (detail) => detail["Creaby"] === listPenilaianKaUpt[0].npk
   );
-
-  // console.log("DATA ", listEmployee.filter((item) => item.upt === "Prodi MI" ));
-  console.log("KA DEPT ", kadept);
-  console.log("KA UPT ", kaupt);
-  console.log("DeptArrData:", listDepartment);
-  console.log("All Dept:", listAllDepartment);
-  console.log("List Penilaian Ka Upt:", listPenilaianKaUpt);
-  console.log("For Penilaian:", forPenilai);
-  console.log("List Penilaian Ka Dept:", listPenilaianKaDept);
-  console.log("List Kriteria Penilaian:", listKriteriaPenilaian);
-  console.log("List Detail Kriteria Penilaian:", listDetailKriteriaPenilaian);
-  console.log("User Info:", userInfo);
-  console.log("List Values:", listValues);
-  console.log("List Setting Ranking:", listSettingRanking);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -828,22 +813,31 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         item["Jabatan Penilai"] !== "Kepala Seksi" &&
         item["Jabatan Penilai"] !== "Sekretaris Prodi"
       ) {
+        console.log("SCORE KAUPT", tempTotal1);
         tempTotal1 = 0;
       } else {
         tempTotal1 += parseFloat(item.Nilai) || 0;
       }
     });
 
+    // if (listPenilaianKaDept === null){
+    //   setTotalScoreforKaDept(tempTotal1);
+    // }
+
+    console.log("LINE 841", listPenilaianKaUpt);
+    console.log("LINE 842", listPenilaianKaDept);
+
     listPenilaianKaDept.forEach((item) => {
-      if (item["Jabatan Penilai"] !== "Kepala Departemen") {
+      if (item["Jabatan Penilai"] !== "Kepala Departemen" && userInfo.jabatan !== "Kepala Departemen") {
         tempTotal2 = 0;
+        console.log("SCORE KADEPT", tempTotal2);
       } else {
         tempTotal2 += parseFloat(item.Nilai) || 0;
       }
     });
 
     listPenilaianWadir.forEach((item) => {
-      if (item["Jabatan Penilai"] !== "Wakil Direktur") {
+      if (item["Jabatan Penilai"] !== "Wakil Direktur" && userInfo.jabatan !== "Wakil Direktur") {
         tempTotal3 = 0;
       } else {
         tempTotal3 += parseFloat(item.Nilai) || 0;
@@ -1476,21 +1470,21 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       }
                                     } else {
                                       content =
-                                      (detailSS.Facil === userInfo.npk) ? (
-                                        <SearchDropdown
-                                          forInput={item.Value}
-                                          arrData={filteredArrData}
-                                          isRound
-                                          value={
-                                            formDataRef2.current[
-                                              item.Value
-                                            ] || ""
-                                          }
-                                          onChange={handleInputChange}
-                                        />
-                                      ) : (totalScoreforKaUpt < range5End &&
-                                          totalScoreforKaUpt !== 0) ||
-                                        totalScoreforKaDept < range4End ? (
+                                        detailSS.Facil === userInfo.npk ? (
+                                          <SearchDropdown
+                                            forInput={item.Value}
+                                            arrData={filteredArrData}
+                                            isRound
+                                            value={
+                                              formDataRef2.current[
+                                                item.Value
+                                              ] || ""
+                                            }
+                                            onChange={handleInputChange}
+                                          />
+                                        ) : (totalScoreforKaUpt < range5End &&
+                                            totalScoreforKaUpt !== 0) ||
+                                          totalScoreforKaDept < range4End ? (
                                           <div className="form-control bg-light">
                                             The score does not reach the
                                             required range.
