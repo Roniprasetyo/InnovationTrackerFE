@@ -469,6 +469,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
+
       if (memberData.length < 2) {
         window.scrollTo(0, 0);
         setIsError({

@@ -31,6 +31,7 @@ export default function Submission() {
           API_LINK + "RencanaSS/GetCountSSNeedAction",
           {
             id: userInfo.npk,
+            role: userInfo.role.slice(0, 5),
           }
         );
 

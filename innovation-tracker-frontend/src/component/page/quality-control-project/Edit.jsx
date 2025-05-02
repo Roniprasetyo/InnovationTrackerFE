@@ -550,6 +550,9 @@ export default function QualityControlProjectEdit({ onChangePage, withID }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
+      
       if (currentData.length < 2) {
         window.scrollTo(0, 0);
         setIsError({
