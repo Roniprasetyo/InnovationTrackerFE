@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { redirect, useSearchParams } from "react-router-dom";
 import { decodeHtml, formatDate, maxCharDisplayed, separator } from "../../util/Formatting";
 import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
@@ -404,7 +404,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           SweetAlert("Success", "Data Successfully Submitted", "success");
           setTimeout(function () {
             localStorage.setItem("refreshAfterSubmit", "true");
-            window.close();
+            // window.close();
+            window.href.url("/submission/ss")
           }, 2000);
         }
       } catch (error) {

@@ -40,12 +40,12 @@ export default function BerandaIndex() {
                 INNOVATION LIBRARY
               </div>
             </div>
-            <div className="row">
+            {/* <div className="row">
               <div className="d-flex gap-4">
                 <NewsListView />
                 <CalendarView />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

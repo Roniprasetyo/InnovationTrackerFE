@@ -77,6 +77,10 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     endPeriod: "",
   });
 
+  console.log("Section Head:", sectionHead);
+  console.log("User Info:", userInfo);
+  console.log("List Employee:", listEmployee.find((item)=> item.departemen));
+
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
@@ -129,8 +133,14 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           value.npk === userInfo.npk &&
           value.jabatan === "Kepala Departemen"
       );
+
+      const Direktur = listEmployee.find(
+        (value) =>
+          value.npk === userInfo.npk &&
+          value.jabatan === "Direktur"
+      );
   
-      let selected = kepalaDepartemen || kepalaSeksi || sekProdi;
+      let selected = kepalaDepartemen || kepalaSeksi || sekProdi || Direktur;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -188,6 +198,9 @@ export default function SuggestionSystemAdd({ onChangePage }) {
             }
           }
         }
+      }
+      else if(selected.jabatan === "Kepala Departemen") {
+
       }
   
       if (selected) {
