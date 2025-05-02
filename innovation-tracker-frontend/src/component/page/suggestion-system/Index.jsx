@@ -373,7 +373,7 @@ export default function SuggestionSytemIndex({
       }
       if (detailSS.Status === "Draft") {
         status1 = "Waiting Approval";
-      } else if (totalScore1 < ranking) {
+      } else if (totalScore1 <= ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";
@@ -388,7 +388,7 @@ export default function SuggestionSytemIndex({
         status1 = "Waiting Approval";
       } 
 
-      else if (totalScore2 < ranking) {
+      else if (totalScore2 <= ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";

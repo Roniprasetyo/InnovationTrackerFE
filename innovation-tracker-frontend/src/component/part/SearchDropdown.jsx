@@ -14,6 +14,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
     value,
     onChange,
     isDisabled = false,
+    selectedValued = null,
     ...props
   },
   ref
@@ -26,9 +27,20 @@ const SearchDropdown = forwardRef(function SearchDropdown(
   useEffect(() => {
     if (!value || value === null || value === "") {
       setSearchTerm("");
+      if (selectedValued != null) { 
+        value = selectedValued.Value;
+        if (arrData != null) {
+          onChange({ target: { name: forInput, value: selectedValued.Value } });
+        }
+      }
     } else {
       const matchedData = arrData.find((data) => data.Value === value);
-      setSearchTerm(matchedData ? matchedData.Text : "");
+      setSearchTerm(matchedData ? (
+        matchedData.Text.length > 75
+          ? matchedData.Text.substring(0, 75) + "... "
+          : matchedData.Text
+      ) : "");
+      
     }
   }, [value, arrData]);
 
@@ -39,6 +51,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
   };
 
   const handleOptionClick = (selectedValue, text) => {
+    console.log(selectedValue);
     onChange({ target: { name: forInput, value: selectedValue } });
     setSearchTerm(text);
     setDropdownOpen(false);
