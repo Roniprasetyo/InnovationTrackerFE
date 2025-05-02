@@ -25,6 +25,7 @@ export default function Submission() {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      console.log(userInfo);
 
       try {
         const data = await UseFetch(
@@ -32,6 +33,7 @@ export default function Submission() {
           {
             id: userInfo.npk,
             role: userInfo.role.slice(0, 5),
+            jabatan: userInfo.jabatan,
           }
         );
 

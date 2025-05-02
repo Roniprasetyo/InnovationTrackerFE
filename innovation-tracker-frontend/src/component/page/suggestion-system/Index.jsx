@@ -757,7 +757,11 @@ export default function SuggestionSytemIndex({
                 "Scoring Position": value["Scoring Position"] || "-",
                 Status: value["Status"],
                 Count: value["Count"],
-                Action: ["Detail", "Delete"],
+                Action: ["Waiting Approval", "Approved", "Rejected"].includes(
+                  value["Status"]
+                )
+                  ? ["Detail", "Delete"]
+                  : ["Detail"],
                 Alignment: [
                   "center",
                   "left",
@@ -798,6 +802,15 @@ export default function SuggestionSytemIndex({
                 Score: value["Score"] || 0,
                 Status: value["Status"],
                 Count: value["Count"],
+                IsBold:
+                  (value["Status"] === "Scoring" &&
+                    value["Creaby Score"] === userInfo.username) ||
+                  (value["Status"] === "Draft Scoring" &&
+                    value["Creaby Score"] === userInfo.username) ||
+                  (value["Status"] === "Waiting Approval" &&
+                    value["Facil"] === userInfo.npk) ||
+                  (value["Status"] === "Approved" &&
+                    value["Facil"] === userInfo.npk),
                 Action:
                   role === "ROL03" &&
                   value["Status"] === "Draft" &&

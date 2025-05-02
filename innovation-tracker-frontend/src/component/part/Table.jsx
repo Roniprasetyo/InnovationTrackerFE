@@ -272,7 +272,8 @@ export default function Table({
                 if (
                   value !== "Key" &&
                   value !== "Count" &&
-                  value !== "Alignment"
+                  value !== "Alignment" &&
+                  value !== "IsBold"
                 ) {
                   colCount++;
                   return (
@@ -311,10 +312,7 @@ export default function Table({
                         value["Status"] === "Belum Dikonversi" ||
                         value["Status"] === "Belum Dibuat Penjadwalan" ||
                         value["Status"] === "Rejected" ||
-                        value["Status"] === "Approved" ||
-                        value["Status"] === "Scoring" ||
-                        value["Status"] === "Waiting Approval" ||
-                        value["Status"] === "Draft Scoring")
+                        value["IsBold"] === true)
                         ? "fw-bold"
                         : undefined
                     }
