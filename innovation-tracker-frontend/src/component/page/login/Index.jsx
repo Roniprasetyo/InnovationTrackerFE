@@ -269,13 +269,13 @@ export default function Login() {
                   onClick={() =>
                     handleLoginWithRole(
                       value.RoleID,
-                      userDetail.nama,
+                      userDetail?.nama,
                       value.Role,
-                      userDetail.npk,
+                      userDetail?.npk,
                       value.InoRole,
-                      userDetail.jabatan,
-                      userDetail.upt_bagian,
-                      userDetail.departemen_jurusan
+                      userDetail?.jabatan,
+                      userDetail?.upt_bagian,
+                      userDetail?.departemen_jurusan
                     )
                   }
                 >

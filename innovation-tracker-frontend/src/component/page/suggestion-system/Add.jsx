@@ -79,6 +79,11 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     endPeriod: "",
   });
 
+  console.log("SECTION HEAD", sectionHead);
+  console.log("LIST", listAllDepartment);
+  console.log("LIST employee", listEmployee);
+  console.log("Userinfo", userInfo);
+
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
@@ -130,6 +135,10 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         (value) =>
           value.npk === userInfo.npk &&
           value.jabatan === "Kepala Departemen"
+      )
+      
+      const secondly = listDepartment.find(
+        (value) => userInfo.departemen === value.Struktur && userInfo.jabatan !== "Staff" && userInfo.jabatan !== "Sekretaris Prodi"
       );
 
       const lgsungDirektur = listEmployee.find(
@@ -142,7 +151,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
       );
   
-      let selected = Direktur || kepalaDepartemen || sekProdi || kepalaSeksi;
+      console.log("SECONLYD", secondly);
+      let selected = secondly || kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -174,8 +184,9 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }
       }
       else if(
-        selected?.npk === userInfo.npk &&
-        (selected.jabatan === "Kepala Departemen" && selected.jabatan !== "Sekretaris Prodi")
+        (selected?.npk === userInfo.npk || selected?.Npk === userInfo.npk) &&
+        ((selected.jabatan === "Kepala Departemen" || selected.Jabatan === "Kepala Departemen") 
+        && selected.jabatan !== "Sekretaris Prodi")
       ) {
         const userStruktur = listDepartment.find(
           (item) => item.Npk === userInfo.npk
@@ -188,7 +199,13 @@ export default function SuggestionSystemAdd({ onChangePage }) {
             (item) =>
               item.Struktur === parent
           );
+
+          const lgsungDirektur = listDepartment.find(
+            (value) =>
+              value.Struktur === userStruktur["Struktur Parent"]
+          );
   
+          console.log("lanngsung direktur", lgsungDirektur);
           if (Kadept) {
             const matchingDirect = listEmployee.find(
               (emp) => emp.npk === Kadept.Npk
@@ -198,6 +215,9 @@ export default function SuggestionSystemAdd({ onChangePage }) {
               setSectionHead(matchingDirect);
               return;
             }
+          }
+          else if(lgsungDirektur) {
+            setSectionHead(lgsungDirektur);
           }
         }
       }
@@ -222,12 +242,15 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   }, [listDepartment]);
   
   useEffect(() => {
-    const userStruktur = listEmployee.find(
-      (item) => item.npk === userInfo.npk
+    const userStruktur = listDepartment.find(
+      (value) =>
+        value.Struktur === userInfo.departemen
     );
     setEmp(userStruktur);
 
   }, [listEmployee]);
+
+  console.log("EMP", emp)
 
   useEffect(() => {
       const fetchData = async () => {
@@ -858,7 +881,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                                   value={formDataRef.current.sis_kualitas}
                                   onChange={handleInputChange}
                                   errorMessage={errors.sis_kualitas}
-                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -925,7 +947,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
                                   value={formDataRef.current.sis_kemanan}
                                   onChange={handleInputChange}
                                   errorMessage={errors.sis_kemanan}
-                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>

@@ -792,7 +792,7 @@ export default function SuggestionSytemIndex({
                   "Draft Scoring",
                   "Approved",
                 ].includes(value["Status"]),
-                Action: ["Waiting Approval", "Approved", "Rejected"].includes(
+                Action: ["Waiting Approval"].includes(
                   value["Status"]
                 )
                   ? ["Detail", "Delete"]
@@ -819,6 +819,9 @@ export default function SuggestionSytemIndex({
                 userInfo.jabatan === "Kepala Seksi") &&
               type !== "mySubmission"
             ) {
+              const dataemployee = listEmployee.find(
+                (value) => value.npk === value["NPK"]
+              );
               return {
                 Key: value.Key,
                 No: value["No"],
