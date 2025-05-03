@@ -51,7 +51,6 @@ const SearchDropdown = forwardRef(function SearchDropdown(
   };
 
   const handleOptionClick = (selectedValue, text) => {
-    console.log(selectedValue);
     onChange({ target: { name: forInput, value: selectedValue } });
     setSearchTerm(text);
     setDropdownOpen(false);

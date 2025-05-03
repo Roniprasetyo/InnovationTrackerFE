@@ -25,7 +25,6 @@ export default function Submission() {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      console.log(userInfo);
 
       try {
         const data = await UseFetch(
@@ -67,7 +66,6 @@ export default function Submission() {
     //         "Terjadi kesalahan: Gagal mengambil data setting."
     //       );
     //     } else {
-    //       console.log("data",data)
     //       setNeedScoring(data[0]["Need Scoring"])
     //       setWaitingApproval(data[0]["Waiting Approval"])
     //     }

@@ -24,17 +24,17 @@ export default function BerandaIndex() {
           </div>
         </div>
       </div>
-      <div className="container p-3">
+      <div className="container p-12">
         <div className="row">
-          <div className="d-flex justify-content-between container-sm my-3">
+          <div className="d-flex justify-content-center container-sm my-12">
             <div className="mb-4 color-primary align-items-center justify-content-center text-center">
               <div className="gap-3 justify-content-center">
-                <h2 className="display-5 text-center fw-bold">WELCOME</h2>
-                <div className="d-flex align-items-end mb-2">
+                <h2 className="display-5 text-center fw-bold">WELCOME TO ASTRATECH</h2>
+                {/* <div className="d-flex align-items-end mb-2">
                   <h2 className="display-10 fw-medium align-items-end text-start">
                     TO ASTRATECH
                   </h2>
-                </div>
+                </div> */}
               </div>
               <div className="display-6 fw-medium text-nowrap">
                 INNOVATION LIBRARY

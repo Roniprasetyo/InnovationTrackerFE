@@ -164,7 +164,6 @@ export default function Dashboard() {
             }))
           );
 
-          console.log(tableData);
 
           const formatted = categoryArray.map((category, index) => ({
             label: category,

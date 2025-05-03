@@ -79,11 +79,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     endPeriod: "",
   });
 
-  console.log("SECTION HEAD", sectionHead);
-  console.log("LIST", listAllDepartment);
-  console.log("LIST employee", listEmployee);
-  console.log("Userinfo", userInfo);
-
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
@@ -151,7 +146,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
       );
   
-      console.log("SECONLYD", secondly);
       let selected = secondly || kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
   
       if (
@@ -205,7 +199,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
               value.Struktur === userStruktur["Struktur Parent"]
           );
   
-          console.log("lanngsung direktur", lgsungDirektur);
           if (Kadept) {
             const matchingDirect = listEmployee.find(
               (emp) => emp.npk === Kadept.Npk
@@ -250,8 +243,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
 
   }, [listEmployee]);
 
-  console.log("EMP", emp)
-
   useEffect(() => {
       const fetchData = async () => {
         setIsError((prevError) => ({ ...prevError, error: false }));
@@ -293,7 +284,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           if (data === "ERROR") {
             throw new Error("Error: Failed to get the category data.");
           } else {
-  
             setListDepartment(data);
           }
         } catch (error) {

@@ -322,7 +322,7 @@ export default function Table({
                     {checkboxTable ? (
                       <td
                         className="text-center align-middle"
-                        style={{ width: "1rem" }}
+                        style={{ width: "1.5rem" }}
                       >
                         <input
                           className="form-check-input"

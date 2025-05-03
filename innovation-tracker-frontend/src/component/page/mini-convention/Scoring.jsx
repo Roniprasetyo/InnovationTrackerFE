@@ -108,7 +108,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           }
         );
 
-        console.log(WithID, data);
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
@@ -153,9 +152,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     let total = 0;
     Object.values(formDataRef2.current).forEach((val) => {
       const matched = listDetailKriteriaPenilaian.find((item) => item.Value === val);
-
-      console.log("val dari formDataRef2:", val);
-      console.log("matched item:", matched);
 
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
@@ -259,7 +255,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       fetchData();
     }, []);
 
-    console.log("DATA ", listDetailKriteriaPenilaian);
     const formatNumber = (value) => {
       return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     };
@@ -270,8 +265,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       setUserInput(rawValue);
       // handleInputChange({ target: { name: "budget", value: rawValue } });
     };
-
-    console.log("LIST KRITERIA ", listKriteriaPenilaian);
 
   if (isLoading) return <Loading />;
 

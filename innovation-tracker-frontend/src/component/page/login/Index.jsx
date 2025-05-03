@@ -165,7 +165,6 @@ export default function Login() {
     upt,
     departmen
   ) {
-    console.log("RESPON", role);
     try {
       const ipAddress = await UseFetch(
         "https://api.ipify.org/?format=json",

@@ -165,7 +165,7 @@ export default function ListKriteriaAdd({ onChangePage }) {
                   <Input
                     type="number"
                     forInput="kriScore"
-                    label="Name"
+                    label="Score"
                     isRequired
                     value={formDataRef.current.kriScore}
                     onChange={handleInputChange}

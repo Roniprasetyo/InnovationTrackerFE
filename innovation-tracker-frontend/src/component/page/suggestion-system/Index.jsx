@@ -1147,7 +1147,7 @@ export default function SuggestionSytemIndex({
           <Button
             title="Assign to batch..."
             classType="primary ms-2"
-            label="SUBMIT"
+            label="Submit"
             onClick={handleSubmitBatch}
           />
         }

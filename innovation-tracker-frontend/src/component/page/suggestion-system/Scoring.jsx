@@ -71,9 +71,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const encodedId = searchParams.get("id");
-  if (parseInt(encodedId)) {
-    window.location.href = "/*";
-  }
   let userInfo = "";
   const id = deobfuscateId(encodedId);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -478,7 +475,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         if (!data) {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          console.log("DIRR ",userInfo.jabatan);
           setListPenilaianWadir(data);
         }
       } catch (error) {

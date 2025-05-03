@@ -46,14 +46,8 @@ export default function EditScoring({ onChangePage }) {
   const [searchParams] = useSearchParams();
   const encodedId = searchParams.get("id");
 
-  if (parseInt(encodedId)) {
-    // Redirect ke halaman lain jika tidak bisa dikonversi ke integer
-    window.location.href = "/*"; // ganti "/" dengan URL tujuanmu
-  }
-
   let userInfo = "";
   const id = deobfuscateId(encodedId);
-  console.log("ID", id);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [listEmployee, setListEmployee] = useState([]);
@@ -128,14 +122,10 @@ export default function EditScoring({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-
-      // console.log("ID: ", id);
       try {
         const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
           id: id,
         });
-
-        // console.log("Data SS: ", id, data);
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
         } else {
@@ -168,11 +158,8 @@ export default function EditScoring({ onChangePage }) {
   useEffect(() => {
     let total = 0;
     let data = [];
-    // console.log("DATA", formDataRef2.current);
-    console.log("Key", key.current);
     let i = 0;
     Object.values(listPenilaian).forEach((d) => {
-      console.log("ssd", d);
       key.current[i] = d.Keys;
       i++; // increment i
     });
@@ -184,21 +171,15 @@ export default function EditScoring({ onChangePage }) {
 
       formDataRef3.current[val] = matched?.Score;
 
-      // console.log(listDetailKriteriaPenilaian);
-      // console.log("val dari formDataRef2:", formDataRef3.current);
-      // console.log("matched score:", matched?.Score);
-
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
-    console.log("Key", key.current);
 
     setTotalScore(total);
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // console.log(name, value);
     formDataRef2.current[name] = value;
 
     const validationError = validateInput(name, value, userSchema);
@@ -216,15 +197,10 @@ export default function EditScoring({ onChangePage }) {
 
       formDataRef3.current[val] = matched?.Score;
 
-      console.log("val:", val);
-      console.log("matched item:", matched?.Score);
-      console.log("formdataref3:", formDataRef3.current);
-
       const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
 
-    // formComment.current = e.target.value;
     setTotalScore(total);
   };
 
@@ -264,19 +240,9 @@ export default function EditScoring({ onChangePage }) {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log("P, punya saya", errors);
-  }, [errors]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("Comment: ", decodeHtml(formComment.current));
-    console.log(
-      "Comment value: ",
-      `${formComment.current}  - ${userInfo.username}`
-    );
-    // console.log(formComment.current.value);
 
     let status1 = ""; 
 
@@ -308,8 +274,6 @@ export default function EditScoring({ onChangePage }) {
         status1 = "Draft Scoring";
       }
     }
-
-    console.log("STATUS", status1);
 
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "), // "12, 2, 4,  7"
@@ -382,29 +346,16 @@ export default function EditScoring({ onChangePage }) {
       sis_status: Yup.string().nullable()
     });
 
-    console.log("payload: ", payload);
-
     const validationErrors = await validateAllInputs(
       payload,
       payloadSchema,
       setErrors
     );
 
-    console.log(
-      "VALIDASI: ",
-      Object.values(validationErrors).every((error) => !error)
-    );
-    console.log("VALIDASI: ", validationErrors);
-    console.log("VALIDASI: ", errors);
-
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
-
-      console.log("FormDataRef: ", formDataRef2.current);
-      console.log("Payload: ", payload);
-      console.log("Payload nilai: ", formDataRef3.current);
 
       try {
         const data = await UseFetch(
@@ -412,18 +363,11 @@ export default function EditScoring({ onChangePage }) {
           payload
         );
 
-        console.log("PAYLOAD", payload);
-        console.log("DATA", data);
-
         if (!data) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
-          // window.location.href = ROOT_LINK + "/submission/ss";
           SweetAlert("Success", "Data Successfully Submitted", "success");
 
-          // alert("Data berhasil disimpan!");
-
-          // Tunggu 2 detik sebelum close + redirect
           setTimeout(function() {
             if (window.opener) {
               window.opener.location.href = ROOT_LINK + "/submission/ss";
@@ -445,9 +389,7 @@ export default function EditScoring({ onChangePage }) {
         setIsLoading(false);
       }
     } else {
-      console.log("356 error", errors);
       SweetAlert("Error", Object.values(validationErrors).join("\n"), "error");
-      // window.scrollTo(0, 0);
     }
   };
 
@@ -459,7 +401,6 @@ export default function EditScoring({ onChangePage }) {
           API_LINK + "MiniConvention/GetListKriteriaPenilaian"
         );
 
-        // console.log("")
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
@@ -487,7 +428,6 @@ export default function EditScoring({ onChangePage }) {
           creaby: userInfo.username,
         });
 
-        console.log("INI DATA SISIA: ", data);
         if (!data) {
           throw new Error("Error: Failed to get the category data.");
         } else {
@@ -522,8 +462,6 @@ export default function EditScoring({ onChangePage }) {
     fetchDataDetailByID();
   }, []);
 
-  // console.log("INI DATA 377: ", listDetailKriteriaPenilaian);
-
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -551,15 +489,12 @@ export default function EditScoring({ onChangePage }) {
           error: true,
           message: error.message,
         }));
-        // setListCategory({});
       }
     };
 
     fetchData();
   }, []);
 
-  // const arrTextData = listDetailKriteriaPenilaian.map(item => item.Text);
-  // console.log("TEXT ", listDetailKriteriaPenilaian);
   const formatNumber = (value) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
@@ -568,15 +503,11 @@ export default function EditScoring({ onChangePage }) {
     const rawValue = e.target.value.replace(/[^\d]/g, "");
     setFormattedValue(formatNumber(rawValue));
     setUserInput(rawValue);
-    // handleInputChange({ target: { name: "budget", value: rawValue } });
   };
 
   const handleComment = (e) => {
     formComment.current = e.target.value;
   };
-
-  // console.log("NILAI: ", listPenilaian);
-  // console.log("LIST KRITERIA ", listDetailKriteriaPenilaian);
 
   if (isLoading) return <Loading />;
 
