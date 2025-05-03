@@ -476,8 +476,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         });
 
         if (!data) {
-          // throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the category data.");
         } else {
+          console.log("DIRR ",userInfo.jabatan);
           setListPenilaianWadir(data);
         }
       } catch (error) {
@@ -704,21 +705,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   const handleTabChange = (e, newValue) => {
     setSelectedTab(newValue);
-    // let jabatanTarget = [];
-
-    // if (newValue === 0) jabatanTarget = ["Kepala Seksi", "Sekretaris Prodi"];
-    // else if (newValue === 1) jabatanTarget = ["Kepala Departemen"];
-    // else if (newValue === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
-
-    // let isChecked = listAllPenilaian.some(
-    //   (item) =>
-    //     item["Jabatan Penilai"] &&
-    //     jabatanTarget.some((jabatan) =>
-    //       item["Jabatan Penilai"].includes(jabatan)
-    //     )
-    // );
-    // setReadOnly(isChecked);
-
     setHasUserSelectedTab(true);
   };
   
@@ -784,7 +770,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     });
 
     listPenilaianWadir.forEach((item) => {
-      if (item["Jabatan Penilai"] !== "Wakil Direktur" && userInfo.jabatan !== "Wakil Direktur") {
+      if (item["Jabatan Penilai"] !== "Wakil Direktur" && userInfo.jabatan !== "Wakil Direktur" && userInfo.jabatan !== "Direktur") {
         tempTotal3 = 0;
       } else {
         tempTotal3 += parseFloat(item.Nilai) || 0;
