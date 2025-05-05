@@ -402,6 +402,13 @@ export default function SuggestionSytemIndex({
 
     const tempStatus = getStatusByKey(id);
 
+    const decodedTitle = maxCharDisplayed(
+      decodeHtml(
+        decodeHtml(decodeHtml(value["Project Title"]))
+      ).replace(/<\/?[^>]+(>|$)/g, ""),
+      50
+    );
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure about this value?",
@@ -411,7 +418,7 @@ export default function SuggestionSytemIndex({
       "",
       true
     );
-
+    
     if (confirm) {
       if (tempStatus !== "Approved") {
         UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
@@ -422,6 +429,14 @@ export default function SuggestionSytemIndex({
             if (!data) {
               setIsError(true);
             } else {
+              UseFetch(API_LINK + "NotifikasController/CreateNotifikasi", {
+                from: userInfo.username,
+                to: "", 
+                message: `A new Suggestion System submission has been created by ${userInfo.nama} - ${userInfo.npk} with the title: "${decodedTitle}". Please review and take the appropriate action.`,
+                sis: id,
+                rci: -1,
+              });
+    
               SweetAlert(
                 "Success",
                 "Thank you for your rating. Please wait until the next update",
@@ -432,7 +447,7 @@ export default function SuggestionSytemIndex({
           })
           .then(() => setIsLoading(false));
       }
-    }
+    }    
   };
 
   const handleApprove = async (id) => {
