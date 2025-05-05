@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { date, number, object, string } from "yup";
 import { API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
-import { separator, clearSeparator } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
@@ -11,23 +10,13 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
-import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
-import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decodeHtml, formatDate } from "../../util/Formatting";
 import Label from "../../part/Label";
-
-const inisialisasiData = [
-  {
-    Key: null,
-    Name: null,
-    Count: 0,
-  },
-];
 
 export default function SuggestionSystemEdit({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
@@ -36,11 +25,10 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
-
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [checkedStates, setCheckedStates] = useState({
     sisQuality: false,
     sisCost: false,
@@ -115,7 +103,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
     sisDelivery: string().max(200, "maximum 200 characters").nullable(),
     sisMoral: string().max(200, "maximum 200 characters").nullable(),
     sisStatus: string().required("required"),
-    sisReasonforRejection: string().required("required"),
+    sisReasonforRejection: string().nullable(),
   });
 
   useEffect(() => {
@@ -139,6 +127,36 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterPeriod/GetListPeriod",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          setListPeriod(data);
+          formDataRef.current.per_id = data[0].Value;
+          setSelectedPeriod(data[0].Value);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListPeriod({});
       }
     };
 
@@ -236,7 +254,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
             sisSafety: data[0]["Safety"],
             sisMoral: data[0]["Moral"],
             sisStatus: data[0]["Status"],
-            sisReasonforRejection: data[0]["Alasan Penolakan"]
+            sisReasonforRejection: data[0]["Alasan Penolakan"],
           };
 
           setCheckedStates({
@@ -261,6 +279,37 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
 
     fetchData();
   }, [withID]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+          p1: selectedPeriod,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          const sDate = data[0].perAwal.split("T")[0];
+          const eDate = data[0].perAkhir.split("T")[0];
+          if (data[0]) {
+            periodDataRef.current = {
+              startPeriod: sDate,
+              endPeriod: eDate,
+            };
+          }
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [selectedPeriod]);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
@@ -781,9 +830,12 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
                     {formDataRef.current.sisStatus === "Rejected" && (
                       <>
                         <hr />
-                        <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
+                        <h5 className="fw-medium fw-bold">
+                          Reason for Rejection
+                        </h5>
                         <Label
-                        data={formDataRef.current.sisReasonforRejection}/>
+                          data={formDataRef.current.sisReasonforRejection}
+                        />
                         <hr />
                       </>
                     )}

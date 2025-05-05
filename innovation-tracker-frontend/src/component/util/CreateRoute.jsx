@@ -4,11 +4,19 @@ const Beranda = lazy(() => import("../page/beranda/Root"));
 const Login = lazy(() => import("../page/login/Index"));
 const Notifikasi = lazy(() => import("../page/notifikasi/Root"));
 const Submission = lazy(() => import("../page/submission/Index"));
-const QualityControlProject = lazy(() => import("../page/quality-control-project/Root"));
-const QualityControlCircle = lazy(() => import("../page/quality-control-circle/Root"));
+const QualityControlProject = lazy(() =>
+  import("../page/quality-control-project/Root")
+);
+const QualityControlCircle = lazy(() =>
+  import("../page/quality-control-circle/Root")
+);
 const SuggestionSystem = lazy(() => import("../page/suggestion-system/Root"));
-const ValueChainInnovation = lazy(() => import("../page/value-chain-innovation/Root"));
-const BusinessPerformaceImprovement = lazy(() => import("../page/business-performance-improvement/Root"));
+const ValueChainInnovation = lazy(() =>
+  import("../page/value-chain-innovation/Root")
+);
+const BusinessPerformaceImprovement = lazy(() =>
+  import("../page/business-performance-improvement/Root")
+);
 const MasterSetting = lazy(() => import("../page/master-setting/Root"));
 const MasterUser = lazy(() => import("../page/master-user/Root"));
 const MasterFacilitator = lazy(() => import("../page/master-facilitator/Root"));
@@ -17,6 +25,9 @@ const MasterPerusahaan = lazy(() => import("../page/master-perusahaan/Root"));
 const MasterStep = lazy(() => import("../page/master-step/Root"));
 const MiniKonvensi = lazy(() => import("../page/mini-convention/Root"));
 const Scoring = lazy(() => import("../page/suggestion-system/Scoring"));
+const Dashboard = lazy(() => import("../page/dashboard/Dashboard"));
+const KriteriaNilai = lazy(() => import("../page/master-kriteria-nilai/Root"));
+const ListKriteria = lazy(() => import("../page/list-kriteria/Root"));
 
 const routeList = [
   {
@@ -30,6 +41,10 @@ const routeList = [
   {
     path: "/submission",
     element: <Submission />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
   },
   {
     path: "/submission/ss",
@@ -86,6 +101,14 @@ const routeList = [
   {
     path: "/scoring",
     element: <Scoring />,
+  },
+  {
+    path: "/kriteria_nilai",
+    element: <KriteriaNilai />,
+  },
+  {
+    path: "/list_kriteria",
+    element: <ListKriteria />,
   },
 ];
 

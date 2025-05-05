@@ -5,19 +5,9 @@ import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
-import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
-
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    Name: null,
-    Count: 0,
-  },
-];
 
 export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
@@ -25,13 +15,15 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [listEmployee, setListEmployee] = useState([]);
   const [userData, setUserData] = useState({});
+  const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
+  const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] = useState([]);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
 
   const formDataRef = useRef({
     Key: "",
-    NPK:"",
+    NPK: "",
     Period: "",
     Category: "",
     CategoryImp: "",
@@ -54,17 +46,17 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     "Alasan Penolakan": "",
   });
 
+  const formDataRef2 = useRef({});
+  const formDataRef3 = useRef({});
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/GetRencanaSSById",
-          {
-            id: withID,
-          }
-        );
+        const data = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSById", {
+          id: withID,
+        });
 
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Error: Failed to get SS data");
@@ -108,7 +100,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
             jabatan: value.jabatan,
           }))
         );
-
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -121,18 +112,76 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     };
 
     fetchData();
-  }, []); 
-        
+  }, []);
+
   useEffect(() => {
     if (listEmployee.length > 0 && userInfo?.upt) {
       const userData = listEmployee.find(
-        (value) =>
-          value.npk === formDataRef.current["NPK"]
+        (value) => value.npk === formDataRef.current["NPK"]
       );
       setUserData(userData);
     }
   }, [listEmployee, userInfo]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MiniConvention/GetListKriteriaPenilaian"
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListKriteriaPenilaian(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MiniConvention/GetListDetailKriteriaPenilaian"
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          const dataDetail = data.map((item) => ({
+            Text: `${item.Desc} - (${item.Score})`,
+            Value: item.Value,
+            Score: item.Score,
+            Id: item.Value2,
+          }));
+
+          setListDetailKriteriaPenilaian(dataDetail);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   if (isLoading) return <Loading />;
 
@@ -179,6 +228,16 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
               <Loading />
             ) : (
               <div className="row">
+                {formDataRef.current.Status === "Rejected" && (
+                  <div className="col-lg-12 mb-3">
+                    <div className="bg-gradient bg-danger rounded-3 px-3 pt-3 pb-2 text-white">
+                      <h5 className="fw-medium fw-bold">
+                        Reason for Rejection
+                      </h5>
+                      <Label data={formDataRef.current["Alasan Penolakan"]} />
+                    </div>
+                  </div>
+                )}
                 <div className="col-lg-12">
                   <div className="card mb-3">
                     <div className="card-header">
@@ -194,16 +253,13 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         </div>
 
                         <div className="col-md-4">
-                          <Label
-                            title="Name​"
-                            data={userData["name"]}
-                          />
+                          <Label title="Name​" data={userData["name"] || "-"} />
                         </div>
 
                         <div className="col-md-4">
                           <Label
                             title="Section​"
-                            data={userData["upt"]}
+                            data={userData["upt"] || "-"}
                           />
                         </div>
                       </div>
@@ -294,7 +350,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div><hr />
+                        </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Problem Statement"
@@ -313,7 +370,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               <sub>[Download File]</sub>
                             </a>
                           )}
-                        </div><hr />
+                        </div>
+                        <hr />
                         <div className="col-lg-12 mb-4">
                           <Label
                             title="Goal Statement​"
@@ -385,13 +443,81 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />
-                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                      <Label
-                      data={formDataRef.current["Alasan Penolakan"]}/>
+                      <h5 className="fw-medium fw-bold">
+                        Reason for Rejection
+                      </h5>
+                      <Label data={formDataRef.current["Alasan Penolakan"]} />
                       <hr />
                     </div>
                   )}
                 </div>
+                {formDataRef.current.Status === "Approved" && (
+                  <div className="col-lg-12">
+                    <div className="card mb-3">
+                      <div className="card-header align-items-center d-flex">
+                        <h5 className="fw-medium">Criteria</h5>
+                      </div>
+                      <div className="card-body d-flex flex-wrap">
+                        <div
+                          className="pe-4 border-end"
+                          style={{ width: "80%" }}
+                        >
+                          {listKriteriaPenilaian.map((item) => {
+                            const selectedItem =
+                              listDetailKriteriaPenilaian.find(
+                                (detail) => detail.Id === item.Value
+                              );
+
+                            const filteredArrData =
+                              listDetailKriteriaPenilaian.filter(
+                                (detail) => detail.Id === item.Value
+                              );
+
+                            return (
+                              <div className="row mb-3" key={item.Value}>
+                                <div className="col-lg-4">
+                                  <Label data={item.Text} />
+                                </div>
+                                <div className="col-lg-8">--</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="ps-4" style={{ width: "20%" }}>
+                          <div
+                            className="d-flex flex-column gap-3"
+                            style={{ height: "100px" }}
+                          >
+                            <div
+                              className="card fw-medium text-center"
+                              style={{ width: "200px" }}
+                            >
+                              Ka.Unit/Ka.UPT
+                              <hr />
+                              <h5>{0}</h5>
+                            </div>
+                            <div
+                              className="card fw-medium text-center"
+                              style={{ width: "200px" }}
+                            >
+                              Ka.Prodi/Ka.Dept
+                              <hr />
+                              <h5>{0}</h5>
+                            </div>
+                            <div
+                              className="card fw-medium text-center"
+                              style={{ width: "200px" }}
+                            >
+                              WaDIR/DIR
+                              <hr />
+                              <h5>{0}</h5>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>
                     Submitted by{" "}

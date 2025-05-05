@@ -41,11 +41,11 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [checkedStates, setCheckedStates] = useState({
-    rciQuality: false,
-    rciCost: false,
-    rciDelivery: false,
-    rciSafety: false,
-    rciMoral: false,
+    sisQuality: false,
+    sisCost: false,
+    sisDelivery: false,
+    sisSafety: false,
+    sisMoral: false,
   });
 
   const [listCategory, setListCategory] = useState([]);
@@ -217,6 +217,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -278,7 +279,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
+      // setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
           p1: selectedPeriod,
@@ -422,19 +423,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const validationError = validateInput(name, value, userSchema);
-    name === "rciProjBenefit"
-      ? (formDataRef.current[name] = separator(value))
-      : (formDataRef.current[name] = value);
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
-  };
-
-  const handleInputMemberChange = (e) => {
-    const { name, value } = e.target;
-    const validationError = validateInput(name, value, memberSchema);
-    memberDataRef.current[name] = value;
+    formDataRef.current[name] = value;
     setErrors((prevErrors) => ({
       ...prevErrors,
       [validationError.name]: validationError.error,

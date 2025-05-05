@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { date, number, object, string } from "yup";
+import { date, object, string } from "yup";
 import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -880,6 +880,7 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -946,6 +947,7 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>

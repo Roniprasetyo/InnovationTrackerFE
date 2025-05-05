@@ -23,10 +23,8 @@ const DropDownSearch = forwardRef(function DropDownSearch(
     value: item.Value,
     label: item.Text,
   }));
-  // console.log("Options in DropDownSearch:", Options);
 
   const handleChange = (selectedOption) => {
-    // console.log("Selected option from dropdown:", selectedOption);
     setSelectedValue(selectedOption ? selectedOption.value : "");
     onChange && onChange(selectedOption ? selectedOption.value : "");
   };
@@ -35,11 +33,9 @@ const DropDownSearch = forwardRef(function DropDownSearch(
     setSelectedValue(value);
   }, [value]);
 
-  // console.log("VALUE NYA ", selectedValue);
-
   return (
     <>
-      <div className="mb-3">
+      <div className="">
         {showLabel && (
           <label className="form-label fw-bold">
             {label}

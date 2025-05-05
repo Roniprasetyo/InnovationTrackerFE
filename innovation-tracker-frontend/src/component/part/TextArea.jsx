@@ -12,7 +12,7 @@ const TextArea = forwardRef(
       isDisabled = false,
       errorMessage = "",
       onChange,
-      ...props  
+      ...props
     },
     ref
   ) => {
@@ -34,7 +34,9 @@ const TextArea = forwardRef(
         {label && (
           <label htmlFor={forInput} className="form-label fw-bold ms-1">
             {label} {isRequired && <span className="text-danger"> *</span>}
-            {errorMessage && <span className="fw-normal text-danger"> {errorMessage}</span>}
+            {errorMessage && (
+              <span className="fw-normal text-danger"> {errorMessage}</span>
+            )}
           </label>
         )}
         <JoditEditor
@@ -64,7 +66,9 @@ const TextArea = forwardRef(
           onBlur={handleEditorChange}
           {...props}
         />
-        {!label && errorMessage && <span className="small fw-normal text-danger">{errorMessage}</span>}
+        {!label && errorMessage && (
+          <span className="small fw-normal text-danger">{errorMessage}</span>
+        )}
       </div>
     );
   }

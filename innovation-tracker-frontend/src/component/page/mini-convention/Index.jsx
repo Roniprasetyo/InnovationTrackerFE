@@ -139,9 +139,7 @@ export default function MiniConventionIndex({ onChangePage , onScoring}) {
             const foundEmployee = listEmployee.find(
               (emp) => emp.npk === value["Submission Name"]
             );
-          
-            console.log("FOND", foundEmployee);
-            return {
+                      return {
               Key: value.Key,
               No: value["No"],
               "Submission Name": foundEmployee ? foundEmployee.name : value["Submission Name"] + " (N/A)",

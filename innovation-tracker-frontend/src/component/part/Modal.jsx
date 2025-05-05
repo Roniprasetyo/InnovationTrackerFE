@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import Button from "./Button";
 
 const Modal = forwardRef(function Modal(
-  { title, children, size, Button1 = null, Button2 = null },
+  { title, children, size, Button1 = null, Button2 = null, centered = false },
   ref
 ) {
   const dialog = useRef();
@@ -42,15 +42,15 @@ const Modal = forwardRef(function Modal(
       <hr className="m-0" />
       <div className="modal-footer p-3">
         <form method="dialog">
-          {Button1}
-          {Button2}
           <Button
             classType="secondary"
-            label="Tutup"
+            label="Close"
             onClick={() => {
               dialog.current.close();
             }}
-          />
+            />
+            {Button2}
+            {Button1}
         </form>
       </div>
     </dialog>

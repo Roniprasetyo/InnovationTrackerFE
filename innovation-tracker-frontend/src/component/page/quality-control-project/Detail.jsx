@@ -22,13 +22,10 @@ const inisialisasiData = [
 
 export default function QualityControlProjectDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
-  let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
-  const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
-
   const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({

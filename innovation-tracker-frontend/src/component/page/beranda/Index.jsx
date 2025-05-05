@@ -7,56 +7,6 @@ import CalendarView from "../../part/CalendarView";
 import NewsListView from "../../part/NewsListView";
 
 export default function BerandaIndex() {
-  const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(true);
-
-  const formDataRef = useRef({
-    countTotalPermintaan: 0,
-    countTerlambat: 0,
-    countBatal: 0,
-    countSelesai: 0,
-    countMenungguAnalisa: 0,
-    countBelumDibuatRAK: 0,
-    countBelumDibuatPenawaran: 0,
-    countDalamProsesNegosiasi: 0,
-    countBelumDibuatSPK: 0,
-    countDalamProsesProduksi: 0,
-    countDalamProsesQC: 0,
-    countDalamProsesDelivery: 0,
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError((prevError) => ({ ...prevError, error: false }));
-
-      try {
-        const data = await UseFetch(
-          API_LINK + "Utilities/GetDataCountingDashboard",
-          {}
-        );
-
-        if (data === "ERROR" || data.length === 0) {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data dashboard.");
-        } else {
-          formDataRef.current = { ...formDataRef.current, ...data[0] };
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (isLoading) return <Loading />;
-
   return (
     <>
       <div>
@@ -74,35 +24,28 @@ export default function BerandaIndex() {
           </div>
         </div>
       </div>
-      <div className="container p-3">
-        {isError.error && (
-          <div className="flex-fill ">
-            <Alert
-              type="danger"
-              message={isError.message}
-              handleClose={() => setIsError({ error: false, message: "" })}
-            />
-          </div>
-        )}
+      <div className="container p-12">
         <div className="row">
-          <div className="d-flex justify-content-between container-sm my-3">
-            <div className="mb-4 color-primary align-items-center justify-content-center text-left">
-              <div className="gap-3 justify-content-left">
-                <h2 className="display-5 fw-bold">WELCOME</h2>
-                <div className="d-flex align-items-end mb-2">
+          <div className="d-flex justify-content-center container-sm my-12">
+            <div className="mb-4 color-primary align-items-center justify-content-center text-center">
+              <div className="gap-3 justify-content-center">
+                <h2 className="display-5 text-center fw-bold">WELCOME TO ASTRATECH</h2>
+                {/* <div className="d-flex align-items-end mb-2">
                   <h2 className="display-10 fw-medium align-items-end text-start">
                     TO ASTRATECH
                   </h2>
-                </div>
+                </div> */}
               </div>
-              <div className="display-6 fw-medium text-nowrap">INNOVATION LIBRARY</div>
+              <div className="display-6 fw-medium text-nowrap">
+                INNOVATION LIBRARY
+              </div>
             </div>
-            <div className="row">
+            {/* <div className="row">
               <div className="d-flex gap-4">
                 <NewsListView />
                 <CalendarView />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

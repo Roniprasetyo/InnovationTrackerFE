@@ -22,8 +22,8 @@ export default function MasterPerusahaanAdd({ onChangePage }) {
 
   
   const userSchema = object({
-    prsName: string().max(50, "Maksimum 50 karakter").required("Harus diisi"),
-    prsAddress: string().max(200, "Maksimum 200 karakter").required("Harus diisi"), 
+    prsName: string().max(50, "50 characters max").required("required"),
+    prsAddress: string().max(200, "required").required("required"), 
   });
 
   const handleInputChange = (e) => {

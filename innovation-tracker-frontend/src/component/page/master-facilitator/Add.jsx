@@ -6,7 +6,6 @@ import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
 import DropDown from "../../part/Dropdown";
-import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
@@ -16,7 +15,6 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
-
   const [listEmployee, setListEmployee] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listCategory, setListCategory] = useState([]);
@@ -104,10 +102,7 @@ export default function MasterFacilitatorAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perID = selected.Value;
+          formDataRef.current.perID = data[0].Value;
           window.scrollTo(0, 0);
         }
       } catch (error) {

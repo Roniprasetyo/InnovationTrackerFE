@@ -21,16 +21,17 @@ export default function MasterPerusahaanDetail({ onChangePage, withID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "MasterPerusahaan/GetPerusahaanById", 
+          API_LINK + "MasterPerusahaan/GetPerusahaanById",
           { id: withID }
         );
 
         if (data === "ERROR" || !data) {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data perusahaan.");
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil data perusahaan."
+          );
         } else {
-          
-          formDataRef.current.prs_alamat=data[0].prs_alamat;
-          formDataRef.current.prs_nama=data[0].prs_nama;
+          formDataRef.current.prs_alamat = data[0].prs_alamat;
+          formDataRef.current.prs_nama = data[0].prs_nama;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -45,14 +46,24 @@ export default function MasterPerusahaanDetail({ onChangePage, withID }) {
 
   return (
     <>
-      <div className="row my-3" style={{ display: "flex", alignItems: "center" }}>
-        <h2 className="fw-bold" style={{ color: "rgb(0, 89, 171)", margin: "0" }}>
+      <div
+        className="row my-3"
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <h2
+          className="fw-bold"
+          style={{ color: "rgb(0, 89, 171)", margin: "0" }}
+        >
           <Icon
             type="Bold"
             name="angle-left"
             cssClass="btn me-1 py-0 text"
             onClick={() => onChangePage("index")}
-            style={{ fontSize: "22px", cursor: "pointer", color: "rgb(0, 89, 171)" }}
+            style={{
+              fontSize: "22px",
+              cursor: "pointer",
+              color: "rgb(0, 89, 171)",
+            }}
           />
           Detail Data
         </h2>
@@ -75,10 +86,18 @@ export default function MasterPerusahaanDetail({ onChangePage, withID }) {
             ) : (
               <div className="row">
                 <div className="col-lg-6">
-                  <Label forLabel="prsName" title="Name" data={formDataRef.current.prs_nama} />
+                  <Label
+                    forLabel="prsName"
+                    title="Name"
+                    data={formDataRef.current.prs_nama}
+                  />
                 </div>
                 <div className="col-lg-12">
-                  <Label forLabel="prsAddress" title="Address" data={formDataRef.current.prs_alamat} />
+                  <Label
+                    forLabel="prsAddress"
+                    title="Address"
+                    data={formDataRef.current.prs_alamat}
+                  />
                 </div>
               </div>
             )}

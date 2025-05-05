@@ -11,23 +11,12 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
-import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
 import Cookies from "js-cookie";
-import { clearSeparator, separator } from "../../util/Formatting";
-
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    Name: null,
-    Count: 0,
-  },
-];
 
 export default function SuggestionSystemAdd({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
@@ -35,12 +24,15 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [listEmployee, setListEmployee] = useState([]);
+  const [emp, setEmp] = useState([]);
   const [sectionHead, setSectionHead] = useState({});
+  const [listDepartment, setListDepartment] = useState([]);
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
+  const [listAllDepartment, setAllListDepartment] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
 
   const [checkedStates, setCheckedStates] = useState({
@@ -79,7 +71,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     sis_pengiriman: "",
     sis_kemanan: "",
     sis_moral: "",
-    facil_id: sectionHead.npk,
+    facil_id: sectionHead?.npk,
   });
 
   const periodDataRef = useRef({
@@ -117,26 +109,206 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   });
 
   useEffect(() => {
-    if (listEmployee.length > 0 && userInfo?.upt) {
-      const KepalaSeksiData = listEmployee.find(
+    if (
+      listEmployee.length > 0 &&
+      userInfo?.upt &&
+      listDepartment.length > 0
+    ) {
+      const kepalaSeksi = listEmployee.find(
         (value) =>
-          value.upt === userInfo.upt && value.jabatan === "Kepala Seksi"
+          value.upt_bagian === userInfo.upt &&
+          (value.jabatan === "Kepala Seksi" || value.jabatan === "Kepala Departemen")
       );
-      setSectionHead(KepalaSeksiData);
+  
+      const sekProdi = listEmployee.find(
+        (value) =>
+          value.upt_bagian === userInfo.upt &&
+          (value.jabatan === "Sekretaris Prodi" || value.jabatan === "Kepala Departemen")
+      );
+  
+      const kepalaDepartemen = listEmployee.find(
+        (value) =>
+          value.npk === userInfo.npk &&
+          value.jabatan === "Kepala Departemen"
+      )
+      
+      const secondly = listDepartment.find(
+        (value) => userInfo.departemen === value.Struktur && userInfo.jabatan !== "Staff" && userInfo.jabatan !== "Sekretaris Prodi"
+      );
+
+      const lgsungDirektur = listEmployee.find(
+        (value) =>
+          value.npk === userInfo.npk
+      );
+  
+      const Direktur = listDepartment.find(
+        (value) =>
+          value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
+      );
+  
+      let selected = secondly || kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
+  
+      if (
+        selected?.npk === userInfo.npk &&
+        (selected.jabatan === "Kepala Seksi" || selected.jabatan === "Sekretaris Prodi")
+      ) {
+        const userStruktur = listDepartment.find(
+          (item) => item.Npk === userInfo.npk
+        );
+  
+        if (userStruktur) {
+          const parent = userStruktur["Struktur Parent"];
+  
+          const parentDept = listDepartment.find(
+            (item) =>
+              item["Struktur Parent"] === parent &&
+              item.Jabatan === "Kepala Departemen"
+          );
+  
+          if (parentDept) {
+            const matchingEmployee = listEmployee.find(
+              (emp) => emp.npk === parentDept.Npk
+            );
+  
+            if (matchingEmployee) {
+              setSectionHead(matchingEmployee);
+              return;
+            }
+          }
+        }
+      }
+      else if(
+        (selected?.npk === userInfo.npk || selected?.Npk === userInfo.npk) &&
+        ((selected.jabatan === "Kepala Departemen" || selected.Jabatan === "Kepala Departemen") 
+        && selected.jabatan !== "Sekretaris Prodi")
+      ) {
+        const userStruktur = listDepartment.find(
+          (item) => item.Npk === userInfo.npk
+        );
+  
+        if (userStruktur) {
+          const parent = userStruktur["Struktur Parent"];
+  
+          const Kadept = listDepartment.find(
+            (item) =>
+              item.Struktur === parent
+          );
+
+          const lgsungDirektur = listDepartment.find(
+            (value) =>
+              value.Struktur === userStruktur["Struktur Parent"]
+          );
+  
+          if (Kadept) {
+            const matchingDirect = listEmployee.find(
+              (emp) => emp.npk === Kadept.Npk
+            );
+  
+            if (Kadept) {
+              setSectionHead(matchingDirect);
+              return;
+            }
+          }
+          else if(lgsungDirektur) {
+            setSectionHead(lgsungDirektur);
+          }
+        }
+      }
+  
+      if (selected) {
+        setSectionHead(selected);
+      }
     }
-  }, [listEmployee, userInfo]);
+  }, [listEmployee, userInfo, listDepartment]);  
+
+  useEffect(() => {
+    const userStruktur = listDepartment.find(
+      (item) => item.Npk === userInfo.npk
+    );
+    if(userStruktur) {
+      const parent = userStruktur["Struktur Parent"];
+      const wakilDirect = listDepartment.find(
+        (item) =>
+          item.Struktur === parent
+      );
+    }
+  }, [listDepartment]);
+  
+  useEffect(() => {
+    const userStruktur = listDepartment.find(
+      (value) =>
+        value.Struktur === userInfo.departemen
+    );
+    setEmp(userStruktur);
+
+  }, [listEmployee]);
+
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(
+            API_LINK + "RencanaSS/GetListStrukturDepartment"
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+  
+            setAllListDepartment(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, []);
+  
+
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        try {
+          const data = await UseFetch(
+            API_LINK + "RencanaSS/GetListStrukturDepartment"
+          );
+  
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to get the category data.");
+          } else {
+            setListDepartment(data);
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+          setListCategory({});
+        }finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, []);
 
   useEffect(() => {
     if (sectionHead?.npk) {
       formDataRef.current.facil_id = sectionHead.npk;
     }
+    else if (sectionHead?.Npk) {
+      formDataRef.current.facil_id = sectionHead.Npk;
+    }
   }, [sectionHead]);
-  
-
-  console.log("SECTION HEAD NPK:", formDataRef.current.facil_id);
-
-  // useEffect(() => {
-  // }, [sectionHead]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -160,7 +332,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }));
         setListCategory({});
       }
-      console.log("COOKIE", JSON.parse(decryptId(cookie)));
     };
 
     fetchData();
@@ -206,11 +377,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.per_id = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.per_id = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -258,41 +426,32 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   }, [selectedPeriod]);
 
   useEffect(() => {
-        const fetchData = async () => {
-          setIsError((prevError) => ({ ...prevError, error: false }));
-          try {
-            const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-              },
-            });
-    
-            const data = await response.json();
-            setListEmployee(
-              data.map((value) => ({
-                username: value.username,
-                npk: value.npk,
-                name: value.nama,
-                upt: value.upt_bagian,
-                jabatan: value.jabatan,
-              }))
-            );
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const response = await fetch(`${EMP_API_LINK}getDataKaryawan`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        });
 
-          } catch (error) {
-            window.scrollTo(0, 0);
-            setIsError((prevError) => ({
-              ...prevError,
-              error: true,
-              message: error.message,
-            }));
-            setListEmployee({});
-          }
-        };
-    
-        fetchData();
-      }, []);   
+        const data = await response.json();
+        setListEmployee(data);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;

@@ -1,12 +1,15 @@
 import Icon from "./Icon";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export default function Table({
   data,
+  checkboxTable = false,
+  userInfo,
   onToggle = () => {},
   onCancel = () => {},
   onDelete = () => {},
   onDetail = () => {},
-  onScoring = () => {},
   onEdit = () => {},
   onApprove = () => {},
   onReject = () => {},
@@ -15,9 +18,38 @@ export default function Table({
   onFinal = () => {},
   onPrint = () => {},
   onRemove = () => {},
+  onScoring = () => {},
+  onEditScoring = () => {},
+  onCheckedChange = () => {},
 }) {
+  const [selectedKeys, setSelectedKeys] = useState([]);
+
   let colPosition;
   let colCount = 0;
+
+  useEffect(() => {
+    onCheckedChange(selectedKeys);
+  }, [selectedKeys]);
+
+  const isAllSelected =
+    data.length > 0 && data[0]["Count"]
+      ? data.filter((row) => row).every((row) => selectedKeys.includes(row))
+      : false;
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedKeys([]);
+    } else {
+      const allKeys = data.filter((row) => row).map((row) => row);
+      setSelectedKeys(allKeys);
+    }
+  };
+
+  const handleCheckboxChange = (key) => {
+    setSelectedKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
 
   function generateActionButton(columnName, value, key, id, status, rowValue) {
     if (columnName !== "Action") return value;
@@ -169,6 +201,17 @@ export default function Table({
               onClick={() => onPrint(id)}
             />
           );
+        case "EditScoring":
+          return (
+            <Icon
+              key={key + action}
+              name="edit"
+              type="Bold"
+              cssClass="btn px-1 py-0 text-primary"
+              title="Modify"
+              onClick={() => onEditScoring("editScoring", id, rowValue)}
+            />
+          );
         case "Scoring":
           return (
             <Icon
@@ -210,12 +253,30 @@ export default function Table({
         <table className="table table-hover table-striped table table-light border">
           <thead>
             <tr>
+              {checkboxTable ? (
+                <th
+                  className="text-center align-middle"
+                  style={{ width: "1rem" }}
+                  title="Select All"
+                >
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+              ) : (
+                ""
+              )}
               {Object.keys(data[0]).map((value, index) => {
                 if (
                   value !== "Key" &&
                   value !== "Count" &&
-                  value !== "Alignment"
+                  value !== "Alignment" &&
+                  value !== "IsBold"
                 ) {
+                  if (checkboxTable) colCount++;
                   colCount++;
                   return (
                     <th key={"Header" + index} className="text-center">
@@ -242,6 +303,7 @@ export default function Table({
             {data[0].Count !== 0 &&
               data.map((value, rowIndex) => {
                 colPosition = -1;
+                const isChecked = selectedKeys.includes(value);
                 return (
                   <tr
                     key={value["Key"]}
@@ -250,16 +312,34 @@ export default function Table({
                       (value["Status"] === "Draft" ||
                         value["Status"] === "Revision" ||
                         value["Status"] === "Belum Dikonversi" ||
-                        value["Status"] === "Belum Dibuat Penjadwalan")
+                        value["Status"] === "Belum Dibuat Penjadwalan" ||
+                        value["Status"] === "Rejected" ||
+                        value["IsBold"] === true)
                         ? "fw-bold"
                         : undefined
                     }
                   >
+                    {checkboxTable ? (
+                      <td
+                        className="text-center align-middle"
+                        style={{ width: "1.5rem" }}
+                      >
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleCheckboxChange(value)}
+                        />
+                      </td>
+                    ) : (
+                      ""
+                    )}
                     {Object.keys(value).map((column, colIndex) => {
                       if (
                         column !== "Key" &&
                         column !== "Count" &&
-                        column !== "Alignment"
+                        column !== "Alignment" &&
+                        column !== "IsBold"
                       ) {
                         colPosition++;
                         return (

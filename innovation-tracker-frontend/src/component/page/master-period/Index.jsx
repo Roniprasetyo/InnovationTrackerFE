@@ -16,16 +16,19 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    StartDate: null,
-    EndDate: null,
+    "Start Date": null,
+    "End Date": null,
+    Period: null,
     Status: null,
     Count: 0,
   },
 ];
 
 const dataFilterSort = [
-  { Value: "[StartDate] asc", Text: "StartDate [↑]" },
-  { Value: "[EndDate] desc", Text: "EndDate [↓]" },
+  { Value: "[Start Date] asc", Text: "Start Date [↑]" },
+  { Value: "[Start Date] desc", Text: "Start Date [↓]" },
+  { Value: "[End Date] asc", Text: "End Date [↑]" },
+  { Value: "[End Date] desc", Text: "End Date [↓]" },
 ];
 
 const dataFilterStatus = [
@@ -40,7 +43,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[StartDate] asc",
+    sort: "[Start Date] asc",
     status: "Aktif",
   });
 
@@ -107,10 +110,10 @@ export default function MasterPeriodIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            StartDate: formatDate(value.StartDate.split("T")[0], true),
-            EndDate: formatDate(value.EndDate.split("T")[0], true),
+            "Start Date": formatDate(value["Start Date"].split("T")[0], true),
+            "End Date": formatDate(value["End Date"].split("T")[0], true),
             Action: ["Toggle", "Edit"],
-            Alignment: ["center", "center", "center", "center", "center"],
+            Alignment: ["center", "center", "center", "right", "center", "center"],
           }));
           setCurrentData(formattedData);
         }
@@ -170,7 +173,7 @@ export default function MasterPeriodIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[StartDate] asc"
+              defaultValue="[Start Date] asc"
             />
             <DropDown
               ref={searchFilterStatus}

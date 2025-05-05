@@ -48,7 +48,6 @@ export default function MasterPerusahaanIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
-  const searchFilterJenis = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -180,7 +179,7 @@ export default function MasterPerusahaanIndex({ onChangePage }) {
               label="Sort By"
               type="none"
               arrData={dataFilterSort}
-              defaultValue="[Nama Alat/Mesin] asc"
+              defaultValue="[Name] asc"
             />
             <DropDown
               ref={searchFilterStatus}

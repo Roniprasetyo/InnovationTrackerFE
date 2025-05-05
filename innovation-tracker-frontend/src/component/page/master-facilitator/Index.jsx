@@ -59,9 +59,6 @@ export default function MasterFacilitatorIndex({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
           window.scrollTo(0, 0);
         }
       } catch (error) {

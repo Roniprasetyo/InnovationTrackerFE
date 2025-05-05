@@ -19,12 +19,14 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
     perId: "",
     perAwal: "",
     perAkhir: "",
+    perPeriode: "",
   });
 
   const userSchema = object({
     perId: number(),
-    perAwal: string().required("Harus dipilih"),
-    perAkhir: string().required("Harus dipilih"),
+    perAwal: string().required("required"),
+    perAkhir: string().required("required"),
+    perPeriode: string().max(20, "20 chars max").required("required"),
   });
 
   useEffect(() => {
@@ -39,14 +41,12 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Terjadi kesalahan: Gagal mengambil data periode.");
         } else {
-          // Format tanggal ke format yyyy-MM-dd
           const formattedData = {
             perId: data[0].perId,
-            perAwal: new Date(data[0].perAwal).toLocaleDateString("en-CA"), // yyyy-MM-dd
-            perAkhir: new Date(data[0].perAkhir).toLocaleDateString("en-CA"), // yyyy-MM-dd
+            perAwal: new Date(data[0].perAwal).toLocaleDateString("en-CA"), 
+            perAkhir: new Date(data[0].perAkhir).toLocaleDateString("en-CA"),
+            perPeriode: data[0].perPeriode,
           };
-
-          // Update formDataRef dengan data yang sudah diformat
           formDataRef.current = formattedData;
         }
       } catch (error) {
@@ -156,7 +156,7 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
                 <Loading />
               ) : (
                 <div className="row mt-4">
-                  <div className="col-lg-6">
+                  <div className="col-lg-4">
                     <Input
                       type="date"
                       forInput="perAwal"
@@ -167,7 +167,7 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
                       errorMessage={errors.perAwal}
                     />
                   </div>
-                  <div className="col-lg-6">
+                  <div className="col-lg-4">
                     <Input
                       type="date"
                       forInput="perAkhir"
@@ -176,6 +176,17 @@ export default function MasterPeriodEdit({ onChangePage, withID }) {
                       value={formDataRef.current.perAkhir}
                       onChange={handleInputChange}
                       errorMessage={errors.perAkhir}
+                    />
+                  </div>
+                  <div className="col-lg-4">
+                    <Input
+                      type="text"
+                      forInput="perPeriode"
+                      label="Period Name"
+                      isRequired
+                      value={formDataRef.current.perPeriode}
+                      onChange={handleInputChange}
+                      errorMessage={errors.perPeriode}
                     />
                   </div>
                 </div>

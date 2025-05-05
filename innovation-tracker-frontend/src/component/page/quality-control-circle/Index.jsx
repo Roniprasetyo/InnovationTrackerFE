@@ -18,6 +18,7 @@ import {
 } from "../../util/Formatting";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
+import { exportExcel } from "../../util/ExportExcel";
 
 const inisialisasiData = [
   {
@@ -80,6 +81,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
+  const dataExport = useRef();
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -106,13 +108,12 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleSubmit = async (id) => {
     setIsError(false);
-    console.log("INI", currentData["Status"]);
     let status;
-    if(currentData.Status === "Approved") {
-      status = "Rejected"
-    }
-    else {
-      status = "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed."
+    if (currentData.Status === "Approved") {
+      status = "Rejected";
+    } else {
+      status =
+        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
     }
     const confirm = await SweetAlert(
       "Confirm",
@@ -145,7 +146,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleApprove = async (id) => {
     setIsError(false);
-    
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to approve this submission?",
@@ -242,13 +243,12 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
                 : role === "ROL03" &&
-                value["Status"] === "Rejected" &&
-                value["Creaby"] === userInfo.username
-                  ? ["Detail", "Edit", "Submit"]
-                  : role === "ROL01" &&
-                  value["Status"] === "Approved"
-                    ? ["Detail", "Submit"]
-                    : ["Detail"],
+                  value["Status"] === "Rejected" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "Edit", "Submit"]
+                : role === "ROL01" && value["Status"] === "Approved"
+                ? ["Detail", "Submit"]
+                : ["Detail"],
             Alignment: [
               "center",
               "left",
@@ -263,6 +263,23 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             ],
           }));
           setCurrentData(formattedData);
+          const rawData = data.map(({ Key, Count, ...rest }) => rest);
+          const cleanedData = rawData.map((value) => {
+            return {
+              No: value["No"],
+              "Circle Name": maxCharDisplayed(value["Circle Name"], 30),
+              "Project Title": decodeHtml(
+                decodeHtml(decodeHtml(value["Project Title"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
+              Category: value["Category"],
+              "Project Benefit": value["Project Benefit"],
+              "Start Date": value["Start Date"].split("T")[0],
+              "End Date": value["End Date"].split("T")[0],
+              Period: value["Period"],
+              Status: value["Status"],
+            };
+          });
+          dataExport.current = cleanedData;
         }
       } catch {
         setIsError(true);
@@ -309,7 +326,23 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               onClick={() => onChangePage("add")}
             />
           ) : (
-            ""
+            <Button
+              iconName="file-excel"
+              label="Export"
+              classType="success"
+              onClick={() =>
+                exportExcel(
+                  dataExport.current,
+                  "QCC_" +
+                    new Date().toLocaleDateString() +
+                    "_" +
+                    new Date().toLocaleTimeString() +
+                    "_" +
+                    currentFilter.page +
+                    ".xlsx"
+                )
+              }
+            />
           )}
           <Input
             ref={searchQuery}

@@ -145,7 +145,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           setIsError({ error: true, message: "Invalid data format" });
 
         const filteredData = data.filter(
-          (item) => item?.upt_bagian === userInfo?.upt
+          (item) =>
+            item?.upt_bagian === userInfo?.upt ||
+            item?.departemen_jurusan === userInfo?.upt
         );
 
         setListEmployee(
@@ -236,11 +238,8 @@ export default function QualityControlCircleAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.perId = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -470,6 +469,9 @@ export default function QualityControlCircleAdd({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
+
       if (memberData.length < 2) {
         window.scrollTo(0, 0);
         setIsError({
@@ -931,6 +933,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -997,6 +1000,7 @@ export default function QualityControlCircleAdd({ onChangePage }) {
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>
