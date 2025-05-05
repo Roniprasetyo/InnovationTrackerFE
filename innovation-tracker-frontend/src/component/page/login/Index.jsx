@@ -165,7 +165,6 @@ export default function Login() {
     upt,
     departmen
   ) {
-    console.log("RESPON", role);
     try {
       const ipAddress = await UseFetch(
         "https://api.ipify.org/?format=json",
@@ -269,13 +268,13 @@ export default function Login() {
                   onClick={() =>
                     handleLoginWithRole(
                       value.RoleID,
-                      userDetail.nama,
+                      userDetail?.nama,
                       value.Role,
-                      userDetail.npk,
+                      userDetail?.npk,
                       value.InoRole,
-                      userDetail.jabatan,
-                      userDetail.upt_bagian,
-                      userDetail.departemen_jurusan
+                      userDetail?.jabatan,
+                      userDetail?.upt_bagian,
+                      userDetail?.departemen_jurusan
                     )
                   }
                 >

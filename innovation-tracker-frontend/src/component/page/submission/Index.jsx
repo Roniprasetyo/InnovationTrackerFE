@@ -32,6 +32,7 @@ export default function Submission() {
           {
             id: userInfo.npk,
             role: userInfo.role.slice(0, 5),
+            jabatan: userInfo.jabatan,
           }
         );
 
@@ -65,7 +66,6 @@ export default function Submission() {
     //         "Terjadi kesalahan: Gagal mengambil data setting."
     //       );
     //     } else {
-    //       console.log("data",data)
     //       setNeedScoring(data[0]["Need Scoring"])
     //       setWaitingApproval(data[0]["Waiting Approval"])
     //     }
@@ -111,6 +111,7 @@ export default function Submission() {
                     "Kepala Departemen",
                     "Sekretaris Prodi",
                     "Wakil Direktur",
+                    "Direktur"
                   ].includes(userInfo.jabatan) && (
                     <div
                       className="col-sm-3 bg-success rounded-5"

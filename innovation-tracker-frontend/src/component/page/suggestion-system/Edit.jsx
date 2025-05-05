@@ -28,6 +28,7 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [checkedStates, setCheckedStates] = useState({
     sisQuality: false,
     sisCost: false,
@@ -126,6 +127,36 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
           message: error.message,
         }));
         setListCategory({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterPeriod/GetListPeriod",
+          {}
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          setListPeriod(data);
+          formDataRef.current.per_id = data[0].Value;
+          setSelectedPeriod(data[0].Value);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListPeriod({});
       }
     };
 
@@ -248,6 +279,37 @@ export default function SuggestionSystemEdit({ onChangePage, withID }) {
 
     fetchData();
   }, [withID]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
+      try {
+        const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
+          p1: selectedPeriod,
+        });
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the period data.");
+        } else {
+          const sDate = data[0].perAwal.split("T")[0];
+          const eDate = data[0].perAkhir.split("T")[0];
+          if (data[0]) {
+            periodDataRef.current = {
+              startPeriod: sDate,
+              endPeriod: eDate,
+            };
+          }
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [selectedPeriod]);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;

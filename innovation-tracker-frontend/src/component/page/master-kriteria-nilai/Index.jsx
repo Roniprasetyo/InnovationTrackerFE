@@ -41,7 +41,7 @@ export default function MasterKriteriaNilaiIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Name] asc",
+    sort: "[Key] desc",
     status: "Aktif",
   });
 

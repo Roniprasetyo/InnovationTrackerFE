@@ -23,8 +23,8 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
-  { Value: "[Criteria] asc", Text: "Criteria [↑]" },
-  { Value: "[Criteria] desc", Text: "Criteria [↓]" },
+  { Value: "[Key] asc", Text: "Criteria [↑]" },
+  { Value: "[Key] desc", Text: "Criteria [↓]" },
   { Value: "[Score] asc", Text: "Score [↑]" },
   { Value: "[Score] desc", Text: "Score [↓]" },
 ];
@@ -41,7 +41,7 @@ export default function ListKriteriaIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Criteria] asc",
+    sort: "[Key] desc",
     status: "Aktif",
   });
 

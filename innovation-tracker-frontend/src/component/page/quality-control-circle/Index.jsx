@@ -108,7 +108,6 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleSubmit = async (id) => {
     setIsError(false);
-    console.log("INI", currentData["Status"]);
     let status;
     if (currentData.Status === "Approved") {
       status = "Rejected";

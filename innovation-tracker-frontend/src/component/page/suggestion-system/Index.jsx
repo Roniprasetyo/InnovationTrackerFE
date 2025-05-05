@@ -127,12 +127,14 @@ export default function SuggestionSytemIndex({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await UseFetch(API_LINK + "RencanaSS/GetListSettingRanking", {});
-  
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetListSettingRanking",
+          {}
+        );
+
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the GetPenilaianById.");
         } else {
-          console.log("INI DATA KA UPTddd: ", data);
           setListSettingRanking(data);
         }
       } catch (error) {
@@ -147,7 +149,7 @@ export default function SuggestionSytemIndex({
         setIsLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 
@@ -386,9 +388,7 @@ export default function SuggestionSytemIndex({
       }
       if (detailSS.Status === "Draft") {
         status1 = "Waiting Approval";
-      } 
-
-      else if (totalScore2 <= ranking) {
+      } else if (totalScore2 <= ranking) {
         status1 = "Final";
       } else {
         status1 = "Scoring";
@@ -439,7 +439,7 @@ export default function SuggestionSytemIndex({
     
               SweetAlert(
                 "Success",
-                "Thank you for your rating. Please wait until the next update",
+                "Thank you for your submission. Please wait until the next update",
                 "success"
               );
               handleSetCurrentPage(currentFilter.page);
@@ -455,7 +455,7 @@ export default function SuggestionSytemIndex({
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to approve this submission?",
-      "success",
+      "info",
       "Approve",
       null,
       "",
@@ -579,6 +579,7 @@ export default function SuggestionSytemIndex({
 
   const handleDelete = async (id) => {
     setIsError(false);
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to delete this submission?",
@@ -590,16 +591,14 @@ export default function SuggestionSytemIndex({
     );
 
     if (confirm) {
+      // setIsLoading(true);
       UseFetch(API_LINK + "RencanaSS/SetNonActiveRencanaSS", {
         id: id,
-      })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
-        .then(() => setIsLoading(false));
+      }).then(() => {
+        SweetAlert("Success", "Success Deleted Data", "success").then(() => {
+          window.location.reload();
+        });
+      });
     }
   };
 
@@ -801,7 +800,15 @@ export default function SuggestionSytemIndex({
                 "Scoring Position": value["Scoring Position"] || "-",
                 Status: value["Status"],
                 Count: value["Count"],
-                Action: ["Detail", "Delete"],
+                IsBold: [
+                  "Scoring",
+                  "Waiting Approval",
+                  "Draft Scoring",
+                  "Approved",
+                ].includes(value["Status"]),
+                Action: ["Waiting Approval"].includes(value["Status"])
+                  ? ["Detail", "Delete"]
+                  : ["Detail"],
                 Alignment: [
                   "center",
                   "left",
@@ -824,6 +831,9 @@ export default function SuggestionSytemIndex({
                 userInfo.jabatan === "Kepala Seksi") &&
               type !== "mySubmission"
             ) {
+              const dataemployee = listEmployee.find(
+                (value) => value.npk === value["NPK"]
+              );
               return {
                 Key: value.Key,
                 No: value["No"],
@@ -842,6 +852,15 @@ export default function SuggestionSytemIndex({
                 Score: value["Score"] || 0,
                 Status: value["Status"],
                 Count: value["Count"],
+                IsBold:
+                  (value["Status"] === "Scoring" &&
+                    value["Creaby Score"] !== userInfo.username) ||
+                  (value["Status"] === "Draft Scoring" &&
+                    value["Creaby Score"] === userInfo.username) ||
+                  (value["Status"] === "Waiting Approval" &&
+                    value["Facil"] === userInfo.npk) ||
+                  (value["Status"] === "Approved" &&
+                    value["Facil"] === userInfo.npk),
                 Action:
                   role === "ROL03" &&
                   value["Status"] === "Draft" &&
@@ -868,17 +887,21 @@ export default function SuggestionSytemIndex({
                     : userInfo.jabatan === "Kepala Departemen" &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
-                    : userInfo.jabatan === "Wakil Direktur" &&
+                    : (userInfo.jabatan === "Wakil Direktur" ||
+                        userInfo.jabatan === "Direktur") &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Kepala Seksi" ||
-                      userInfo.jabatan === "Sekretaris Prodi" ||
-                      userInfo.jabatan === "Kepala Departemen" ||
-                      userInfo.jabatan === "Wakil Direktur" ||
-                      userInfo.jabatan === "Direktur") && (value["Status"] === "Scoring" || value["Status"] === "Approved" || value["Status"] === "Final")
+                        userInfo.jabatan === "Sekretaris Prodi" ||
+                        userInfo.jabatan === "Kepala Departemen" ||
+                        userInfo.jabatan === "Wakil Direktur" ||
+                        userInfo.jabatan === "Direktur") &&
+                      (value["Status"] === "Scoring" ||
+                        value["Status"] === "Approved" ||
+                        value["Status"] === "Final")
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
@@ -891,7 +914,8 @@ export default function SuggestionSytemIndex({
                     : userInfo.jabatan === "Kepala Departemen" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
-                    : userInfo.jabatan === "Wakil Direktur" &&
+                    : (userInfo.jabatan === "Wakil Direktur" ||
+                        userInfo.jabatan === "Direktur") &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
                     : ["Detail"],
@@ -925,6 +949,7 @@ export default function SuggestionSytemIndex({
                 "Submitted On": formatDate(value["Creadate"]),
                 Status: value["Status"],
                 Count: value["Count"],
+                IsBold: ["Draft", "Rejected"].includes(value["Status"]),
                 Action:
                   role === "ROL03" &&
                   value["Status"] === "Draft" &&
@@ -1137,7 +1162,7 @@ export default function SuggestionSytemIndex({
           <Button
             title="Assign to batch..."
             classType="primary ms-2"
-            label="SUBMIT"
+            label="Submit"
             onClick={handleSubmitBatch}
           />
         }

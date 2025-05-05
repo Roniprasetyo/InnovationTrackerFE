@@ -273,8 +273,10 @@ export default function Table({
                 if (
                   value !== "Key" &&
                   value !== "Count" &&
-                  value !== "Alignment"
+                  value !== "Alignment" &&
+                  value !== "IsBold"
                 ) {
+                  if (checkboxTable) colCount++;
                   colCount++;
                   return (
                     <th key={"Header" + index} className="text-center">
@@ -312,10 +314,7 @@ export default function Table({
                         value["Status"] === "Belum Dikonversi" ||
                         value["Status"] === "Belum Dibuat Penjadwalan" ||
                         value["Status"] === "Rejected" ||
-                        value["Status"] === "Approved" ||
-                        value["Status"] === "Scoring" ||
-                        value["Status"] === "Waiting Approval" ||
-                        value["Status"] === "Draft Scoring")
+                        value["IsBold"] === true)
                         ? "fw-bold"
                         : undefined
                     }
@@ -323,7 +322,7 @@ export default function Table({
                     {checkboxTable ? (
                       <td
                         className="text-center align-middle"
-                        style={{ width: "1rem" }}
+                        style={{ width: "1.5rem" }}
                       >
                         <input
                           className="form-check-input"
@@ -339,7 +338,8 @@ export default function Table({
                       if (
                         column !== "Key" &&
                         column !== "Count" &&
-                        column !== "Alignment"
+                        column !== "Alignment" &&
+                        column !== "IsBold"
                       ) {
                         colPosition++;
                         return (

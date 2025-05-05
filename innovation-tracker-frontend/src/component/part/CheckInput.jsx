@@ -19,7 +19,6 @@ const CheckInput = forwardRef(function CheckInput(
 
   const handleCheckboxChange = () => {
     if (checkedStates) ref = "";
-    console.log(ref);
     setCheckedStates(!checkedStates);
   };
 
