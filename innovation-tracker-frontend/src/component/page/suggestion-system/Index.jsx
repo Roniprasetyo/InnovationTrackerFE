@@ -76,6 +76,7 @@ export default function SuggestionSytemIndex({
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [penJabatan, setPenJabatan] = useState([]);
+  const [selectedId, setSelectedId] = useState("");
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
@@ -154,6 +155,11 @@ export default function SuggestionSytemIndex({
   }, []);
 
   const handleSubmit = async (id) => {
+    // const selectedItem = currentData.find(item => item.Key === id);
+    // const facil = selectedItem?.Category;
+
+    // console.log("FACIL", facil);
+    // setSelectedId(id);
     setIsError(false);
     setIsError((prevError) => ({ ...prevError, error: false }));
 
@@ -402,13 +408,6 @@ export default function SuggestionSytemIndex({
 
     const tempStatus = getStatusByKey(id);
 
-    const decodedTitle = maxCharDisplayed(
-      decodeHtml(
-        decodeHtml(decodeHtml(value["Project Title"]))
-      ).replace(/<\/?[^>]+(>|$)/g, ""),
-      50
-    );
-
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure about this value?",
@@ -421,31 +420,51 @@ export default function SuggestionSytemIndex({
     
     if (confirm) {
       if (tempStatus !== "Approved") {
-        UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
-          id: id,
-          status: status1,
-        })
-          .then((data) => {
-            if (!data) {
-              setIsError(true);
-            } else {
-              UseFetch(API_LINK + "NotifikasController/CreateNotifikasi", {
-                from: userInfo.username,
-                to: "", 
-                message: `A new Suggestion System submission has been created by ${userInfo.nama} - ${userInfo.npk} with the title: "${decodedTitle}". Please review and take the appropriate action.`,
-                sis: id,
-                rci: -1,
-              });
+        setIsLoading(true);
     
-              SweetAlert(
-                "Success",
-                "Thank you for your submission. Please wait until the next update",
-                "success"
-              );
-              handleSetCurrentPage(currentFilter.page);
-            }
-          })
-          .then(() => setIsLoading(false));
+        try {
+          const updateResult = await UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
+            id: id,
+            status: status1,
+          });
+    
+          if (!updateResult) {
+            setIsError(true);
+            setIsLoading(false);
+            return;
+          }else{
+            const decodedTitle = decodeHtml(
+              decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+            ).replace(/<\/?[^>]+(>|$)/g, "");
+
+            const decodedNama = decodeHtml(
+              decodeHtml(decodeHtml(userInfo.nama))
+            ).replace(/<\/?[^>]+(>|$)/g, "'");
+
+          const notifResult = await UseFetch(API_LINK + "Notifikasi/CreateNotifikasi", {
+            from: userInfo.username,
+            to: "", 
+            message: `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`,
+            sis: id,
+            rci: -1,
+          });
+    
+          console.log("Hasil notifikasi:", notifResult);
+    
+          SweetAlert(
+            "Success",
+            "Thank you for your submission. Please wait until the next update",
+            "success"
+          );
+    
+          handleSetCurrentPage(currentFilter.page);
+        }
+        } catch (error) {
+          console.error("Terjadi error saat submit:", error);
+          setIsError(true);
+        } finally {
+          setIsLoading(false);
+        }
       }
     }    
   };
@@ -591,7 +610,6 @@ export default function SuggestionSytemIndex({
     );
 
     if (confirm) {
-      // setIsLoading(true);
       UseFetch(API_LINK + "RencanaSS/SetNonActiveRencanaSS", {
         id: id,
       }).then(() => {
