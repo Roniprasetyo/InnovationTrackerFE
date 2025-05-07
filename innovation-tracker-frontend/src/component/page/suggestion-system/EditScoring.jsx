@@ -92,7 +92,7 @@ export default function EditScoring({ onChangePage }) {
   const formDataRef2 = useRef([]);
   const formDataRef3 = useRef([]);
   const key = useRef({});
-  const formComment = useRef(null);
+  const [formComment, setFormComment] = useState("");
 
   const userSchema = object({
     Key: number().required("required"),
@@ -240,11 +240,10 @@ export default function EditScoring({ onChangePage }) {
     fetchData();
   }, []);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let status1 = ""; 
+    let status1 = "";
 
     if (
       userInfo.jabatan === "Kepala Seksi" ||
@@ -285,10 +284,10 @@ export default function EditScoring({ onChangePage }) {
       pen_createdate: listPenilaian[0].creadate,
       pen_modif_by: userInfo.username,
       pen_comment:
-        formComment.current && formComment.current.trim() !== ""
-          ? `${formComment.current} - ${userInfo.username}`
+        formComment && formComment.trim() !== ""
+          ? `${formComment} - ${userInfo.username}`
           : "",
-      sis_status: status1
+      sis_status: status1,
     };
 
     const payloadSchema = Yup.object().shape({
@@ -343,7 +342,7 @@ export default function EditScoring({ onChangePage }) {
       pen_modif_by: Yup.string().required("pen_modif_by is required"),
 
       pen_comment: Yup.string().nullable(),
-      sis_status: Yup.string().nullable()
+      sis_status: Yup.string().nullable(),
     });
 
     const validationErrors = await validateAllInputs(
@@ -368,7 +367,7 @@ export default function EditScoring({ onChangePage }) {
         } else {
           SweetAlert("Success", "Data Successfully Submitted", "success");
 
-          setTimeout(function() {
+          setTimeout(function () {
             if (window.opener) {
               window.opener.location.href = ROOT_LINK + "/submission/ss";
               window.close();
@@ -376,7 +375,6 @@ export default function EditScoring({ onChangePage }) {
               window.location.href = ROOT_LINK + "/submission/ss";
             }
           }, 2000); // 2000 milidetik = 2 detik
-          
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -445,9 +443,24 @@ export default function EditScoring({ onChangePage }) {
               KrpId: item.Kriteria,
               creaby: item.Creaby,
               creadate: item.Creadate,
+              komment:
+                userInfo.jabatan === "Kepala Seksi" ||
+                userInfo.jabatan === "Sekretaris Prodi"
+                  ? item.Komment1
+                  : userInfo.jabatan === "Kepala Departemen"
+                  ? item.Komment2
+                  : userInfo.jabatan === "Wakil Direktur" ||
+                    userInfo.jabatan === "Direktur"
+                  ? item.Komment3
+                  : "-",
             };
           });
+          let fullComment = dataDetail[0].komment;
 
+          // Hapus " - sesuatu" di akhir jika memang ada
+          let trimmedComment = fullComment.replace(/\s-\s[^-]+$/, "");
+
+          setFormComment(trimmedComment);
           setListPenilaian(dataDetail);
         }
       } catch (error) {
@@ -474,7 +487,7 @@ export default function EditScoring({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text:`(Poin: ${item.Score}) - ${item.Desc}`,
+            Text: `(Poin: ${item.Score}) - ${item.Desc}`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -506,7 +519,7 @@ export default function EditScoring({ onChangePage }) {
   };
 
   const handleComment = (e) => {
-    formComment.current = e.target.value;
+    setFormComment(e.target.value);
   };
 
   if (isLoading) return <Loading />;
@@ -684,8 +697,7 @@ export default function EditScoring({ onChangePage }) {
                                 // ref={formComment}
                                 // isRequired
                                 onChange={handleComment}
-                                selectedValued={listPenilaian.komment || ""}
-                                value={formComment.current}
+                                value={formComment}
                                 errorMessage={errors.formComment}
                               />
                             </div>
