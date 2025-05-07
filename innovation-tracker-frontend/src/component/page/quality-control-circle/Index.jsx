@@ -235,18 +235,18 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             Status: value["Status"],
             Count: value["Count"],
             Action:
-              role === "ROL03" &&
+              role === "ROL01" &&
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : role === "ROL03" &&
+                : role === "ROL01" &&
                   value["Status"] === "Rejected" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
-                : role === "ROL01" && value["Status"] === "Approved"
+                : role === "ROL36" && value["Status"] === "Approved"
                 ? ["Detail", "Submit"]
                 : ["Detail"],
             Alignment: [
@@ -318,7 +318,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role.slice(0, 5) !== "ROL01" ? (
+          {userInfo.role.slice(0, 5) !== "ROL36" ? (
             <Button
               iconName="add"
               label="Register"
@@ -371,7 +371,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               label="Status"
               type="semua"
               arrData={
-                userInfo.role.slice(0, 5) === "ROL01"
+                userInfo.role.slice(0, 5) === "ROL36"
                   ? dataFilterStatus.filter((item) => item.Value != "Draft")
                   : dataFilterStatus
               }
