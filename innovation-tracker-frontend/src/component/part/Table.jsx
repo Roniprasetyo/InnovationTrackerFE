@@ -21,6 +21,7 @@ export default function Table({
   onScoring = () => {},
   onEditScoring = () => {},
   onCheckedChange = () => {},
+  onFillStep = () => {}
 }) {
   const [selectedKeys, setSelectedKeys] = useState([]);
 
@@ -221,6 +222,17 @@ export default function Table({
               cssClass="btn px-1 py-0 text-primary"
               title="Review"
               onClick={() => onScoring("scoring", id, rowValue)}
+            />
+          );
+          case "FillTheStep":
+          return (
+            <Icon
+              key={key + action}
+              name="clipboard-list"
+              type="Bold"
+              cssClass="btn px-1 py-0 text-primary"
+              title="Fill The Step"
+              onClick={() => onFillStep("fillthestep", id, rowValue)}
             />
           );
         default: {

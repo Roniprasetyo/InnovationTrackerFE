@@ -9,6 +9,10 @@ import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
+import SearchDropdown from "../../part/SearchDropdown";
+import Button from "../../part/Button";
+import TextArea from "../../part/TextArea";
+import FileUpload from "../../part/FileUpload";
 // import userInfo from
 
 const inisialisasiData = [
@@ -20,7 +24,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function QualityControlCircleDetail({ onChangePage, withID }) {
+export default function QualityControlCircleFillStep({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -44,7 +48,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Goal: "",
     GoalFile: "",
     Scope: "",
-    "Start Date": "", 
+    "Start Date": "",
     "End Date": "",
     Quality: "",
     Cost: null,
@@ -420,12 +424,113 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
+                  <div className="card mb-3">
+                    <div className="card-header">
+                      <h5 className="fw-medium">The Steps</h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <Label title="Metodologi" />
+                        </div>
+                        <div className="col-lg-8">
+                          <div className="row">
+                            <div className="col-md-9">
+                              <SearchDropdown />
+                            </div>
+                            <div className="col-md-1">
+                              <Button
+                                classType="secondary"
+                                label="?"
+                                onClick={() => onChangePage("index")}
+                                style={{ width: "100%", borderRadius: "16px" }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <TextArea
+                              forInput="rciCase"
+                              label="Bussiness Case"
+                              isRequired
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
+                              // value={formDataRef.current.rciCase}
+                              // onChange={handleInputChange}
+                              // errorMessage={errors.rciCase}
+                            />
+                          </div>
+                          <div className="col-lg-4 mb-3">
+                            <FileUpload
+                              forInput="rciCaseFile"
+                              label="Bussiness Case Document (.pdf)"
+                              formatFile=".pdf"
+                              // ref={bussinessCaseFileRef}
+                              // onChange={() =>
+                              //   handleFileChange(bussinessCaseFileRef, "pdf")
+                              // }
+                              // errorMessage={errors.rciCaseFile}
+                            />
+                          </div>
+                          <hr />
+                          <div className="col-lg-12">
+                            <TextArea
+                              forInput="rciProblem"
+                              label="Problem Statement​"
+                              isRequired
+                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
+                              // value={formDataRef.current.rciProblem}
+                              // onChange={handleInputChange}
+                              // errorMessage={errors.rciProblem}
+                            />
+                          </div>
+                          <div className="col-lg-4 mb-3">
+                            <FileUpload
+                              forInput="rciProblemFile"
+                              label="Problem Statement​ Document (.pdf)"
+                              formatFile=".pdf"
+                              // ref={problemFileRef}
+                              // onChange={() =>
+                              //   handleFileChange(problemFileRef, "pdf")
+                              // }
+                              // errorMessage={errors.rciProblemFile}
+                            />
+                          </div>
+                          <hr />
+                          <div className="col-lg-12">
+                            <TextArea
+                              forInput="rciGoal"
+                              label="Goal Statement​"
+                              isRequired
+                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
+                              // value={formDataRef.current.rciGoal}
+                              // onChange={handleInputChange}
+                              // errorMessage={errors.rciGoal}
+                            />
+                          </div>
+                          <div className="col-lg-4">
+                            <FileUpload
+                              forInput="goalFileRef"
+                              label="Goal Statement​ Document (.pdf)"
+                              formatFile=".pdf"
+                              // ref={goalFileRef}
+                              // onChange={() =>
+                                // handleFileChange(goalFileRef, "pdf")
+                              // }
+                              // errorMessage={errors.goalFileRef}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />
-                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                      <Label
-                      data={formDataRef.current["Alasan Penolakan"]}/>
+                      <h5 className="fw-medium fw-bold">
+                        Reason for Rejection
+                      </h5>
+                      <Label data={formDataRef.current["Alasan Penolakan"]} />
                       <hr />
                     </div>
                   )}

@@ -248,6 +248,10 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 ? ["Detail", "Edit", "Submit"]
                 : role === "ROL01" && value["Status"] === "Approved"
                 ? ["Detail", "Submit"]
+                : role === "ROL03" &&
+                  value["Status"] === "Approved" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "FillTheStep"]
                 : ["Detail"],
             Alignment: [
               "center",
@@ -389,6 +393,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             onApprove={handleApprove}
             onReject={handleReject}
             onEdit={onChangePage}
+            onFillStep={onChangePage}
           />
           <Paging
             pageSize={PAGE_SIZE}
