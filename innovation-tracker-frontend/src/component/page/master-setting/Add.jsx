@@ -15,6 +15,7 @@ const listTypeSetting = [
   { Value: "Innovation Category", Text: "Innovation Category" },
   { Value: "Knowledge Category", Text: "Knowledge Category" },
   { Value: "Innovation Role Category", Text: "Innovation Role Category" },
+  { Value: "Mini Convention", Text: "Mini Convention" },
 ];
 
 export default function MasterSettingAdd({ onChangePage }) {

@@ -222,14 +222,14 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
             Status: value["Status"],
             Count: value["Count"],
             Action:
-              role === "ROL03" &&
+              role === "ROL01" &&
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : role === "ROL03" &&
+                : role === "ROL01" &&
                 value["Status"] === "Rejected" &&
                 value["Creaby"] === userInfo.username
                   ? ["Detail", "Edit", "Submit"]
@@ -287,7 +287,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role.slice(0, 5) !== "ROL01" ? (
+          {userInfo.role.slice(0, 5) !== "ROL36" ? (
             <Button
               iconName="add"
               label="Register"
@@ -324,7 +324,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               label="Status"
               type="semua"
               arrData={
-                userInfo.role.slice(0, 5) === "ROL01"
+                userInfo.role.slice(0, 5) === "ROL36"
                   ? dataFilterStatus.filter((item) => item.Value != "Draft")
                   : dataFilterStatus
               }

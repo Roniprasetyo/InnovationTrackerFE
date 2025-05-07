@@ -79,11 +79,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     endPeriod: "",
   });
 
-  console.log("SECTION HEAD", sectionHead);
-  console.log("LIST", listAllDepartment);
-  console.log("LIST employee", listEmployee);
-  console.log("Userinfo", userInfo);
-
   const bussinessCaseFileRef = useRef(null);
   const problemFileRef = useRef(null);
   const goalFileRef = useRef(null);
@@ -142,17 +137,15 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       );
 
       const lgsungDirektur = listEmployee.find(
-        (value) =>
-          value.npk === userInfo.npk
+        (value) => value.npk === userInfo.npk
       );
   
-      const Direktur = listDepartment.find(
+      const Direktur = listEmployee.find(
         (value) =>
-          value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
+          value.jabatan === userInfo.departemen
       );
   
-      console.log("SECONLYD", secondly);
-      let selected = secondly || kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
+      let selected = kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -205,7 +198,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
               value.Struktur === userStruktur["Struktur Parent"]
           );
   
-          console.log("lanngsung direktur", lgsungDirektur);
           if (Kadept) {
             const matchingDirect = listEmployee.find(
               (emp) => emp.npk === Kadept.Npk
@@ -240,17 +232,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       );
     }
   }, [listDepartment]);
-  
-  useEffect(() => {
-    const userStruktur = listDepartment.find(
-      (value) =>
-        value.Struktur === userInfo.departemen
-    );
-    setEmp(userStruktur);
-
-  }, [listEmployee]);
-
-  console.log("EMP", emp)
 
   useEffect(() => {
       const fetchData = async () => {
