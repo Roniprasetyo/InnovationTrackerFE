@@ -498,7 +498,7 @@ export default function SuggestionSytemIndex({
           if (data === "ERROR" || data.length === 0) {
             setIsError(true);
           } else {
-            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApprove", {
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveReject", {
               from: userInfo.username,
               to: "",
               message: `Suggestion System Submission Approved. Your Suggestion System submission titled ${decodedTitle} has been approved and will proceed to the evaluation stage.`,
