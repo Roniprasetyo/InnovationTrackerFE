@@ -417,22 +417,22 @@ export default function SuggestionSytemIndex({
       "",
       true
     );
-    
+
     if (confirm) {
       if (tempStatus !== "Approved") {
         setIsLoading(true);
-    
+
         try {
           const updateResult = await UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
             id: id,
             status: status1,
           });
-    
+
           if (!updateResult) {
             setIsError(true);
             setIsLoading(false);
             return;
-          }else{
+          } else {
             const decodedTitle = decodeHtml(
               decodeHtml(decodeHtml(currentData[0]["Project Title"]))
             ).replace(/<\/?[^>]+(>|$)/g, "");
@@ -441,24 +441,24 @@ export default function SuggestionSytemIndex({
               decodeHtml(decodeHtml(userInfo.nama))
             ).replace(/<\/?[^>]+(>|$)/g, "'");
 
-          const notifResult = await UseFetch(API_LINK + "Notifikasi/CreateNotifikasi", {
-            from: userInfo.username,
-            to: "", 
-            message: `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`,
-            sis: id,
-            rci: -1,
-          });
-    
-          console.log("Hasil notifikasi:", notifResult);
-    
-          SweetAlert(
-            "Success",
-            "Thank you for your submission. Please wait until the next update",
-            "success"
-          );
-    
-          handleSetCurrentPage(currentFilter.page);
-        }
+            const notifResult = await UseFetch(API_LINK + "Notifikasi/CreateNotifikasi", {
+              from: userInfo.username,
+              to: "",
+              message: `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`,
+              sis: id,
+              rci: -1,
+            });
+
+            console.log("Hasil notifikasi:", notifResult);
+
+            SweetAlert(
+              "Success",
+              "Thank you for your submission. Please wait until the next update",
+              "success"
+            );
+
+            handleSetCurrentPage(currentFilter.page);
+          }
         } catch (error) {
           console.error("Terjadi error saat submit:", error);
           setIsError(true);
@@ -466,7 +466,7 @@ export default function SuggestionSytemIndex({
           setIsLoading(false);
         }
       }
-    }    
+    }
   };
 
   const handleApprove = async (id) => {
@@ -482,20 +482,38 @@ export default function SuggestionSytemIndex({
     );
 
     if (confirm) {
+      setIsLoading(true);
+
       UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Approved",
         reason: null,
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+        .then(async (data) => {
+
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          if (data === "ERROR" || data.length === 0) {
+            setIsError(true);
+          } else {
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApprove", {
+              from: userInfo.username,
+              to: "",
+              message: `Suggestion System Submission Approved. Your Suggestion System submission titled ${decodedTitle} has been approved and will proceed to the evaluation stage.`,
+              sis: id,
+              rci: -1,
+            });
             handleSetCurrentPage(currentFilter.page);
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     }
   };
+
+
   const handleSubmitBatch = (id) => {
     setIsError(false);
     setIsLoading(true);
@@ -581,18 +599,33 @@ export default function SuggestionSytemIndex({
     );
 
     if (confirm) {
+      setIsLoading(true);
       UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Rejected",
-        reason: confirm,
+        reason: confirm, 
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+        .then(async (data) => {
+
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          if (data === "ERROR" || data.length === 0) {
+            setIsError(true);
+          } else {
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveReject", {
+              from: userInfo.username,
+              to: "",
+              message: `Suggestion System Submission Reject. Your Suggestion System submission titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
+              sis: id,
+              rci: -1,
+            });
             handleSetCurrentPage(currentFilter.page);
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -776,8 +809,8 @@ export default function SuggestionSytemIndex({
           type === "mySubmission"
             ? API_LINK + "RencanaSS/GetMyRencanaSS"
             : userInfo.role.slice(0, 5) === "ROL01"
-            ? API_LINK + "RencanaSS/GetRencanaSSforInnoCoor"
-            : API_LINK + "RencanaSS/GetRencanaSS",
+              ? API_LINK + "RencanaSS/GetRencanaSSforInnoCoor"
+              : API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter
         );
 
@@ -881,62 +914,62 @@ export default function SuggestionSytemIndex({
                     value["Facil"] === userInfo.npk),
                 Action:
                   role === "ROL03" &&
-                  value["Status"] === "Draft" &&
-                  value["Creaby"] === userInfo.username
+                    value["Status"] === "Draft" &&
+                    value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
                     : inorole === "Facilitator" &&
                       value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL03" &&
-                      value["Status"] === "Rejected" &&
-                      value["Creaby"] === userInfo.username
-                    ? ["Detail", "Edit", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL01" && value["Status"] === "Approved"
-                    ? ["Detail", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      (value["Status"] === "Approved" ||
-                        value["Status"] === "Awaiting Scoring")
-                    ? ["Detail", "Scoring"]
-                    : userInfo.jabatan === "Kepala Departemen" &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : (userInfo.jabatan === "Wakil Direktur" ||
-                        userInfo.jabatan === "Direktur") &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : (userInfo.jabatan === "Kepala Seksi" ||
-                        userInfo.jabatan === "Sekretaris Prodi" ||
-                        userInfo.jabatan === "Kepala Departemen" ||
-                        userInfo.jabatan === "Wakil Direktur" ||
-                        userInfo.jabatan === "Direktur") &&
-                      (value["Status"] === "Scoring" ||
-                        value["Status"] === "Approved" ||
-                        value["Status"] === "Final")
-                    ? ["Detail", "Scoring"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Approved"
-                    ? ["Detail", "Scoring"]
-                    : userInfo.upt === foundEmployee.upt &&
-                      userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : userInfo.jabatan === "Kepala Departemen" &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
-                    : (userInfo.jabatan === "Wakil Direktur" ||
-                        userInfo.jabatan === "Direktur") &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail", "Reject", "Approve"]
-                    : ["Detail"],
+                      ? ["Detail", "Reject", "Approve"]
+                      : role === "ROL03" &&
+                        value["Status"] === "Rejected" &&
+                        value["Creaby"] === userInfo.username
+                        ? ["Detail", "Edit", "Submit"]
+                        : userInfo.upt === foundEmployee.upt &&
+                          userInfo.jabatan === "Kepala Seksi" &&
+                          value["Status"] === "Waiting Approval"
+                          ? ["Detail", "Reject", "Approve"]
+                          : role === "ROL01" && value["Status"] === "Approved"
+                            ? ["Detail", "Submit"]
+                            : userInfo.upt === foundEmployee.upt &&
+                              userInfo.jabatan === "Kepala Seksi" &&
+                              (value["Status"] === "Approved" ||
+                                value["Status"] === "Awaiting Scoring")
+                              ? ["Detail", "Scoring"]
+                              : userInfo.jabatan === "Kepala Departemen" &&
+                                value["Status"] === "Draft Scoring"
+                                ? ["Detail", "EditScoring", "Submit"]
+                                : (userInfo.jabatan === "Wakil Direktur" ||
+                                  userInfo.jabatan === "Direktur") &&
+                                  value["Status"] === "Draft Scoring"
+                                  ? ["Detail", "EditScoring", "Submit"]
+                                  : userInfo.jabatan === "Kepala Seksi" &&
+                                    value["Status"] === "Draft Scoring"
+                                    ? ["Detail", "EditScoring", "Submit"]
+                                    : (userInfo.jabatan === "Kepala Seksi" ||
+                                      userInfo.jabatan === "Sekretaris Prodi" ||
+                                      userInfo.jabatan === "Kepala Departemen" ||
+                                      userInfo.jabatan === "Wakil Direktur" ||
+                                      userInfo.jabatan === "Direktur") &&
+                                      (value["Status"] === "Scoring" ||
+                                        value["Status"] === "Approved" ||
+                                        value["Status"] === "Final")
+                                      ? ["Detail", "Scoring"]
+                                      : userInfo.upt === foundEmployee.upt &&
+                                        userInfo.jabatan === "Kepala Seksi" &&
+                                        value["Status"] === "Approved"
+                                        ? ["Detail", "Scoring"]
+                                        : userInfo.upt === foundEmployee.upt &&
+                                          userInfo.jabatan === "Kepala Seksi" &&
+                                          value["Status"] === "Draft Scoring"
+                                          ? ["Detail", "EditScoring", "Submit"]
+                                          : userInfo.jabatan === "Kepala Departemen" &&
+                                            value["Status"] === "Waiting Approval"
+                                            ? ["Detail", "Reject", "Approve"]
+                                            : (userInfo.jabatan === "Wakil Direktur" ||
+                                              userInfo.jabatan === "Direktur") &&
+                                              value["Status"] === "Waiting Approval"
+                                              ? ["Detail", "Reject", "Approve"]
+                                              : ["Detail"],
                 Alignment: [
                   "center",
                   "left",
@@ -970,47 +1003,47 @@ export default function SuggestionSytemIndex({
                 IsBold: ["Draft", "Rejected"].includes(value["Status"]),
                 Action:
                   role === "ROL03" &&
-                  value["Status"] === "Draft" &&
-                  value["Creaby"] === userInfo.username
+                    value["Status"] === "Draft" &&
+                    value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
                     : inorole === "Facilitator" &&
                       value["Status"] === "Waiting Approval" &&
                       value.Creaby !== userInfo.username
-                    ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL03" &&
-                      value["Status"] === "Rejected" &&
-                      value["Creaby"] === userInfo.username
-                    ? ["Detail", "Edit", "Submit"]
-                    : role === "ROL01" && value["Status"] === "Approved"
-                    ? ["Detail", "Submit"]
-                    : // : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring")
-                    // ? ["Detail", "Scoring"]
-                    // : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
-                    // ? ["Detail", "Scoring"]
-                    jabatanTarget === "Kepala Departemen" &&
-                      value["Status"] === "Waiting Approval"
-                    ? ["Detail"]
-                    : (jabatanTarget === "Wakil Direktur" ||
-                        jabatanTarget === "Direktur") &&
-                      value["Status"] !== "Draft Scoring"
-                    ? ["Detail", "Scoring"]
-                    : (jabatanTarget === "Wakil Direktur" ||
-                        jabatanTarget === "Direktur") &&
-                      value["Status"] === "Scoring"
-                    ? ["Detail", "Scoring"]
-                    : // : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"]
-                    userInfo.upt === foundEmployee.upt &&
-                      (jabatanTarget === "Kepala Seksi" ||
-                        jabatanTarget === "Sekretaris Prodi") &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : jabatanTarget === "Kepala Departemen" &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : jabatanTarget === "Wakil Direktur" &&
-                      value["Status"] === "Draft Scoring"
-                    ? ["Detail", "EditScoring", "Submit"]
-                    : ["Detail"],
+                      ? ["Detail", "Reject", "Approve"]
+                      : role === "ROL03" &&
+                        value["Status"] === "Rejected" &&
+                        value["Creaby"] === userInfo.username
+                        ? ["Detail", "Edit", "Submit"]
+                        : role === "ROL01" && value["Status"] === "Approved"
+                          ? ["Detail", "Submit"]
+                          : // : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring")
+                          // ? ["Detail", "Scoring"]
+                          // : (jabatanTarget === "Kepala Departemen") && (value["Status"] !== "Draft Scoring")
+                          // ? ["Detail", "Scoring"]
+                          jabatanTarget === "Kepala Departemen" &&
+                            value["Status"] === "Waiting Approval"
+                            ? ["Detail"]
+                            : (jabatanTarget === "Wakil Direktur" ||
+                              jabatanTarget === "Direktur") &&
+                              value["Status"] !== "Draft Scoring"
+                              ? ["Detail", "Scoring"]
+                              : (jabatanTarget === "Wakil Direktur" ||
+                                jabatanTarget === "Direktur") &&
+                                value["Status"] === "Scoring"
+                                ? ["Detail", "Scoring"]
+                                : // : userInfo.upt === foundEmployee.upt && jabatanTarget === "Kepala Seksi" && value["Status"] === "Approved"  ? ["Detail", "Scoring"]
+                                userInfo.upt === foundEmployee.upt &&
+                                  (jabatanTarget === "Kepala Seksi" ||
+                                    jabatanTarget === "Sekretaris Prodi") &&
+                                  value["Status"] === "Draft Scoring"
+                                  ? ["Detail", "EditScoring", "Submit"]
+                                  : jabatanTarget === "Kepala Departemen" &&
+                                    value["Status"] === "Draft Scoring"
+                                    ? ["Detail", "EditScoring", "Submit"]
+                                    : jabatanTarget === "Wakil Direktur" &&
+                                      value["Status"] === "Draft Scoring"
+                                      ? ["Detail", "EditScoring", "Submit"]
+                                      : ["Detail"],
                 Alignment: [
                   "center",
                   "left",
