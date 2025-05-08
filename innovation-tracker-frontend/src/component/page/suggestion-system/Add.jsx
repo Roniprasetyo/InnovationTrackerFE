@@ -27,12 +27,10 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [listEmployee, setListEmployee] = useState([]);
-  const [emp, setEmp] = useState([]);
   const [sectionHead, setSectionHead] = useState({});
   const [listDepartment, setListDepartment] = useState([]);
   const [listCategory, setListCategory] = useState([]);
   const [listPeriod, setListPeriod] = useState([]);
-  const [listAllDepartment, setAllListDepartment] = useState([]);
   const [listImpCategory, setListImpCategory] = useState([]);
 
   const [checkedStates, setCheckedStates] = useState({
@@ -109,91 +107,77 @@ export default function SuggestionSystemAdd({ onChangePage }) {
   });
 
   useEffect(() => {
-    if (
-      listEmployee.length > 0 &&
-      userInfo?.upt &&
-      listDepartment.length > 0
-    ) {
+    if (listEmployee.length > 0 && userInfo?.upt && listDepartment.length > 0) {
       const kepalaSeksi = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
-          (value.jabatan === "Kepala Seksi" || value.jabatan === "Kepala Departemen")
+          (value.jabatan === "Kepala Seksi" ||
+            value.jabatan === "Kepala Departemen")
       );
-  
+
       const sekProdi = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
-          (value.jabatan === "Sekretaris Prodi" || value.jabatan === "Kepala Departemen")
-      );
-  
-      const kepalaDepartemen = listEmployee.find(
-        (value) =>
-          value.npk === userInfo.npk &&
-          value.jabatan === "Kepala Departemen"
+          (value.jabatan === "Sekretaris Prodi" ||
+            value.jabatan === "Kepala Departemen")
       );
 
-      const lgsungDirektur = listEmployee.find(
+      const kepalaDepartemen = listEmployee.find(
         (value) =>
-          value.npk === userInfo.npk
+          value.npk === userInfo.npk && value.jabatan === "Kepala Departemen"
       );
-  
-      const Direktur = listDepartment.find(
-        (value) =>
-          value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
-      );
-  
-      let selected = Direktur || kepalaDepartemen || sekProdi || kepalaSeksi;
-  
+
+      let selected = kepalaDepartemen || kepalaSeksi || sekProdi;
+
       if (
         selected?.npk === userInfo.npk &&
-        (selected.jabatan === "Kepala Seksi" || selected.jabatan === "Sekretaris Prodi")
+        (selected.jabatan === "Kepala Seksi" ||
+          selected.jabatan === "Sekretaris Prodi")
       ) {
         const userStruktur = listDepartment.find(
           (item) => item.Npk === userInfo.npk
         );
-  
+
         if (userStruktur) {
           const parent = userStruktur["Struktur Parent"];
-  
+
           const parentDept = listDepartment.find(
             (item) =>
               item["Struktur Parent"] === parent &&
               item.Jabatan === "Kepala Departemen"
           );
-  
+
           if (parentDept) {
             const matchingEmployee = listEmployee.find(
               (emp) => emp.npk === parentDept.Npk
             );
-  
+
             if (matchingEmployee) {
               setSectionHead(matchingEmployee);
               return;
             }
           }
         }
-      }
-      else if(
+      } else if (
         selected?.npk === userInfo.npk &&
-        (selected.jabatan === "Kepala Departemen" && selected.jabatan !== "Sekretaris Prodi")
+        selected.jabatan === "Kepala Departemen"
       ) {
         const userStruktur = listDepartment.find(
           (item) => item.Npk === userInfo.npk
         );
-  
+
         if (userStruktur) {
           const parent = userStruktur["Struktur Parent"];
-  
+
           const Kadept = listDepartment.find(
-            (item) =>
-              item.Struktur === parent
+            (item) => item.Struktur === parent
           );
-  
+
           if (Kadept) {
             const matchingDirect = listEmployee.find(
               (emp) => emp.npk === Kadept.Npk
             );
-  
+
             if (Kadept) {
               setSectionHead(matchingDirect);
               return;
@@ -201,99 +185,56 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           }
         }
       }
-  
+
       if (selected) {
         setSectionHead(selected);
       }
     }
-  }, [listEmployee, userInfo, listDepartment]);  
+  }, [listEmployee, userInfo, listDepartment]);
 
   useEffect(() => {
     const userStruktur = listDepartment.find(
       (item) => item.Npk === userInfo.npk
     );
-    if(userStruktur) {
+    if (userStruktur) {
       const parent = userStruktur["Struktur Parent"];
       const wakilDirect = listDepartment.find(
-        (item) =>
-          item.Struktur === parent
+        (item) => item.Struktur === parent
       );
     }
   }, [listDepartment]);
-  
-  useEffect(() => {
-    const userStruktur = listEmployee.find(
-      (item) => item.npk === userInfo.npk
-    );
-    setEmp(userStruktur);
-
-  }, [listEmployee]);
 
   useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const data = await UseFetch(
-            API_LINK + "RencanaSS/GetListStrukturDepartment"
-          );
-  
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the category data.");
-          } else {
-  
-            setAllListDepartment(data);
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListCategory({});
-        }finally {
-          setIsLoading(false);
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaSS/GetListStrukturDepartment"
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListDepartment(data);
         }
-      };
-      fetchData();
-    }, []);
-  
-
-  useEffect(() => {
-      const fetchData = async () => {
-        setIsError((prevError) => ({ ...prevError, error: false }));
-        try {
-          const data = await UseFetch(
-            API_LINK + "RencanaSS/GetListStrukturDepartment"
-          );
-  
-          if (data === "ERROR") {
-            throw new Error("Error: Failed to get the category data.");
-          } else {
-  
-            setListDepartment(data);
-          }
-        } catch (error) {
-          window.scrollTo(0, 0);
-          setIsError((prevError) => ({
-            ...prevError,
-            error: true,
-            message: error.message,
-          }));
-          setListCategory({});
-        }finally {
-          setIsLoading(false);
-        }
-      };
-      fetchData();
-    }, []);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListCategory({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (sectionHead?.npk) {
       formDataRef.current.facil_id = sectionHead.npk;
-    }
-    else if (sectionHead?.Npk) {
-      formDataRef.current.facil_id = sectionHead.Npk;
     }
   }, [sectionHead]);
 
@@ -473,90 +414,94 @@ export default function SuggestionSystemAdd({ onChangePage }) {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    const validationErrors = await validateAllInputs(
-      formDataRef.current,
-      userSchema,
-      setErrors
-    );
 
-    if (Object.values(validationErrors).every((error) => !error)) {
-      const sDate = new Date(formDataRef.current.sis_tanggalmulai);
-      const eDate = new Date(formDataRef.current.sis_tanggalakhir);
-      const selectedEndDate = new Date(periodDataRef.current.endPeriod);
+    console.log(formDataRef.current);
+    // const validationErrors = await validateAllInputs(
+    //   formDataRef.current,
+    //   userSchema,
+    //   setErrors
+    // );
 
-      if (sDate >= eDate) {
-        window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message: "Invalid date: The end date must be after the start date!",
-        });
-        return;
-      }
+    // if (Object.values(validationErrors).every((error) => !error)) {
+    //   const sDate = new Date(formDataRef.current.sis_tanggalmulai);
+    //   const eDate = new Date(formDataRef.current.sis_tanggalakhir);
+    //   const selectedEndDate = new Date(periodDataRef.current.endPeriod);
 
-      if (eDate > selectedEndDate) {
-        window.scrollTo(0, 0);
-        setIsError({
-          error: true,
-          message:
-            "Invalid date: Selected end date exceeds the innovation period end date",
-        });
-        return;
-      }
+    //   if (sDate >= eDate) {
+    //     window.scrollTo(0, 0);
+    //     setIsError({
+    //       error: true,
+    //       message: "Invalid date: The end date must be after the start date!",
+    //     });
+    //     return;
+    //   }
 
-      setIsLoading(true);
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setErrors({});
+    //   if (eDate > selectedEndDate) {
+    //     window.scrollTo(0, 0);
+    //     setIsError({
+    //       error: true,
+    //       message:
+    //         "Invalid date: Selected end date exceeds the innovation period end date",
+    //     });
+    //     return;
+    //   }
 
-      const uploadPromises = [];
+    //   setIsLoading(true);
+    //   setIsError((prevError) => ({ ...prevError, error: false }));
+    //   setErrors({});
 
-      if (bussinessCaseFileRef.current.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(bussinessCaseFileRef.current).then(
-            (data) => (formDataRef.current["sis_kasusfile"] = data.Hasil)
-          )
-        );
-      }
-      if (problemFileRef.current.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(problemFileRef.current).then(
-            (data) => (formDataRef.current["sis_masalahfile"] = data.Hasil)
-          )
-        );
-      }
-      if (goalFileRef.current.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(goalFileRef.current).then(
-            (data) => (formDataRef.current["sis_tujuanfile"] = data.Hasil)
-          )
-        );
-      }
+    //   const uploadPromises = [];
 
-      try {
-        await Promise.all(uploadPromises);
+    //   if (bussinessCaseFileRef.current.files.length > 0) {
+    //     uploadPromises.push(
+    //       UploadFile(bussinessCaseFileRef.current).then(
+    //         (data) => (formDataRef.current["sis_kasusfile"] = data.Hasil)
+    //       )
+    //     );
+    //   }
+    //   if (problemFileRef.current.files.length > 0) {
+    //     uploadPromises.push(
+    //       UploadFile(problemFileRef.current).then(
+    //         (data) => (formDataRef.current["sis_masalahfile"] = data.Hasil)
+    //       )
+    //     );
+    //   }
+    //   if (goalFileRef.current.files.length > 0) {
+    //     uploadPromises.push(
+    //       UploadFile(goalFileRef.current).then(
+    //         (data) => (formDataRef.current["sis_tujuanfile"] = data.Hasil)
+    //       )
+    //     );
+    //   }
 
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/CreateRencanaSS",
-          formDataRef.current
-        );
+    //   try {
+    //     await Promise.all(uploadPromises);
 
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to submit the data.");
-        } else {
-          SweetAlert("Success", "Data successfully submitted", "success");
-          onChangePage("index");
-        }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
-      }
-    } else window.scrollTo(0, 0);
+    //     const data = await UseFetch(
+    //       API_LINK + "RencanaSS/CreateRencanaSS",
+    //       formDataRef.current
+    //     );
+
+    //     if (data === "ERROR") {
+    //       throw new Error("Error: Failed to submit the data.");
+    //     } else {
+    //       SweetAlert("Success", "Data successfully submitted", "success");
+    //       onChangePage("index");
+    //     }
+    //   } catch (error) {
+    //     window.scrollTo(0, 0);
+    //     setIsError((prevError) => ({
+    //       ...prevError,
+    //       error: true,
+    //       message: error.message,
+    //     }));
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // } else window.scrollTo(0, 0);
   };
+
+  console.log(formDataRef.current.facil_id);
 
   return (
     <>
