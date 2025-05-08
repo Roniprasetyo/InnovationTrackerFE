@@ -410,7 +410,7 @@ export default function SuggestionSytemIndex({
 
     const confirm = await SweetAlert(
       "Confirm",
-      "Are you sure about this value?",
+      "  sure about this value?",
       "info",
       "Submit",
       null,
@@ -505,6 +505,15 @@ export default function SuggestionSytemIndex({
               sis: id,
               rci: -1,
             });
+
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasi2", {
+              from: userInfo.username,
+              to: userInfo.username,
+              message: `Suggestion System Requires Evaluation. A Suggestion System submission titled ${decodedTitle}, submitted by`,
+              sis: id,
+              rci: -1,
+            });
+
             handleSetCurrentPage(currentFilter.page);
           }
         })
@@ -603,7 +612,7 @@ export default function SuggestionSytemIndex({
       UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Rejected",
-        reason: confirm, 
+        reason: confirm,
       })
         .then(async (data) => {
 
