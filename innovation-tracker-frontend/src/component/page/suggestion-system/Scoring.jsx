@@ -1,44 +1,22 @@
 import { useRef, useState, useEffect } from "react";
-import { redirect, useSearchParams } from "react-router-dom";
-import {
-  decodeHtml,
-  formatDate,
-  maxCharDisplayed,
-  separator,
-} from "../../util/Formatting";
-import {
-  API_LINK,
-  EMP_API_LINK,
-  FILE_LINK,
-  ROOT_LINK,
-} from "../../util/Constants";
+import { useSearchParams } from "react-router-dom";
+import { maxCharDisplayed } from "../../util/Formatting";
+import { API_LINK, EMP_API_LINK, ROOT_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import { date, number, object, string } from "yup";
 import * as Yup from "yup";
 import Alert from "../../part/Alert";
 import SweetAlert from "../../util/SweetAlert";
-import Icon from "../../part/Icon";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
-import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
 import Input from "../../part/Input";
 import SearchDropdown from "../../part/SearchDropdown";
-import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
-import { Tabs, Tab, Box, Paper, List } from "@mui/material";
+import { Tabs, Tab, Box } from "@mui/material";
 import PropTypes from "prop-types";
-
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    Name: null,
-    Count: 0,
-  },
-];
 
 function TabScoring(props) {
   const { children, value, index, ...other } = props;
@@ -62,17 +40,10 @@ TabScoring.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
 function deobfuscateId(obfuscated) {
   const parts = obfuscated.split(".");
   if (parts.length === 2) {
-    return atob(parts[1]); // hanya ambil bagian Base64
+    return atob(parts[1]);
   }
   return null;
 }
@@ -93,13 +64,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [scoringPosition, setScoringPosition] = useState([]);
   const [scoringPositionRole, setScoringPositionRole] = useState([]);
   const [activeTab, setActiveTab] = useState(false);
-  const [isSearchDropdown, setIsSearchDropdown] = useState(false);
   const [listAllPenilaian, setAllListPenilaian] = useState([]);
   const [listSettingRanking, setListSettingRanking] = useState([]);
   const [listPenilaianKaDept, setListPenilaianKaDept] = useState([]);
   const [listPenilaianWadir, setListPenilaianWadir] = useState([]);
   const [submitOnly, setReadOnly] = useState(false);
-  const [listKaDept, setKaDept] = useState([]);
   const [detailSS, setDetailSS] = useState([]);
   const [listRecordPenilaian, setRecordListPenilaian] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
@@ -110,8 +79,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   const [totalScoreforWadir, setTotalScoreforWadir] = useState(0);
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [userInput, setUserInput] = useState("");
-  const [formattedValue, setFormattedValue] = useState("");
   const [forPenilai, setForPenilai] = useState("");
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const [listValues, setListValues] = useState([]);
@@ -208,7 +175,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
     fetchData();
   }, [id]);
-
+  const handleCancel = () => {
+    window.opener.location.href = ROOT_LINK + "/submission/ss";
+    window.close();
+  };
   useEffect(() => {
     if (listEmployee.length > 0 && userInfo?.upt) {
       const userData = listEmployee.find(
@@ -281,7 +251,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             name: value.nama,
             upt: value.upt_bagian,
             jabatan: value.jabatan,
-            // jurusan: value.departemen_jurusan,
           }))
         );
 
@@ -308,23 +277,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       userInfo.jabatan === "Kepala Seksi" ||
       userInfo.jabatan === "Sekretaris Prodi"
     ) {
-      comment =
-        formCommentFase1.trim() !== ""
-          ? `${formCommentFase1} - ${userInfo.username}`
-          : "";
+      formCommentFase1?.trim() !== "" ? formCommentFase1 : "";
+      comment = formCommentFase1;
     } else if (userInfo.jabatan === "Kepala Departemen") {
-      comment =
-        formCommentFase2.trim() !== ""
-          ? `${formCommentFase2} - ${userInfo.username}`
-          : "";
+      formCommentFase2?.trim() !== "" ? formCommentFase2 : "";
+      comment = formCommentFase2;
     } else if (
       userInfo.jabatan === "Direktur" ||
       userInfo.jabatan === "Wakil Direktur"
     ) {
-      comment =
-        formCommentFase3.trim() !== ""
-          ? `${formCommentFase3} - ${userInfo.username}`
-          : "";
+      comment = formCommentFase3?.trim() !== "" ? formCommentFase3 : "";
     }
 
     const payload = {
@@ -334,7 +296,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       jabatan: userInfo.jabatan,
       statusPN: "-",
       created: userInfo.username,
-      pen_comment: comment,
+      pen_comment: `${comment} - ${userInfo.username}`,
     };
 
     const payloadSchema = Yup.object().shape({
@@ -356,20 +318,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             return items.length === listKriteriaPenilaian.length;
           }
         ),
-
       sis_id: Yup.string().required("sis_id is required"),
-
-      pen_nilai: Yup.string()
-        .required("pen_nilai is required")
-        .matches(
-          /^(\d+\s*,\s*)*\d+$/,
-          "pen_nilai must be a comma-separated list of numbers"
-        ),
-
+      pen_nilai: Yup.string().required("pen_nilai is required"),
       jabatan: Yup.string().required("jabatan is required"),
-
       statusPN: Yup.string().required("statusPN is required"),
-
       created: Yup.string().required("created is required"),
       pen_comment: Yup.string().nullable(),
     });
@@ -419,16 +371,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   };
 
   const handleComment1 = (e) => {
-    console.log(e.target.value);
     setFormCommentFase1(e.target.value);
   };
+
   const handleComment2 = (e) => {
-    console.log(e.target.value);
     setFormCommentFase2(e.target.value);
   };
 
   const handleComment3 = (e) => {
-    console.log(e.target.value);
     setFormCommentFase3(e.target.value);
   };
 
@@ -452,7 +402,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       } finally {
         setIsLoading(false);
       }
@@ -472,10 +421,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         );
 
         if (!data) {
-          // throw new Error("Error: Failed to get the category data.");
         } else {
-          // console.log("Data", data);
-          setFormCommentFase2(data[0]?.Komment);
+          if (data[0]?.Komment !== null && data[0]?.Komment !== "") {
+            setFormCommentFase2(data[0]?.Komment);
+          } else {
+            setFormCommentFase2("-");
+          }
           setListPenilaianKaDept(data);
         }
       } catch (error) {
@@ -504,9 +455,13 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         );
 
         if (!data) {
-          throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the Wadir/Dir data.");
         } else {
-          setFormCommentFase3(data[0]?.Komment);
+          if (data[0]?.Komment !== null && data[0]?.Komment !== "") {
+            setFormCommentFase3(data[0]?.Komment);
+          } else {
+            setFormCommentFase3("-");
+          }
           setListPenilaianWadir(data);
         }
       } catch (error) {
@@ -532,10 +487,13 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         });
 
         if (data === "ERROR") {
-          throw new Error("Error: Failed to get the category data.");
+          throw new Error("Error: Failed to get the Penilaian KA UPT data.");
         } else {
-          // console.log(data[0].Komment)
-          setFormCommentFase1(data[0]?.Komment);
+          if (data[0]?.Komment !== null && data[0]?.Komment !== "") {
+            setFormCommentFase1(data[0]?.Komment);
+          } else {
+            setFormCommentFase1("-");
+          }
           setListPenilaianKaUpt(data);
         }
       } catch (error) {
@@ -545,7 +503,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       } finally {
         setIsLoading(false);
       }
@@ -576,7 +533,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       } finally {
         setIsLoading(false);
       }
@@ -604,7 +560,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       } finally {
         setIsLoading(false);
       }
@@ -663,7 +618,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       } finally {
         setIsLoading(false);
       }
@@ -705,7 +659,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           error: true,
           message: error.message,
         }));
-        setListCategory({});
       } finally {
         setIsLoading(false);
       }
@@ -713,24 +666,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
     fetchData();
   }, []);
-
-  const formatNumber = (value) => {
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
-
-  const handleChange = (e) => {
-    const rawValue = e.target.value.replace(/[^\d]/g, "");
-    setFormattedValue(formatNumber(rawValue));
-    setUserInput(rawValue);
-    // handleInputChange({ target: { name: "budget", value: rawValue } });
-  };
-
-  const DeptArrData =
-    listDepartment.length > 0 && userInfo?.npk
-      ? listDepartment.find(
-          (detail) => String(detail.Npk) === String(userInfo.npk)
-        )
-      : null;
 
   const handleTabChange = (e, newValue) => {
     setSelectedTab(newValue);
@@ -770,12 +705,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   });
 
   const [selectedTab, setSelectedTab] = useState(tabIndexUser);
-
-  const arrTextDataforKaUpt = listPenilaianKaUpt.map((item) => item);
-
   const arrTextDataforKaDept = listPenilaianKaDept.map((item) => item);
-
-  const arrTextDataforWadir = listPenilaianKaDept.map((item) => item);
 
   useEffect(() => {
     let tempTotal1 = 0;
@@ -827,7 +757,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
       if (firstData) {
         const namePosition = listEmployee.find(
-          (item) => item.username === firstData["Creaby"]
+          (item) => item.username === firstData["Creaby Username"]
         );
         setScoringPosition(namePosition?.name);
         setScoringPositionRole(firstData["Jabatan Penilai"]);
@@ -897,24 +827,11 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             item["Jabatan Penilai"].includes(jabatan)
           )
       );
-      console.log("cheklist", buffer);
       setIsCheked(buffer);
       setReadOnly(buffer);
     }
     setActiveTab(selectedTab === tabIndexUser);
   }, [selectedTab, tabIndexUser, listAllPenilaian]);
-
-  useEffect(() => {
-    // Efek yang dijalankan saat isChecked berubah
-    console.log("Status isChecked berubah:", isChecked);
-
-    // Contoh tindakan lainnya
-    if (isChecked) {
-      // Lakukan sesuatu saat checkbox dicentang
-    } else {
-      // Lakukan sesuatu saat checkbox tidak dicentang
-    }
-  }, [isChecked]);
 
   if (isLoading) return <Loading />;
 
@@ -967,15 +884,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                             </div>
 
                             <div className="col-md-4">
-                              <Label
-                                title="Name​"
-                                data={userData?.name || "-"}
-                              />
+                              <Label title="Name" data={userData.name || "-"} />
                             </div>
 
                             <div className="col-md-4">
                               <Label
-                                title="Section​"
+                                title="Section"
                                 data={userData?.upt || "-"}
                               />
                             </div>
@@ -1096,7 +1010,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                             >
                               <div className=" card-body pe-4">
                                 {listKriteriaPenilaian.map((item) => {
-                                  let totalNilai = 0;
                                   const filteredArrData =
                                     listDetailKriteriaPenilaian.filter(
                                       (detail) => detail.Id === item.Value
@@ -1117,19 +1030,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       (detail) => detail.Kriteria === item.Value
                                     );
 
-                                  const rankingKaUpt = findRanking(
-                                    totalScoreforKaUpt,
-                                    listSettingRanking
-                                  );
-                                  const rankingKaDept = findRanking(
-                                    totalScoreforKaDept,
-                                    listSettingRanking
-                                  );
-                                  const rankingWadir = findRanking(
-                                    totalScoreforWadir,
-                                    listSettingRanking
-                                  );
-
                                   const isKepalaSeksi =
                                     forPenilai.jabatan === "Kepala Seksi" ||
                                     forPenilai.jabatan === "Sekretaris Prodi";
@@ -1140,15 +1040,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     forPenilai.jabatan === "Direktur";
                                   const isFirstTab =
                                     selectedTab === tabIndexUser;
-                                  const range3End =
-                                    listSettingRanking
-                                      .find(
-                                        (item) => item.Ranking === "Ranking 3"
-                                      )
-                                      ?.Range.split("-")
-                                      .map((r) => parseInt(r.trim(), 10))[1] +
-                                    1;
-
                                   const range5End =
                                     listSettingRanking
                                       .find(
@@ -1157,7 +1048,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       ?.Range.split("-")
                                       .map((r) => parseInt(r.trim(), 10))[1] +
                                     1;
-
                                   const range4End =
                                     listSettingRanking
                                       .find(
@@ -1228,7 +1118,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                             </div>
                                           );
                                       } else {
-                                        // Selain tab 1 atau 2
                                         content = (
                                           <div className="form-control bg-light">
                                             Not yet scored
@@ -1236,7 +1125,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         );
                                       }
                                     } else {
-                                      // Kalau masih first tab (punya dia sendiri)
                                       content = matchingPenilaianforKaUpt ? (
                                         <div className="form-control bg-light">
                                           {`(Poin: ${matchingPenilaianforKaUpt.Nilai}) - ${matchingPenilaianforKaUpt.Deskripsi}`}
@@ -1539,8 +1427,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           (userInfo.jabatan ===
                                             "Kepala Seksi" ||
                                             userInfo.jabatan ===
-                                              "Sekretaris Prodi") === true
-                                            ? isChecked
+                                              "Sekretaris Prodi") &&
+                                          isChecked === true
+                                            ? true
+                                            : userInfo.jabatan ===
+                                              "Kepala Departemen"
+                                            ? true
+                                            : userInfo.jabatan ===
+                                                "Wakil Direktur" ||
+                                              userInfo.jabatan === "Direktur"
+                                            ? true
                                             : false
                                         }
                                         type="textarea"
@@ -1554,15 +1450,25 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 ) : selectedTab === 1 ? (
                                   <>
                                     <div className="col-lg-4">
-                                      <Label data="Comment1" />
+                                      <Label data="Comment" />
                                     </div>
                                     <div className="col-lg-12">
                                       <Input
                                         isDisabled={
                                           userInfo.jabatan ===
-                                          "Kepala Departemen"
-                                            ? false
-                                            : true
+                                            "Kepala Departemen" &&
+                                          isChecked === true
+                                            ? true
+                                            : userInfo.jabatan ===
+                                                "Kepala Seksi" ||
+                                              userInfo.jabatan ===
+                                                "Sekretaris Prodi"
+                                            ? true
+                                            : userInfo.jabatan ===
+                                                "Wakil Direktur" ||
+                                              userInfo.jabatan === "Direktur"
+                                            ? true
+                                            : false
                                         }
                                         type="textarea"
                                         forInput="commentFase2"
@@ -1575,14 +1481,25 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 ) : selectedTab === 2 ? (
                                   <>
                                     <div className="col-lg-4">
-                                      <Label data="Comment2" />
+                                      <Label data="Comment" />
                                     </div>
                                     <div className="col-lg-12">
                                       <Input
                                         isDisabled={
-                                          userInfo.jabatan === "Wakil Direktur"
-                                            ? false
-                                            : true
+                                          (userInfo.jabatan ===
+                                            "Wakil Direktur" ||
+                                            userInfo.jabatan === "Direktur") &&
+                                          isChecked === true
+                                            ? true
+                                            : userInfo.jabatan ===
+                                                "Kepala Seksi" ||
+                                              userInfo.jabatan ===
+                                                "Sekretaris Prodi"
+                                            ? true
+                                            : userInfo.jabatan ===
+                                              "Kepala Departemen"
+                                            ? true
+                                            : false
                                         }
                                         type="textarea"
                                         forInput="commentFase3"
@@ -1603,7 +1520,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                 style={{ height: "100px" }}
                               >
                                 <>
-                                  {/* Ka.Unit/Ka.UPT/SekProdi */}
                                   <div
                                     className="card fw-medium text-center"
                                     style={{
@@ -1651,7 +1567,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     </div>
                                   </div>
 
-                                  {/* Ka.Prodi/Ka.Dept */}
                                   <div
                                     className="card fw-medium text-center"
                                     style={{
@@ -1699,7 +1614,6 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     </div>
                                   </div>
 
-                                  {/* WaDIR/DIR */}
                                   <div
                                     className="card fw-medium text-center"
                                     style={{
@@ -1754,13 +1668,13 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                       </div>
                     </div>
                     <div className="col-lg-12">
-                      {activeTab && !submitOnly && (
+                      {activeTab && !submitOnly ? (
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="flex-grow-1 m-2">
                             <Button
                               classType="danger me-2 px-4 py-2"
                               label="CANCEL"
-                              onClick={() => onChangePage("index")}
+                              onClick={handleCancel}
                               style={{ width: "100%", borderRadius: "16px" }}
                             />
                           </div>
@@ -1772,6 +1686,16 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                               style={{ width: "100%", borderRadius: "16px" }}
                             />
                           </div>
+                        </div>
+                      ) : (
+                        <div className="my-3">
+                          <Button
+                            classType="primary"
+                            iconName={"angle-left"}
+                            label="Back"
+                            onClick={handleCancel}
+                            // style={{ borderRadius: "16px" }}
+                          />
                         </div>
                       )}
                     </div>

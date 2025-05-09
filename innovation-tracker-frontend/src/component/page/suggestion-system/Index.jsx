@@ -52,6 +52,7 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Draft Scoring", Text: "Draft Scoring" },
   { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
   { Value: "Rejected", Text: "Rejected" },
@@ -84,7 +85,9 @@ export default function SuggestionSytemIndex({
     jenis: "SS",
     role: userInfo.role.slice(0, 5),
     npk: userInfo.npk,
+    upt: userInfo.upt,
   });
+  console.log(userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -715,7 +718,9 @@ export default function SuggestionSytemIndex({
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          const dataTemp = data.filter((item) => item.Text.includes("Convention"));
+          const dataTemp = data.filter((item) =>
+            item.Text.includes("Convention")
+          );
           setListCategory(dataTemp);
           batchRef.current = dataTemp[0].Value;
         }
@@ -759,6 +764,7 @@ export default function SuggestionSytemIndex({
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
+            console.log("tesa",foundEmployee);
 
             const jabatanTarget =
               userInfo.upt === "Pusat Sistem Informasi"
@@ -819,6 +825,7 @@ export default function SuggestionSytemIndex({
               const dataemployee = listEmployee.find(
                 (value) => value.npk === value["NPK"]
               );
+              
               return {
                 Key: value.Key,
                 No: value["No"],
@@ -858,7 +865,7 @@ export default function SuggestionSytemIndex({
                       value["Status"] === "Rejected" &&
                       value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
+                    : 
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
@@ -906,6 +913,9 @@ export default function SuggestionSytemIndex({
                     : userInfo.jabatan === "Sekretaris Prodi" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
+                    : userInfo.jabatan === "Sekretaris Prodi" &&
+                      value["Status"] === "Draft Scoring"
+                    ? ["Detail", "EditScoring", "Submit"]
                     : ["Detail"],
                 Alignment: [
                   "center",
@@ -1049,7 +1059,8 @@ export default function SuggestionSytemIndex({
               classType="success"
               onClick={() => onChangePage("add")}
             />
-          ) : userInfo.peran.toLowerCase() === "Innovation Coordinator".toLowerCase() ? (
+          ) : userInfo.peran.toLowerCase() ===
+            "Innovation Coordinator".toLowerCase() ? (
             <Button
               iconName="file-excel"
               label="Export"
