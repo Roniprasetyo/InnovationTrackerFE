@@ -317,7 +317,6 @@ export default function SuggestionSytemIndex({
               Creadate: item.Creadate,
             };
           });
-
           statusDir = dataDetail;
         }
       } catch (error) {
@@ -432,33 +431,64 @@ export default function SuggestionSytemIndex({
             setIsError(true);
             setIsLoading(false);
             return;
-          } else {
-            const decodedTitle = decodeHtml(
-              decodeHtml(decodeHtml(currentData[0]["Project Title"]))
-            ).replace(/<\/?[^>]+(>|$)/g, "");
-
-            const decodedNama = decodeHtml(
-              decodeHtml(decodeHtml(userInfo.nama))
-            ).replace(/<\/?[^>]+(>|$)/g, "'");
-
-            const notifResult = await UseFetch(API_LINK + "Notifikasi/CreateNotifikasi", {
-              from: userInfo.username,
-              to: "",
-              message: `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`,
-              sis: id,
-              rci: -1,
-            });
-
-            console.log("Hasil notifikasi:", notifResult);
-
-            SweetAlert(
-              "Success",
-              "Thank you for your submission. Please wait until the next update",
-              "success"
-            );
-
-            handleSetCurrentPage(currentFilter.page);
           }
+
+          const nilaiData = await UseFetch(
+            API_LINK + "RencanaSS/GetPenilaianByIDScoring",
+            {
+              id: id,
+              jab: userInfo.jabatan,
+            }
+          );
+
+          console.log("Data penilaian yang diambil:", nilaiData);
+
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          const decodedNama = decodeHtml(
+            decodeHtml(decodeHtml(userInfo.nama))
+          ).replace(/<\/?[^>]+(>|$)/g, "'");
+
+          let ranking = 0;
+          let isSpecialRole = false;
+
+          if (
+            userInfo.jabatan === "Kepala Seksi" ||
+            userInfo.jabatan === "Sekretaris Prodi"
+          ) {
+            const item = listSettingRanking.find((s) => s.Ranking === "Ranking 5");
+            if (item && item.Range) {
+              const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+              ranking = parts.length > 1 ? parts[1] : parts[0];
+              isSpecialRole = true;
+            }
+          }
+
+          const notifikasiEndpoint = isSpecialRole
+            ? "Notifikasi/CreateNotifikasi3"
+            : "Notifikasi/CreateNotifikasi";
+
+          const notifikasiMessage = isSpecialRole
+            ? `Suggestion System Requires Further Evaluation. A Suggestion System submission titled ${decodedTitle} is now pending your evaluation. Please review and score the submission accordingly.`
+            : `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
+
+          await UseFetch(API_LINK + notifikasiEndpoint, {
+            from: userInfo.username,
+            to: "",
+            message: notifikasiMessage,
+            sis: id,
+            rci: -1,
+          });
+
+          SweetAlert(
+            "Success",
+            "Thank you for your submission. Please wait until the next update",
+            "success"
+          );
+
+          handleSetCurrentPage(currentFilter.page);
         } catch (error) {
           console.error("Terjadi error saat submit:", error);
           setIsError(true);
@@ -471,6 +501,7 @@ export default function SuggestionSytemIndex({
 
   const handleApprove = async (id) => {
     setIsError(false);
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to approve this submission?",
@@ -489,15 +520,24 @@ export default function SuggestionSytemIndex({
         set: "Approved",
         reason: null,
       })
-        .then(async (data) => {
+        .then(async () => {
+          try {
+            const detailResponse = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
+              id: id,
+            });
 
-          const decodedTitle = decodeHtml(
-            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
-          ).replace(/<\/?[^>]+(>|$)/g, "");
+            if (detailResponse === "ERROR" || !Array.isArray(detailResponse) || detailResponse.length === 0) {
+              throw new Error("Error: Failed to get the GetRencanaSSByIdV2.");
+            }
 
-          if (data === "ERROR" || data.length === 0) {
-            setIsError(true);
-          } else {
+            const detailSS = detailResponse[0];
+            const decodedTitle = decodeHtml(
+              decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+            ).replace(/<\/?[^>]+(>|$)/g, "");
+
+            console.log("Creaby:", detailSS.Creaby);
+            console.log("NPK:", detailSS.NPK);
+
             await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveReject", {
               from: userInfo.username,
               to: "",
@@ -509,17 +549,29 @@ export default function SuggestionSytemIndex({
             await UseFetch(API_LINK + "Notifikasi/CreateNotifikasi2", {
               from: userInfo.username,
               to: userInfo.username,
-              message: `Suggestion System Requires Evaluation. A Suggestion System submission titled ${decodedTitle}, submitted by`,
+              message: `Suggestion System Requires Evaluation. A Suggestion System submission titled ${decodedTitle}, submitted by ${detailSS.Creaby} - ${detailSS.NPK}, is ready for your evaluation. Please review and score the submission accordingly.`,
               sis: id,
               rci: -1,
             });
 
             handleSetCurrentPage(currentFilter.page);
+          } catch (error) {
+            window.scrollTo(0, 0);
+            setIsError({
+              error: true,
+              message: error.message,
+            });
+            setListCategory({});
           }
         })
-        .catch(() => setIsError(true))
-        .finally(() => setIsLoading(false));
+        .catch(() => {
+          setIsError({ error: true, message: "Approval request failed." });
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
+
   };
 
 
