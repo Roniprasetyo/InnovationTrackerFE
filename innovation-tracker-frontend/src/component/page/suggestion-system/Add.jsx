@@ -137,16 +137,15 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       );
 
       const lgsungDirektur = listEmployee.find(
-        (value) =>
-          value.npk === userInfo.npk
+        (value) => value.npk === userInfo.npk
       );
   
-      const Direktur = listDepartment.find(
+      const Direktur = listEmployee.find(
         (value) =>
-          value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
+          value.jabatan === userInfo.departemen
       );
   
-      let selected = secondly || kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
+      let selected = kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -233,15 +232,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       );
     }
   }, [listDepartment]);
-  
-  useEffect(() => {
-    const userStruktur = listDepartment.find(
-      (value) =>
-        value.Struktur === userInfo.departemen
-    );
-    setEmp(userStruktur);
-
-  }, [listEmployee]);
 
   useEffect(() => {
       const fetchData = async () => {

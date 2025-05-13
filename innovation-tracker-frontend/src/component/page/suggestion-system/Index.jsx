@@ -52,6 +52,7 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Draft Scoring", Text: "Draft Scoring" },
   { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
   { Value: "Rejected", Text: "Rejected" },
@@ -84,7 +85,9 @@ export default function SuggestionSytemIndex({
     jenis: "SS",
     role: userInfo.role.slice(0, 5),
     npk: userInfo.npk,
+    upt: userInfo.upt,
   });
+  console.log(userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -715,9 +718,11 @@ export default function SuggestionSytemIndex({
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          setListCategory(
-            data.filter((item) => item.Text.includes("Convention"))
+          const dataTemp = data.filter((item) =>
+            item.Text.includes("Convention")
           );
+          setListCategory(dataTemp);
+          batchRef.current = dataTemp[0].Value;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -742,7 +747,7 @@ export default function SuggestionSytemIndex({
         const data = await UseFetch(
           type === "mySubmission"
             ? API_LINK + "RencanaSS/GetMyRencanaSS"
-            : userInfo.role.slice(0, 5) === "ROL01"
+            : userInfo.role.slice(0, 5) === "ROL36"
             ? API_LINK + "RencanaSS/GetRencanaSSforInnoCoor"
             : API_LINK + "RencanaSS/GetRencanaSS",
           currentFilter
@@ -759,13 +764,14 @@ export default function SuggestionSytemIndex({
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
+            console.log("tesa",foundEmployee);
 
             const jabatanTarget =
               userInfo.upt === "Pusat Sistem Informasi"
                 ? "Kepala Departemen"
                 : userInfo.jabatan;
 
-            if (role === "ROL01") {
+            if (role === "ROL36") {
               return {
                 Key: value.Key,
                 No: value["No"],
@@ -819,6 +825,7 @@ export default function SuggestionSytemIndex({
               const dataemployee = listEmployee.find(
                 (value) => value.npk === value["NPK"]
               );
+              
               return {
                 Key: value.Key,
                 No: value["No"],
@@ -847,22 +854,22 @@ export default function SuggestionSytemIndex({
                   (value["Status"] === "Approved" &&
                     value["Facil"] === userInfo.npk),
                 Action:
-                  role === "ROL03" &&
+                  role === "ROL01" &&
                   value["Status"] === "Draft" &&
                   value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
                     : inorole === "Facilitator" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL03" &&
+                    : role === "ROL01" &&
                       value["Status"] === "Rejected" &&
                       value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
+                    : 
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL01" && value["Status"] === "Approved"
+                    : role === "ROL36" && value["Status"] === "Approved"
                     ? ["Detail", "Submit"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
@@ -903,6 +910,12 @@ export default function SuggestionSytemIndex({
                         userInfo.jabatan === "Direktur") &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
+                    : userInfo.jabatan === "Sekretaris Prodi" &&
+                      value["Status"] === "Waiting Approval"
+                    ? ["Detail", "Reject", "Approve"]
+                    : userInfo.jabatan === "Sekretaris Prodi" &&
+                      value["Status"] === "Draft Scoring"
+                    ? ["Detail", "EditScoring", "Submit"]
                     : ["Detail"],
                 Alignment: [
                   "center",
@@ -936,7 +949,7 @@ export default function SuggestionSytemIndex({
                 Count: value["Count"],
                 IsBold: ["Draft", "Rejected"].includes(value["Status"]),
                 Action:
-                  role === "ROL03" &&
+                  role === "ROL01" &&
                   value["Status"] === "Draft" &&
                   value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
@@ -944,11 +957,11 @@ export default function SuggestionSytemIndex({
                       value["Status"] === "Waiting Approval" &&
                       value.Creaby !== userInfo.username
                     ? ["Detail", "Reject", "Approve"]
-                    : role === "ROL03" &&
+                    : role === "ROL01" &&
                       value["Status"] === "Rejected" &&
                       value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
-                    : role === "ROL01" && value["Status"] === "Approved"
+                    : role === "ROL36" && value["Status"] === "Approved"
                     ? ["Detail", "Submit"]
                     : // : userInfo.upt === foundEmployee.upt && (jabatanTarget === "Kepala Seksi" || jabatanTarget === "Sekretaris Prodi") && (value["Status"] === "Approved" || value["Status"] === "Scoring")
                     // ? ["Detail", "Scoring"]
@@ -1039,14 +1052,15 @@ export default function SuggestionSytemIndex({
       </div>
       <div className="flex-fill">
         <div className="input-group">
-          {type === "mySubmission" && userInfo.role.slice(0, 5) !== "ROL01" ? (
+          {type === "mySubmission" && userInfo.role.slice(0, 5) !== "ROL36" ? (
             <Button
               iconName="add"
               label="Register"
               classType="success"
               onClick={() => onChangePage("add")}
             />
-          ) : userInfo.peran === "Innovation Coordinator" ? (
+          ) : userInfo.peran.toLowerCase() ===
+            "Innovation Coordinator".toLowerCase() ? (
             <Button
               iconName="file-excel"
               label="Export"
@@ -1094,14 +1108,14 @@ export default function SuggestionSytemIndex({
               label="Status"
               type="semua"
               arrData={
-                userInfo.role.slice(0, 5) === "ROL01"
+                userInfo.role.slice(0, 5) === "ROL36"
                   ? dataFilterStatus.filter((item) => item.Value != "Draft")
                   : dataFilterStatus
               }
               defaultValue=""
             />
           </Filter>
-          {userInfo.role.slice(0, 5) === "ROL01" ? (
+          {userInfo.role.slice(0, 5) === "ROL36" ? (
             <Button
               iconName="paper-plane-top"
               classType="primary px-3 border-start"
@@ -1117,7 +1131,7 @@ export default function SuggestionSytemIndex({
         <div className="d-flex flex-column">
           {!isLoading && (
             <Table
-              checkboxTable={userInfo.role.slice(0, 5) === "ROL01"}
+              checkboxTable={userInfo.role.slice(0, 5) === "ROL36"}
               data={currentData}
               onCheckedChange={handleSelectionChange}
               onDetail={onChangePage}
