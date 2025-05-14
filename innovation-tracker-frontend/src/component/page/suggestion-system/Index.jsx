@@ -503,7 +503,6 @@ export default function SuggestionSytemIndex({
         }
       }
     }
-
   };
 
   const handleApprove = async (id) => {
@@ -541,9 +540,6 @@ export default function SuggestionSytemIndex({
             const decodedTitle = decodeHtml(
               decodeHtml(decodeHtml(currentData[0]["Project Title"]))
             ).replace(/<\/?[^>]+(>|$)/g, "");
-
-            console.log("Creaby:", detailSS.Creaby);
-            console.log("NPK:", detailSS.NPK);
 
             await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveReject", {
               from: userInfo.username,
