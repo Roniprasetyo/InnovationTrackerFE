@@ -248,7 +248,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 ? ["Detail", "Edit", "Submit"]
                 : role === "ROL36" && value["Status"] === "Approved"
                 ? ["Detail", "Submit"]
-                : role === "ROL03" &&
+                :
                   value["Status"] === "Approved" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "FillTheStep"]

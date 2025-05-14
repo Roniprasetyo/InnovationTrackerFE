@@ -13,6 +13,7 @@ import SearchDropdown from "../../part/SearchDropdown";
 import Button from "../../part/Button";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
+import Modal from "../../part/Modal";
 // import userInfo from
 
 const inisialisasiData = [
@@ -22,6 +23,15 @@ const inisialisasiData = [
     Name: null,
     Count: 0,
   },
+];
+
+const MetodologiArr = [
+  { Value: "pdca", Text: "PDCA (Plan-Do-Check-Act)" },
+  { Value: "dmaic", Text: "DMAIC (Define-Measure-Analyze-Improve-Control)" },
+  { Value: "kaizen", Text: "Kaizen" },
+  { Value: "six_sigma", Text: "Six Sigma" },
+  { Value: "lean", Text: "Lean Manufacturing" },
+  { Value: "5s", Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
 ];
 
 export default function QualityControlCircleFillStep({ onChangePage, withID }) {
@@ -62,6 +72,10 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     Nama: "",
     Section: "",
   });
+
+  // const formDataMetodologiRef = useRef({});
+  const [formDataMetodologiRef, setFormDataMetodRed] = useState("");
+  const modalRef = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -146,6 +160,26 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
 
     fetchData();
   }, [withID, listEmployee]);
+  console.log("currentData, ", currentData);
+
+  const handleMetodologi = (e) => {
+    setFormDataMetodRed(e.target.value);
+    console.log(formDataMetodologiRef);
+  };
+
+  const handleOpenModal = (id) => {
+    console.log(id);
+    if (id.length === 0) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: "Please select one or more data!",
+      }));
+    } else {
+      modalRef.current.open();
+    }
+  };
 
   if (isLoading) return <Loading />;
 
@@ -431,19 +465,24 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                     <div className="card-body">
                       <div className="row">
                         <div className="col-lg-12">
-                          <Label title="Metodologi" />
-                        </div>
-                        <div className="col-lg-8">
                           <div className="row">
-                            <div className="col-md-9">
-                              <SearchDropdown />
+                            <div className="col-lg-11">
+                              <SearchDropdown
+                                arrData={MetodologiArr}
+                                value={formDataMetodologiRef.current}
+                                label="Metodologi"
+                                onChange={handleMetodologi}
+                                isRequired
+                              />
                             </div>
-                            <div className="col-md-1">
+                            <div className="col-md-1 mt-4">
                               <Button
-                                classType="secondary"
+                                // classType="secondary"
                                 label="?"
-                                onClick={() => onChangePage("index")}
-                                style={{ width: "100%", borderRadius: "16px" }}
+                                onClick={() =>
+                                  handleOpenModal(formDataMetodologiRef)
+                                }
+                                style={{ borderRadius: "16px" }}
                               />
                             </div>
                           </div>
@@ -451,10 +490,10 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                         <div className="row">
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciCase"
-                              label="Bussiness Case"
+                              forInput="pdcaPlan"
+                              label="Plan"
                               isRequired
-                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented (menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)"
                               // value={formDataRef.current.rciCase}
                               // onChange={handleInputChange}
                               // errorMessage={errors.rciCase}
@@ -462,8 +501,8 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                           </div>
                           <div className="col-lg-4 mb-3">
                             <FileUpload
-                              forInput="rciCaseFile"
-                              label="Bussiness Case Document (.pdf)"
+                              forInput="pdcaPlanFile"
+                              label="Plan Document (.pdf)"
                               formatFile=".pdf"
                               // ref={bussinessCaseFileRef}
                               // onChange={() =>
@@ -475,10 +514,11 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                           <hr />
                           <div className="col-lg-12">
                             <TextArea
-                              forInput="rciProblem"
-                              label="Problem Statement​"
+                              forInput="pdcaDo"
+                              label="Do"
                               isRequired
-                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
+                              placeholder="Describe the steps taken to implement the plan and any resources used
+(Jelaskan langkah-langkah yang dilakukan untuk melaksanakan rencana serta sumber daya yang digunakan)"
                               // value={formDataRef.current.rciProblem}
                               // onChange={handleInputChange}
                               // errorMessage={errors.rciProblem}
@@ -487,7 +527,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                           <div className="col-lg-4 mb-3">
                             <FileUpload
                               forInput="rciProblemFile"
-                              label="Problem Statement​ Document (.pdf)"
+                              label="Do Document (.pdf)"
                               formatFile=".pdf"
                               // ref={problemFileRef}
                               // onChange={() =>
@@ -497,29 +537,61 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                             />
                           </div>
                           <hr />
-                          <div className="col-lg-12">
-                            <TextArea
-                              forInput="rciGoal"
-                              label="Goal Statement​"
-                              isRequired
-                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
-                              // value={formDataRef.current.rciGoal}
-                              // onChange={handleInputChange}
-                              // errorMessage={errors.rciGoal}
-                            />
-                          </div>
-                          <div className="col-lg-4">
-                            <FileUpload
-                              forInput="goalFileRef"
-                              label="Goal Statement​ Document (.pdf)"
-                              formatFile=".pdf"
-                              // ref={goalFileRef}
-                              // onChange={() =>
-                                // handleFileChange(goalFileRef, "pdf")
-                              // }
-                              // errorMessage={errors.goalFileRef}
-                            />
-                          </div>
+                          {formDataRef.current.Status === "Scoring" && (
+                            <>
+                              {/* Bagian CHECK */}
+                              <div className="col-lg-12">
+                                <TextArea
+                                  forInput="pdcaCheck"
+                                  label="Check"
+                                  isRequired
+                                  placeholder="Explain how the outcomes were monitored or measured and whether the plan was successful
+(Jelaskan bagaimana hasil dievaluasi atau diukur serta apakah rencananya berhasil)"
+                                  // value={formDataRef.current.rciGoal}
+                                  // onChange={handleInputChange}
+                                  // errorMessage={errors.rciGoal}
+                                />
+                              </div>
+                              <div className="col-lg-4">
+                                <FileUpload
+                                  forInput="pdcaCheckFile"
+                                  label="Check​ Document (.pdf)"
+                                  formatFile=".pdf"
+                                  // ref={goalFileRef}
+                                  // onChange={() =>
+                                  //   handleFileChange(goalFileRef, "pdf")
+                                  // }
+                                  // errorMessage={errors.goalFileRef}
+                                />
+                              </div>
+
+                              {/* Bagian ACTION */}
+                              <div className="col-lg-12">
+                                <TextArea
+                                  forInput="pdcaAction"
+                                  label="Action"
+                                  isRequired
+                                  placeholder="Describe what actions were taken based on the evaluation and how the process can be improved
+(Jelaskan tindakan yang diambil berdasarkan evaluasi dan bagaimana prosesnya dapat ditingkatkan)"
+                                  // value={formDataRef.current.rciGoal}
+                                  // onChange={handleInputChange}
+                                  // errorMessage={errors.rciGoal}
+                                />
+                              </div>
+                              <div className="col-lg-4">
+                                <FileUpload
+                                  forInput="pdcaActionFile"
+                                  label="Action Document (.pdf)"
+                                  formatFile=".pdf"
+                                  // ref={goalFileRef}
+                                  // onChange={() =>
+                                  //   handleFileChange(goalFileRef, "pdf")
+                                  // }
+                                  // errorMessage={errors.goalFileRef}
+                                />
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -546,6 +618,9 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
           </div>
         </div>
       </div>
+      <Modal title="Pict Metodologi" ref={modalRef} size="small">
+        <image src="../../util/image.png" alt="Metodologi Image" />
+      </Modal>
     </>
   );
 }
