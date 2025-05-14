@@ -433,13 +433,10 @@ export default function SuggestionSytemIndex({
             return;
           }
 
-          const nilaiData = await UseFetch(
-            API_LINK + "RencanaSS/GetPenilaianByIDScoring",
-            {
-              id: id,
-              jab: userInfo.jabatan,
-            }
-          );
+          const nilaiData = await UseFetch(API_LINK + "RencanaSS/GetPenilaianByIDScoring", {
+            id: id,
+            jab: userInfo.jabatan,
+          });
 
           console.log("Data penilaian yang diambil:", nilaiData);
 
@@ -453,6 +450,8 @@ export default function SuggestionSytemIndex({
 
           let ranking = 0;
           let isSpecialRole = false;
+          let notifikasiEndpoint = "Notifikasi/CreateNotifikasi";
+          let notifikasiMessage = `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
 
           if (
             userInfo.jabatan === "Kepala Seksi" ||
@@ -463,24 +462,31 @@ export default function SuggestionSytemIndex({
               const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
               ranking = parts.length > 1 ? parts[1] : parts[0];
               isSpecialRole = true;
+              notifikasiEndpoint = "Notifikasi/CreateNotifikasi3";
+              notifikasiMessage = `Suggestion System Requires Further Evaluation. A Suggestion System submission titled ${decodedTitle} is now pending your evaluation. Please review and score the submission accordingly.`;
             }
           }
 
-          const notifikasiEndpoint = isSpecialRole
-            ? "Notifikasi/CreateNotifikasi3"
-            : "Notifikasi/CreateNotifikasi";
+          if (userInfo.jabatan === "Kepala Departemen") {
+            const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
+            if (item && item.Range) {
+              const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+              ranking = parts.length > 1 ? parts[1] : parts[0];
+              isSpecialRole = true;
+              notifikasiEndpoint = "Notifikasi/CreateNotifikasi4";
+              notifikasiMessage = `Suggestion System Requires Final Evaluation. A Suggestion System submission titled ${decodedTitle} is now pending your evaluation. Please review and score the submission accordingly.`;
+            }
+          }
 
-          const notifikasiMessage = isSpecialRole
-            ? `Suggestion System Requires Further Evaluation. A Suggestion System submission titled ${decodedTitle} is now pending your evaluation. Please review and score the submission accordingly.`
-            : `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
-
-          await UseFetch(API_LINK + notifikasiEndpoint, {
-            from: userInfo.username,
-            to: "",
-            message: notifikasiMessage,
-            sis: id,
-            rci: -1,
-          });
+          if (status1 !== "Final") {
+            await UseFetch(API_LINK + notifikasiEndpoint, {
+              from: userInfo.username,
+              to: "",
+              message: notifikasiMessage,
+              sis: id,
+              rci: -1,
+            });
+          }
 
           SweetAlert(
             "Success",
@@ -497,6 +503,7 @@ export default function SuggestionSytemIndex({
         }
       }
     }
+
   };
 
   const handleApprove = async (id) => {
