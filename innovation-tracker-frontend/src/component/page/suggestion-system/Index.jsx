@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Navigate  } from "react-router-dom";
 import { PAGE_SIZE, API_LINK, EMP_API_LINK } from "../../util/Constants";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -19,6 +19,7 @@ import {
   formatDate,
   maxCharDisplayed,
 } from "../../util/Formatting";
+import NotFound from "../not-found/Index";
 
 const inisialisasiData = [
   {
@@ -52,6 +53,7 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Draft", Text: "Draft" },
+  { Value: "Draft Scoring", Text: "Draft Scoring" },
   { Value: "Waiting Approval", Text: "Waiting Approval" },
   { Value: "Approved", Text: "Approved" },
   { Value: "Rejected", Text: "Rejected" },
@@ -64,7 +66,28 @@ export default function SuggestionSytemIndex({
 }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
-  if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  if (cookie) {
+    try {
+      userInfo = JSON.parse(decryptId(cookie));
+    } catch (e) {
+      userInfo = "";
+    }
+  }
+
+  if (!userInfo) {
+    return (
+      <div>
+        <div className="mt-3 flex-fill">
+            <Alert
+              type="danger"
+              message="Your session has expired."
+            />
+          </div>
+        <NotFound />
+      </div>
+    ) ;
+  }
+
   const location = useLocation();
   const type = location.state?.type;
   const [isError, setIsError] = useState(false);
@@ -84,7 +107,9 @@ export default function SuggestionSytemIndex({
     jenis: "SS",
     role: userInfo.role.slice(0, 5),
     npk: userInfo.npk,
+    upt: userInfo.upt,
   });
+  console.log(userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -715,7 +740,9 @@ export default function SuggestionSytemIndex({
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
-          const dataTemp = data.filter((item) => item.Text.includes("Convention"));
+          const dataTemp = data.filter((item) =>
+            item.Text.includes("Convention")
+          );
           setListCategory(dataTemp);
           batchRef.current = dataTemp[0].Value;
         }
@@ -759,6 +786,7 @@ export default function SuggestionSytemIndex({
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
+            console.log("tesa",foundEmployee);
 
             const jabatanTarget =
               userInfo.upt === "Pusat Sistem Informasi"
@@ -782,6 +810,7 @@ export default function SuggestionSytemIndex({
                 Batch: value["Batch"] || "-",
                 "Submitted On": formatDate(value["Creadate"]),
                 Score: value["Score"] || 0,
+                "Direct Leader": value["Atasan Facil"],
                 "Scoring Position": value["Scoring Position"] || "-",
                 Status: value["Status"],
                 Count: value["Count"],
@@ -819,6 +848,7 @@ export default function SuggestionSytemIndex({
               const dataemployee = listEmployee.find(
                 (value) => value.npk === value["NPK"]
               );
+              
               return {
                 Key: value.Key,
                 No: value["No"],
@@ -858,7 +888,7 @@ export default function SuggestionSytemIndex({
                       value["Status"] === "Rejected" &&
                       value["Creaby"] === userInfo.username
                     ? ["Detail", "Edit", "Submit"]
-                    : userInfo.upt === foundEmployee.upt &&
+                    : 
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
@@ -906,6 +936,9 @@ export default function SuggestionSytemIndex({
                     : userInfo.jabatan === "Sekretaris Prodi" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
+                    : userInfo.jabatan === "Sekretaris Prodi" &&
+                      value["Status"] === "Draft Scoring"
+                    ? ["Detail", "EditScoring", "Submit"]
                     : ["Detail"],
                 Alignment: [
                   "center",
@@ -1049,7 +1082,8 @@ export default function SuggestionSytemIndex({
               classType="success"
               onClick={() => onChangePage("add")}
             />
-          ) : userInfo.peran.toLowerCase() === "Innovation Coordinator".toLowerCase() ? (
+          ) : userInfo.peran.toLowerCase() ===
+            "Innovation Coordinator".toLowerCase() ? (
             <Button
               iconName="file-excel"
               label="Export"
