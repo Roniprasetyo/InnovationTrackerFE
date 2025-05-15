@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, Navigate } from "react-router-dom";
+import { useLocation, Navigate  } from "react-router-dom";
 import { PAGE_SIZE, API_LINK, EMP_API_LINK } from "../../util/Constants";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -78,11 +78,14 @@ export default function SuggestionSytemIndex({
     return (
       <div>
         <div className="mt-3 flex-fill">
-          <Alert type="danger" message="Your session has expired." />
-        </div>
+            <Alert
+              type="danger"
+              message="Your session has expired."
+            />
+          </div>
         <NotFound />
       </div>
-    );
+    ) ;
   }
 
   const location = useLocation();

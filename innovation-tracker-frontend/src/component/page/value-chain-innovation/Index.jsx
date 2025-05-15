@@ -18,6 +18,7 @@ import {
 } from "../../util/Formatting";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
+import NotFound from "../not-found/Index";
 
 const inisialisasiData = [
   {
@@ -61,7 +62,27 @@ const dataFilterStatus = [
 export default function ValueChainInnovationIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
-  if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  if (cookie) {
+      try {
+        userInfo = JSON.parse(decryptId(cookie));
+      } catch (e) {
+        userInfo = "";
+      }
+    }
+  
+    if (!userInfo) {
+      return (
+        <div>
+          <div className="mt-3 flex-fill">
+              <Alert
+                type="danger"
+                message="Your session has expired."
+              />
+            </div>
+          <NotFound />
+        </div>
+      ) ;
+    }
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

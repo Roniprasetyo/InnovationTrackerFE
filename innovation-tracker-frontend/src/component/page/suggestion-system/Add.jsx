@@ -108,6 +108,9 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     facil_id: string(),
   });
 
+  console.log("SECTION HEAD : ", sectionHead);
+  console.log("USER INFO : ", userInfo);
+
   useEffect(() => {
     if (
       listEmployee.length > 0 &&
