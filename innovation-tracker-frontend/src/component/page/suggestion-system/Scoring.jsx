@@ -221,7 +221,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       userInfo.jabatan === "Sekretaris Prodi"
     ) {
       setTotalScoreforKaUpt(total);
-    } else if (userInfo.jabatan == "Kepala Departemen") {
+    } else if (
+      userInfo.jabatan == "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
       setTotalScoreforKaDept(total);
     } else if (
       userInfo.jabatan === "Wakil Direktur" ||
@@ -279,7 +282,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     ) {
       formCommentFase1?.trim() !== "" ? formCommentFase1 : "";
       comment = formCommentFase1;
-    } else if (userInfo.jabatan === "Kepala Departemen") {
+    } else if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
       formCommentFase2?.trim() !== "" ? formCommentFase2 : "";
       comment = formCommentFase2;
     } else if (
@@ -605,7 +611,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             (item) =>
               item["Struktur Parent"] === strukturParentTarget &&
               (item.Jabatan === "Kepala Departemen" ||
-                item.Jabatan === "Sekretaris Prodi")
+                item.Jabatan === "Kepala Jurusan")
           );
 
           setAllListDepartment(data);
@@ -674,7 +680,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   useEffect(() => {
     if (!hasUserSelectedTab) {
-      if (userInfo?.jabatan === "Kepala Departemen") {
+      if (
+        userInfo?.jabatan === "Kepala Departemen" ||
+        userInfo?.jabatan === "Kepala Jurusan"
+      ) {
         setSelectedTab(1);
       } else if (
         userInfo?.jabatan === "Kepala Seksi" ||
@@ -694,7 +703,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   ];
 
   const tabIndexUser = tabLabels.findIndex((label) => {
-    if (userInfo.jabatan === "Kepala Departemen")
+    if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    )
       return label === "Ka.Prodi/Ka.Dept";
     if (
       userInfo.jabatan === "Wakil Direktur" ||
@@ -725,8 +737,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
     listPenilaianKaDept.forEach((item) => {
       if (
-        item["Jabatan Penilai"] !== "Kepala Departemen" &&
-        userInfo.jabatan !== "Kepala Departemen"
+        (item["Jabatan Penilai"] !== "Kepala Departemen" &&
+          userInfo.jabatan !== "Kepala Departemen") ||
+        (item["Jabatan Penilai"] !== "Kepala Jurusan" &&
+          userInfo.jabatan !== "Kepala Jurusan")
       ) {
         tempTotal2 = 0;
       } else {
@@ -817,7 +831,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     let jabatanTarget = [];
 
     if (selectedTab === 0) jabatanTarget = ["Kepala Seksi", "Sekretaris Prodi"];
-    else if (selectedTab === 1) jabatanTarget = ["Kepala Departemen"];
+    else if (selectedTab === 1)
+      jabatanTarget = ["Kepala Departemen", "Kepala Jurusan"];
     else if (selectedTab === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
     if (listAllPenilaian.length !== 0) {
       const buffer = listAllPenilaian.some(
@@ -884,7 +899,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                             </div>
 
                             <div className="col-md-4">
-                              <Label title="Name" data={userData.name || "-"} />
+                              <Label
+                                title="Name"
+                                data={userData?.name || "-"}
+                              />
                             </div>
 
                             <div className="col-md-4">
@@ -940,7 +958,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           "Sekretaris Prodi",
                                         ];
                                       else if (index === 1)
-                                        jabatanTarget = ["Kepala Departemen"];
+                                        jabatanTarget = [
+                                          "Kepala Departemen",
+                                          "Kepala Jurusan",
+                                        ];
                                       else if (index === 2)
                                         jabatanTarget = [
                                           "Wakil Direktur",
@@ -1034,7 +1055,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     forPenilai.jabatan === "Kepala Seksi" ||
                                     forPenilai.jabatan === "Sekretaris Prodi";
                                   const isKaDept =
-                                    forPenilai.jabatan === "Kepala Departemen";
+                                    forPenilai.jabatan ===
+                                      "Kepala Departemen" ||
+                                    forPenilai.jabatan === "Kepala Jurusan";
                                   const isWadir =
                                     forPenilai.jabatan === "Wakil Direktur" ||
                                     forPenilai.jabatan === "Direktur";
@@ -1070,9 +1093,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               required range.
                                             </div>
                                           ) : matchingPenilaianforKaDept ? (
-                                            matchingPenilaianforKaDept[
+                                            (matchingPenilaianforKaDept[
                                               "Jabatan Penilai"
-                                            ] !== "Kepala Departemen" &&
+                                            ] !== "Kepala Departemen" ||
+                                              matchingPenilaianforKaDept[
+                                                "Jabatan Penilai"
+                                              ] !== "Kepala Jurusan") &&
                                             (matchingPenilaianforKaDept[
                                               "Jabatan Penilai"
                                             ] === "Kepala Seksi" ||
@@ -1219,7 +1245,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         ) : matchingPenilaianforKaDept ? (
                                           matchingPenilaianforKaDept[
                                             "Jabatan Penilai"
-                                          ] === "Kepala Departemen" ? (
+                                          ] === "Kepala Departemen" ||
+                                          matchingPenilaianforKaDept[
+                                            "Jabatan Penilai"
+                                          ] === "Kepala Jurusan" ? (
                                             <div className="form-control bg-light">
                                               {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
                                             </div>
@@ -1431,7 +1460,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           isChecked === true
                                             ? true
                                             : userInfo.jabatan ===
-                                              "Kepala Departemen"
+                                                "Kepala Departemen" ||
+                                              userInfo.jabatan ===
+                                                "Kepala Jurusan"
                                             ? true
                                             : userInfo.jabatan ===
                                                 "Wakil Direktur" ||
@@ -1455,8 +1486,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     <div className="col-lg-12">
                                       <Input
                                         isDisabled={
-                                          userInfo.jabatan ===
-                                            "Kepala Departemen" &&
+                                          (userInfo.jabatan ===
+                                            "Kepala Departemen" ||
+                                            userInfo.jabatan ===
+                                              "Kepala Jurusan") &&
                                           isChecked === true
                                             ? true
                                             : userInfo.jabatan ===
@@ -1497,7 +1530,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                                 "Sekretaris Prodi"
                                             ? true
                                             : userInfo.jabatan ===
-                                              "Kepala Departemen"
+                                                "Kepala Departemen" ||
+                                              userInfo.jabatan ===
+                                                "Kepala Jurusan"
                                             ? true
                                             : false
                                         }

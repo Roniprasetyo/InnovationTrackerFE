@@ -181,7 +181,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       }
       else if(
         (selected?.npk === userInfo.npk || selected?.Npk === userInfo.npk) &&
-        ((selected.jabatan === "Kepala Departemen" || selected.Jabatan === "Kepala Departemen") 
+        ((selected.jabatan === "Kepala Departemen" || selected.Jabatan === "Kepala Jurusan") 
         && selected.jabatan !== "Sekretaris Prodi")
       ) {
         const userStruktur = listDepartment.find(

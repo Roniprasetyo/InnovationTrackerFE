@@ -109,6 +109,7 @@ export default function Submission() {
                   {[
                     "Kepala Seksi",
                     "Kepala Departemen",
+                    "Kepala Jurusan",
                     "Sekretaris Prodi",
                     "Wakil Direktur",
                     "Direktur",

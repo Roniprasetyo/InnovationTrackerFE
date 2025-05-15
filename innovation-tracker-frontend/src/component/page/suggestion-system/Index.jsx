@@ -288,7 +288,7 @@ export default function SuggestionSytemIndex({
           tempTotal1 += parseFloat(item.Nilai) || 0;
         }
       });
-    } else if (userInfo.jabatan === "Kepala Departemen") {
+    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
       try {
         const data = await UseFetch(
           API_LINK + "RencanaSS/GetPenilaianByIDScoring",
@@ -442,7 +442,7 @@ export default function SuggestionSytemIndex({
       } else {
         status1 = "Scoring";
       }
-    } else if (userInfo.jabatan === "Kepala Departemen") {
+    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
       const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
       if (item && item.Range) {
         const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
@@ -875,7 +875,8 @@ export default function SuggestionSytemIndex({
                 ],
               };
             } else if (
-              (userInfo.jabatan === "Kepala Departemen" ||
+              (userInfo.jabatan === "Kepala Departemen"
+                || userInfo.jabatan === "Kepala Jurusan" ||
                 userInfo.jabatan === "Sekretaris Prodi" ||
                 userInfo.jabatan === "Direktur" ||
                 userInfo.jabatan === "Wakil Direktur" ||
@@ -935,7 +936,7 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
-                    : userInfo.jabatan === "Kepala Departemen" &&
+                    : (userInfo.jabatan === "Kepala Departemen" && userInfo.jabatan === "Kepala Jurusan") &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Wakil Direktur" ||
@@ -947,7 +948,8 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Kepala Seksi" ||
                         userInfo.jabatan === "Sekretaris Prodi" ||
-                        userInfo.jabatan === "Kepala Departemen" ||
+                        userInfo.jabatan === "Kepala Departemen"
+                        || userInfo.jabatan === "Kepala Jurusan"||
                         userInfo.jabatan === "Wakil Direktur" ||
                         userInfo.jabatan === "Direktur") &&
                       (value["Status"] === "Scoring" ||
@@ -962,7 +964,7 @@ export default function SuggestionSytemIndex({
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
-                    : userInfo.jabatan === "Kepala Departemen" &&
+                    : (userInfo.jabatan === "Kepala Departemen" && userInfo.jabatan === "Kepala Jurusan") &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
                     : (userInfo.jabatan === "Wakil Direktur" ||

@@ -240,7 +240,7 @@ export default function EditScoring({ onChangePage }) {
       ) {
         status1 = "Draft Scoring";
       }
-    } else if (userInfo.jabatan === "Kepala Departemen") {
+    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
       if (
         formDataRef.current.Status === "Approved" ||
         formDataRef.current.Status.includes("Draft Scoring")
@@ -425,7 +425,8 @@ export default function EditScoring({ onChangePage }) {
                 userInfo.jabatan === "Kepala Seksi" ||
                 userInfo.jabatan === "Sekretaris Prodi"
                   ? item.Komment1
-                  : userInfo.jabatan === "Kepala Departemen"
+                  : userInfo.jabatan === "Kepala Departemen" ||
+                  userInfo.jabatan === "Kepala Jurusan" 
                   ? item.Komment2
                   : userInfo.jabatan === "Wakil Direktur" ||
                     userInfo.jabatan === "Direktur"
