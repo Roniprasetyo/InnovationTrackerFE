@@ -11,12 +11,14 @@ import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
+import Icon from "../../part/Icon";
+import Cookies from "js-cookie";
+import { decryptId } from "../../util/Encryptor";
 
 const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Dari: null,
     Pesan: null,
     Waktu: null,
     Count: 0,
@@ -30,17 +32,22 @@ const dataFilterSort = [
 
 const dataFilterStatus = [
   { Value: "Belum Dibaca", Text: "Belum Dibaca" },
-  { Value: "Sudah Dibaca", Text: "Sudah Dibaca" },
+  { Value: "Terbaca", Text: "Terbaca" },
 ];
 
 export default function NotifikasiIndex() {
+    const cookie = Cookies.get("activeUser");
+  
+  let userInfo = "";
+    if (cookie) userInfo = JSON.parse(decryptId(cookie));
+
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Waktu] desc",
+    sort: "Waktu",
     status: "Belum Dibaca",
     app: APPLICATION_ID,
   });
@@ -61,6 +68,9 @@ export default function NotifikasiIndex() {
 
   function handleSearch() {
     setIsLoading(true);
+      console.log('searchQuery:', searchQuery.current?.value);
+  console.log('searchFilterSort:', searchFilterSort.current?.value);
+  console.log('searchFilterStatus:', searchFilterStatus.current?.value);
     setCurrentFilter((prevFilter) => {
       return {
         ...prevFilter,
@@ -79,14 +89,16 @@ export default function NotifikasiIndex() {
       "info",
       "Ya, saya yakin!"
     );
-
+    
     if (result) {
+    console.log("result", currentData);
       setIsLoading(true);
       setIsError(false);
-      UseFetch(API_LINK + "Utilities/SetReadNotifikasi", {
-        application: APPLICATION_ID,
-      })
-        .then((data) => {
+
+      const data = UseFetch(API_LINK + "Notifikasi/UpdateNotifikasi", {
+        application: userInfo.username,
+        key: userInfo.username, 
+      })  
           if (data === "ERROR" || data.length === 0) setIsError(true);
           else {
             SweetAlert(
@@ -95,9 +107,8 @@ export default function NotifikasiIndex() {
               "success"
             );
             handleSetCurrentPage(currentFilter.page);
+            setIsLoading(true);
           }
-        })
-        .then(() => setIsLoading(false));
     }
   }
 
@@ -107,7 +118,7 @@ export default function NotifikasiIndex() {
 
       try {
         const data = await UseFetch(
-          API_LINK + "Utilities/GetDataNotifikasi",
+          API_LINK + "Notifikasi/GetDataNotifikasi",
           currentFilter
         );
 
@@ -116,20 +127,55 @@ export default function NotifikasiIndex() {
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
-          const formattedData = data.map((value) => ({
-            ...value,
-            Dari: value["Dari"].toUpperCase(),
-            Pesan: (
-              <div
+          console.log("Data", );
+          const formattedData = data.map((value) => {
+            const formatted = {
+              ...value,
+              Pesan: (
+                <div
                 className="link-decoration-none"
+                style={{ fontSize: "14px" }}
                 dangerouslySetInnerHTML={{
                   __html: value["Pesan"],
                 }}
-              ></div>
-            ),
-            Waktu: formatDate(value["Waktu"]),
-            Alignment: ["center", "left", "left", "center", "center"],
-          }));
+              ></div>              
+              ),
+              Waktu: formatDate(value["Waktu"]),
+              Alignment: ["center", "left", "left", "center", "center", "center"],
+            };
+          
+            if (value["Status"] !== "Terbaca") {
+              formatted.Aksi = (
+                <Icon
+                  name="check"
+                  type="Bold"
+                  cssClass="btn bi-check-lg"
+                  title="Tandai Sudah Dibaca"
+                  onClick={async () => {
+                    const result = await SweetAlert(
+                      "Tandai Sudah Dibaca",
+                      "Apakah Anda yakin ingin menandai notifikasi ini sudah dibaca?",
+                      "info",
+                      "Ya, tandai!"
+                    );
+          
+                    if (result) {
+                      setIsLoading(true);
+                      await UseFetch(API_LINK + "Notifikasi/SetReadNotifikasi", {
+                        key: value.Key,
+                        application: userInfo.username,
+                      });
+                      setCurrentFilter((prev) => ({ ...prev }));
+                    }
+                  }}
+                />
+              );
+            }
+          
+            return formatted;
+          });
+          
+          console.log(formattedData)
           setCurrentData(formattedData);
         }
       } catch {
@@ -144,6 +190,7 @@ export default function NotifikasiIndex() {
 
   return (
     <>
+      <div className="my-3 container">
       <div className="d-flex flex-column">
         {isError && (
           <div className="flex-fill">
@@ -153,6 +200,16 @@ export default function NotifikasiIndex() {
             />
           </div>
         )}
+        <div className="mb-4 color-primary text-center">
+          <div className="d-flex gap-3 justify-content-center">
+            <h2 className="display-1 fw-bold">Notification</h2>
+            <div className="d-flex align-items-end mb-2">
+              <h2 className="display-5 fw-bold align-items-end">System</h2>
+            </div>
+          </div>
+        </div>
+        </div>
+        
         <div className="flex-fill">
           <div className="input-group">
             <Input
