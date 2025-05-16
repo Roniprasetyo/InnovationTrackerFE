@@ -120,7 +120,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       const kepalaSeksi = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
-          (value.jabatan === "Kepala Seksi" || value.jabatan === "Kepala Departemen")
+          (value.jabatan === "Kepala Seksi")
       );
   
       const sekProdi = listEmployee.find(
@@ -133,6 +133,12 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         (value) =>
           value.npk === userInfo.npk &&
           value.jabatan === "Kepala Departemen"
+      )
+
+      const kepalaJurusan = listEmployee.find(
+        (value) =>
+          value.npk === userInfo.npk &&
+          (value.jabatan === "Kepala Jurusan" || value.jabatan === "Kepala Departemen")
       )
       
       const secondly = listDepartment.find(
@@ -148,7 +154,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           value.jabatan === userInfo.departemen
       );
   
-      let selected = kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
+      let selected = kepalaDepartemen || kepalaJurusan || sekProdi || kepalaSeksi || Direktur;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -164,7 +170,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           const parentDept = listDepartment.find(
             (item) =>
               item["Struktur Parent"] === parent &&
-              item.Jabatan === "Kepala Departemen"
+              item.Jabatan === "Kepala Jurusan" || item.Jabatan === "Kepala Departemen"
           );
   
           if (parentDept) {
@@ -180,8 +186,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }
       }
       else if(
-        (selected?.npk === userInfo.npk || selected?.Npk === userInfo.npk) &&
-        ((selected.jabatan === "Kepala Departemen" || selected.Jabatan === "Kepala Jurusan") 
+        selected?.npk === userInfo.npk  &&
+        ((selected.jabatan === "Kepala Departemen" || selected.jabatan === "Kepala Jurusan") 
         && selected.jabatan !== "Sekretaris Prodi")
       ) {
         const userStruktur = listDepartment.find(
@@ -205,6 +211,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
             const matchingDirect = listEmployee.find(
               (emp) => emp.npk === Kadept.Npk
             );
+           
   
             if (Kadept) {
               setSectionHead(matchingDirect);
@@ -218,10 +225,12 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       }
   
       if (selected) {
+        console.log("tss", selected);
         setSectionHead(selected);
       }
     }
   }, [listEmployee, userInfo, listDepartment]);  
+  console.log("ATAS: ", sectionHead);
 
   useEffect(() => {
     const userStruktur = listDepartment.find(

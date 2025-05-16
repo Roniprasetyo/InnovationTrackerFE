@@ -223,7 +223,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       setTotalScoreforKaUpt(total);
     } else if (
       userInfo.jabatan == "Kepala Departemen" ||
-      userInfo.jabatan === "Kepala Jurusan"
+      userInfo.jabatan == "Kepala Jurusan"
     ) {
       setTotalScoreforKaDept(total);
     } else if (
@@ -558,6 +558,27 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           setListSettingRanking(data);
+          console.log(
+            "rank 5",
+            data
+              .find((item) => item.Ranking === "Ranking 5")
+              ?.Range.split("-")
+              .map((r) => parseInt(r.trim(), 10))[1] + 1
+          );
+          console.log(
+            "rank 4",
+            data
+              .find((item) => item.Ranking === "Ranking 4")
+              ?.Range.split("-")
+              .map((r) => parseInt(r.trim(), 10))[1] + 1
+          );
+          console.log(
+            "rank 3",
+            data
+              .find((item) => item.Ranking === "Ranking 3")
+              ?.Range.split("-")
+              .map((r) => parseInt(r.trim(), 10))[1] + 1
+          );
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -737,10 +758,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
     listPenilaianKaDept.forEach((item) => {
       if (
-        (item["Jabatan Penilai"] !== "Kepala Departemen" &&
-          userInfo.jabatan !== "Kepala Departemen") ||
-        (item["Jabatan Penilai"] !== "Kepala Jurusan" &&
-          userInfo.jabatan !== "Kepala Jurusan")
+        item["Jabatan Penilai"] !== "Kepala Departemen" &&
+        item["Jabatan Penilai"] !== "Kepala Jurusan"
       ) {
         tempTotal2 = 0;
       } else {
@@ -1236,7 +1255,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       }
                                     } else {
                                       content =
-                                        totalScoreforKaUpt < 41 &&
+                                        totalScoreforKaUpt < range5End &&
                                         totalScoreforKaUpt !== 0 ? (
                                           <div className="form-control bg-light">
                                             The score does not reach the
@@ -1365,7 +1384,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           />
                                         ) : (totalScoreforKaUpt < range5End &&
                                             totalScoreforKaUpt !== 0) ||
-                                          totalScoreforKaDept < range4End ? (
+                                          (totalScoreforKaDept < range4End &&
+                                            totalScoreforKaDept !== 0) ? (
                                           <div className="form-control bg-light">
                                             The score does not reach the
                                             required range.
