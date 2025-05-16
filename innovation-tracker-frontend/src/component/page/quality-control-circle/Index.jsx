@@ -65,26 +65,26 @@ export default function QualityControlCircleIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) {
-      try {
-        userInfo = JSON.parse(decryptId(cookie));
-      } catch (e) {
-        userInfo = "";
-      }
+    try {
+      userInfo = JSON.parse(decryptId(cookie));
+    } catch (e) {
+      userInfo = "";
     }
-  
-    if (!userInfo) {
-      return (
-        <div>
-          <div className="mt-3 flex-fill">
-              <Alert
-                type="danger"
-                message="Your session has expired."
-              />
-            </div>
-          <NotFound />
+  }
+
+  if (!userInfo) {
+    return (
+      <div>
+        <div className="mt-3 flex-fill">
+          <Alert
+            type="danger"
+            message="Your session has expired."
+          />
         </div>
-      ) ;
-    }
+        <NotFound />
+      </div>
+    );
+  }
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,6 +129,8 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleSubmit = async (id) => {
     setIsError(false);
+    setIsLoading(true);
+
     let status;
     if (currentData.Status === "Approved") {
       status = "Rejected";
@@ -136,6 +138,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
       status =
         "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
     }
+
     const confirm = await SweetAlert(
       "Confirm",
       status,
@@ -147,23 +150,51 @@ export default function QualityControlCircleIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
-        id: id,
-      })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert(
-              "Success",
-              "Thank you for submitting your registration form. Please wait until the next update",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
-        .then(() => setIsLoading(false));
+      try {
+        const result = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+          id: id,
+        });
+
+        if (result === "ERROR" || result.length === 0) {
+          setIsError(true);
+        } else {
+           const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          const decodedNama = decodeHtml(
+            decodeHtml(decodeHtml(userInfo.nama))
+          ).replace(/<\/?[^>]+(>|$)/g, "'");
+
+          const notifikasiMessage = `A new Quality Control Circle registration has been submitted by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
+
+          await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiQCC1", {
+            from: userInfo.username,
+            to: "",
+            message: notifikasiMessage,
+            sis: -1,
+            rci: id,
+          });
+
+          SweetAlert(
+            "Success",
+            "Thank you for submitting your registration form. Please wait until the next update",
+            "success"
+          );
+
+          handleSetCurrentPage(currentFilter.page);
+        }
+      } catch (error) {
+        console.error("Terjadi error saat submit:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
     }
   };
+
 
   const handleApprove = async (id) => {
     setIsError(false);
@@ -211,13 +242,27 @@ export default function QualityControlCircleIndex({ onChangePage }) {
         set: "Rejected",
         reason: confirm,
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+        .then(async (data) => {
+
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          if (data === "ERROR" || data.length === 0) {
+            setIsError(true);
+          } else {
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
+              from: userInfo.username,
+              to: "",
+              message: `Quality Control Circle Reject. Your Quality Control Circle titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
+              sis: -1,
+              rci: id,
+            });
             handleSetCurrentPage(currentFilter.page);
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -257,23 +302,23 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             Count: value["Count"],
             Action:
               role === "ROL01" &&
-              value["Status"] === "Draft" &&
-              value["Creaby"] === userInfo.username
+                value["Status"] === "Draft" &&
+                value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
-                ? ["Detail", "Reject", "Approve"]
-                : role === "ROL01" &&
-                  value["Status"] === "Rejected" &&
-                  value["Creaby"] === userInfo.username
-                ? ["Detail", "Edit", "Submit"]
-                : role === "ROL36" && value["Status"] === "Approved"
-                ? ["Detail", "Submit"]
-                :
-                  value["Status"] === "Approved" &&
-                  value["Creaby"] === userInfo.username
-                ? ["Detail", "FillTheStep"]
-                : ["Detail"],
+                  ? ["Detail", "Reject", "Approve"]
+                  : role === "ROL01" &&
+                    value["Status"] === "Rejected" &&
+                    value["Creaby"] === userInfo.username
+                    ? ["Detail", "Edit", "Submit"]
+                    : role === "ROL36" && value["Status"] === "Approved"
+                      ? ["Detail", "Submit"]
+                      :
+                      value["Status"] === "Approved" &&
+                        value["Creaby"] === userInfo.username
+                        ? ["Detail", "FillTheStep"]
+                        : ["Detail"],
             Alignment: [
               "center",
               "left",
@@ -359,12 +404,12 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 exportExcel(
                   dataExport.current,
                   "QCC_" +
-                    new Date().toLocaleDateString() +
-                    "_" +
-                    new Date().toLocaleTimeString() +
-                    "_" +
-                    currentFilter.page +
-                    ".xlsx"
+                  new Date().toLocaleDateString() +
+                  "_" +
+                  new Date().toLocaleTimeString() +
+                  "_" +
+                  currentFilter.page +
+                  ".xlsx"
                 )
               }
             />
