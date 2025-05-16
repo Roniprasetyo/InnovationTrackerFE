@@ -1,25 +1,42 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { API_LINK, ROOT_LINK, EMP_API_LINK } from "../../util/Constants";
+import { decodeHtml, formatDate, separator } from "../../util/Formatting";
+import {
+  API_LINK,
+  ROOT_LINK,
+  EMP_API_LINK,
+  FILE_LINK,
+} from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
-import { date, number, object, string } from "yup";
+import { date, number, object, Schema, string } from "yup";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
+import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
 import Input from "../../part/Input";
+import TextArea from "../../part/TextArea";
 import SearchDropdown from "../../part/SearchDropdown";
+import DropDown from "../../part/Dropdown";
 import Button from "../../part/Button";
 import SweetAlert from "../../util/SweetAlert";
 import * as Yup from "yup";
 
+const inisialisasiData = [
+  {
+    Key: null,
+    No: null,
+    Name: null,
+    Count: 0,
+  },
+];
 function deobfuscateId(obfuscated) {
   const parts = obfuscated.split(".");
   if (parts.length === 2) {
-    return atob(parts[1]);
+    return atob(parts[1]); // hanya ambil bagian Base64
   }
   return null;
 }
@@ -28,6 +45,7 @@ export default function EditScoring({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   const [searchParams] = useSearchParams();
   const encodedId = searchParams.get("id");
+
   let userInfo = "";
   const id = deobfuscateId(encodedId);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -42,6 +60,8 @@ export default function EditScoring({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userInput, setUserInput] = useState("");
   const [formattedValue, setFormattedValue] = useState("");
+
+  // VARIABLE UNTUK UPDATE LIST DETAIL KRITERIA PENILIAN
   const [listPenilaian, setListPenilaian] = useState([]);
 
   const formDataRef = useRef({
@@ -72,7 +92,7 @@ export default function EditScoring({ onChangePage }) {
   const formDataRef2 = useRef([]);
   const formDataRef3 = useRef([]);
   const key = useRef({});
-  const [formComment, setFormComment] = useState("");
+  const formComment = useRef(null);
 
   const userSchema = object({
     Key: number().required("required"),
@@ -141,7 +161,7 @@ export default function EditScoring({ onChangePage }) {
     let i = 0;
     Object.values(listPenilaian).forEach((d) => {
       key.current[i] = d.Keys;
-      i++;
+      i++; // increment i
     });
 
     Object.values(formDataRef2.current).forEach((val) => {
@@ -220,15 +240,11 @@ export default function EditScoring({ onChangePage }) {
     fetchData();
   }, []);
 
-  const handleCancel = () => {
-    window.opener.location.href = ROOT_LINK + "/submission/ss";
-    window.close();
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let status1 = "";
+    let status1 = ""; 
 
     if (
       userInfo.jabatan === "Kepala Seksi" ||
@@ -240,7 +256,7 @@ export default function EditScoring({ onChangePage }) {
       ) {
         status1 = "Draft Scoring";
       }
-    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
+    } else if (userInfo.jabatan === "Kepala Departemen") {
       if (
         formDataRef.current.Status === "Approved" ||
         formDataRef.current.Status.includes("Draft Scoring")
@@ -260,19 +276,19 @@ export default function EditScoring({ onChangePage }) {
     }
 
     const payload = {
-      dkp_id: Object.values(formDataRef2.current).join(", "),
+      dkp_id: Object.values(formDataRef2.current).join(", "), // "12, 2, 4,  7"
       sis_id: id,
-      pen_nilai: Object.values(formDataRef3.current).join(", "),
+      pen_nilai: Object.values(formDataRef3.current).join(", "), // "34, 44, 66, 12"
       jabatan: userInfo.jabatan,
       status: "-",
       pen_createby: listPenilaian[0].creaby,
       pen_createdate: listPenilaian[0].creadate,
       pen_modif_by: userInfo.username,
       pen_comment:
-        formComment && formComment.trim() !== ""
-          ? `${formComment} - ${userInfo.username}`
+        formComment.current && formComment.current.trim() !== ""
+          ? `${formComment.current} - ${userInfo.username}`
           : "",
-      sis_status: status1,
+      sis_status: status1
     };
 
     const payloadSchema = Yup.object().shape({
@@ -293,7 +309,9 @@ export default function EditScoring({ onChangePage }) {
             return items.length === listKriteriaPenilaian.length;
           }
         ),
+
       sis_id: Yup.string().required("sis_id is required"),
+
       pen_nilai: Yup.string()
         .matches(
           /^(\d+\s*,\s*)*\d+$/,
@@ -311,15 +329,21 @@ export default function EditScoring({ onChangePage }) {
             return items.length === listKriteriaPenilaian.length;
           }
         ),
+
       jabatan: Yup.string().required("jabatan is required"),
+
       status: Yup.string()
         .oneOf(["-"], 'status must be "-"')
         .required("status is required"),
+
       pen_createby: Yup.string().required("pen_created is required"),
+
       pen_createdate: Yup.string().required("pen_createdate is required"),
+
       pen_modif_by: Yup.string().required("pen_modif_by is required"),
+
       pen_comment: Yup.string().nullable(),
-      sis_status: Yup.string().nullable(),
+      sis_status: Yup.string().nullable()
     });
 
     const validationErrors = await validateAllInputs(
@@ -344,14 +368,15 @@ export default function EditScoring({ onChangePage }) {
         } else {
           SweetAlert("Success", "Data Successfully Submitted", "success");
 
-          setTimeout(function () {
+          setTimeout(function() {
             if (window.opener) {
               window.opener.location.href = ROOT_LINK + "/submission/ss";
               window.close();
             } else {
               window.location.href = ROOT_LINK + "/submission/ss";
             }
-          }, 2000);
+          }, 2000); // 2000 milidetik = 2 detik
+          
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -403,7 +428,6 @@ export default function EditScoring({ onChangePage }) {
           creaby: userInfo.username,
         });
 
-        // console.log(data);
         if (!data) {
           throw new Error("Error: Failed to get the category data.");
         } else {
@@ -421,23 +445,9 @@ export default function EditScoring({ onChangePage }) {
               KrpId: item.Kriteria,
               creaby: item.Creaby,
               creadate: item.Creadate,
-              komment:
-                userInfo.jabatan === "Kepala Seksi" ||
-                userInfo.jabatan === "Sekretaris Prodi"
-                  ? item.Komment1
-                  : userInfo.jabatan === "Kepala Departemen" ||
-                  userInfo.jabatan === "Kepala Jurusan" 
-                  ? item.Komment2
-                  : userInfo.jabatan === "Wakil Direktur" ||
-                    userInfo.jabatan === "Direktur"
-                  ? item.Komment3
-                  : "-",
             };
           });
-          let fullComment = dataDetail[0].komment;
-          let trimmedComment = fullComment?.replace(/\s-\s[^-]+$/, "");
 
-          setFormComment(trimmedComment);
           setListPenilaian(dataDetail);
         }
       } catch (error) {
@@ -464,7 +474,7 @@ export default function EditScoring({ onChangePage }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           const dataDetail = data.map((item) => ({
-            Text: `(Poin: ${item.Score}) - ${item.Desc}`,
+            Text:`(Poin: ${item.Score}) - ${item.Desc}`,
             Value: item.Value,
             Score: item.Score,
             Id: item.Value2,
@@ -485,8 +495,18 @@ export default function EditScoring({ onChangePage }) {
     fetchData();
   }, []);
 
+  const formatNumber = (value) => {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const handleChange = (e) => {
+    const rawValue = e.target.value.replace(/[^\d]/g, "");
+    setFormattedValue(formatNumber(rawValue));
+    setUserInput(rawValue);
+  };
+
   const handleComment = (e) => {
-    setFormComment(e.target.value);
+    formComment.current = e.target.value;
   };
 
   if (isLoading) return <Loading />;
@@ -494,6 +514,28 @@ export default function EditScoring({ onChangePage }) {
   return (
     <>
       <div className="container min-vh-100">
+        <div
+          className="row my-3"
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <h2
+            className="fw-bold"
+            style={{ color: "rgb(0, 89, 171)", margin: "0" }}
+          >
+            <Icon
+              type="Bold"
+              name="angle-left"
+              cssClass="btn me-1 py-0 text"
+              onClick={() => onChangePage("index")}
+              style={{
+                fontSize: "22px",
+                cursor: "pointer",
+                color: "rgb(0, 89, 171)",
+              }}
+            />
+            Scoring Data
+          </h2>
+        </div>
         <div className="mt-3">
           {isError.error && (
             <div className="flex-fill ">
@@ -530,14 +572,14 @@ export default function EditScoring({ onChangePage }) {
 
                             <div className="col-md-4">
                               <Label
-                                title="Name"
+                                title="Name​"
                                 data={userData?.name || "-"}
                               />
                             </div>
 
                             <div className="col-md-4">
                               <Label
-                                title="Section"
+                                title="Section​"
                                 data={userData?.upt || "-"}
                               />
                             </div>
@@ -556,6 +598,11 @@ export default function EditScoring({ onChangePage }) {
                             style={{ width: "80%" }}
                           >
                             {listKriteriaPenilaian.map((item) => {
+                              const selectedItem =
+                                listDetailKriteriaPenilaian.find(
+                                  (detail) => detail.Id === item.Value
+                                );
+
                               const filteredArrData =
                                 listDetailKriteriaPenilaian.filter(
                                   (detail) => detail.Id === item.Value
@@ -609,6 +656,7 @@ export default function EditScoring({ onChangePage }) {
                                   <div className="col-lg-8">
                                     <SearchDropdown
                                       forInput={item.Value}
+                                      // placeholder={arrTextData[item.Value] || ''}
                                       arrData={filteredArrData}
                                       isRound
                                       isRequired
@@ -620,6 +668,7 @@ export default function EditScoring({ onChangePage }) {
                                       }
                                       disableTyping
                                       onChange={handleInputChange}
+                                      // errorMessage={errors.formDataRef2.current[item.Value]}
                                     />
                                   </div>
                                 </div>
@@ -632,8 +681,11 @@ export default function EditScoring({ onChangePage }) {
                               <Input
                                 type="textarea"
                                 forInput="comment"
+                                // ref={formComment}
+                                // isRequired
                                 onChange={handleComment}
-                                value={formComment}
+                                selectedValued={listPenilaian.komment || ""}
+                                value={formComment.current}
                                 errorMessage={errors.formComment}
                               />
                             </div>
@@ -646,11 +698,13 @@ export default function EditScoring({ onChangePage }) {
                                 minHeight: "180px",
                               }}
                             >
+                              {/* HEADER DI ATAS */}
                               <h3
                                 className="w-100 text-center"
                                 style={{
                                   textAlign: "center",
                                   background: "transparent",
+                                  // border: "none",
                                   padding: 0,
                                   fontWeight: "bold",
                                 }}
@@ -660,6 +714,7 @@ export default function EditScoring({ onChangePage }) {
 
                               <hr />
 
+                              {/* ISI DI TENGAH */}
                               <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
                                 <h1 className="fw-medium fw-bold">
                                   {totalScore}
@@ -676,7 +731,7 @@ export default function EditScoring({ onChangePage }) {
                           <Button
                             classType="danger me-2 px-4 py-2"
                             label="CANCEL"
-                            onClick={handleCancel}
+                            onClick={() => onChangePage("index")}
                             style={{ width: "100%", borderRadius: "16px" }}
                           />
                         </div>
@@ -690,6 +745,12 @@ export default function EditScoring({ onChangePage }) {
                         </div>
                       </div>
                     </div>
+                    {/* <div className="d-flex justify-content-end pe-3 mb-3">
+                    <sub>
+                      Submitted by{" "}
+                      <strong>{formDataRef.current["Creaby"] || "-"}</strong>
+                    </sub>
+                  </div> */}
                   </div>
                 </form>
               )}

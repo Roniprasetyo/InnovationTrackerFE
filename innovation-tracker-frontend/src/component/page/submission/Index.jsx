@@ -109,11 +109,10 @@ export default function Submission() {
                   {[
                     "Kepala Seksi",
                     "Kepala Departemen",
-                    "Kepala Jurusan",
                     "Sekretaris Prodi",
                     "Wakil Direktur",
-                    "Direktur",
-                  ].includes(userInfo.jabatan) || userInfo.role.slice(0, 5) === "ROL36" ? (
+                    "Direktur"
+                  ].includes(userInfo.jabatan) && (
                     <div
                       className="col-sm-3 bg-success rounded-5"
                       onClick={() => navigate("/submission/ss")}
@@ -138,8 +137,8 @@ export default function Submission() {
                         </p>
                       </div>
                     </div>
-                  ): ""}
-                  {userInfo.role.slice(0, 5) !== "ROL36" && (
+                  )}
+                  {userInfo.role.slice(0, 5) !== "ROL01" && (
                     <div
                       className="col-sm-3 bg-success rounded-5"
                       onClick={() =>

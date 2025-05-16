@@ -8,7 +8,6 @@ import Icon from "../../part/Icon";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
-import Button from "../../part/Button";
 
 export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
@@ -17,8 +16,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   const [listEmployee, setListEmployee] = useState([]);
   const [userData, setUserData] = useState({});
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
-  const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
-    useState([]);
+  const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] = useState([]);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
@@ -121,7 +119,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
       const userData = listEmployee.find(
         (value) => value.npk === formDataRef.current["NPK"]
       );
-      // console.log("Name", userData.name);
       setUserData(userData);
     }
   }, [listEmployee, userInfo]);
@@ -190,6 +187,28 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
 
   return (
     <>
+      <div
+        className="row my-3"
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <h2
+          className="fw-bold"
+          style={{ color: "rgb(0, 89, 171)", margin: "0" }}
+        >
+          <Icon
+            type="Bold"
+            name="angle-left"
+            cssClass="btn me-1 py-0 text"
+            onClick={() => onChangePage("index")}
+            style={{
+              fontSize: "22px",
+              cursor: "pointer",
+              color: "rgb(0, 89, 171)",
+            }}
+          />
+          Detail Data
+        </h2>
+      </div>
       <div className="mt-3">
         {isError.error && (
           <div className="flex-fill ">
@@ -234,7 +253,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         </div>
 
                         <div className="col-md-4">
-                          <Label title="Name​" data={userData?.name || "-"} />
+                          <Label title="Name​" data={userData["name"] || "-"} />
                         </div>
 
                         <div className="col-md-4">
@@ -421,12 +440,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
-                  <Button
-                    iconName={"angle-left"}
-                    classType={"primary"}
-                    onClick={() => onChangePage("index")}
-                    label="Back"
-                  />
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />
@@ -505,7 +518,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                     </div>
                   </div>
                 )}
-
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>
                     Submitted by{" "}

@@ -9,7 +9,6 @@ import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
-// import userInfo from
 
 const inisialisasiData = [
   {
@@ -22,7 +21,6 @@ const inisialisasiData = [
 
 export default function QualityControlCircleDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
-  let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });

@@ -108,9 +108,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
     facil_id: string(),
   });
 
-  console.log("SECTION HEAD : ", sectionHead);
-  console.log("USER INFO : ", userInfo);
-
   useEffect(() => {
     if (
       listEmployee.length > 0 &&
@@ -120,7 +117,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       const kepalaSeksi = listEmployee.find(
         (value) =>
           value.upt_bagian === userInfo.upt &&
-          (value.jabatan === "Kepala Seksi")
+          (value.jabatan === "Kepala Seksi" || value.jabatan === "Kepala Departemen")
       );
   
       const sekProdi = listEmployee.find(
@@ -134,27 +131,22 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           value.npk === userInfo.npk &&
           value.jabatan === "Kepala Departemen"
       )
-
-      const kepalaJurusan = listEmployee.find(
-        (value) =>
-          value.npk === userInfo.npk &&
-          (value.jabatan === "Kepala Jurusan" || value.jabatan === "Kepala Departemen")
-      )
       
       const secondly = listDepartment.find(
         (value) => userInfo.departemen === value.Struktur && userInfo.jabatan !== "Staff" && userInfo.jabatan !== "Sekretaris Prodi"
       );
 
       const lgsungDirektur = listEmployee.find(
-        (value) => value.npk === userInfo.npk
-      );
-  
-      const Direktur = listEmployee.find(
         (value) =>
-          value.jabatan === userInfo.departemen
+          value.npk === userInfo.npk
       );
   
-      let selected = kepalaDepartemen || kepalaJurusan || sekProdi || kepalaSeksi || Direktur;
+      const Direktur = listDepartment.find(
+        (value) =>
+          value.Struktur === lgsungDirektur.departemen_jurusan && !lgsungDirektur.upt_bagian.includes("Prodi")
+      );
+  
+      let selected = secondly || kepalaDepartemen || sekProdi || kepalaSeksi || Direktur;
   
       if (
         selected?.npk === userInfo.npk &&
@@ -170,7 +162,7 @@ export default function SuggestionSystemAdd({ onChangePage }) {
           const parentDept = listDepartment.find(
             (item) =>
               item["Struktur Parent"] === parent &&
-              item.Jabatan === "Kepala Jurusan" || item.Jabatan === "Kepala Departemen"
+              item.Jabatan === "Kepala Departemen"
           );
   
           if (parentDept) {
@@ -186,8 +178,8 @@ export default function SuggestionSystemAdd({ onChangePage }) {
         }
       }
       else if(
-        selected?.npk === userInfo.npk  &&
-        ((selected.jabatan === "Kepala Departemen" || selected.jabatan === "Kepala Jurusan") 
+        (selected?.npk === userInfo.npk || selected?.Npk === userInfo.npk) &&
+        ((selected.jabatan === "Kepala Departemen" || selected.Jabatan === "Kepala Departemen") 
         && selected.jabatan !== "Sekretaris Prodi")
       ) {
         const userStruktur = listDepartment.find(
@@ -211,7 +203,6 @@ export default function SuggestionSystemAdd({ onChangePage }) {
             const matchingDirect = listEmployee.find(
               (emp) => emp.npk === Kadept.Npk
             );
-           
   
             if (Kadept) {
               setSectionHead(matchingDirect);
@@ -225,12 +216,10 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       }
   
       if (selected) {
-        console.log("tss", selected);
         setSectionHead(selected);
       }
     }
   }, [listEmployee, userInfo, listDepartment]);  
-  console.log("ATAS: ", sectionHead);
 
   useEffect(() => {
     const userStruktur = listDepartment.find(
@@ -244,6 +233,15 @@ export default function SuggestionSystemAdd({ onChangePage }) {
       );
     }
   }, [listDepartment]);
+  
+  useEffect(() => {
+    const userStruktur = listDepartment.find(
+      (value) =>
+        value.Struktur === userInfo.departemen
+    );
+    setEmp(userStruktur);
+
+  }, [listEmployee]);
 
   useEffect(() => {
       const fetchData = async () => {
