@@ -221,7 +221,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       userInfo.jabatan === "Sekretaris Prodi"
     ) {
       setTotalScoreforKaUpt(total);
-    } else if (userInfo.jabatan == "Kepala Departemen") {
+    } else if (
+      userInfo.jabatan == "Kepala Departemen" ||
+      userInfo.jabatan == "Kepala Jurusan"
+    ) {
       setTotalScoreforKaDept(total);
     } else if (
       userInfo.jabatan === "Wakil Direktur" ||
@@ -277,23 +280,19 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       userInfo.jabatan === "Kepala Seksi" ||
       userInfo.jabatan === "Sekretaris Prodi"
     ) {
-      formCommentFase1?.trim() !== ""
-        ? formCommentFase1
-        : "";
-        comment = formCommentFase1;
-    } else if (userInfo.jabatan === "Kepala Departemen") {
-      formCommentFase2?.trim() !== ""
-        ? formCommentFase2
-        : "";
-        comment = formCommentFase2
+      formCommentFase1?.trim() !== "" ? formCommentFase1 : "";
+      comment = formCommentFase1;
+    } else if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
+      formCommentFase2?.trim() !== "" ? formCommentFase2 : "";
+      comment = formCommentFase2;
     } else if (
       userInfo.jabatan === "Direktur" ||
       userInfo.jabatan === "Wakil Direktur"
     ) {
-      comment =
-        formCommentFase3?.trim() !== ""
-          ? formCommentFase3
-          : "";
+      comment = formCommentFase3?.trim() !== "" ? formCommentFase3 : "";
     }
 
     const payload = {
@@ -326,12 +325,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           }
         ),
       sis_id: Yup.string().required("sis_id is required"),
-      pen_nilai: Yup.string()
-        .required("pen_nilai is required")
-        .matches(
-          /^(\d+\s*,\s*)*\d+$/,
-          "pen_nilai must be a comma-separated list of numbers"
-        ),
+      pen_nilai: Yup.string().required("pen_nilai is required"),
       jabatan: Yup.string().required("jabatan is required"),
       statusPN: Yup.string().required("statusPN is required"),
       created: Yup.string().required("created is required"),
@@ -383,17 +377,14 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   };
 
   const handleComment1 = (e) => {
-    console.log(e.target.value);
     setFormCommentFase1(e.target.value);
   };
 
   const handleComment2 = (e) => {
-    console.log(e.target.value);
     setFormCommentFase2(e.target.value);
   };
 
   const handleComment3 = (e) => {
-    console.log(e.target.value);
     setFormCommentFase3(e.target.value);
   };
 
@@ -437,9 +428,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
         if (!data) {
         } else {
-          if(data[0]?.Komment !== null){
+          if (data[0]?.Komment !== null && data[0]?.Komment !== "") {
             setFormCommentFase2(data[0]?.Komment);
-          }else{
+          } else {
             setFormCommentFase2("-");
           }
           setListPenilaianKaDept(data);
@@ -472,9 +463,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
         if (!data) {
           throw new Error("Error: Failed to get the Wadir/Dir data.");
         } else {
-          if(data[0]?.Komment !== null){
+          if (data[0]?.Komment !== null && data[0]?.Komment !== "") {
             setFormCommentFase3(data[0]?.Komment);
-          }else{
+          } else {
             setFormCommentFase3("-");
           }
           setListPenilaianWadir(data);
@@ -501,13 +492,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           id: id,
         });
 
-        console.log("Data:", data);
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the Penilaian KA UPT data.");
         } else {
-          if(data[0]?.Komment !== null){
+          if (data[0]?.Komment !== null && data[0]?.Komment !== "") {
             setFormCommentFase1(data[0]?.Komment);
-          }else{
+          } else {
             setFormCommentFase1("-");
           }
           setListPenilaianKaUpt(data);
@@ -568,6 +558,27 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
           throw new Error("Error: Failed to get the category data.");
         } else {
           setListSettingRanking(data);
+          console.log(
+            "rank 5",
+            data
+              .find((item) => item.Ranking === "Ranking 5")
+              ?.Range.split("-")
+              .map((r) => parseInt(r.trim(), 10))[1] + 1
+          );
+          console.log(
+            "rank 4",
+            data
+              .find((item) => item.Ranking === "Ranking 4")
+              ?.Range.split("-")
+              .map((r) => parseInt(r.trim(), 10))[1] + 1
+          );
+          console.log(
+            "rank 3",
+            data
+              .find((item) => item.Ranking === "Ranking 3")
+              ?.Range.split("-")
+              .map((r) => parseInt(r.trim(), 10))[1] + 1
+          );
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -621,7 +632,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
             (item) =>
               item["Struktur Parent"] === strukturParentTarget &&
               (item.Jabatan === "Kepala Departemen" ||
-                item.Jabatan === "Sekretaris Prodi")
+                item.Jabatan === "Kepala Jurusan")
           );
 
           setAllListDepartment(data);
@@ -690,7 +701,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
   useEffect(() => {
     if (!hasUserSelectedTab) {
-      if (userInfo?.jabatan === "Kepala Departemen") {
+      if (
+        userInfo?.jabatan === "Kepala Departemen" ||
+        userInfo?.jabatan === "Kepala Jurusan"
+      ) {
         setSelectedTab(1);
       } else if (
         userInfo?.jabatan === "Kepala Seksi" ||
@@ -710,7 +724,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
   ];
 
   const tabIndexUser = tabLabels.findIndex((label) => {
-    if (userInfo.jabatan === "Kepala Departemen")
+    if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    )
       return label === "Ka.Prodi/Ka.Dept";
     if (
       userInfo.jabatan === "Wakil Direktur" ||
@@ -742,7 +759,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     listPenilaianKaDept.forEach((item) => {
       if (
         item["Jabatan Penilai"] !== "Kepala Departemen" &&
-        userInfo.jabatan !== "Kepala Departemen"
+        item["Jabatan Penilai"] !== "Kepala Jurusan"
       ) {
         tempTotal2 = 0;
       } else {
@@ -773,7 +790,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
 
       if (firstData) {
         const namePosition = listEmployee.find(
-          (item) => item.username === firstData["Creaby"]
+          (item) => item.username === firstData["Creaby Username"]
         );
         setScoringPosition(namePosition?.name);
         setScoringPositionRole(firstData["Jabatan Penilai"]);
@@ -833,7 +850,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
     let jabatanTarget = [];
 
     if (selectedTab === 0) jabatanTarget = ["Kepala Seksi", "Sekretaris Prodi"];
-    else if (selectedTab === 1) jabatanTarget = ["Kepala Departemen"];
+    else if (selectedTab === 1)
+      jabatanTarget = ["Kepala Departemen", "Kepala Jurusan"];
     else if (selectedTab === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
     if (listAllPenilaian.length !== 0) {
       const buffer = listAllPenilaian.some(
@@ -959,7 +977,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           "Sekretaris Prodi",
                                         ];
                                       else if (index === 1)
-                                        jabatanTarget = ["Kepala Departemen"];
+                                        jabatanTarget = [
+                                          "Kepala Departemen",
+                                          "Kepala Jurusan",
+                                        ];
                                       else if (index === 2)
                                         jabatanTarget = [
                                           "Wakil Direktur",
@@ -1053,7 +1074,9 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     forPenilai.jabatan === "Kepala Seksi" ||
                                     forPenilai.jabatan === "Sekretaris Prodi";
                                   const isKaDept =
-                                    forPenilai.jabatan === "Kepala Departemen";
+                                    forPenilai.jabatan ===
+                                      "Kepala Departemen" ||
+                                    forPenilai.jabatan === "Kepala Jurusan";
                                   const isWadir =
                                     forPenilai.jabatan === "Wakil Direktur" ||
                                     forPenilai.jabatan === "Direktur";
@@ -1089,9 +1112,12 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                               required range.
                                             </div>
                                           ) : matchingPenilaianforKaDept ? (
-                                            matchingPenilaianforKaDept[
+                                            (matchingPenilaianforKaDept[
                                               "Jabatan Penilai"
-                                            ] !== "Kepala Departemen" &&
+                                            ] !== "Kepala Departemen" ||
+                                              matchingPenilaianforKaDept[
+                                                "Jabatan Penilai"
+                                              ] !== "Kepala Jurusan") &&
                                             (matchingPenilaianforKaDept[
                                               "Jabatan Penilai"
                                             ] === "Kepala Seksi" ||
@@ -1229,7 +1255,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                       }
                                     } else {
                                       content =
-                                        totalScoreforKaUpt < 41 &&
+                                        totalScoreforKaUpt < range5End &&
                                         totalScoreforKaUpt !== 0 ? (
                                           <div className="form-control bg-light">
                                             The score does not reach the
@@ -1238,7 +1264,10 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                         ) : matchingPenilaianforKaDept ? (
                                           matchingPenilaianforKaDept[
                                             "Jabatan Penilai"
-                                          ] === "Kepala Departemen" ? (
+                                          ] === "Kepala Departemen" ||
+                                          matchingPenilaianforKaDept[
+                                            "Jabatan Penilai"
+                                          ] === "Kepala Jurusan" ? (
                                             <div className="form-control bg-light">
                                               {`${matchingPenilaianforKaDept.Deskripsi} - (Poin: ${matchingPenilaianforKaDept.Nilai})`}
                                             </div>
@@ -1355,7 +1384,8 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           />
                                         ) : (totalScoreforKaUpt < range5End &&
                                             totalScoreforKaUpt !== 0) ||
-                                          totalScoreforKaDept < range4End ? (
+                                          (totalScoreforKaDept < range4End &&
+                                            totalScoreforKaDept !== 0) ? (
                                           <div className="form-control bg-light">
                                             The score does not reach the
                                             required range.
@@ -1446,12 +1476,18 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                           (userInfo.jabatan ===
                                             "Kepala Seksi" ||
                                             userInfo.jabatan ===
-                                              "Sekretaris Prodi") && isChecked === true
+                                              "Sekretaris Prodi") &&
+                                          isChecked === true
                                             ? true
-                                            : userInfo.jabatan === "Kepala Departemen"
+                                            : userInfo.jabatan ===
+                                                "Kepala Departemen" ||
+                                              userInfo.jabatan ===
+                                                "Kepala Jurusan"
                                             ? true
-                                            : userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur"
-                                            ? true 
+                                            : userInfo.jabatan ===
+                                                "Wakil Direktur" ||
+                                              userInfo.jabatan === "Direktur"
+                                            ? true
                                             : false
                                         }
                                         type="textarea"
@@ -1470,12 +1506,20 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     <div className="col-lg-12">
                                       <Input
                                         isDisabled={
-                                          userInfo.jabatan ===
-                                          "Kepala Departemen" && isChecked === true
+                                          (userInfo.jabatan ===
+                                            "Kepala Departemen" ||
+                                            userInfo.jabatan ===
+                                              "Kepala Jurusan") &&
+                                          isChecked === true
                                             ? true
-                                            : (userInfo.jabatan === "Kepala Seksi" || userInfo.jabatan === "Sekretaris Prodi")
+                                            : userInfo.jabatan ===
+                                                "Kepala Seksi" ||
+                                              userInfo.jabatan ===
+                                                "Sekretaris Prodi"
                                             ? true
-                                            : (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur")
+                                            : userInfo.jabatan ===
+                                                "Wakil Direktur" ||
+                                              userInfo.jabatan === "Direktur"
                                             ? true
                                             : false
                                         }
@@ -1495,11 +1539,20 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
                                     <div className="col-lg-12">
                                       <Input
                                         isDisabled={
-                                          (userInfo.jabatan === "Wakil Direktur" || userInfo.jabatan === "Direktur") && isChecked === true
+                                          (userInfo.jabatan ===
+                                            "Wakil Direktur" ||
+                                            userInfo.jabatan === "Direktur") &&
+                                          isChecked === true
                                             ? true
-                                            : (userInfo.jabatan === "Kepala Seksi" || userInfo.jabatan === "Sekretaris Prodi")
+                                            : userInfo.jabatan ===
+                                                "Kepala Seksi" ||
+                                              userInfo.jabatan ===
+                                                "Sekretaris Prodi"
                                             ? true
-                                            : userInfo.jabatan === "Kepala Departemen"
+                                            : userInfo.jabatan ===
+                                                "Kepala Departemen" ||
+                                              userInfo.jabatan ===
+                                                "Kepala Jurusan"
                                             ? true
                                             : false
                                         }

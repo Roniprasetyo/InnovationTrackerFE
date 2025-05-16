@@ -9,6 +9,11 @@ import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
+import SearchDropdown from "../../part/SearchDropdown";
+import Button from "../../part/Button";
+import TextArea from "../../part/TextArea";
+import FileUpload from "../../part/FileUpload";
+import Modal from "../../part/Modal";
 // import userInfo from
 
 const inisialisasiData = [
@@ -20,7 +25,16 @@ const inisialisasiData = [
   },
 ];
 
-export default function QualityControlCircleDetail({ onChangePage, withID }) {
+const MetodologiArr = [
+  { Value: "pdca", Text: "PDCA (Plan-Do-Check-Act)" },
+  { Value: "dmaic", Text: "DMAIC (Define-Measure-Analyze-Improve-Control)" },
+  { Value: "kaizen", Text: "Kaizen" },
+  { Value: "six_sigma", Text: "Six Sigma" },
+  { Value: "lean", Text: "Lean Manufacturing" },
+  { Value: "5s", Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
+];
+
+export default function QualityControlCircleFillStep({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -44,7 +58,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Goal: "",
     GoalFile: "",
     Scope: "",
-    "Start Date": "", 
+    "Start Date": "",
     "End Date": "",
     Quality: "",
     Cost: null,
@@ -58,6 +72,10 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
     Nama: "",
     Section: "",
   });
+
+  // const formDataMetodologiRef = useRef({});
+  const [formDataMetodologiRef, setFormDataMetodRed] = useState("");
+  const modalRef = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,6 +160,26 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
 
     fetchData();
   }, [withID, listEmployee]);
+  console.log("currentData, ", currentData);
+
+  const handleMetodologi = (e) => {
+    setFormDataMetodRed(e.target.value);
+    console.log(formDataMetodologiRef);
+  };
+
+  const handleOpenModal = (id) => {
+    console.log(id);
+    if (id.length === 0) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: "Please select one or more data!",
+      }));
+    } else {
+      modalRef.current.open();
+    }
+  };
 
   if (isLoading) return <Loading />;
 
@@ -420,12 +458,151 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
+                  <div className="card mb-3">
+                    <div className="card-header">
+                      <h5 className="fw-medium">The Steps</h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <div className="row">
+                            <div className="col-lg-11">
+                              <SearchDropdown
+                                arrData={MetodologiArr}
+                                value={formDataMetodologiRef.current}
+                                label="Metodologi"
+                                onChange={handleMetodologi}
+                                isRequired
+                              />
+                            </div>
+                            <div className="col-md-1 mt-4">
+                              <Button
+                                // classType="secondary"
+                                label="?"
+                                onClick={() =>
+                                  handleOpenModal(formDataMetodologiRef)
+                                }
+                                style={{ borderRadius: "16px" }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <TextArea
+                              forInput="pdcaPlan"
+                              label="Plan"
+                              isRequired
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented (menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)"
+                              // value={formDataRef.current.rciCase}
+                              // onChange={handleInputChange}
+                              // errorMessage={errors.rciCase}
+                            />
+                          </div>
+                          <div className="col-lg-4 mb-3">
+                            <FileUpload
+                              forInput="pdcaPlanFile"
+                              label="Plan Document (.pdf)"
+                              formatFile=".pdf"
+                              // ref={bussinessCaseFileRef}
+                              // onChange={() =>
+                              //   handleFileChange(bussinessCaseFileRef, "pdf")
+                              // }
+                              // errorMessage={errors.rciCaseFile}
+                            />
+                          </div>
+                          <hr />
+                          <div className="col-lg-12">
+                            <TextArea
+                              forInput="pdcaDo"
+                              label="Do"
+                              isRequired
+                              placeholder="Describe the steps taken to implement the plan and any resources used
+(Jelaskan langkah-langkah yang dilakukan untuk melaksanakan rencana serta sumber daya yang digunakan)"
+                              // value={formDataRef.current.rciProblem}
+                              // onChange={handleInputChange}
+                              // errorMessage={errors.rciProblem}
+                            />
+                          </div>
+                          <div className="col-lg-4 mb-3">
+                            <FileUpload
+                              forInput="rciProblemFile"
+                              label="Do Document (.pdf)"
+                              formatFile=".pdf"
+                              // ref={problemFileRef}
+                              // onChange={() =>
+                              //   handleFileChange(problemFileRef, "pdf")
+                              // }
+                              // errorMessage={errors.rciProblemFile}
+                            />
+                          </div>
+                          <hr />
+                          {formDataRef.current.Status === "Scoring" && (
+                            <>
+                              {/* Bagian CHECK */}
+                              <div className="col-lg-12">
+                                <TextArea
+                                  forInput="pdcaCheck"
+                                  label="Check"
+                                  isRequired
+                                  placeholder="Explain how the outcomes were monitored or measured and whether the plan was successful
+(Jelaskan bagaimana hasil dievaluasi atau diukur serta apakah rencananya berhasil)"
+                                  // value={formDataRef.current.rciGoal}
+                                  // onChange={handleInputChange}
+                                  // errorMessage={errors.rciGoal}
+                                />
+                              </div>
+                              <div className="col-lg-4">
+                                <FileUpload
+                                  forInput="pdcaCheckFile"
+                                  label="Check​ Document (.pdf)"
+                                  formatFile=".pdf"
+                                  // ref={goalFileRef}
+                                  // onChange={() =>
+                                  //   handleFileChange(goalFileRef, "pdf")
+                                  // }
+                                  // errorMessage={errors.goalFileRef}
+                                />
+                              </div>
+
+                              {/* Bagian ACTION */}
+                              <div className="col-lg-12">
+                                <TextArea
+                                  forInput="pdcaAction"
+                                  label="Action"
+                                  isRequired
+                                  placeholder="Describe what actions were taken based on the evaluation and how the process can be improved
+(Jelaskan tindakan yang diambil berdasarkan evaluasi dan bagaimana prosesnya dapat ditingkatkan)"
+                                  // value={formDataRef.current.rciGoal}
+                                  // onChange={handleInputChange}
+                                  // errorMessage={errors.rciGoal}
+                                />
+                              </div>
+                              <div className="col-lg-4">
+                                <FileUpload
+                                  forInput="pdcaActionFile"
+                                  label="Action Document (.pdf)"
+                                  formatFile=".pdf"
+                                  // ref={goalFileRef}
+                                  // onChange={() =>
+                                  //   handleFileChange(goalFileRef, "pdf")
+                                  // }
+                                  // errorMessage={errors.goalFileRef}
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />
-                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                      <Label
-                      data={formDataRef.current["Alasan Penolakan"]}/>
+                      <h5 className="fw-medium fw-bold">
+                        Reason for Rejection
+                      </h5>
+                      <Label data={formDataRef.current["Alasan Penolakan"]} />
                       <hr />
                     </div>
                   )}
@@ -441,6 +618,9 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
           </div>
         </div>
       </div>
+      <Modal title="Pict Metodologi" ref={modalRef} size="small">
+        <image src="../../util/image.png" alt="Metodologi Image" />
+      </Modal>
     </>
   );
 }
