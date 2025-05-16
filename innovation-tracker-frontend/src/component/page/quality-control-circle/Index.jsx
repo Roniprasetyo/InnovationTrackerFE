@@ -19,6 +19,7 @@ import {
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import { exportExcel } from "../../util/ExportExcel";
+import NotFound from "../not-found/Index";
 
 const inisialisasiData = [
   {
@@ -63,7 +64,27 @@ const dataFilterStatus = [
 export default function QualityControlCircleIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
-  if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  if (cookie) {
+      try {
+        userInfo = JSON.parse(decryptId(cookie));
+      } catch (e) {
+        userInfo = "";
+      }
+    }
+  
+    if (!userInfo) {
+      return (
+        <div>
+          <div className="mt-3 flex-fill">
+              <Alert
+                type="danger"
+                message="Your session has expired."
+              />
+            </div>
+          <NotFound />
+        </div>
+      ) ;
+    }
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -235,19 +256,23 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             Status: value["Status"],
             Count: value["Count"],
             Action:
-              role === "ROL03" &&
+              role === "ROL01" &&
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : role === "ROL03" &&
+                : role === "ROL01" &&
                   value["Status"] === "Rejected" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
-                : role === "ROL01" && value["Status"] === "Approved"
+                : role === "ROL36" && value["Status"] === "Approved"
                 ? ["Detail", "Submit"]
+                :
+                  value["Status"] === "Approved" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "FillTheStep"]
                 : ["Detail"],
             Alignment: [
               "center",
@@ -318,7 +343,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
       )}
       <div className="flex-fill">
         <div className="input-group">
-          {userInfo.role.slice(0, 5) !== "ROL01" ? (
+          {userInfo.role.slice(0, 5) !== "ROL36" ? (
             <Button
               iconName="add"
               label="Register"
@@ -371,7 +396,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
               label="Status"
               type="semua"
               arrData={
-                userInfo.role.slice(0, 5) === "ROL01"
+                userInfo.role.slice(0, 5) === "ROL36"
                   ? dataFilterStatus.filter((item) => item.Value != "Draft")
                   : dataFilterStatus
               }
@@ -389,6 +414,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             onApprove={handleApprove}
             onReject={handleReject}
             onEdit={onChangePage}
+            onFillStep={onChangePage}
           />
           <Paging
             pageSize={PAGE_SIZE}
