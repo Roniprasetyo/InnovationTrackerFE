@@ -2,3 +2,8 @@
     background-color: #e9ecef; /* abu-abu muda dari Bootstrap */
     font-weight: bold;
 }  
+.garis-tipis {
+  border-bottom: 1px solid #000;
+  margin: 0;
+  padding: 0;
+}

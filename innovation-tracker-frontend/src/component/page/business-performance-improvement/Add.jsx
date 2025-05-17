@@ -41,11 +41,11 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [checkedStates, setCheckedStates] = useState({
-    sisQuality: false,
-    sisCost: false,
-    sisDelivery: false,
-    sisSafety: false,
-    sisMoral: false,
+    rciQuality: false,
+    rciCost: false,
+    rciDelivery: false,
+    rciSafety: false,
+    rciMoral: false,
   });
 
   const [listCategory, setListCategory] = useState([]);
@@ -231,8 +231,8 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
           const selected = data.find(
             (item) => item.Text === new Date().getFullYear()
           );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.perId = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);

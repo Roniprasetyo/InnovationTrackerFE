@@ -18,6 +18,7 @@ import SuggestionSystem from "./component/page/suggestion-system/Root.jsx";
 import ValueChainInnovation from "./component/page/value-chain-innovation/Root.jsx";
 import BusinessPerformaceImprovement from "./component/page/business-performance-improvement/Root.jsx";
 import Scoring from "./component/page/suggestion-system/Scoring.jsx";
+import QCCScoring from "./component/page/quality-control-circle/Scoring.jsx";
 import EditScoring from "./component/page/suggestion-system/EditScoring.jsx";
 import NotifikasiIndex from "./component/page/notifikasi/Index.jsx";
 
@@ -80,6 +81,10 @@ export default function App() {
           {
             path: "/scoring",
             element: <Scoring />,
+          },
+          {
+            path: "/QCCScoring",
+            element: <QCCScoring />,
           },
           {
             path: "/editScoring",

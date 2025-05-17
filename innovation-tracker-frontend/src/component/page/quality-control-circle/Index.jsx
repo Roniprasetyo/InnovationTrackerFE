@@ -61,7 +61,10 @@ const dataFilterStatus = [
   { Value: "Rejected", Text: "Rejected" },
 ];
 
-export default function QualityControlCircleIndex({ onChangePage }) {
+export default function QualityControlCircleIndex({ 
+  onChangePage,
+  onScoring, 
+}) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) {
@@ -280,6 +283,9 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
+                : inorole === "Facilitator" &&
+                  value["Status"] === "Scoring"
+                ? ["Detail", "Scoring"]
                 : role === "ROL01" &&
                   value["Status"] === "Rejected" &&
                   value["Creaby"] === userInfo.username
@@ -430,6 +436,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             onSubmit={handleSubmit}
             onApprove={handleApprove}
             onReject={handleReject}
+            onScoring={onScoring}
             onEdit={onChangePage}
             onFillStep={onChangePage}
           />
