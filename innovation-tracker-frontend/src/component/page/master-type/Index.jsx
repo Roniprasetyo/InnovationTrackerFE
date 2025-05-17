@@ -23,8 +23,8 @@ const inisialisasiData = [
 ];
 
 const dataFilterSort = [
-  { Value: "[Name] asc", Text: "Name [↑]" },
-  { Value: "[Name] desc", Text: "Name [↓]" },
+  { Value: "[Type] asc", Text: "Type [↑]" },
+  { Value: "[Type] desc", Text: "Type [↓]" },
 ];
 
 const dataFilterStatus = [
