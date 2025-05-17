@@ -16,7 +16,6 @@ const inisialisasiData = [
   {
     Key: null,
     No: null,
-    Name: null,
     Type: null,
     Status: null,
     Count: 0,
@@ -40,7 +39,7 @@ export default function MasterTypeIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Name] asc",
+    sort: "[Type]",
     status: "Aktif",
   });
 
@@ -84,8 +83,8 @@ export default function MasterTypeIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "MasterStep/SetStatusStep", {
-        idStep: id,
+      UseFetch(API_LINK + "MasterType/SetStatusType", {
+        idType: id,
       })
         .then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
@@ -115,7 +114,7 @@ export default function MasterTypeIndex({ onChangePage }) {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
-            Name: decodeHtml(value.Name),
+            Type: decodeHtml(value.Type),
             Action: ["Delete", "Detail", "Edit"],
             Alignment: ["center", "left", "center", "center", "center"],
           }));

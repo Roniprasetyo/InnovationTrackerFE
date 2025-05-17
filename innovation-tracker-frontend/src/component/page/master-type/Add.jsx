@@ -118,7 +118,7 @@ export default function MasterTypeAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header py-3">
-              <h3 className="fw-bold text-center">STEP FORM</h3>
+              <h3 className="fw-bold text-center">TYPE FORM</h3>
             </div>
             <div className="card-body">
               <div className="row p-4">
