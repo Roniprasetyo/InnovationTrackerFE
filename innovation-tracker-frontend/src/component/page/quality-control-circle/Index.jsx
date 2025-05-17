@@ -162,28 +162,46 @@ export default function QualityControlCircleIndex({ onChangePage }) {
           id: id,
           status: null,
         });
-  
-        if (!updateResult) {
+
+        if (updateResult === "ERROR" || updateResult.length === 0) {
           setIsError(true);
-          setIsLoading(false);
-          return;
+        } else {
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          const decodedNama = decodeHtml(
+            decodeHtml(decodeHtml(userInfo.nama))
+          ).replace(/<\/?[^>]+(>|$)/g, "'");
+
+          const notifikasiMessage = `A new Quality Control Circle registration has been submitted by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
+
+          await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiQCC1", {
+            from: userInfo.username,
+            to: "",
+            message: notifikasiMessage,
+            sis: -1,
+            rci: id,
+          });
+
+          SweetAlert(
+            "Success",
+            "Thank you for submitting your registration form. Please wait until the next update",
+            "success"
+          );
+
+          handleSetCurrentPage(currentFilter.page);
         }
-  
-        SweetAlert(
-          "Success",
-          "Thank you for submitting your registration form. Please wait until the next update",
-          "success"
-        );
-        handleSetCurrentPage(currentFilter.page);
-      }catch(error) {
+      } catch (error) {
         console.error("Terjadi error saat submit:", error);
-          setIsError(true);
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
+    } else {
+      setIsLoading(false);
     }
   };
-
 
   const handleApprove = async (id) => {
     setIsError(false);
@@ -203,13 +221,27 @@ export default function QualityControlCircleIndex({ onChangePage }) {
         id: id,
         set: "Approved",
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+         .then(async (data) => {
+
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          if (data === "ERROR" || data.length === 0) {
+            setIsError(true);
+          } else {
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
+              from: userInfo.username,
+              to: "",
+              message: `Quality Control Circle Approve. Your Quality Control Circle titled ${decodedTitle} has been approved and please continue to fill in the next form`,
+              sis: -1,
+              rci: id,
+            });
             handleSetCurrentPage(currentFilter.page);
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     }
   };
 
