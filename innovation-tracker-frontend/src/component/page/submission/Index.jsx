@@ -183,21 +183,54 @@ export default function Submission() {
                   Study Program/UPT/Unit, where the target project is relate
                   with the KPIs of each Study Program/UPT/Unit.
                 </p>
-                <div
-                  className="col-sm-4 bg-success rounded-5"
-                  onClick={() => navigate("/submission/qcc")}
-                >
-                  <div
-                    className="d-flex align-items-center mx-3"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <p className="fw-small text-white my-1">
-                      <small>
-                        <Icon name="plus me-2 text-white" />
-                        <i>Quality Control Circle</i>
-                      </small>
-                    </p>
-                  </div>
+                
+                <div className="row gap-2">
+                  {[
+                    "Facilitator",
+                  ].includes(userInfo.inorole) || userInfo.role.slice(0, 5) === "ROL36" ? (
+                    <div
+                      className="col-sm-3 bg-success rounded-5"
+                      onClick={() => navigate("/submission/qcc")}
+                    >
+                      <div
+                        className="d-flex align-items-center"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <p className="fw-small text-white my-1">
+                          <small>
+                            <Icon name="memo-circle-check me-2 text-white" />
+                            <i>Submission need Action </i>
+                            <span
+                              className="badge rounded-pill bg-danger ms-1"
+                              style={{
+                                fontSize: ".8em",
+                              }}
+                            >
+                              {count > 0 ? count : ""}
+                            </span>
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  ): ""}
+                  {userInfo.role.slice(0, 5) !== "ROL36" && (
+                    <div
+                      className="col-sm-4 bg-success rounded-5"
+                      onClick={() => navigate("/submission/qcc")}
+                    >
+                      <div
+                        className="d-flex align-items-center mx-3"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <p className="fw-small text-white my-1">
+                          <small>
+                            <Icon name="plus me-2 text-white" />
+                            <i>Quality Control Circle</i>
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

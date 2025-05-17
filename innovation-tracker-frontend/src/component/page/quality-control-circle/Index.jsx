@@ -127,6 +127,11 @@ export default function QualityControlCircleIndex({ onChangePage }) {
     });
   }
 
+  const getStatusByKey = (key) => {
+    const data = currentData.find((item) => item.Key === key);
+    return data ? data.Status : null;
+  };
+
   const handleSubmit = async (id) => {
     setIsError(false);
     setIsLoading(true);
@@ -138,6 +143,8 @@ export default function QualityControlCircleIndex({ onChangePage }) {
       status =
         "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
     }
+
+    const tempStatus = getStatusByKey(id);
 
     const confirm = await SweetAlert(
       "Confirm",
@@ -151,47 +158,29 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
     if (confirm) {
       try {
-        const result = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+        const updateResult = await UseFetch(API_LINK + "RencanaCircle/UpdateStatusRencanaCircle", {
           id: id,
+          status: null,
         });
-
-        if (result === "ERROR" || result.length === 0) {
+  
+        if (!updateResult) {
           setIsError(true);
-        } else {
-           const decodedTitle = decodeHtml(
-            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
-          ).replace(/<\/?[^>]+(>|$)/g, "");
-
-          const decodedNama = decodeHtml(
-            decodeHtml(decodeHtml(userInfo.nama))
-          ).replace(/<\/?[^>]+(>|$)/g, "'");
-
-          const notifikasiMessage = `A new Quality Control Circle registration has been submitted by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
-
-          await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiQCC1", {
-            from: userInfo.username,
-            to: "",
-            message: notifikasiMessage,
-            sis: -1,
-            rci: id,
-          });
-
-          SweetAlert(
-            "Success",
-            "Thank you for submitting your registration form. Please wait until the next update",
-            "success"
-          );
-
-          handleSetCurrentPage(currentFilter.page);
+          setIsLoading(false);
+          return;
         }
-      } catch (error) {
+  
+        SweetAlert(
+          "Success",
+          "Thank you for submitting your registration form. Please wait until the next update",
+          "success"
+        );
+        handleSetCurrentPage(currentFilter.page);
+      }catch(error) {
         console.error("Terjadi error saat submit:", error);
-        setIsError(true);
+          setIsError(true);
       } finally {
         setIsLoading(false);
       }
-    } else {
-      setIsLoading(false);
     }
   };
 

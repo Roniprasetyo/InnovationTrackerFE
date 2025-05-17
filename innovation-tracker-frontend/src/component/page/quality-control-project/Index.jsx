@@ -126,8 +126,16 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     });
   }
 
+  const getStatusByKey = (key) => {
+    const data = currentData.find((item) => item.Key === key);
+    return data ? data.Status : null;
+  };
+
   const handleSubmit = async (id) => {
     setIsError(false);
+
+    const tempStatus = getStatusByKey(id);
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.",
@@ -139,21 +147,30 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
-        id: id,
-      })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert(
-              "Success",
-              "Thank you for submitting your registration form. Please wait until the next update",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
-        .then(() => setIsLoading(false));
+      try {
+        const updateResult = await UseFetch(API_LINK + "RencanaCircle/UpdateStatusRencanaCircle", {
+          id: id,
+          status: null,
+        });
+  
+        if (!updateResult) {
+          setIsError(true);
+          setIsLoading(false);
+          return;
+        }
+  
+        SweetAlert(
+          "Success",
+          "Thank you for submitting your registration form. Please wait until the next update",
+          "success"
+        );
+        handleSetCurrentPage(currentFilter.page);
+      }catch(error) {
+        console.error("Terjadi error saat submit:", error);
+          setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

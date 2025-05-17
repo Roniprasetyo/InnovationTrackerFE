@@ -430,6 +430,16 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
     }));
   };
 
+  const handleInputMemberChange = (e) => {
+    const { name, value } = e.target;
+    const validationError = validateInput(name, value, memberSchema);
+    memberDataRef.current[name] = value;
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [validationError.name]: validationError.error,
+    }));
+  };
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -607,7 +617,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               type="text"
                               forInput="setName"
                               label="Section"
-                              isDisabled
+                              isDisabled={true}
                               value={userInfo.upt}
                             />
                           </div>
@@ -630,7 +640,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               forInput="rciLeader"
                               label="Leader"
                               isRequired
-                              isDisabled
+                              isDisabled={true}
                               value={userInfo.nama}
                               onChange={handleInputChange}
                               errorMessage={errors.rciLeader}
@@ -756,7 +766,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               label="Period"
                               arrData={listPeriod}
                               isRequired
-                              isDisabled
+                              isDisabled={true}
                               value={formDataRef.current.perId}
                               onChange={handleInputChange}
                               errorMessage={errors.perId}

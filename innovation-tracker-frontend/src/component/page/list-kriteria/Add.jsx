@@ -151,8 +151,8 @@ export default function ListKriteriaAdd({ onChangePage }) {
                 <div className="col-lg-6">
                   <SearchDropdown
                     forInput="kriId"
-                    label="Knowledge Category"
-                    placeHolder="Knowledge Category"
+                    label="Criteria"
+                    placeHolder="Criteria"
                     arrData={listKriteria}
                     isRequired
                     isRound
