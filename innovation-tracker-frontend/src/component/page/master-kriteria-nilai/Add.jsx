@@ -9,6 +9,13 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
+import DropDown from "../../part/Dropdown";
+import SearchDropdown from "../../part/SearchDropdown";
+
+const listCategory = [
+  { Value: "Suggestion System (SS)", Text: "Suggestion System (SS)" },
+  { Value: "QCC/QCP/BPI/VCI", Text: "QCC/QCP/BPI/VCI" },
+];
 
 export default function MasterKriteriaNilaiAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
@@ -18,11 +25,13 @@ export default function MasterKriteriaNilaiAdd({ onChangePage }) {
   const formDataRef = useRef({
     kriNama: "",
     kriDesk: "",
+    kriCateg: "",
   });
 
   const userSchema = object({
     kriNama: string().max(50, "maksimum 50 karakter").required("harus diisi"),
     kriDesk: string().max(100, "maksimum 100 karakter"),
+    kriCateg: string().max(100, "maksimum 100 karakter"),
   });
 
   const handleInputChange = (e) => {
@@ -128,6 +137,19 @@ export default function MasterKriteriaNilaiAdd({ onChangePage }) {
                     value={formDataRef.current.kriNama}
                     onChange={handleInputChange}
                     errorMessage={errors.kriNama}
+                  />
+                </div>
+                <div className="col-lg-6">
+                  <SearchDropdown
+                    forInput="kriCateg"
+                    label="Category"
+                    placeHolder="Category"
+                    arrData={listCategory}
+                    isRequired
+                    isRound
+                    value={formDataRef.current.kriCateg}
+                    onChange={handleInputChange}
+                    errorMessage={errors.kriCateg}
                   />
                 </div>
                 <div className="col-lg-12">

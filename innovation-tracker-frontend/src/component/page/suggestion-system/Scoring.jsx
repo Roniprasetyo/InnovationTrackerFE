@@ -393,7 +393,7 @@ export default function MiniConventionScoring({ onChangePage, WithID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "MiniConvention/GetListKriteriaPenilaian"
+          API_LINK + "MiniConvention/GetListKriteriaPenilaian", {category: "Suggestion System (SS)"}
         );
 
         if (data === "ERROR") {

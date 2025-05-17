@@ -168,10 +168,10 @@ export default function ValueChainInnovationAdd({ onChangePage }) {
         } else {
           setListPeriod(data);
           const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
+            (item) => String(item.Text) === String(new Date().getFullYear())
           );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.perId = selected?.Value;
+          setSelectedPeriod(selected?.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
