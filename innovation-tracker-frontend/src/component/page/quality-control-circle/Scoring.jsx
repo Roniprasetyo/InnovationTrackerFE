@@ -18,6 +18,8 @@ import Button from "../../part/Button";
 import { Tabs, Tab, Box } from "@mui/material";
 import PropTypes from "prop-types";
 import "../../../assets/css/general.css"
+import DropDown from "../../part/Dropdown";
+import FloatingCard from "../../part/FloatingCard";
 
 function TabScoring(props) {
   const { children, value, index, ...other } = props;
@@ -62,6 +64,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
   const [listDepartment, setListDepartment] = useState([]);
   const [listAllDepartment, setAllListDepartment] = useState([]);
   const [listPenilaianKaUpt, setListPenilaianKaUpt] = useState([]);
+  const [listNilaiDetailKriteria, setListNilaiDetailKriteria] = useState([]);
   const [scoringPosition, setScoringPosition] = useState([]);
   const [scoringPositionRole, setScoringPositionRole] = useState([]);
   const [activeTab, setActiveTab] = useState(false);
@@ -203,17 +206,17 @@ export default function QCCScoring({ onChangePage, WithID }) {
     let total = 0;
     formDataRef3.current = [];
     Object.values(formDataRef2.current).forEach((val) => {
-      const matched = listDetailKriteriaPenilaian.find(
+      const matched = listNilaiDetailKriteria.find(
         (item) => item.Value === val
       );
 
       if (matched) {
-        formDataRef3.current[val] = matched.Score;
+        formDataRef3.current[val] = matched.Text;
       } else {
         formDataRef3.current[val] = null;
       }
 
-      const parsed = parseFloat(matched?.Score);
+      const parsed = parseFloat(matched?.Text);
       if (!isNaN(parsed)) total += parsed;
     });
 
@@ -490,11 +493,13 @@ export default function QCCScoring({ onChangePage, WithID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(API_LINK + "RencanaCircle/GetDeskripsiDetailkriteriaById");
+        const data2 = await UseFetch(API_LINK + "RencanaCircle/GetNilaiDetailkriteriaById");
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the Penilaian KA UPT data.");
         } else {
           setListPenilaianKaUpt(data);
+          setListNilaiDetailKriteria(data2);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -510,7 +515,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
     fetchData();
   }, []);
 
-  console.log("LIST PENILAIAN", listPenilaianKaUpt);
+  console.log("LIST PENILAIAN", listNilaiDetailKriteria);
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -933,168 +938,59 @@ export default function QCCScoring({ onChangePage, WithID }) {
                       <div className="card mb-3">
                         <div className="card-header d-flex align-items-center justify-content-between">
                           <h5 className="fw-medium m-0">Criteria</h5>
-                          <div className="text-end">
-                            <div className="small">Already Scored by:</div>
-                            {(listPenilaianKaUpt.length > 0 ||
-                              listPenilaianKaDept.length > 0 ||
-                              listPenilaianWadir.length > 0) && (
-                              <div className="fw-semibold">
-                                {scoringPosition} as {scoringPositionRole}
-                              </div>
-                            )}
-                          </div>
                         </div>
-                        <div className="card-body d-flex flex-wrap">
-                          <Box sx={{ width: "80%" }}>
-                            <div>
-                              <Box>
-                                {isLoading ? (
-                                  <Loading />
-                                ) : (
-                                  <Tabs
-                                    value={selectedTab}
-                                    className="card rounded-bottom-0"
-                                    onChange={handleTabChange}
-                                    variant="fullWidth"
-                                    sx={{
-                                      "& .MuiTabs-indicator": {
-                                        height: "3px",
-                                        backgroundColor: "#1976d2",
-                                      },
-                                    }}
-                                  >
-                                    {tabLabels.map((label, index) => {
-                                      let jabatanTarget = [];
-
-                                      if (index === 0)
-                                        jabatanTarget = [
-                                          "Kepala Seksi",
-                                          "Sekretaris Prodi",
-                                        ];
-                                      else if (index === 1)
-                                        jabatanTarget = [
-                                          "Kepala Departemen",
-                                          "Kepala Jurusan",
-                                        ];
-                                      else if (index === 2)
-                                        jabatanTarget = [
-                                          "Wakil Direktur",
-                                          "Direktur",
-                                        ];
-
-                                      let isChecked = listAllPenilaian.some(
-                                        (item) =>
-                                          item["Jabatan Penilai"] &&
-                                          jabatanTarget.some((jabatan) =>
-                                            item["Jabatan Penilai"].includes(
-                                              jabatan
-                                            )
-                                          )
-                                      );
-
-                                      return (
-                                        <Tab
-                                          key={index}
-                                          label={
-                                            isChecked ? (
-                                              <div className="d-flex gap-2 align-items-center">
-                                                <span
-                                                  style={{
-                                                    color: "green",
-                                                    fontSize: "20px",
-                                                  }}
-                                                >
-                                                  ✓
-                                                </span>
-                                                <span
-                                                  style={{ fontSize: "14px" }}
-                                                >
-                                                  {label}
-                                                </span>
-                                              </div>
-                                            ) : (
-                                              label
-                                            )
-                                          }
-                                          sx={{
-                                            backgroundColor:
-                                              selectedTab === index
-                                                ? "#ffffff"
-                                                : "#f0f0f0",
-                                            borderRight:
-                                              index !== 2
-                                                ? "1px solid #ddd"
-                                                : "none",
-                                            fontWeight: "bold",
-                                            color: "black",
-                                            minHeight: "48px",
-                                          }}
-                                        />
-                                      );
-                                    })}
-                                  </Tabs>
-                                )}
-                              </Box>
-                            </div>
+                        <div className="">
+                          <div>
                             <div
-                              className="card"
                               style={{
                                 borderTop: "none",
                                 borderRadius: "0 0 12px 12px",
                               }}
                             >
-                              <div className=" card-body pe-4">
+                              <div className="card-body">
                                 {listKriteriaPenilaian.map((item) => {
                                   const matchingKriteria = listPenilaianKaUpt.filter(
                                     (detail) => detail.Kriteria === item.Value
                                   );
+                                  const matchingListNilai = listNilaiDetailKriteria.filter((detail) =>
+                                    matchingKriteria.length > 0 && detail.Deskripsi === matchingKriteria[0].Deskripsi
+                                  );
 
-                                    console.log("MATCHING KRITERIA", matchingKriteria);
-
-                                  const matchingPenilaianforKaDept =
-                                    listPenilaianKaDept.find(
-                                      (detail) => detail.Kriteria === item.Value
-                                    );
-
-                                  const isKepalaSeksi =
-                                    forPenilai.jabatan === "Kepala Seksi" ||
-                                    forPenilai.jabatan === "Sekretaris Prodi";
-                                  const isKaDept =
-                                    forPenilai.jabatan ===
-                                      "Kepala Departemen" ||
-                                    forPenilai.jabatan === "Kepala Jurusan";
-                                  const isWadir =
-                                    forPenilai.jabatan === "Wakil Direktur" ||
-                                    forPenilai.jabatan === "Direktur";
-                                  const isFirstTab =
-                                    selectedTab === tabIndexUser;
-                                  const range5End =
-                                    listSettingRanking
-                                      .find(
-                                        (item) => item.Ranking === "Ranking 5"
-                                      )
-                                      ?.Range.split("-")
-                                      .map((r) => parseInt(r.trim(), 10))[1] +
-                                    1;
-                                  const range4End =
-                                    listSettingRanking
-                                      .find(
-                                        (item) => item.Ranking === "Ranking 4"
-                                      )
-                                      ?.Range.split("-")
-                                      .map((r) => parseInt(r.trim(), 10))[1] +
-                                    1;
+                                  console.log("MATCHING KRITERIA", matchingListNilai);
 
                                   let content = null;
 
-                                  content = matchingKriteria.length > 0
-                                          ? matchingKriteria.map((detail, index) => (
-                                              <Label key={index} data={detail.Deskripsi} />
-                                            ))
-                                          : <Label data="Not Found" />
+                                  content =
+                                  matchingKriteria.length > 0 ? (
+                                    matchingKriteria.map((detail, index) => {
+                                      const nilai = listNilaiDetailKriteria.filter(
+                                        (n) => n.Deskripsi === detail.Deskripsi
+                                      );
+
+                                      return (
+                                        <div className="row mb-2" key={index}>
+                                          <div className="col-lg-10">
+                                            <Label data={detail.Deskripsi} />
+                                          </div>
+                                          <div className="col-lg-2 d-flex align-items-start">
+                                            <SearchDropdown
+                                            isRound
+                                            isPlaceHolder={false}
+                                            forInput={nilai.Value}
+                                            arrData={nilai}
+                                            value={nilai.Value}
+                                            onChange={handleInputChange}
+                                            />
+                                          </div>
+                                        </div>
+                                      );
+                                    })
+                                  ) : (
+                                    <Label data="Not Found" />
+                                  );
 
                                   return (
-                                    <div className="card row mb-3" key={item.Value}>
+                                    <div className="card row mb-3 px-0 mx-0" key={item.Value} >
                                       <div className="card-header col-lg-12">
                                         <div
                                           style={{
@@ -1103,14 +999,15 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                             gap: "4px",
                                           }}
                                         >
-                                          <Label
-                                            data={
-                                              item.Text === "Reduksi Biaya"
-                                                ? `${item.Text} \t (IDR)`
-                                                : item.Desc === "-" ? `${item.Text}` :
-                                                `${item.Desc}  <strong>(${item.Text})</strong>`
-                                            }
-                                          />
+                                          <h6>
+                                            {item.Desc === "-" ? (
+                                              item.Text
+                                            ) : (
+                                              <>
+                                                {item.Desc} <strong>({item.Text})</strong>
+                                              </>
+                                            )}
+                                          </h6>
                                           <span
                                             style={{
                                               color: "red",
@@ -1122,122 +1019,40 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                           </span>
                                         </div>
                                       </div>
-                                      <div className="card-body col-lg-6">{content}</div>
+                                      <div className="card-body row col-lg-12">
+                                        <div className="col-lg-12">
+                                          {content}
+                                        </div>
+                                        <div className="col-lg-0">
+                                          <div className="d-flex flex-column">
+                                          <div className="mb-2">Comment</div>
+                                          <div className="col-lg-12">
+                                            <Input
+                                              isDisabled={false}
+                                              type="textarea"
+                                              forInput="commentFase1"
+                                              onChange={handleComment1}
+                                              value={formCommentFase1}
+                                              errorMessage={errors.formCommentFase1}
+                                            />
+                                          </div>
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
                                   );
                                 })}
-                                {selectedTab === 0 ? (
-                                  <>
-                                    <div className="col-lg-4">
-                                      <Label data="Comment" />
-                                    </div>
-                                    <div className="col-lg-12">
-                                      <Input
-                                        isDisabled={
-                                          (userInfo.jabatan ===
-                                            "Kepala Seksi" ||
-                                            userInfo.jabatan ===
-                                              "Sekretaris Prodi") &&
-                                          isChecked === true
-                                            ? true
-                                            : userInfo.jabatan ===
-                                                "Kepala Departemen" ||
-                                              userInfo.jabatan ===
-                                                "Kepala Jurusan"
-                                            ? true
-                                            : userInfo.jabatan ===
-                                                "Wakil Direktur" ||
-                                              userInfo.jabatan === "Direktur"
-                                            ? true
-                                            : false
-                                        }
-                                        type="textarea"
-                                        forInput="commentFase1"
-                                        onChange={handleComment1}
-                                        value={formCommentFase1}
-                                        errorMessage={errors.formCommentFase1}
-                                      />
-                                    </div>
-                                  </>
-                                ) : selectedTab === 1 ? (
-                                  <>
-                                    <div className="col-lg-4">
-                                      <Label data="Comment" />
-                                    </div>
-                                    <div className="col-lg-12">
-                                      <Input
-                                        isDisabled={
-                                          (userInfo.jabatan ===
-                                            "Kepala Departemen" ||
-                                            userInfo.jabatan ===
-                                              "Kepala Jurusan") &&
-                                          isChecked === true
-                                            ? true
-                                            : userInfo.jabatan ===
-                                                "Kepala Seksi" ||
-                                              userInfo.jabatan ===
-                                                "Sekretaris Prodi"
-                                            ? true
-                                            : userInfo.jabatan ===
-                                                "Wakil Direktur" ||
-                                              userInfo.jabatan === "Direktur"
-                                            ? true
-                                            : false
-                                        }
-                                        type="textarea"
-                                        forInput="commentFase2"
-                                        onChange={handleComment2}
-                                        value={formCommentFase2}
-                                        errorMessage={errors.formCommentFase2}
-                                      />
-                                    </div>
-                                  </>
-                                ) : selectedTab === 2 ? (
-                                  <>
-                                    <div className="col-lg-4">
-                                      <Label data="Comment" />
-                                    </div>
-                                    <div className="col-lg-12">
-                                      <Input
-                                        isDisabled={
-                                          (userInfo.jabatan ===
-                                            "Wakil Direktur" ||
-                                            userInfo.jabatan === "Direktur") &&
-                                          isChecked === true
-                                            ? true
-                                            : userInfo.jabatan ===
-                                                "Kepala Seksi" ||
-                                              userInfo.jabatan ===
-                                                "Sekretaris Prodi"
-                                            ? true
-                                            : userInfo.jabatan ===
-                                                "Kepala Departemen" ||
-                                              userInfo.jabatan ===
-                                                "Kepala Jurusan"
-                                            ? true
-                                            : false
-                                        }
-                                        type="textarea"
-                                        forInput="commentFase3"
-                                        onChange={handleComment3}
-                                        value={formCommentFase3}
-                                        errorMessage={errors.formCommentFase3}
-                                      />
-                                    </div>
-                                  </>
-                                ) : null}
                               </div>
                             </div>
-                          </Box>
-                          <Box sx={{ width: "20%" }}>
+                          </div>
+                          <div>
                             <div className="ps-4">
                               <div
                                 className="d-flex flex-column gap-3"
-                                style={{ height: "100px" }}
                               >
                                 <>
-                                  <div
-                                    className="card fw-medium text-center"
+                                  {/* <div
+                                    className="card fw-medium text-center position-fixed bottom-0 end-0 m-3 p-2 bg-white shadow rounded"
                                     style={{
                                       width: "200px",
                                       minHeight: "250px",
@@ -1260,7 +1075,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                       justifyContent: "space-between",
                                     }}
                                   >
-                                    <div className="mt-2">Total Score</div>
+                                    <div className="mt-2 ">Total Score</div>
                                     <hr style={{ margin: "0.5rem 0" }} />
 
                                     <div
@@ -1281,58 +1096,12 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                         {totalScoreforKaUpt}
                                       </h1>
                                     </div>
-                                  </div>
-
-                                  <div
-                                    className="card fw-medium text-center"
-                                    style={{
-                                      width: "200px",
-                                      minHeight: "250px",
-                                      color:
-                                        selectedTab === 1 ? "white" : "black",
-                                      backgroundColor:
-                                        selectedTab === 1 ? "#0d6efd" : "white",
-                                      boxShadow:
-                                        selectedTab === 1
-                                          ? "0 2px 10px rgba(13, 110, 253, 0.75)"
-                                          : "none",
-                                      transform:
-                                        selectedTab === 1
-                                          ? "scale(1.05)"
-                                          : "scale(1)",
-                                      transition:
-                                        "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      justifyContent: "space-between",
-                                    }}
-                                  >
-                                    <div className="mt-2">Total Score</div>
-                                    <hr style={{ margin: "0.5rem 0" }} />
-
-                                    <div
-                                      style={{
-                                        flexGrow: 1,
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        fontSize: "16px",
-                                      }}
-                                    >
-                                      <div>Ka.Prodi/Ka.Dept</div>
-
-                                      <h1
-                                        style={{ margin: 0, fontSize: "40px" }}
-                                      >
-                                        {totalScoreforKaDept}
-                                      </h1>
-                                    </div>
-                                  </div>
+                                  </div> */}
+                                    <FloatingCard />
                                 </>
                               </div>
                             </div>
-                          </Box>
+                          </div>
                         </div>
                       </div>
                     </div>

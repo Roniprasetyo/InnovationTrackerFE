@@ -157,7 +157,8 @@ export default function QualityControlCircleEdit({ onChangePage, withID }) {
           setIsError({ error: true, message: "Invalid data format" });
 
         const filteredData = data.filter(
-          (item) => item?.upt_bagian === userInfo?.upt
+          (item) => item?.upt_bagian === userInfo?.upt ||
+            item?.departemen_jurusan === userInfo?.upt
         );
 
         setListEmployee(

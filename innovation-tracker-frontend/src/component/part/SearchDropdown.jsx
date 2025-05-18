@@ -15,6 +15,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
     onChange,
     isDisabled = false,
     selectedValued = null,
+    isPlaceHolder = false,
     ...props
   },
   ref
@@ -176,7 +177,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
               className={`form-control ${isRound ? "rounded-5" : ""} ${
                 errorMessage ? "is-invalid" : ""
               }`}
-              placeholder={`-- Choose ${placeHolder} --`}
+              placeholder={isPlaceHolder ? `-- Choose ${placeHolder} --` : ""}
               value={searchTerm}
               onChange={handleInputChange}
               onFocus={() => setDropdownOpen(true)}
