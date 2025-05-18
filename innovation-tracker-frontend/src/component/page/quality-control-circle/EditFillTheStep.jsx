@@ -38,7 +38,10 @@ const MetodologiArr = [
   { Value: 44, Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
 ];
 
-export default function QualityControlCircleFillStep({ onChangePage, withID }) {
+export default function QualityControlCircleEditFillStep({
+  onChangePage,
+  withID,
+}) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   // console.log(withID);
@@ -48,6 +51,8 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [listEmployee, setListEmployee] = useState([]);
+  const [listMetodologi, setListMetodologi] = useState([]);
+  const [typeSetting, setTypeSetting] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -78,11 +83,9 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     Section: "",
   });
 
-  console.log("username", userInfo.username);
-
   const payloadRef = useRef({
+    Key: 0,
     rci_id: withID,
-    fts_created_by: userInfo.username,
     set_id: null,
     fts_plan: "",
     fts_plan_file: "",
@@ -92,7 +95,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     fts_check_file: "",
     fts_action: "",
     fts_action_file: "",
-    fts_status: "",
+    fts_modi_by: userInfo.username
   });
 
   const planFileRef = useRef(null);
@@ -101,7 +104,9 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
   const actionFileRef = useRef(null);
 
   const payloadSchema = object({
+    Key: number().required("ID Required"),
     rci_id: number().required("required"),
+    fts_action_file: string().nullable(),
     set_id: number().required("The Section is Required"),
     fts_plan: string().required("The Section is Required"),
     fts_plan_file: string().nullable(),
@@ -110,9 +115,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     fts_check: string().nullable(),
     fts_check_file: string().nullable(),
     fts_action: string().nullable(),
-    fts_action_file: string().nullable(),
-    fts_status: string().nullable(),
-    fts_created_by: string().required("required creaby"),
+    fts_modi_by: string().required("required creaby"),
   });
 
   const [formDataMetodologiRef, setFormDataMetodRed] = useState("");
@@ -146,6 +149,58 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetSettingMetodologi"
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the category data.");
+        } else {
+          setListMetodologi(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(API_LINK + "RencanaCircle/GetTypeSetting");
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the Type Setting data.");
+        } else {
+          setTypeSetting(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
@@ -166,6 +221,59 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
       [validationError.name]: error,
     }));
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetFillTheStepByID",
+          {
+            id: withID,
+          }
+        );
+
+        console.log("2355", data[0]["RCI ID"])
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get FTS data");
+        } else {
+          payloadRef.current = {
+              Key: data[0].Key,
+              rci_id: data[0]["RCI ID"],
+              set_id: data[0]["SET ID"],
+              fts_plan: decodeHtml(
+                decodeHtml(decodeHtml(data[0]["Plan"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
+              fts_plan_file: data[0]["Plan File"],
+              fts_do: decodeHtml(decodeHtml(decodeHtml(data[0]["Do"]))).replace(
+                /<\/?[^>]+(>|$)/g,
+                ""
+              ),
+              fts_do_file: data[0]["Do File"],
+              fts_check: decodeHtml(
+                decodeHtml(decodeHtml(data[0]["Check"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
+              fts_check_file: data[0]["Check File"],
+              fts_action: decodeHtml(
+                decodeHtml(decodeHtml(data[0]["Action"]))
+              ).replace(/<\/?[^>]+(>|$)/g, ""),
+              fts_action_file: data[0]["Action File"],
+            };
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -222,6 +330,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
 
     fetchData();
   }, [withID, listEmployee]);
+  // console.log("currentData, ", currentData);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -231,7 +340,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
       ...prevErrors,
       [validationError.name]: validationError.error,
     }));
-    console.log(payloadRef.current[name] = name, ": ", payloadRef.current[name] = value);
+    console.log((payloadRef.current[name] = name), " (Tes): ", (payloadRef.current[name] = value));
   };
 
   const handleOpenModal = (id) => {
@@ -250,6 +359,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+
     const validationErrors = await validateAllInputs(
       payloadRef.current,
       payloadSchema,
@@ -268,42 +378,40 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
       if (planFileRef.current?.files.length > 0) {
         uploadPromises.push(
           UploadFile(planFileRef.current).then(
-            (data) => (payloadRef.current["fts_plan_file"] = data.Hasil)
+            (data) => (payloadRef["fts_plan_file"] = data.Hasil)
           )
         );
       }
       if (doFileRef.current?.files.length > 0) {
         uploadPromises.push(
           UploadFile(doFileRef.current).then(
-            (data) => (payloadRef.current["fts_do_file"] = data.Hasil)
+            (data) => (payloadRef["fts_do_file"] = data.Hasil)
           )
         );
       }
       if (checkFileRef.current?.files.length > 0) {
         uploadPromises.push(
           UploadFile(checkFileRef.current).then(
-            (data) => (payloadRef.current["fts_check_file"] = data.Hasil)
+            (data) => (payloadRef["fts_check_file"] = data.Hasil)
           )
         );
       }
       if (actionFileRef.current?.files.length > 0) {
         uploadPromises.push(
           UploadFile(actionFileRef.current).then(
-            (data) => (payloadRef.current["fts_action_file"] = data.Hasil)
+            (data) => (payloadRef["fts_action_file"] = data.Hasil)
           )
         );
       }
-      payloadRef.current.set_id = 51;
 
       try {
         await Promise.all(uploadPromises);
 
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/CreateFillTheStep",
+          API_LINK + "RencanaCircle/UpdateFillTheStep",
           payloadRef.current
         );
 
-        console.log("Data", data);
         if (data === "ERROR") {
           throw new Error("Error: Failed to submit the data.");
         } else {
@@ -322,8 +430,18 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
       }
     } else window.scrollTo(0, 0);
   };
+  const filteredTypeMetodologi = typeSetting.filter(
+    (detail) => detail.Text === "Metodologi"
+  );
+
+  const filteredArrData = listMetodologi.filter(
+    (detail) => detail.Type === filteredTypeMetodologi[0]?.Value
+  );
+  // const arrTextData = filteredArrData.map((item) => item.Value === payload[0].set_id);
 
   if (isLoading) return <Loading />;
+
+  console.log("TES", payloadRef.current)
 
   return (
     <>
@@ -600,9 +718,10 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                             <div className="row">
                               <div className="col-lg-11">
                                 <SearchDropdown
-                                  arrData={MetodologiArr}
+                                  arrData={filteredArrData}
                                   forInput="set_id"
                                   value={payloadRef.current.set_id}
+                                  // selectedValued={arrTextData[payload.set_id]}
                                   label="Metodologi"
                                   onChange={handleInputChange}
                                   isRequired

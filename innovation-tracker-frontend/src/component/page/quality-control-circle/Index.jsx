@@ -65,26 +65,23 @@ export default function QualityControlCircleIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) {
-      try {
-        userInfo = JSON.parse(decryptId(cookie));
-      } catch (e) {
-        userInfo = "";
-      }
+    try {
+      userInfo = JSON.parse(decryptId(cookie));
+    } catch (e) {
+      userInfo = "";
     }
-  
-    if (!userInfo) {
-      return (
-        <div>
-          <div className="mt-3 flex-fill">
-              <Alert
-                type="danger"
-                message="Your session has expired."
-              />
-            </div>
-          <NotFound />
+  }
+
+  if (!userInfo) {
+    return (
+      <div>
+        <div className="mt-3 flex-fill">
+          <Alert type="danger" message="Your session has expired." />
         </div>
-      ) ;
-    }
+        <NotFound />
+      </div>
+    );
+  }
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -130,17 +127,17 @@ export default function QualityControlCircleIndex({ onChangePage }) {
   const handleSubmit = async (id) => {
     setIsError(false);
     let status;
-    if (currentData.Status === "Approved") {
-      status = "Rejected";
-    } else {
-      status =
-        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
-    }
+    // if (currentData.Status === "Approved") {
+    //   status = "Rejected";
+    // } else {
+    //   status =
+    //     "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
+    // }
     const confirm = await SweetAlert(
       "Confirm",
-      status,
-      "warning",
-      "SUBMIT",
+      "Are you sure about this value?",
+      "info",
+      "Submit",
       null,
       "",
       true
@@ -255,6 +252,9 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             Period: value["Period"],
             Status: value["Status"],
             Count: value["Count"],
+            IsBold: ["Draft Scoring", "Approved"].includes(
+              value["Status"]
+            ),
             Action:
               role === "ROL01" &&
               value["Status"] === "Draft" &&
@@ -269,10 +269,12 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 ? ["Detail", "Edit", "Submit"]
                 : role === "ROL36" && value["Status"] === "Approved"
                 ? ["Detail", "Submit"]
-                :
-                  value["Status"] === "Approved" &&
+                : value["Status"] === "Approved" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "FillTheStep"]
+                : value["Status"] === "Draft Scoring" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "EditFillTheStep", "Submit"]
                 : ["Detail"],
             Alignment: [
               "center",

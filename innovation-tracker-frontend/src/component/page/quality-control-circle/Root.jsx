@@ -4,6 +4,7 @@ import QualityControlCircleAdd from "./Add";
 import QualityControlCircleEdit from "./Edit";
 import QualityControlCircleDetail from "./Detail";
 import QualityControlCircleFillStep from "./FillStep";
+import QualityControlCircleEditFillStep from "./EditFillTheStep";
 
 export default function QualityControlCircle() {
   const [pageMode, setPageMode] = useState("index");
@@ -18,6 +19,13 @@ export default function QualityControlCircle() {
       case "edit":
         return (
           <QualityControlCircleEdit
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+      case "editfts":
+        return (
+          <QualityControlCircleEditFillStep
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
