@@ -908,92 +908,94 @@ export default function QCCScoring({ onChangePage, WithID }) {
                         <div className="card-header d-flex align-items-center justify-content-between">
                           <h5 className="fw-medium m-0">Criteria</h5>
                         </div>
-                        <div className="card-body">
-                          <div>
-                              {isLoading ? (
-                                <Loading />
-                              ) : (
-                                <Tabs
-                                  value={selectedTab}
-                                  className="card rounded-bottom-0"
-                                  onChange={handleTabChange}
-                                  variant="fullWidth"
-                                  sx={{
-                                    "& .MuiTabs-indicator": {
-                                      height: "3px",
-                                      backgroundColor: "#1976d2",
-                                    },
-                                  }}
-                                >
-                                  {tabLabels.map((label, index) => {
-                                    let jabatanTarget;
+                        <div className={role === "ROL6" ? "card-body" : ""}>
+                          {role === "ROL36" && (
+                            <div>
+                                {isLoading ? (
+                                  <Loading />
+                                ) : (
+                                  <Tabs
+                                    value={selectedTab}
+                                    className="card rounded-bottom-0"
+                                    onChange={handleTabChange}
+                                    variant="fullWidth"
+                                    sx={{
+                                      "& .MuiTabs-indicator": {
+                                        height: "3px",
+                                        backgroundColor: "#1976d2",
+                                      },
+                                    }}
+                                  >
+                                    {tabLabels.map((label, index) => {
+                                      let jabatanTarget;
 
-                                    if (index === 1)
-                                      jabatanTarget = "ROL36"
+                                      if (index === 1)
+                                        jabatanTarget = "ROL36"
 
-                                    let isChecked = listAllPenilaian.some(
-                                      (item) =>
-                                        item["Jabatan Penilai"] &&
-                                        jabatanTarget.some((jabatan) =>
-                                          item["Jabatan Penilai"].includes(
-                                            jabatan
+                                      let isChecked = listAllPenilaian.some(
+                                        (item) =>
+                                          item["Jabatan Penilai"] &&
+                                          jabatanTarget.some((jabatan) =>
+                                            item["Jabatan Penilai"].includes(
+                                              jabatan
+                                            )
                                           )
-                                        )
-                                    );
+                                      );
 
-                                    return (
-                                      <Tab
-                                        key={index}
-                                        label={
-                                          isChecked ? (
-                                            <div className="d-flex gap-2 align-items-center">
-                                              <span
-                                                style={{
-                                                  color: "green",
-                                                  fontSize: "20px",
-                                                }}
-                                              >
-                                                ✓
-                                              </span>
-                                              <span
-                                                style={{ fontSize: "14px" }}
-                                              >
-                                                {label}
-                                              </span>
-                                            </div>
-                                          ) : (
-                                            label
-                                          )
-                                        }
-                                        sx={{
-                                          backgroundColor:
-                                            selectedTab === index
-                                              ? "#ffffff"
-                                              : "#f0f0f0",
-                                          borderRight:
-                                            index !== 2
-                                              ? "1px solid #ddd"
-                                              : "none",
-                                          fontWeight: "bold",
-                                          color: "black",
-                                          minHeight: "48px",
-                                        }}
-                                      />
-                                    );
-                                  })}
-                                </Tabs>
-                              )}
-                          </div>
+                                      return (
+                                        <Tab
+                                          key={index}
+                                          label={
+                                            isChecked ? (
+                                              <div className="d-flex gap-2 align-items-center">
+                                                <span
+                                                  style={{
+                                                    color: "green",
+                                                    fontSize: "20px",
+                                                  }}
+                                                >
+                                                  ✓
+                                                </span>
+                                                <span
+                                                  style={{ fontSize: "14px" }}
+                                                >
+                                                  {label}
+                                                </span>
+                                              </div>
+                                            ) : (
+                                              label
+                                            )
+                                          }
+                                          sx={{
+                                            backgroundColor:
+                                              selectedTab === index
+                                                ? "#ffffff"
+                                                : "#f0f0f0",
+                                            borderRight:
+                                              index !== 2
+                                                ? "1px solid #ddd"
+                                                : "none",
+                                            fontWeight: "bold",
+                                            color: "black",
+                                            minHeight: "48px",
+                                          }}
+                                        />
+                                      );
+                                    })}
+                                  </Tabs>
+                                )}
+                            </div>
+                          )}
                           <div>
                             <div
-                              className="card"
+                              className={role === "ROL6" ? "card" : ""}
                               style={{
                                 borderTop: "none",
                                 borderRadius: "0 0 12px 12px",
                               }}
                             >
                               <div className="card-body">
-                                {listKriteriaPenilaian.map((item) => {
+                                {listKriteriaPenilaian.map((item, index2) => {
                                   const matchingKriteria = listKriteria.filter(
                                     (detail) => detail.Kriteria === item.Value
                                   );
@@ -1001,7 +1003,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                     matchingKriteria.length > 0 && detail.Deskripsi === matchingKriteria[0].Deskripsi
                                   );
 
-                                  console.log("MATCHING KRITERIA", matchingListNilai);
+                                  console.log("MATCHING KRITERIA", listKriteriaPenilaian);
 
                                   let content = null;
 
@@ -1018,19 +1020,25 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                             <Label data={detail.Deskripsi} />
                                           </div>
                                           <div className="col-lg-2 d-flex align-items-start">
-                                            <SearchDropdown
-                                            forInput={detail.Value}
-                                            isRound
-                                            isPlaceHolder={false}
-                                            selectedValued={
-                                              arrTextData[
-                                                detail.Text - 1
-                                              ]
-                                            }
-                                            arrData={nilai}
-                                            value={formDataRef2.current[detail.Value]}
-                                            onChange={handleInputChange}
-                                            />
+                                            {index2 === 2 || index2 === 3 ? (
+                                              <div className="form-control bg-light rounded-5">
+                                                Not yet scored
+                                              </div>
+                                            ) : (
+                                              <SearchDropdown
+                                              forInput={detail.Value}
+                                              isRound
+                                              isPlaceHolder={false}
+                                              selectedValued={
+                                                arrTextData[
+                                                  detail.Text - 1
+                                                ]
+                                              }
+                                              arrData={nilai}
+                                              value={formDataRef2.current[detail.Value]}
+                                              onChange={handleInputChange}
+                                              />
+                                            )}
                                           </div>
                                         </div>
                                       );
@@ -1077,7 +1085,12 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                           <div className="d-flex flex-column">
                                           <div className="mb-2">Comment</div>
                                           <div className="col-lg-12">
-                                            <Input
+                                            {index2 === 2 || index2 === 3 ? (
+                                              <div className="form-control bg-light">
+                                                Not yet scored
+                                              </div>
+                                            ) : (
+                                              <Input
                                               isDisabled={false}
                                               type="textarea"
                                               forInput="commentFase1"
@@ -1085,6 +1098,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                               value={formCommentFase1}
                                               errorMessage={errors.formCommentFase1}
                                             />
+                                            )}
                                           </div>
                                           </div>
                                         </div>

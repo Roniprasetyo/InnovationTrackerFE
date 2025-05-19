@@ -984,7 +984,7 @@ export default function SuggestionSytemIndex({
                   "Waiting Approval",
                   "Draft Scoring",
                   "Approved",
-                ].includes(value["Status"]),
+                ].includes(value["Status"]) && value["Status"] !== "Rejected",
                 Action: ["Waiting Approval"].includes(value["Status"])
                   ? ["Detail", "Delete"]
                   : ["Detail"],
