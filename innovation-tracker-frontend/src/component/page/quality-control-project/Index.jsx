@@ -76,10 +76,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
     return (
       <div>
         <div className="mt-3 flex-fill">
-          <Alert
-            type="danger"
-            message="Your session has expired."
-          />
+          <Alert type="danger" message="Your session has expired." />
         </div>
         <NotFound />
       </div>
@@ -139,9 +136,9 @@ export default function QualityControlProjectIndex({ onChangePage }) {
 
     const confirm = await SweetAlert(
       "Confirm",
-      "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.",
-      "warning",
-      "SUBMIT",
+      "Are you sure about this value?",
+      "info",
+      "Submit",
       null,
       "",
       true
@@ -149,9 +146,8 @@ export default function QualityControlProjectIndex({ onChangePage }) {
 
     if (confirm) {
       try {
-        const updateResult = await UseFetch(API_LINK + "RencanaCircle/UpdateStatusRencanaCircle", {
-          id: id,
-          status: null,
+        const updateResult = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+          id: id
         });
 
         if (updateResult === "ERROR" || updateResult.length === 0) {
@@ -311,6 +307,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
             Period: value["Period"],
             Status: value["Status"],
             Count: value["Count"],
+            IsBold: ["Draft Scoring", "Approved"].includes(value["Status"]),
             Action:
               role === "ROL01" &&
                 value["Status"] === "Draft" &&
@@ -318,12 +315,20 @@ export default function QualityControlProjectIndex({ onChangePage }) {
                 ? ["Detail", "Edit", "Submit"]
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
-                  ? ["Detail", "Reject", "Approve"]
-                  : role === "ROL01" &&
-                    value["Status"] === "Rejected" &&
-                    value["Creaby"] === userInfo.username
-                    ? ["Detail", "Edit", "Submit"]
-                    : ["Detail"],
+                ? ["Detail", "Reject", "Approve"]
+                : role === "ROL01" &&
+                  value["Status"] === "Rejected" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "Edit", "Submit"]
+                : role === "ROL36" && value["Status"] === "Approved"
+                ? ["Detail", "Submit"]
+                : value["Status"] === "Approved" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "FillTheStep"]
+                : value["Status"] === "Draft Scoring" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "EditFillTheStep", "Submit"]
+                : ["Detail"],
             Alignment: [
               "center",
               "left",
@@ -431,6 +436,7 @@ export default function QualityControlProjectIndex({ onChangePage }) {
             onApprove={handleApprove}
             onReject={handleReject}
             onEdit={onChangePage}
+            onFillStep={onChangePage}
           />
           <Paging
             pageSize={PAGE_SIZE}

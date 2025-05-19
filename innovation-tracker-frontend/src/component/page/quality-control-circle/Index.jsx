@@ -76,10 +76,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
     return (
       <div>
         <div className="mt-3 flex-fill">
-          <Alert
-            type="danger"
-            message="Your session has expired."
-          />
+          <Alert type="danger" message="Your session has expired." />
         </div>
         <NotFound />
       </div>
@@ -134,23 +131,11 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleSubmit = async (id) => {
     setIsError(false);
-    setIsLoading(true);
-
-    let status;
-    if (currentData.Status === "Approved") {
-      status = "Rejected";
-    } else {
-      status =
-        "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
-    }
-
-    const tempStatus = getStatusByKey(id);
-
     const confirm = await SweetAlert(
       "Confirm",
-      status,
-      "warning",
-      "SUBMIT",
+      "Are you sure about this value?",
+      "info",
+      "Submit",
       null,
       "",
       true
@@ -158,9 +143,8 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
     if (confirm) {
       try {
-        const updateResult = await UseFetch(API_LINK + "RencanaCircle/UpdateStatusRencanaCircle", {
-          id: id,
-          status: null,
+        const updateResult = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+          id: id
         });
 
         if (updateResult === "ERROR" || updateResult.length === 0) {
@@ -321,6 +305,9 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             Period: value["Period"],
             Status: value["Status"],
             Count: value["Count"],
+            IsBold: ["Draft Scoring", "Approved"].includes(
+              value["Status"]
+            ),
             Action:
               role === "ROL01" &&
                 value["Status"] === "Draft" &&
@@ -328,18 +315,20 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 ? ["Detail", "Edit", "Submit"]
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
-                  ? ["Detail", "Reject", "Approve"]
-                  : role === "ROL01" &&
-                    value["Status"] === "Rejected" &&
-                    value["Creaby"] === userInfo.username
-                    ? ["Detail", "Edit", "Submit"]
-                    : role === "ROL36" && value["Status"] === "Approved"
-                      ? ["Detail", "Submit"]
-                      :
-                      value["Status"] === "Approved" &&
-                        value["Creaby"] === userInfo.username
-                        ? ["Detail", "FillTheStep"]
-                        : ["Detail"],
+                ? ["Detail", "Reject", "Approve"]
+                : role === "ROL01" &&
+                  value["Status"] === "Rejected" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "Edit", "Submit"]
+                : role === "ROL36" && value["Status"] === "Approved"
+                ? ["Detail", "Submit"]
+                : value["Status"] === "Approved" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "FillTheStep"]
+                : value["Status"] === "Draft Scoring" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "EditFillTheStep", "Submit"]
+                : ["Detail"],
             Alignment: [
               "center",
               "left",

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, Navigate  } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
 import { PAGE_SIZE, API_LINK, EMP_API_LINK } from "../../util/Constants";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -78,14 +78,11 @@ export default function SuggestionSytemIndex({
     return (
       <div>
         <div className="mt-3 flex-fill">
-            <Alert
-              type="danger"
-              message="Your session has expired."
-            />
-          </div>
+          <Alert type="danger" message="Your session has expired." />
+        </div>
         <NotFound />
       </div>
-    ) ;
+    );
   }
 
   const location = useLocation();
@@ -110,7 +107,6 @@ export default function SuggestionSytemIndex({
     npk: userInfo.npk,
     upt: userInfo.upt,
   });
-  console.log(userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -294,7 +290,10 @@ export default function SuggestionSytemIndex({
           tempTotal1 += parseFloat(item.Nilai) || 0;
         }
       });
-    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
+    } else if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
       try {
         const data = await UseFetch(
           API_LINK + "RencanaSS/GetPenilaianByIDScoring",
@@ -324,7 +323,6 @@ export default function SuggestionSytemIndex({
               Creadate: item.Creadate,
             };
           });
-
           statusKdept = dataDetail;
         }
       } catch (error) {
@@ -340,7 +338,7 @@ export default function SuggestionSytemIndex({
       }
 
       statusKdept.forEach((item) => {
-        if (item.jab !== "Kepala Departemen") {
+        if (item.jab !== "Kepala Departemen" && item.jab !== "Kepala Jurusan") {
           tempTotal2 = 0;
         } else {
           tempTotal2 += parseFloat(item.Nilai) || 0;
@@ -447,7 +445,10 @@ export default function SuggestionSytemIndex({
       } else {
         status1 = "Scoring";
       }
-    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
+    } else if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
       const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
       if (item && item.Range) {
         const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
@@ -900,9 +901,7 @@ export default function SuggestionSytemIndex({
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Innovation Category",
-        });
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting");
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
@@ -953,7 +952,6 @@ export default function SuggestionSytemIndex({
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
-            console.log("tesa", foundEmployee);
 
             const jabatanTarget =
               userInfo.upt === "Pusat Sistem Informasi"
@@ -1005,8 +1003,8 @@ export default function SuggestionSytemIndex({
                 ],
               };
             } else if (
-              (userInfo.jabatan === "Kepala Departemen"
-                || userInfo.jabatan === "Kepala Jurusan" ||
+              (userInfo.jabatan === "Kepala Departemen" ||
+                userInfo.jabatan === "Kepala Jurusan" ||
                 userInfo.jabatan === "Sekretaris Prodi" ||
                 userInfo.jabatan === "Direktur" ||
                 userInfo.jabatan === "Wakil Direktur" ||
@@ -1066,8 +1064,9 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
-                    : (userInfo.jabatan === "Kepala Departemen" && userInfo.jabatan === "Kepala Jurusan") &&
-                      value["Status"] === "Draft Scoring"
+                    : userInfo.jabatan === "Kepala Departemen" ||
+                      (userInfo.jabatan === "Kepala Jurusan" &&
+                        value["Status"] === "Draft Scoring")
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Wakil Direktur" ||
                         userInfo.jabatan === "Direktur") &&
@@ -1078,8 +1077,8 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Kepala Seksi" ||
                         userInfo.jabatan === "Sekretaris Prodi" ||
-                        userInfo.jabatan === "Kepala Departemen"
-                        || userInfo.jabatan === "Kepala Jurusan"||
+                        userInfo.jabatan === "Kepala Departemen" ||
+                        userInfo.jabatan === "Kepala Jurusan" ||
                         userInfo.jabatan === "Wakil Direktur" ||
                         userInfo.jabatan === "Direktur") &&
                       (value["Status"] === "Scoring" ||
@@ -1094,7 +1093,8 @@ export default function SuggestionSytemIndex({
                       userInfo.jabatan === "Kepala Seksi" &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
-                    : (userInfo.jabatan === "Kepala Departemen" && userInfo.jabatan === "Kepala Jurusan") &&
+                    : userInfo.jabatan === "Kepala Departemen" &&
+                      userInfo.jabatan === "Kepala Jurusan" &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
                     : (userInfo.jabatan === "Wakil Direktur" ||

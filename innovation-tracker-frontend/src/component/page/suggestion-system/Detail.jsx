@@ -190,6 +190,17 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
 
   return (
     <>
+      <div
+        className="row my-3"
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <h2
+          className="fw-bold"
+          style={{ color: "rgb(0, 89, 171)", margin: "0" }}
+        >
+          Detail Data
+        </h2>
+      </div>
       <div className="mt-3">
         {isError.error && (
           <div className="flex-fill ">
@@ -421,12 +432,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
-                  <Button
-                    iconName={"angle-left"}
-                    classType={"primary"}
-                    onClick={() => onChangePage("index")}
-                    label="Back"
-                  />
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />
@@ -505,6 +510,14 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                     </div>
                   </div>
                 )}
+                <div className="col-lg-2">
+                  <Button
+                    iconName={"angle-left"}
+                    classType={"primary"}
+                    onClick={() => onChangePage("index")}
+                    label="Back"
+                  />
+                </div>
 
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>
