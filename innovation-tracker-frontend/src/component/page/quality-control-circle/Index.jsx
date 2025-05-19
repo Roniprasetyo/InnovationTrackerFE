@@ -283,7 +283,7 @@ export default function QualityControlCircleIndex({
                 : inorole === "Facilitator" &&
                   value["Status"] === "Waiting Approval"
                 ? ["Detail", "Reject", "Approve"]
-                : inorole === "Facilitator" &&
+                : (inorole === "Facilitator" || role === "ROL36") &&
                   value["Status"] === "Scoring"
                 ? ["Detail", "Scoring"]
                 : role === "ROL01" &&

@@ -725,23 +725,16 @@ export default function QCCScoring({ onChangePage, WithID }) {
   }, [userInfo, hasUserSelectedTab]);
 
   const tabLabels = [
-    "Ka.Unit/Ka.UPT/SekProdi",
-    "Ka.Prodi/Ka.Dept",
-    "WaDIR/DIR",
+    "Facilitator",
+    "Innovation Coordinator",
   ];
 
+  const role = userInfo.role.slice(0, 5);
   const tabIndexUser = tabLabels.findIndex((label) => {
     if (
-      userInfo.jabatan === "Kepala Departemen" ||
-      userInfo.jabatan === "Kepala Jurusan"
+      role === "ROL36"
     )
-      return label === "Ka.Prodi/Ka.Dept";
-    if (
-      userInfo.jabatan === "Wakil Direktur" ||
-      userInfo.jabatan === "Direktur"
-    )
-      return label === "WaDIR/DIR";
-    return label === "Ka.Unit/Ka.UPT/SekProdi";
+      return label === "Innovation Coordinator";
   });
 
   const [selectedTab, setSelectedTab] = useState(tabIndexUser);
@@ -832,49 +825,16 @@ export default function QCCScoring({ onChangePage, WithID }) {
       }
     }
   }, [listPenilaianWadir]);
-
-  const findRanking = (score, listSettingRanking) => {
-    for (const ranking of listSettingRanking) {
-      const rangeText = ranking.Range;
-
-      if (rangeText.includes("-")) {
-        const [min, max] = rangeText
-          .split("-")
-          .map((num) => parseFloat(num.trim()));
-        if (score >= min && score <= max) {
-          return ranking.Ranking;
-        }
-      } else {
-        const singleValue = parseFloat(rangeText.trim());
-        if (score === singleValue) {
-          return ranking.Ranking;
-        }
-      }
-    }
-    return "No Ranking";
-  };
-
   let [isChecked, setIsCheked] = useState(false);
-  useEffect(() => {
-    let jabatanTarget = [];
 
-    if (selectedTab === 0) jabatanTarget = ["Kepala Seksi", "Sekretaris Prodi"];
+  useEffect(() => {
+    let jabatanTarget;
+    
+    if (selectedTab === 0) jabatanTarget = "ROL01";
     else if (selectedTab === 1)
-      jabatanTarget = ["Kepala Departemen", "Kepala Jurusan"];
-    else if (selectedTab === 2) jabatanTarget = ["Wakil Direktur", "Direktur"];
-    if (listAllPenilaian.length !== 0) {
-      const buffer = listAllPenilaian.some(
-        (item) =>
-          item["Jabatan Penilai"] &&
-          jabatanTarget.some((jabatan) =>
-            item["Jabatan Penilai"].includes(jabatan)
-          )
-      );
-      setIsCheked(buffer);
-      setReadOnly(buffer);
-    }
+    jabatanTarget = "ROL36"
     setActiveTab(selectedTab === tabIndexUser);
-  }, [selectedTab, tabIndexUser, listAllPenilaian]);
+  }, [selectedTab, tabIndexUser]);
 
   if (isLoading) return <Loading />;
 
@@ -948,9 +908,85 @@ export default function QCCScoring({ onChangePage, WithID }) {
                         <div className="card-header d-flex align-items-center justify-content-between">
                           <h5 className="fw-medium m-0">Criteria</h5>
                         </div>
-                        <div className="">
+                        <div className="card-body">
+                          <div>
+                              {isLoading ? (
+                                <Loading />
+                              ) : (
+                                <Tabs
+                                  value={selectedTab}
+                                  className="card rounded-bottom-0"
+                                  onChange={handleTabChange}
+                                  variant="fullWidth"
+                                  sx={{
+                                    "& .MuiTabs-indicator": {
+                                      height: "3px",
+                                      backgroundColor: "#1976d2",
+                                    },
+                                  }}
+                                >
+                                  {tabLabels.map((label, index) => {
+                                    let jabatanTarget;
+
+                                    if (index === 1)
+                                      jabatanTarget = "ROL36"
+
+                                    let isChecked = listAllPenilaian.some(
+                                      (item) =>
+                                        item["Jabatan Penilai"] &&
+                                        jabatanTarget.some((jabatan) =>
+                                          item["Jabatan Penilai"].includes(
+                                            jabatan
+                                          )
+                                        )
+                                    );
+
+                                    return (
+                                      <Tab
+                                        key={index}
+                                        label={
+                                          isChecked ? (
+                                            <div className="d-flex gap-2 align-items-center">
+                                              <span
+                                                style={{
+                                                  color: "green",
+                                                  fontSize: "20px",
+                                                }}
+                                              >
+                                                ✓
+                                              </span>
+                                              <span
+                                                style={{ fontSize: "14px" }}
+                                              >
+                                                {label}
+                                              </span>
+                                            </div>
+                                          ) : (
+                                            label
+                                          )
+                                        }
+                                        sx={{
+                                          backgroundColor:
+                                            selectedTab === index
+                                              ? "#ffffff"
+                                              : "#f0f0f0",
+                                          borderRight:
+                                            index !== 2
+                                              ? "1px solid #ddd"
+                                              : "none",
+                                          fontWeight: "bold",
+                                          color: "black",
+                                          minHeight: "48px",
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                </Tabs>
+                              )}
+                          </div>
                           <div>
                             <div
+                              className="card"
                               style={{
                                 borderTop: "none",
                                 borderRadius: "0 0 12px 12px",
