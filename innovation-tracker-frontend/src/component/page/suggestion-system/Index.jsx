@@ -318,9 +318,10 @@ export default function SuggestionSytemIndex({
               Creadate: item.Creadate,
             };
           });
-
           statusKdept = dataDetail;
+          console.log("DataDetail", statusKdept);
         }
+        
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -334,7 +335,7 @@ export default function SuggestionSytemIndex({
       }
 
       statusKdept.forEach((item) => {
-        if (item.jab !== "Kepala Departemen") {
+        if (item.jab !== "Kepala Departemen" && item.jab !== "Kepala Jurusan") {
           tempTotal2 = 0;
         } else {
           tempTotal2 += parseFloat(item.Nilai) || 0;
@@ -939,7 +940,7 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
-                    : userInfo.jabatan === "Kepala Departemen" &&
+                    : userInfo.jabatan === "Kepala Departemen" ||
                       userInfo.jabatan === "Kepala Jurusan" &&
                       value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]

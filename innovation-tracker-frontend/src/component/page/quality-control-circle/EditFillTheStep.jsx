@@ -52,7 +52,7 @@ export default function QualityControlCircleEditFillStep({
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [listEmployee, setListEmployee] = useState([]);
   const [listMetodologi, setListMetodologi] = useState([]);
-  const [typeSetting, setTypeSetting] = useState([]);
+  const [typesSetting, setTypeSetting] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
@@ -430,18 +430,18 @@ export default function QualityControlCircleEditFillStep({
       }
     } else window.scrollTo(0, 0);
   };
-  const filteredTypeMetodologi = typeSetting.filter(
+  const filteredTypeMetodologi = typesSetting?.filter(
     (detail) => detail.Text === "Metodologi"
   );
 
   const filteredArrData = listMetodologi.filter(
     (detail) => detail.Type === filteredTypeMetodologi[0]?.Value
   );
-  // const arrTextData = filteredArrData.map((item) => item.Value === payload[0].set_id);
+  const arrTextData = filteredArrData.map((item) => item.Value === payloadRef.current.set_id);
 
   if (isLoading) return <Loading />;
 
-  console.log("TES", payloadRef.current)
+  console.log("TES", arrTextData)
 
   return (
     <>
@@ -721,7 +721,7 @@ export default function QualityControlCircleEditFillStep({
                                   arrData={filteredArrData}
                                   forInput="set_id"
                                   value={payloadRef.current.set_id}
-                                  // selectedValued={arrTextData[payload.set_id]}
+                                  // selectedValued={payloadRef.current.set_id} 
                                   label="Metodologi"
                                   onChange={handleInputChange}
                                   isRequired
