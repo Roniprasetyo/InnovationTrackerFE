@@ -143,9 +143,12 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
     if (confirm) {
       try {
-        const updateResult = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
-          id: id
-        });
+        const updateResult = await UseFetch(
+          API_LINK + "RencanaCircle/SentRencanaCircle",
+          {
+            id: id,
+          }
+        );
 
         if (updateResult === "ERROR" || updateResult.length === 0) {
           setIsError(true);
@@ -205,8 +208,7 @@ export default function QualityControlCircleIndex({ onChangePage }) {
         id: id,
         set: "Approved",
       })
-         .then(async (data) => {
-
+        .then(async (data) => {
           const decodedTitle = decodeHtml(
             decodeHtml(decodeHtml(currentData["Project Title"]))
           ).replace(/<\/?[^>]+(>|$)/g, "");
@@ -214,13 +216,16 @@ export default function QualityControlCircleIndex({ onChangePage }) {
           if (data === "ERROR" || data.length === 0) {
             setIsError(true);
           } else {
-            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
-              from: userInfo.username,
-              to: "",
-              message: `Quality Control Circle Approve. Your Quality Control Circle titled ${decodedTitle} has been approved and please continue to fill in the next form`,
-              sis: -1,
-              rci: id,
-            });
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Quality Control Circle Approve. Your Quality Control Circle titled ${decodedTitle} has been approved and please continue to fill in the next form`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
@@ -248,7 +253,6 @@ export default function QualityControlCircleIndex({ onChangePage }) {
         reason: confirm,
       })
         .then(async (data) => {
-
           const decodedTitle = decodeHtml(
             decodeHtml(decodeHtml(currentData["Project Title"]))
           ).replace(/<\/?[^>]+(>|$)/g, "");
@@ -256,13 +260,16 @@ export default function QualityControlCircleIndex({ onChangePage }) {
           if (data === "ERROR" || data.length === 0) {
             setIsError(true);
           } else {
-            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
-              from: userInfo.username,
-              to: "",
-              message: `Quality Control Circle Reject. Your Quality Control Circle titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
-              sis: -1,
-              rci: id,
-            });
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Quality Control Circle Reject. Your Quality Control Circle titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
@@ -305,11 +312,16 @@ export default function QualityControlCircleIndex({ onChangePage }) {
             Period: value["Period"],
             Status: value["Status"],
             Count: value["Count"],
-            IsBold: ["Draft Scoring", "Approved"].includes(value["Status"]),
+            IsBold:
+              value["Creaby"] === userInfo.username
+                ? ["Draft Scoring", "Approved"].includes(value["Status"])
+                : ["Waiting Approval", "Draft Scoring", "Approved"].includes(
+                    value["Status"]
+                  ),
             Action:
               role === "ROL01" &&
-                value["Status"] === "Draft" &&
-                value["Creaby"] === userInfo.username
+              value["Status"] === "Draft" &&
+              value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
                 : role === "ROL01" &&
                   value["Status"] === "Waiting Approval" &&
@@ -417,12 +429,12 @@ export default function QualityControlCircleIndex({ onChangePage }) {
                 exportExcel(
                   dataExport.current,
                   "QCC_" +
-                  new Date().toLocaleDateString() +
-                  "_" +
-                  new Date().toLocaleTimeString() +
-                  "_" +
-                  currentFilter.page +
-                  ".xlsx"
+                    new Date().toLocaleDateString() +
+                    "_" +
+                    new Date().toLocaleTimeString() +
+                    "_" +
+                    currentFilter.page +
+                    ".xlsx"
                 )
               }
             />

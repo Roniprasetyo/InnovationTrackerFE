@@ -146,9 +146,12 @@ export default function QualityControlProjectIndex({ onChangePage }) {
 
     if (confirm) {
       try {
-        const updateResult = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
-          id: id
-        });
+        const updateResult = await UseFetch(
+          API_LINK + "RencanaCircle/SentRencanaCircle",
+          {
+            id: id,
+          }
+        );
 
         if (updateResult === "ERROR" || updateResult.length === 0) {
           setIsError(true);
@@ -208,7 +211,6 @@ export default function QualityControlProjectIndex({ onChangePage }) {
         set: "Approved",
       })
         .then(async (data) => {
-
           const decodedTitle = decodeHtml(
             decodeHtml(decodeHtml(currentData["Project Title"]))
           ).replace(/<\/?[^>]+(>|$)/g, "");
@@ -216,13 +218,16 @@ export default function QualityControlProjectIndex({ onChangePage }) {
           if (data === "ERROR" || data.length === 0) {
             setIsError(true);
           } else {
-            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
-              from: userInfo.username,
-              to: "",
-              message: `Quality Control Project Approve. Your Quality Control Project titled ${decodedTitle} has been approved and please continue to fill in the next form`,
-              sis: -1,
-              rci: id,
-            });
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Quality Control Project Approve. Your Quality Control Project titled ${decodedTitle} has been approved and please continue to fill in the next form`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
@@ -250,7 +255,6 @@ export default function QualityControlProjectIndex({ onChangePage }) {
         reason: confirm,
       })
         .then(async (data) => {
-
           const decodedTitle = decodeHtml(
             decodeHtml(decodeHtml(currentData["Project Title"]))
           ).replace(/<\/?[^>]+(>|$)/g, "");
@@ -258,13 +262,16 @@ export default function QualityControlProjectIndex({ onChangePage }) {
           if (data === "ERROR" || data.length === 0) {
             setIsError(true);
           } else {
-            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
-              from: userInfo.username,
-              to: "",
-              message: `Quality Control Project Reject. Your Quality Control Project titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
-              sis: -1,
-              rci: id,
-            });
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Quality Control Project Reject. Your Quality Control Project titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
@@ -307,11 +314,16 @@ export default function QualityControlProjectIndex({ onChangePage }) {
             Period: value["Period"],
             Status: value["Status"],
             Count: value["Count"],
-            IsBold: ["Draft Scoring", "Approved"].includes(value["Status"]),
+            IsBold:
+              value["Creaby"] === userInfo.username
+                ? ["Draft Scoring", "Approved"].includes(value["Status"])
+                : ["Waiting Approval", "Draft Scoring", "Approved"].includes(
+                    value["Status"]
+                  ),
             Action:
               role === "ROL01" &&
-                value["Status"] === "Draft" &&
-                value["Creaby"] === userInfo.username
+              value["Status"] === "Draft" &&
+              value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
                 : role === "ROL01" &&
                   value["Status"] === "Waiting Approval" &&
