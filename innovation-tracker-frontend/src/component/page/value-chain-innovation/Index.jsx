@@ -143,9 +143,8 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
 
     if (confirm) {
       try {
-        const updateResult = await UseFetch(API_LINK + "RencanaCircle/UpdateStatusRencanaCircle", {
-          id: id,
-          status: null,
+        const updateResult = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
+          id: id
         });
 
         if (updateResult === "ERROR" || updateResult.length === 0) {

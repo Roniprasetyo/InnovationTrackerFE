@@ -22,7 +22,6 @@ const inisialisasiData = [
 ];
 
 export default function QualityControlProjectDetail({ onChangePage, withID }) {
-  let userInfo; 
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
