@@ -63,7 +63,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
   const [listDepartment, setListDepartment] = useState([]);
   const [listAllDepartment, setAllListDepartment] = useState([]);
-  const [listPenilaianKaUpt, setListPenilaianKaUpt] = useState([]);
+  const [listKriteria, setListKriteria] = useState([]);
   const [listNilaiDetailKriteria, setListNilaiDetailKriteria] = useState([]);
   const [scoringPosition, setScoringPosition] = useState([]);
   const [scoringPositionRole, setScoringPositionRole] = useState([]);
@@ -211,12 +211,12 @@ export default function QCCScoring({ onChangePage, WithID }) {
       );
 
       if (matched) {
-        formDataRef3.current[val] = matched.Text;
+        formDataRef3.current[val] = matched.Score;
       } else {
         formDataRef3.current[val] = null;
       }
 
-      const parsed = parseFloat(matched?.Text);
+      const parsed = parseFloat(matched?.Score);
       if (!isNaN(parsed)) total += parsed;
     });
 
@@ -498,8 +498,15 @@ export default function QCCScoring({ onChangePage, WithID }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the Penilaian KA UPT data.");
         } else {
-          setListPenilaianKaUpt(data);
-          setListNilaiDetailKriteria(data2);
+          const dataDetail = data2.map((item) => ({
+            Text: `(Poin: ${item.Score})`,
+            Value: item.Value,
+            Score: item.Score,
+            Deskripsi: item.Deskripsi,
+          }));
+
+          setListKriteria(data);
+          setListNilaiDetailKriteria(dataDetail);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -595,10 +602,10 @@ export default function QCCScoring({ onChangePage, WithID }) {
   }, []);
 
   useEffect(() => {
-    if (listPenilaianKaUpt.length === 0 || listEmployee.length === 0) return;
+    if (listKriteria.length === 0 || listEmployee.length === 0) return;
 
     const distinctCreaby = [
-      ...new Set(listPenilaianKaUpt.map((item) => item.Creaby).filter(Boolean)),
+      ...new Set(listKriteria.map((item) => item.Creaby).filter(Boolean)),
     ];
 
     const filteredEmployees = listEmployee.filter((emp) =>
@@ -606,7 +613,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
     );
 
     setRecordListPenilaian(filteredEmployees);
-  }, [listPenilaianKaUpt, listEmployee]);
+  }, [listKriteria, listEmployee]);
 
   useEffect(() => {
     if (listRecordPenilaian.length === 0) return;
@@ -656,7 +663,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
     (detail) => detail["Npk"] === forPenilai.npk
   );
   const kaupt = listAllDepartment.find(
-    (detail) => detail["Creaby"] === listPenilaianKaUpt[0].npk
+    (detail) => detail["Creaby"] === listKriteria[0].npk
   );
 
   useEffect(() => {
@@ -738,14 +745,16 @@ export default function QCCScoring({ onChangePage, WithID }) {
   });
 
   const [selectedTab, setSelectedTab] = useState(tabIndexUser);
-  const arrTextDataforKaDept = listPenilaianKaDept.map((item) => item);
+  const arrTextData = listNilaiDetailKriteria.map((item) => item);
+
+  console.log("ARR TEXT DATA ", arrTextData);
 
   useEffect(() => {
     let tempTotal1 = 0;
     let tempTotal2 = 0;
     let tempTotal3 = 0;
 
-    listPenilaianKaUpt.forEach((item) => {
+    listKriteria.forEach((item) => {
       if (
         item["Jabatan Penilai"] !== "Kepala Seksi" &&
         item["Jabatan Penilai"] !== "Sekretaris Prodi"
@@ -782,7 +791,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
     setTotalScoreforKaUpt(tempTotal1);
     setTotalScoreforKaDept(tempTotal2);
     setTotalScoreforWadir(tempTotal3);
-  }, [listPenilaianKaUpt, listPenilaianKaDept, listPenilaianWadir]);
+  }, [listKriteria, listPenilaianKaDept, listPenilaianWadir]);
 
   useEffect(() => {
     if (listPenilaianWadir !== null && listPenilaianWadir.length > 0) {
@@ -809,10 +818,10 @@ export default function QCCScoring({ onChangePage, WithID }) {
         setScoringPositionRole(firstData["Jabatan Penilai"]);
       }
     } else if (
-      (listPenilaianKaUpt !== null) &
-      (listPenilaianKaUpt.length > 0)
+      (listKriteria !== null) &
+      (listKriteria.length > 0)
     ) {
-      const firstData = listPenilaianKaUpt[0];
+      const firstData = listKriteria[0];
 
       if (firstData) {
         const namePosition = listEmployee.find(
@@ -949,7 +958,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
                             >
                               <div className="card-body">
                                 {listKriteriaPenilaian.map((item) => {
-                                  const matchingKriteria = listPenilaianKaUpt.filter(
+                                  const matchingKriteria = listKriteria.filter(
                                     (detail) => detail.Kriteria === item.Value
                                   );
                                   const matchingListNilai = listNilaiDetailKriteria.filter((detail) =>
@@ -974,11 +983,16 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                           </div>
                                           <div className="col-lg-2 d-flex align-items-start">
                                             <SearchDropdown
+                                            forInput={detail.Value}
                                             isRound
                                             isPlaceHolder={false}
-                                            forInput={nilai.Value}
+                                            selectedValued={
+                                              arrTextData[
+                                                detail.Text - 1
+                                              ]
+                                            }
                                             arrData={nilai}
-                                            value={nilai.Value}
+                                            value={formDataRef2.current[detail.Value]}
                                             onChange={handleInputChange}
                                             />
                                           </div>

@@ -114,7 +114,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                   No: index + 1,
                   Name: item.Name,
                   Section:
-                    listEmployee.find((value) => value.npk === item.Npk)?.upt ||
+                    listEmployee?.find((value) => value.npk === item.Npk)?.upt ||
                     "",
                   Count: memberCount,
                   Alignment: ["center", "left", "left"],
@@ -210,7 +210,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                           <Label
                             title="Facilitator"
                             data={
-                              formDataRef.current.member.find(
+                              formDataRef.current.member?.find(
                                 (item) => item.Position === "Facilitator"
                               )?.Name || "-"
                             }
@@ -220,7 +220,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                           <Label
                             title="Leader"
                             data={
-                              formDataRef.current.member.find(
+                              formDataRef.current.member?.find(
                                 (item) => item.Position === "Leader"
                               )?.Name || "-"
                             }
@@ -264,12 +264,12 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                             title="Project Timeframe"
                             data={
                               formatDate(
-                                formDataRef.current["Start Date"].split("T")[0],
+                                formDataRef.current["Start Date"]?.split("T")[0],
                                 true
                               ) +
                                 " - " +
                                 formatDate(
-                                  formDataRef.current["End Date"].split("T")[0],
+                                  formDataRef.current["End Date"]?.split("T")[0],
                                   true
                                 ) || "-"
                             }

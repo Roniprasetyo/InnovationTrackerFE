@@ -62,7 +62,7 @@ const FloatingCard = () => {
             cursor: "move",
             pointerEvents: "auto",
             position: "absolute",
-            transition: "all 0.3s ease",
+            transition: "all 0.1s ease",
           }}
         >
           <h5>Total Score</h5>
