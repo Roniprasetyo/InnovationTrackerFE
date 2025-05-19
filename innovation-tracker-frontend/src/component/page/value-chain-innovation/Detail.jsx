@@ -9,6 +9,7 @@ import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
+import Button from "../../part/Button";
 
 const inisialisasiData = [
   {
@@ -118,8 +119,8 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                   No: index + 1,
                   Name: item.Name,
                   Section:
-                    listEmployee.find((value) => value.npk === item.Npk)
-                      ?.upt || "",
+                    listEmployee.find((value) => value.npk === item.Npk)?.upt ||
+                    "",
                   Count: memberCount,
                   Alignment: ["center", "left", "left"],
                 }))
@@ -153,17 +154,6 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
           className="fw-bold"
           style={{ color: "rgb(0, 89, 171)", margin: "0" }}
         >
-          <Icon
-            type="Bold"
-            name="angle-left"
-            cssClass="btn me-1 py-0 text"
-            onClick={() => onChangePage("index")}
-            style={{
-              fontSize: "22px",
-              cursor: "pointer",
-              color: "rgb(0, 89, 171)",
-            }}
-          />
           Detail Data
         </h2>
       </div>
@@ -415,12 +405,21 @@ export default function ValueChainInnovationDetail({ onChangePage, withID }) {
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />
-                      <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
-                      <Label
-                      data={formDataRef.current["Alasan Penolakan"]}/>
+                      <h5 className="fw-medium fw-bold">
+                        Reason for Rejection
+                      </h5>
+                      <Label data={formDataRef.current["Alasan Penolakan"]} />
                       <hr />
                     </div>
                   )}
+                </div>
+                <div className="col-lg-2">
+                  <Button
+                    iconName={"angle-left"}
+                    classType={"primary"}
+                    onClick={() => onChangePage("index")}
+                    label="Back"
+                  />
                 </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>

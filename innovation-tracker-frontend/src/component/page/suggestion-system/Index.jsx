@@ -106,7 +106,6 @@ export default function SuggestionSytemIndex({
     npk: userInfo.npk,
     upt: userInfo.upt,
   });
-  console.log(userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -319,9 +318,7 @@ export default function SuggestionSytemIndex({
             };
           });
           statusKdept = dataDetail;
-          console.log("DataDetail", statusKdept);
         }
-        
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -774,9 +771,7 @@ export default function SuggestionSytemIndex({
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Innovation Category",
-        });
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting");
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
@@ -827,7 +822,6 @@ export default function SuggestionSytemIndex({
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
-            console.log("tesa", foundEmployee);
 
             const jabatanTarget =
               userInfo.upt === "Pusat Sistem Informasi"
@@ -941,8 +935,8 @@ export default function SuggestionSytemIndex({
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
                     : userInfo.jabatan === "Kepala Departemen" ||
-                      userInfo.jabatan === "Kepala Jurusan" &&
-                      value["Status"] === "Draft Scoring"
+                      (userInfo.jabatan === "Kepala Jurusan" &&
+                        value["Status"] === "Draft Scoring")
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Wakil Direktur" ||
                         userInfo.jabatan === "Direktur") &&

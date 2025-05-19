@@ -3,6 +3,8 @@ import QualityControlProjectIndex from "./Index";
 import QualityControlProjectAdd from "./Add";
 import QualityControlProjectEdit from "./Edit";
 import QualityControlProjectDetail from "./Detail";
+import QualityControlProjectEditFillStep from "./EditFillTheStep";
+import QualityControlProjectFillStep from "./FillStep";
 
 export default function QualityControlProject() {
   const [pageMode, setPageMode] = useState("index");
@@ -17,6 +19,20 @@ export default function QualityControlProject() {
       case "edit":
         return (
           <QualityControlProjectEdit
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+      case "editfts":
+        return (
+          <QualityControlProjectEditFillStep
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+      case "fillthestep":
+        return (
+          <QualityControlProjectFillStep
             onChangePage={handleSetPageMode}
             withID={dataID}
           />

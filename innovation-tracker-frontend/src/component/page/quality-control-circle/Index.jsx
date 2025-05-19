@@ -126,13 +126,6 @@ export default function QualityControlCircleIndex({ onChangePage }) {
 
   const handleSubmit = async (id) => {
     setIsError(false);
-    let status;
-    // if (currentData.Status === "Approved") {
-    //   status = "Rejected";
-    // } else {
-    //   status =
-    //     "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.";
-    // }
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure about this value?",

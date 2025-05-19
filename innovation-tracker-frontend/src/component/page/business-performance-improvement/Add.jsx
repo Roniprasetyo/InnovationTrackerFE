@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { date, number, object, string } from "yup";
+import { date, object, string } from "yup";
 import { API_LINK, EMP_API_LINK } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import SweetAlert from "../../util/SweetAlert";
@@ -13,7 +13,6 @@ import Icon from "../../part/Icon";
 import Table from "../../part/Table";
 import TextArea from "../../part/TextArea";
 import FileUpload from "../../part/FileUpload";
-import DropDownSearch from "../../part/DropDownSearch";
 import SearchDropdown from "../../part/SearchDropdown";
 import { decryptId } from "../../util/Encryptor";
 import UploadFile from "../../util/UploadFile";
@@ -31,7 +30,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
+export default function QualityControlProjectAdd({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -41,11 +40,11 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [checkedStates, setCheckedStates] = useState({
-    sisQuality: false,
-    sisCost: false,
-    sisDelivery: false,
-    sisSafety: false,
-    sisMoral: false,
+    rciQuality: false,
+    rciCost: false,
+    rciDelivery: false,
+    rciSafety: false,
+    rciMoral: false,
   });
 
   const [listCategory, setListCategory] = useState([]);
@@ -166,6 +165,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
+          // console.log(data.filter((item) => item.Text.includes("BPI")))
           setListCategory(data.filter((item) => item.Text.includes("BPI")));
         }
       } catch (error) {
@@ -217,7 +217,6 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      setIsLoading(true);
       try {
         const data = await UseFetch(
           API_LINK + "MasterPeriod/GetListPeriod",
@@ -228,11 +227,8 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
           throw new Error("Error: Failed to get the period data.");
         } else {
           setListPeriod(data);
-          const selected = data.find(
-            (item) => item.Text === new Date().getFullYear()
-          );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.perId = data[0].Value;
+          setSelectedPeriod(data[0].Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -279,7 +275,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
-      // setIsLoading(true);
+      setIsLoading(true);
       try {
         const data = await UseFetch(API_LINK + "MasterPeriod/GetPeriodById", {
           p1: selectedPeriod,
@@ -393,10 +389,20 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
 
   const handleDelete = (id) => {
     if (currentData.length === 1) setCurrentData(inisialisasiData);
-    else
-      setCurrentData((prevData) =>
-        prevData.filter((member) => member.Key !== id)
+    else {
+      const prevData = currentData.filter((member) => member.Key !== id);
+      setCurrentData(
+        prevData.map((item, index) => ({
+          Key: item.Key,
+          No: index + 1,
+          Name: item.Name,
+          Section: item.Section,
+          Count: prevData.length,
+          Action: ["Delete"],
+          Alignment: ["center", "left", "left", "center", "center"],
+        }))
       );
+    }
   };
 
   const handleFileChange = (ref, extAllowed) => {
@@ -423,7 +429,19 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const validationError = validateInput(name, value, userSchema);
-    formDataRef.current[name] = value;
+    name === "rciProjBenefit"
+      ? (formDataRef.current[name] = separator(value))
+      : (formDataRef.current[name] = value);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [validationError.name]: validationError.error,
+    }));
+  };
+
+  const handleInputMemberChange = (e) => {
+    const { name, value } = e.target;
+    const validationError = validateInput(name, value, memberSchema);
+    memberDataRef.current[name] = value;
     setErrors((prevErrors) => ({
       ...prevErrors,
       [validationError.name]: validationError.error,
@@ -440,6 +458,9 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      setErrors({});
+
       if (currentData.length < 2) {
         window.scrollTo(0, 0);
         setIsError({
@@ -461,12 +482,12 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
         return;
       }
 
-      if (eDate >= innovationEndPeriod) {
+      if (eDate > innovationEndPeriod) {
         window.scrollTo(0, 0);
         setIsError({
           error: true,
           message:
-            "Invalid date: Selected end date outrange the innovation period end date",
+            "Invalid date: Selected end date exceeds the innovation period end date",
         });
         return;
       }
@@ -577,7 +598,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
         <form onSubmit={handleAdd}>
           <div className="card mb-5">
             <div className="card-header">
-              <h3 className="fw-bold text-center">BPI REGISTRATION FORM</h3>
+              <h3 className="fw-bold text-center">QCP REGISTRATION FORM</h3>
             </div>
             <div className="card-body p-4">
               {isLoading ? (
@@ -683,6 +704,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               forInput="rciTitle"
                               label="Title"
                               isRequired
+                              placeholder="Contains a brief explanation of the idea <i>(memuat penjelasan singkat tentang ide yang akan disampaikan)</i>"
                               value={formDataRef.current.rciTitle}
                               onChange={handleInputChange}
                               errorMessage={errors.rciTitle}
@@ -768,6 +790,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               forInput="rciScope"
                               label="Project Scope"
                               isRequired
+                              placeholder="Designing a plan with a focus on processes, results, and impact on the team <i>(merancang perencanaan dengan berfokus pada proses, hasil dan impact terhadap team)</i>"
                               value={formDataRef.current.rciScope}
                               onChange={handleInputChange}
                               errorMessage={errors.rciScope}
@@ -789,6 +812,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               forInput="rciCase"
                               label="Bussiness Case"
                               isRequired
+                              placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented <i>(menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)</i>"
                               value={formDataRef.current.rciCase}
                               onChange={handleInputChange}
                               errorMessage={errors.rciCase}
@@ -812,6 +836,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               forInput="rciProblem"
                               label="Problem Statement​"
                               isRequired
+                              placeholder="Define the problem that the user or customer is facing <i>(mendefinisikan masalah yang dihadapi pengguna atau pelanggan)</i>"
                               value={formDataRef.current.rciProblem}
                               onChange={handleInputChange}
                               errorMessage={errors.rciProblem}
@@ -835,6 +860,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                               forInput="rciGoal"
                               label="Goal Statement​"
                               isRequired
+                              placeholder="Explain the objectives of the project <i>(menjelaskan tentang tujuan proyek)</i>"
                               value={formDataRef.current.rciGoal}
                               onChange={handleInputChange}
                               errorMessage={errors.rciGoal}
@@ -895,6 +921,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                                   value={formDataRef.current.rciQuality}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciQuality}
+                                  placeholder="Bahwa ide yang diberikan merupakan ide baru, khas, terencana, dan memiliki tujuan yang jelas"
                                 />
                               </div>
                             </div>
@@ -961,6 +988,7 @@ export default function BusinessPerformanceImprovementAdd({ onChangePage }) {
                                   value={formDataRef.current.rciSafety}
                                   onChange={handleInputChange}
                                   errorMessage={errors.rciSafety}
+                                  placeholder="Ide yang berupaya untuk meningkatkan keselamatan kerja dengan optimalisasi proses/produk"
                                 />
                               </div>
                             </div>

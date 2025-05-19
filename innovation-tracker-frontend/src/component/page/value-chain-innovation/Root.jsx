@@ -3,6 +3,8 @@ import ValueChainInnovationIndex from "./Index";
 import ValueChainInnovationAdd from "./Add";
 import ValueChainInnovationEdit from "./Edit";
 import ValueChainInnovationDetail from "./Detail";
+import ValueChainInnovationFillStep from "./FillStep";
+import ValueChainInnovationEditFillStep from "./EditFillTheStep";
 
 export default function ValueChainInnovation() {
   const [pageMode, setPageMode] = useState("index");
@@ -17,6 +19,20 @@ export default function ValueChainInnovation() {
       case "edit":
         return (
           <ValueChainInnovationEdit
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+      case "editfts":
+        return (
+          <ValueChainInnovationEditFillStep
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+      case "fillthestep":
+        return (
+          <ValueChainInnovationFillStep
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
