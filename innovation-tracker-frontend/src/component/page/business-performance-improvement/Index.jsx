@@ -209,6 +209,8 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
     }
   };
 
+  console.log("UserInfo", userInfo);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
@@ -248,9 +250,14 @@ export default function BusinessPerformanceImprovementIndex({ onChangePage }) {
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
-                : inorole === "Facilitator" &&
-                  value["Status"] === "Waiting Approval"
+                : role === "ROL01" &&
+                  value["Status"] === "Waiting Approval" &&
+                  value["Creaby"] !== userInfo.username
                 ? ["Detail", "Reject", "Approve"]
+                : role === "ROL01" &&
+                  value["Status"] === "Draft Scoring" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "EditFillTheStep", "Submit"]
                 : role === "ROL01" &&
                   value["Status"] === "Rejected" &&
                   value["Creaby"] === userInfo.username
