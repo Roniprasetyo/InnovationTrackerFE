@@ -84,11 +84,9 @@ const SearchDropdown = forwardRef(function SearchDropdown(
         <div className="mb-3 position-relative">
           <label htmlFor={forInput} className="form-label fw-bold">
             {label}
-            {isRequired ? <span className="text-danger"> *</span> : ""}
-            {errorMessage ? (
+            {isRequired && <span className="text-danger"> *</span>}
+            {errorMessage && (
               <span className="fw-normal text-danger"> {errorMessage}</span>
-            ) : (
-              ""
             )}
           </label>
 

@@ -38,7 +38,7 @@ const MetodologiArr = [
   { Value: 44, Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
 ];
 
-export default function QualityControlCircleFillStep({ onChangePage, withID }) {
+export default function ValueChainInnovationFillStep({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   // console.log(withID);
@@ -226,14 +226,14 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaCircle/GetRencanaVCIById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get QCP data");
+          throw new Error("Error: Failed to get VCI data");
         } else {
           formDataRef.current = data;
           const members = data.member.filter(
@@ -351,7 +351,6 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
           )
         );
       }
-      payloadRef.current.set_id = 51;
 
       try {
         await Promise.all(uploadPromises);
@@ -416,7 +415,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCC REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">VCI REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -430,7 +429,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-6">
+                        <div className="col-md-12">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
@@ -438,8 +437,14 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                         </div>
                         <div className="col-md-6">
                           <Label
-                            title="Section"
-                            data={formDataRef.current.Section}
+                            title="Company 1​"
+                            data={formDataRef.current["Company 1"] || "-"}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <Label
+                            title="Company 2​"
+                            data={formDataRef.current["Company 2"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
@@ -481,18 +486,6 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                             data={decodeHtml(
                               formDataRef.current["Project Title"] || "-"
                             )}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Innovation Category"
-                            data={formDataRef.current.Category || "-"}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
                           />
                         </div>
                         <div className="col-lg-3">

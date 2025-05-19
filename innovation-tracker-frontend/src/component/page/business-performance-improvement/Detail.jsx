@@ -9,6 +9,7 @@ import Table from "../../part/Table";
 import { decryptId } from "../../util/Encryptor";
 import Cookies from "js-cookie";
 import Label from "../../part/Label";
+import Button from "../../part/Button";
 
 const inisialisasiData = [
   {
@@ -20,24 +21,22 @@ const inisialisasiData = [
   },
 ];
 
-export default function SuggestionSystemDetail({ onChangePage, withID }) {
+export default function QualityControlProjectDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
-  const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
-
   const [listEmployee, setListEmployee] = useState([]);
 
   const formDataRef = useRef({
     Key: "",
-    NPK:"",
-    Period: "",
     Category: "",
     CategoryImp: "",
+    "Group Name": "",
     "Project Title": "",
+    "Project Benefit": 0,
     Case: "",
     CaseFile: "",
     Problem: "",
@@ -53,6 +52,11 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     Safety: "",
     Moral: "",
     Status: "",
+    Creaby: "",
+    "Alasan Penolakan": "",
+    member: [{}],
+    Nama: "",
+    Section: "",
   });
 
   useEffect(() => {
@@ -68,12 +72,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
         });
 
         const data = await response.json();
-        setListEmployee(
-          data.map((value) => ({
-            npk: value.npk,
-            upt: value.upt_bagian,
-          }))
-        );
+        setListEmployee(data);
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -93,14 +92,14 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaSS/GetRencanaSSById",
+          API_LINK + "RencanaCircle/GetRencanaQCPById",
           {
             id: withID,
           }
         );
 
         if (data === "ERROR" || data.length === 0) {
-          throw new Error("Error: Failed to get SS data");
+          throw new Error("Error: Failed to get BPI data");
         } else {
           formDataRef.current = data;
           const members = data.member.filter(
@@ -122,6 +121,16 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
               )
             : setCurrentData(inisialisasiData);
         }
+        formDataRef.current = {
+          ...formDataRef.current,
+          Section: listEmployee.find(
+            (member) =>
+              member.npk ===
+              formDataRef.current.member.find(
+                (pos) => pos.Position === "Leader"
+              )?.Npk
+          )?.upt_bagian,
+        };
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -149,17 +158,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
           className="fw-bold"
           style={{ color: "rgb(0, 89, 171)", margin: "0" }}
         >
-          <Icon
-            type="Bold"
-            name="angle-left"
-            cssClass="btn me-1 py-0 text"
-            onClick={() => onChangePage("index")}
-            style={{
-              fontSize: "22px",
-              cursor: "pointer",
-              color: "rgb(0, 89, 171)",
-            }}
-          />
           Detail Data
         </h2>
       </div>
@@ -175,7 +173,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">BPI REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -185,26 +183,21 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                 <div className="col-lg-12">
                   <div className="card mb-3">
                     <div className="card-header">
-                      <h5 className="fw-medium">User Data</h5>
+                      <h5 className="fw-medium">Team Member</h5>
                     </div>
                     <div className="card-body">
                       <div className="row">
                         <div className="col-md-6">
                           <Label
-                            title="NPK"
-                            data={formDataRef.current["NPK"] || "-"}
+                            title="Circle Name"
+                            data={formDataRef.current["Group Name"] || "-"}
                           />
                         </div>
-
                         <div className="col-md-6">
                           <Label
-                            title="Name​"
-                            data={userInfo.nama}
+                            title="Section"
+                            data={formDataRef.current.Section}
                           />
-                        </div>
-
-                        <div className="col-md-6">
-                          <Label title="Section" data={userInfo.upt} />
                         </div>
                         <div className="col-md-6">
                           <Label
@@ -227,6 +220,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                           />
                         </div>
                       </div>
+                      <Label title="Team Member" />
+                      <Table data={currentData} />
                     </div>
                   </div>
                 </div>
@@ -361,6 +356,9 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                 </div>
                 <div className="col-lg-12">
                   <div className="card mb-3">
+                    <div className="card-header">
+                      <h5 className="fw-medium">Project Benefit</h5>
+                    </div>
                     <div className="card-body">
                       <div className="row">
                         <div className="col-lg-12">
@@ -416,6 +414,24 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
+                  {formDataRef.current.Status === "Rejected" && (
+                    <div>
+                      <hr />
+                      <h5 className="fw-medium fw-bold">
+                        Reason for Rejection
+                      </h5>
+                      <Label data={formDataRef.current["Alasan Penolakan"]} />
+                      <hr />
+                    </div>
+                  )}
+                </div>
+                <div className="col-lg-2">
+                  <Button
+                    iconName={"angle-left"}
+                    classType={"primary"}
+                    onClick={() => onChangePage("index")}
+                    label="Back"
+                  />
                 </div>
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>
