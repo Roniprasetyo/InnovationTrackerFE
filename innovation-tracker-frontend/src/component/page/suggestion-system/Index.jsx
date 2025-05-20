@@ -131,18 +131,18 @@ export default function SuggestionSytemIndex({
   function handleSearch() {
     setIsLoading(true);
     let p2 = "";
-    if (convertToDateString(searchQuery.current.value) !== null) {
-      p2 = convertToDateString(searchQuery.current.value);
+    if (convertToDateString(searchQuery.current?.Value) !== null) {
+      p2 = convertToDateString(searchQuery.current?.Value);
     } else {
-      p2 = searchQuery.current.value;
+      p2 = searchQuery.current?.Value;
     }
     setCurrentFilter((prevFilter) => {
       return {
         ...prevFilter,
         page: 1,
         query: p2,
-        sort: searchFilterSort.current.value,
-        status: searchFilterStatus.current.value,
+        sort: searchFilterSort.current?.Value,
+        status: searchFilterStatus.current?.Value,
       };
     });
   }
@@ -260,7 +260,7 @@ export default function SuggestionSytemIndex({
             return {
               Keys: item.Key,
               Deskripsi: `${deskripsiPendek}`,
-              Value: item.Value,
+              Value: item?.Value,
               Nilai: item.Nilai,
               Kriteria: item.Kriteria,
               jab: item["Jabatan Penilai"],
@@ -315,7 +315,7 @@ export default function SuggestionSytemIndex({
             return {
               Keys: item.Key,
               Deskripsi: `${deskripsiPendek}`,
-              Value: item.Value,
+              Value: item?.Value,
               Nilai: item.Nilai,
               Kriteria: item.Kriteria,
               jab: item["Jabatan Penilai"],
@@ -369,7 +369,7 @@ export default function SuggestionSytemIndex({
             return {
               Keys: item.Key,
               Deskripsi: `${deskripsiPendek}`,
-              Value: item.Value,
+              Value: item?.Value,
               Nilai: item.Nilai,
               Kriteria: item.Kriteria,
               jab: item["Jabatan Penilai"],
@@ -649,7 +649,7 @@ export default function SuggestionSytemIndex({
       arrId.push(value.Key);
     });
     const param = {
-      id: Object.values(arrId).join(","),
+      id: Object?.Values(arrId).join(","),
       batch: batchRef.current,
     };
     UseFetch(API_LINK + "RencanaSS/SetBatchRencanaSS", param)
@@ -910,7 +910,7 @@ export default function SuggestionSytemIndex({
             item.Text.includes("Convention")
           );
           setListCategory(dataTemp);
-          batchRef.current = dataTemp[0].Value;
+          batchRef.current = dataTemp[0]?.Value;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -1064,9 +1064,9 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
-                    : userInfo.jabatan === "Kepala Departemen" ||
-                      (userInfo.jabatan === "Kepala Jurusan" &&
-                        value["Status"] === "Draft Scoring")
+                    : (userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Kepala Jurusan")  &&
+                        value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Wakil Direktur" ||
                         userInfo.jabatan === "Direktur") &&
@@ -1091,10 +1091,10 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Draft Scoring"
+                      value["Status"] === "Draft Scoring" 
                     ? ["Detail", "EditScoring", "Submit"]
-                    : userInfo.jabatan === "Kepala Departemen" &&
-                      userInfo.jabatan === "Kepala Jurusan" &&
+                    : (userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Kepala Jurusan") &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
                     : (userInfo.jabatan === "Wakil Direktur" ||
@@ -1209,6 +1209,8 @@ export default function SuggestionSytemIndex({
     fetchData();
   }, [currentFilter, listEmployee]);
 
+  console.log("dawawd", userInfo)
+
   useEffect(() => {
     const shouldRefresh = localStorage.getItem("refreshAfterSubmit");
 
@@ -1300,7 +1302,7 @@ export default function SuggestionSytemIndex({
               type="semua"
               arrData={
                 userInfo.role.slice(0, 5) === "ROL36"
-                  ? dataFilterStatus.filter((item) => item.Value != "Draft")
+                  ? dataFilterStatus.filter((item) => item?.Value != "Draft")
                   : dataFilterStatus
               }
               defaultValue=""
@@ -1393,7 +1395,7 @@ export default function SuggestionSytemIndex({
           arrData={listCategory}
           forInput="batch"
           value={batchRef.current}
-          onChange={(e) => (batchRef.current = e.target.value)}
+          onChange={(e) => (batchRef.current = e.target?.Value)}
           showLabel={false}
         />
       </Modal>
