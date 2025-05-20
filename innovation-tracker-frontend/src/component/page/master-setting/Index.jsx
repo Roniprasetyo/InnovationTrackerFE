@@ -45,7 +45,7 @@ export default function MasterSettingIndex({ onChangePage }) {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Name] asc",
+    sort: "[Name] desc",
     status: "Aktif",
     jenis: "",
   });

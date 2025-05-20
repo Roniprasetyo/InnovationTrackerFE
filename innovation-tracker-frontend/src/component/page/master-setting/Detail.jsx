@@ -19,7 +19,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
   const formDataRef = useRef({
     setId: "",
     setName: "",
-    setType: "",
+    Value: "",
     setDesc: "",
   });
 
@@ -28,7 +28,7 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingById", {
+        const data = await UseFetch(API_LINK + "MasterSetting/GetSettingByIdDetail", {
           id: withID,
         });
 
@@ -106,9 +106,9 @@ export default function MasterSettingDetail({ onChangePage, withID }) {
                 </div>
                 <div className="col-lg-6">
                   <Label
-                    forLabel="setType"
+                    forLabel="Value"
                     title="Type"
-                    data={formDataRef.current.setType}
+                    data={formDataRef.current.Value}
                   />
                 </div>
                 <div className="col-lg-12">

@@ -11,11 +11,11 @@ import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
 
-const listTypeSetting = [
-  { Value: "Innovation Category", Text: "Innovation Category" },
-  { Value: "Knowledge Category", Text: "Knowledge Category" },
-  { Value: "Innovation Role Category", Text: "Innovation Role Category" },
-];
+// const listTypeSetting = [
+//   { Value: "Innovation Category", Text: "Innovation Category" },
+//   { Value: "Knowledge Category", Text: "Knowledge Category" },
+//   { Value: "Innovation Role Category", Text: "Innovation Role Category" },
+// ];
 
 export default function MasterSettingEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
@@ -25,14 +25,15 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
   const formDataRef = useRef({
     setId: "",
     setName: "",
-    setType: "",
+    Value: "",
     setDesc: "",
   });
+  const [listType, setListType] = useState([]);
 
   const userSchema = object({
     setId: number(),
     setName: string().max(50, "50 characters max").required("required"),
-    setType: string().required("required"),
+    Value: number().required("required"),
     setDesc: string().max(100, "100 characters max").required("required"),
   });
 
@@ -61,6 +62,33 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
         }));
       } finally {
         setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "MasterType/getListType"
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get the facilitator data.");
+        } else {
+          setListType(data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+        setListType([]);
       }
     };
 
@@ -172,13 +200,13 @@ export default function MasterSettingEdit({ onChangePage, withID }) {
                   </div>
                   <div className="col-lg-6">
                     <DropDown
-                      forInput="setType"
+                      forInput="Value"
                       label="Type"
-                      arrData={listTypeSetting}
+                      arrData={listType}
                       isRequired
-                      value={formDataRef.current.setType}
+                      value={formDataRef.current.Value}
                       onChange={handleInputChange}
-                      errorMessage={errors.setType}
+                      errorMessage={errors.Value}
                     />
                   </div>
                   <div className="col-lg-12">

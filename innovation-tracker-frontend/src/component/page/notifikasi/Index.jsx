@@ -14,6 +14,7 @@ import Loading from "../../part/Loading";
 import Icon from "../../part/Icon";
 import Cookies from "js-cookie";
 import { decryptId } from "../../util/Encryptor";
+import { useNavigate } from "react-router-dom";
 
 const inisialisasiData = [
   {
@@ -36,10 +37,11 @@ const dataFilterStatus = [
 ];
 
 export default function NotifikasiIndex() {
-    const cookie = Cookies.get("activeUser");
-  
+  const navigate = useNavigate(); // ✅ Dipindahkan ke atas komponen, bukan di dalam useEffect
+
+  const cookie = Cookies.get("activeUser");
   let userInfo = "";
-    if (cookie) userInfo = JSON.parse(decryptId(cookie));
+  if (cookie) userInfo = JSON.parse(decryptId(cookie));
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,28 +60,21 @@ export default function NotifikasiIndex() {
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
-    setCurrentFilter((prevFilter) => {
-      return {
-        ...prevFilter,
-        page: newCurrentPage,
-      };
-    });
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      page: newCurrentPage,
+    }));
   }
 
   function handleSearch() {
     setIsLoading(true);
-      console.log('searchQuery:', searchQuery.current?.value);
-  console.log('searchFilterSort:', searchFilterSort.current?.value);
-  console.log('searchFilterStatus:', searchFilterStatus.current?.value);
-    setCurrentFilter((prevFilter) => {
-      return {
-        ...prevFilter,
-        page: 1,
-        query: searchQuery.current.value,
-        sort: searchFilterSort.current.value,
-        status: searchFilterStatus.current.value,
-      };
-    });
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      page: 1,
+      query: searchQuery.current.value,
+      sort: searchFilterSort.current.value,
+      status: searchFilterStatus.current.value,
+    }));
   }
 
   async function handleSetRead() {
@@ -89,30 +84,44 @@ export default function NotifikasiIndex() {
       "info",
       "Ya, saya yakin!"
     );
-    
+
     if (result) {
-    console.log("result", currentData);
       setIsLoading(true);
       setIsError(false);
 
-      const data = UseFetch(API_LINK + "Notifikasi/UpdateNotifikasi", {
+      const data = await UseFetch(API_LINK + "Notifikasi/UpdateNotifikasi", {
         application: userInfo.username,
-        key: userInfo.username, 
-      })  
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert(
-              "Sukses",
-              "Semua notifikasi ditandai sudah dibaca",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
-            setIsLoading(true);
-          }
+        key: userInfo.username,
+      });
+
+      if (data === "ERROR" || data.length === 0) setIsError(true);
+      else {
+        SweetAlert(
+          "Sukses",
+          "Semua notifikasi ditandai sudah dibaca",
+          "success"
+        );
+        handleSetCurrentPage(currentFilter.page);
+        setIsLoading(true);
+      }
     }
   }
-
   useEffect(() => {
+    const handleRedirect = (pesan) => {
+      if (pesan.includes("Suggestion System")) {  
+        navigate("/submission/ss");
+      } else if (pesan.includes("Control Circle")) {
+        navigate("/submission/qcc");
+      } else if (pesan.includes("Control Project")) {
+        navigate("/submission/qcp");
+      } else if (pesan.includes("Business Performance")) {
+        navigate("/submission/bpi");
+      } else if (pesan.includes("Value Chain Innovation")) {
+        navigate("/submission/vci");
+      }
+    };
+
+
     const fetchData = async () => {
       setIsError(false);
 
@@ -127,23 +136,25 @@ export default function NotifikasiIndex() {
         } else if (data.length === 0) {
           setCurrentData(inisialisasiData);
         } else {
-          console.log("Data", );
           const formattedData = data.map((value) => {
-            const formatted = {
-              ...value,
-              Pesan: (
-                <div
+            const pesanHTML = (
+              <div
                 className="link-decoration-none"
-                style={{ fontSize: "14px" }}
+                style={{ fontSize: "14px", cursor: "pointer" }}
                 dangerouslySetInnerHTML={{
                   __html: value["Pesan"],
                 }}
-              ></div>              
-              ),
+                onClick={() => handleRedirect(value["Pesan"])}
+              ></div>
+            );
+
+            const formatted = {
+              ...value,
+              Pesan: pesanHTML,
               Waktu: formatDate(value["Waktu"]),
               Alignment: ["center", "left", "left", "center", "center", "center"],
             };
-          
+
             if (value["Status"] !== "Terbaca") {
               formatted.Aksi = (
                 <Icon
@@ -158,24 +169,32 @@ export default function NotifikasiIndex() {
                       "info",
                       "Ya, tandai!"
                     );
-          
+
                     if (result) {
                       setIsLoading(true);
                       await UseFetch(API_LINK + "Notifikasi/SetReadNotifikasi", {
                         key: value.Key,
                         application: userInfo.username,
                       });
+                      if (data === "ERROR" || data.length === 0) setIsError(true);
+                      else {
+                      SweetAlert(
+                        "Sukses",
+                        "Notifikasi ditandai sudah dibaca",
+                        "success"
+                      );
                       setCurrentFilter((prev) => ({ ...prev }));
+                      setIsLoading(true);
+                      }
                     }
                   }}
                 />
               );
             }
-          
+
             return formatted;
           });
-          
-          console.log(formattedData)
+
           setCurrentData(formattedData);
         }
       } catch {
@@ -186,11 +205,10 @@ export default function NotifikasiIndex() {
     };
 
     fetchData();
-  }, [currentFilter]);
+  }, [currentFilter, navigate]); // jangan lupa tambahkan navigate di dependencies
 
   return (
-    <>
-      <div className="my-3 container">
+    <div className="my-3 container">
       <div className="d-flex flex-column">
         {isError && (
           <div className="flex-fill">
@@ -208,64 +226,64 @@ export default function NotifikasiIndex() {
             </div>
           </div>
         </div>
-        </div>
-        
-        <div className="flex-fill">
-          <div className="input-group">
-            <Input
-              ref={searchQuery}
-              forInput="pencarianNotifikasi"
-              placeholder="Cari"
+      </div>
+
+      <div className="flex-fill">
+        <div className="input-group">
+          <Input
+            ref={searchQuery}
+            forInput="pencarianNotifikasi"
+            placeholder="Cari"
+          />
+          <Button
+            iconName="search"
+            classType="primary px-4"
+            title="Cari"
+            onClick={handleSearch}
+          />
+          <Filter>
+            <DropDown
+              ref={searchFilterSort}
+              forInput="ddUrut"
+              label="Urut Berdasarkan"
+              type="none"
+              arrData={dataFilterSort}
+              defaultValue="[Waktu] desc"
             />
-            <Button
-              iconName="search"
-              classType="primary px-4"
-              title="Cari"
-              onClick={handleSearch}
+            <DropDown
+              ref={searchFilterStatus}
+              forInput="ddStatus"
+              label="Status"
+              type="none"
+              arrData={dataFilterStatus}
+              defaultValue="Belum Dibaca"
             />
-            <Filter>
-              <DropDown
-                ref={searchFilterSort}
-                forInput="ddUrut"
-                label="Urut Berdasarkan"
-                type="none"
-                arrData={dataFilterSort}
-                defaultValue="[Waktu] desc"
-              />
-              <DropDown
-                ref={searchFilterStatus}
-                forInput="ddStatus"
-                label="Status"
-                type="none"
-                arrData={dataFilterStatus}
-                defaultValue="Belum Dibaca"
-              />
-            </Filter>
-            <Button
-              iconName="check-double"
-              classType="success px-4 border-start"
-              title="Set Sudah Dibaca"
-              label="Set Sudah Dibaca"
-              onClick={handleSetRead}
-            />
-          </div>
-        </div>
-        <div className="mt-3">
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <div className="d-flex flex-column">
-              <Table data={currentData} />
-              <Paging
-                pageSize={PAGE_SIZE}
-                pageCurrent={currentFilter.page}
-                totalData={currentData[0]["Count"]}
-                navigation={handleSetCurrentPage}
-              />
-            </div>
-          )}
+          </Filter>
+          <Button
+            iconName="check-double"
+            classType="success px-4 border-start"
+            title="Set Sudah Dibaca"
+            label="Set Sudah Dibaca"
+            onClick={handleSetRead}
+          />
         </div>
       </div>
-    </>
+
+      <div className="mt-3">
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <div className="d-flex flex-column">
+            <Table data={currentData} />
+            <Paging
+              pageSize={PAGE_SIZE}
+              pageCurrent={currentFilter.page}
+              totalData={currentData[0]["Count"]}
+              navigation={handleSetCurrentPage}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
