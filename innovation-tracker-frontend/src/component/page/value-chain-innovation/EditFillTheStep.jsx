@@ -95,7 +95,7 @@ export default function ValueChainInnovationEditFillStep({
     fts_check_file: "",
     fts_action: "",
     fts_action_file: "",
-    fts_modi_by: userInfo.username
+    fts_modi_by: userInfo.username,
   });
 
   const planFileRef = useRef(null);
@@ -233,32 +233,32 @@ export default function ValueChainInnovationEditFillStep({
           }
         );
 
-        console.log("2355", data[0]["RCI ID"])
+        console.log("2355", data[0]["RCI ID"]);
         if (data === "ERROR") {
           throw new Error("Error: Failed to get FTS data");
         } else {
           payloadRef.current = {
-              Key: data[0].Key,
-              rci_id: data[0]["RCI ID"],
-              set_id: data[0]["SET ID"],
-              fts_plan: decodeHtml(
-                decodeHtml(decodeHtml(data[0]["Plan"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              fts_plan_file: data[0]["Plan File"],
-              fts_do: decodeHtml(decodeHtml(decodeHtml(data[0]["Do"]))).replace(
-                /<\/?[^>]+(>|$)/g,
-                ""
-              ),
-              fts_do_file: data[0]["Do File"],
-              fts_check: decodeHtml(
-                decodeHtml(decodeHtml(data[0]["Check"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              fts_check_file: data[0]["Check File"],
-              fts_action: decodeHtml(
-                decodeHtml(decodeHtml(data[0]["Action"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              fts_action_file: data[0]["Action File"],
-            };
+            Key: data[0].Key,
+            rci_id: data[0]["RCI ID"],
+            set_id: data[0]["SET ID"],
+            fts_plan: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Plan"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_plan_file: data[0]["Plan File"],
+            fts_do: decodeHtml(decodeHtml(decodeHtml(data[0]["Do"]))).replace(
+              /<\/?[^>]+(>|$)/g,
+              ""
+            ),
+            fts_do_file: data[0]["Do File"],
+            fts_check: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Check"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_check_file: data[0]["Check File"],
+            fts_action: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Action"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_action_file: data[0]["Action File"],
+          };
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -340,7 +340,11 @@ export default function ValueChainInnovationEditFillStep({
       ...prevErrors,
       [validationError.name]: validationError.error,
     }));
-    console.log((payloadRef.current[name] = name), " (Tes): ", (payloadRef.current[name] = value));
+    console.log(
+      (payloadRef.current[name] = name),
+      " (Tes): ",
+      (payloadRef.current[name] = value)
+    );
   };
 
   const handleOpenModal = (id) => {
@@ -437,11 +441,13 @@ export default function ValueChainInnovationEditFillStep({
   const filteredArrData = listMetodologi.filter(
     (detail) => detail.Type === filteredTypeMetodologi[0]?.Value
   );
-  const arrTextData = filteredArrData.map((item) => item.Value === payloadRef.current.set_id);
+  const arrTextData = filteredArrData.map(
+    (item) => item.Value === payloadRef.current.set_id
+  );
 
   if (isLoading) return <Loading />;
 
-  console.log("TES", arrTextData)
+  console.log("TES", arrTextData);
 
   return (
     <>
@@ -482,7 +488,7 @@ export default function ValueChainInnovationEditFillStep({
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-6">
+                        <div className="col-md-12">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
@@ -490,8 +496,14 @@ export default function ValueChainInnovationEditFillStep({
                         </div>
                         <div className="col-md-6">
                           <Label
-                            title="Section"
-                            data={formDataRef.current.Section}
+                            title="Company 1​"
+                            data={formDataRef.current["Company 1"] || "-"}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <Label
+                            title="Company 2​"
+                            data={formDataRef.current["Company 2"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
@@ -533,18 +545,6 @@ export default function ValueChainInnovationEditFillStep({
                             data={decodeHtml(
                               formDataRef.current["Project Title"] || "-"
                             )}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Innovation Category"
-                            data={formDataRef.current.Category || "-"}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
                           />
                         </div>
                         <div className="col-lg-3">
@@ -721,7 +721,7 @@ export default function ValueChainInnovationEditFillStep({
                                   arrData={filteredArrData}
                                   forInput="set_id"
                                   value={payloadRef.current.set_id}
-                                  // selectedValued={payloadRef.current.set_id} 
+                                  // selectedValued={payloadRef.current.set_id}
                                   label="Metodologi"
                                   onChange={handleInputChange}
                                   isRequired

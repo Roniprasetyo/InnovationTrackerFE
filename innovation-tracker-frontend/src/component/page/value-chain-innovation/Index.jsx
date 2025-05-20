@@ -143,9 +143,12 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
 
     if (confirm) {
       try {
-        const updateResult = await UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
-          id: id
-        });
+        const updateResult = await UseFetch(
+          API_LINK + "RencanaCircle/SentRencanaCircle",
+          {
+            id: id,
+          }
+        );
 
         if (updateResult === "ERROR" || updateResult.length === 0) {
           setIsError(true);
@@ -205,7 +208,6 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
         set: "Approved",
       })
         .then(async (data) => {
-
           const decodedTitle = decodeHtml(
             decodeHtml(decodeHtml(currentData["Project Title"]))
           ).replace(/<\/?[^>]+(>|$)/g, "");
@@ -213,13 +215,16 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
           if (data === "ERROR" || data.length === 0) {
             setIsError(true);
           } else {
-            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
-              from: userInfo.username,
-              to: "",
-              message: `Value Chain Innovation Approve. Your Value Chain Innovation titled ${decodedTitle} has been approved and please continue to fill in the next form`,
-              sis: -1,
-              rci: id,
-            });
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Value Chain Innovation Approve. Your Value Chain Innovation titled ${decodedTitle} has been approved and please continue to fill in the next form`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
@@ -247,7 +252,6 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
         reason: confirm,
       })
         .then(async (data) => {
-
           const decodedTitle = decodeHtml(
             decodeHtml(decodeHtml(currentData["Project Title"]))
           ).replace(/<\/?[^>]+(>|$)/g, "");
@@ -255,13 +259,16 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
           if (data === "ERROR" || data.length === 0) {
             setIsError(true);
           } else {
-            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC", {
-              from: userInfo.username,
-              to: "",
-              message: `Value Chain Innovation Reject. Your Value Chain Innovation titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
-              sis: -1,
-              rci: id,
-            });
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Value Chain Innovation Reject. Your Value Chain Innovation titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
@@ -303,7 +310,12 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
             Period: value["Period"],
             Status: value["Status"],
             Count: value["Count"],
-            IsBold: ["Draft Scoring", "Approved"].includes(value["Status"]),
+            IsBold:
+              value["Creaby"] === userInfo.username
+                ? ["Draft Scoring", "Approved"].includes(value["Status"])
+                : ["Waiting Approval", "Draft Scoring"].includes(
+                    value["Status"]
+                  ),
             Action:
               role === "ROL01" &&
               value["Status"] === "Draft" &&

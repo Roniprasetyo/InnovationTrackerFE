@@ -28,6 +28,7 @@ const Scoring = lazy(() => import("../page/suggestion-system/Scoring"));
 const Dashboard = lazy(() => import("../page/dashboard/Dashboard"));
 const KriteriaNilai = lazy(() => import("../page/master-kriteria-nilai/Root"));
 const ListKriteria = lazy(() => import("../page/list-kriteria/Root"));
+const MasterType = lazy(() => import ("../page/master-type/Root"));
 
 const routeList = [
   {
@@ -109,6 +110,10 @@ const routeList = [
   {
     path: "/list_kriteria",
     element: <ListKriteria />,
+  },
+  {
+    path: "/type",
+    element: <MasterType />,
   },
 ];
 

@@ -226,7 +226,7 @@ export default function ValueChainInnovationFillStep({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          API_LINK + "RencanaCircle/GetRencanaVCIById",
           {
             id: withID,
           }
@@ -351,7 +351,7 @@ export default function ValueChainInnovationFillStep({ onChangePage, withID }) {
           )
         );
       }
-      
+
       try {
         await Promise.all(uploadPromises);
 
@@ -429,7 +429,7 @@ export default function ValueChainInnovationFillStep({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="row">
-                        <div className="col-md-6">
+                        <div className="col-md-12">
                           <Label
                             title="Circle Name"
                             data={formDataRef.current["Group Name"] || "-"}
@@ -437,8 +437,14 @@ export default function ValueChainInnovationFillStep({ onChangePage, withID }) {
                         </div>
                         <div className="col-md-6">
                           <Label
-                            title="Section"
-                            data={formDataRef.current.Section}
+                            title="Company 1​"
+                            data={formDataRef.current["Company 1"] || "-"}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <Label
+                            title="Company 2​"
+                            data={formDataRef.current["Company 2"] || "-"}
                           />
                         </div>
                         <div className="col-md-6">
@@ -480,18 +486,6 @@ export default function ValueChainInnovationFillStep({ onChangePage, withID }) {
                             data={decodeHtml(
                               formDataRef.current["Project Title"] || "-"
                             )}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Innovation Category"
-                            data={formDataRef.current.Category || "-"}
-                          />
-                        </div>
-                        <div className="col-lg-3">
-                          <Label
-                            title="Improvement Category"
-                            data={formDataRef.current.CategoryImp || "-"}
                           />
                         </div>
                         <div className="col-lg-3">

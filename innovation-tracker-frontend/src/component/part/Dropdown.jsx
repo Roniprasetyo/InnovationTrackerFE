@@ -9,6 +9,7 @@ const DropDown = forwardRef(function DropDown(
     isRequired = false,
     isDisabled = false,
     errorMessage,
+    isMb3 = false,
     showLabel = true,
     ...props
   },
@@ -33,7 +34,7 @@ const DropDown = forwardRef(function DropDown(
 
   return (
     <>
-      <div className="mb-3">
+      <div className={isMb3 ? "mb-3" : ""}>
         {showLabel && (
           <label htmlFor={forInput} className="form-label fw-bold">
             {label}
