@@ -14,7 +14,6 @@ import Loading from "../../part/Loading";
 import Icon from "../../part/Icon";
 import Cookies from "js-cookie";
 import { decryptId } from "../../util/Encryptor";
-import { useNavigate } from "react-router-dom";
 
 const inisialisasiData = [
   {
@@ -36,9 +35,7 @@ const dataFilterStatus = [
   { Value: "Terbaca", Text: "Terbaca" },
 ];
 
-export default function NotifikasiIndex() {
-  const navigate = useNavigate();
-
+export default function NotifikasiIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
@@ -96,32 +93,33 @@ export default function NotifikasiIndex() {
 
       if (data === "ERROR" || data.length === 0) setIsError(true);
       else {
-        SweetAlert(
-          "Sukses",
-          "Semua notifikasi ditandai sudah dibaca",
-          "success"
-        );
+        SweetAlert("Sukses", "Semua notifikasi ditandai sudah dibaca", "success");
         handleSetCurrentPage(currentFilter.page);
         setIsLoading(true);
       }
     }
   }
+
+  function handleOnClick(item) {
+    const isiPesan = item.rawHTML || "";
+
+    console.log("dawd", item)
+    if (item.Key) {  
+      onChangePage("detailSS", item.Key);
+    } else if (item.rci_id && isiPesan.includes("Quality Control Circle")) {
+      onChangePage("detailQCC", item.rci_id);
+    } else if (item.rci_id && isiPesan.includes("Quality Control Project")) {
+      onChangePage("detailQCP", item.rci_id);
+    } else if (item.rci_id && isiPesan.includes("Business Performance")) {
+      onChangePage("detailBPI", item.rci_id);
+    } else if (item.rci_id && isiPesan.includes("Value Chain Innovation")) {
+      onChangePage("detailVCI", item.rci_id);
+    } else {
+      alert("Tidak ada detail terkait");
+    }
+  }
+
   useEffect(() => {
-    const handleRedirect = (pesan) => {
-      if (pesan.includes("Suggestion System")) {  
-        navigate("/submission/ss");
-      } else if (pesan.includes("Control Circle")) {
-        navigate("/submission/qcc");
-      } else if (pesan.includes("Control Project")) {
-        navigate("/submission/qcp");
-      } else if (pesan.includes("Business Performance")) {
-        navigate("/submission/bpi");
-      } else if (pesan.includes("Value Chain Innovation")) {
-        navigate("/submission/vci");
-      }
-    };
-
-
     const fetchData = async () => {
       setIsError(false);
 
@@ -144,8 +142,7 @@ export default function NotifikasiIndex() {
                 dangerouslySetInnerHTML={{
                   __html: value["Pesan"],
                 }}
-                onClick={() => handleRedirect(value["Pesan"])}
-              ></div>
+              />
             );
 
             const formatted = {
@@ -176,17 +173,8 @@ export default function NotifikasiIndex() {
                         key: value.Key,
                         application: userInfo.username,
                       });
-                      if (data === "ERROR" || data.length === 0) setIsError(true);
-                      else {
-                      SweetAlert(
-                        "Sukses",
-                        "Notifikasi ditandai sudah dibaca",
-                        "success"
-                      );
                       setCurrentFilter((prev) => ({ ...prev }));
                       setIsLoading(true);
-
-                      }
                     }
                   }}
                 />
@@ -206,7 +194,7 @@ export default function NotifikasiIndex() {
     };
 
     fetchData();
-  }, [currentFilter, navigate]); // jangan lupa tambahkan navigate di dependencies
+  }, [currentFilter]);
 
   return (
     <div className="my-3 container">
@@ -275,11 +263,29 @@ export default function NotifikasiIndex() {
           <Loading />
         ) : (
           <div className="d-flex flex-column">
-            <Table data={currentData} />
+            <Table
+              data={currentData.map((item) => ({
+                ...item,
+                Pesan: item.Pesan ? (
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleOnClick(item);
+                    }}
+                    className="text-primary text-decoration-none"
+                  >
+                    {item.Pesan}
+                  </a>
+                ) : (
+                  "-"
+                ),
+              }))}
+            />
             <Paging
               pageSize={PAGE_SIZE}
               pageCurrent={currentFilter.page}
-              totalData={currentData[0]["Count"]}
+              totalData={currentData[0]?.Count || 0}
               navigation={handleSetCurrentPage}
             />
           </div>

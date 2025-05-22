@@ -21,7 +21,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function QualityControlProjectDetail({ onChangePage, withID }) {
+export default function BusinessPerformanceImprovementDetail({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
