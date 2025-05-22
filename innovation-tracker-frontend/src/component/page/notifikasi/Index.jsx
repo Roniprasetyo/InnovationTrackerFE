@@ -37,7 +37,7 @@ const dataFilterStatus = [
 ];
 
 export default function NotifikasiIndex() {
-  const navigate = useNavigate(); // ✅ Dipindahkan ke atas komponen, bukan di dalam useEffect
+  const navigate = useNavigate(); 
 
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
@@ -205,7 +205,7 @@ export default function NotifikasiIndex() {
     };
 
     fetchData();
-  }, [currentFilter, navigate]); // jangan lupa tambahkan navigate di dependencies
+  }, [currentFilter, navigate]); 
 
   return (
     <div className="my-3 container">
