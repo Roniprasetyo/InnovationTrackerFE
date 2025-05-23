@@ -103,9 +103,9 @@ export default function NotifikasiIndex({ onChangePage }) {
   function handleOnClick(item) {
     const isiPesan = item.rawHTML || "";
 
-    console.log("dawd", item)
-    if (item.Key) {  
-      onChangePage("detailSS", item.Key);
+    console.log("dawd", item.sis_id)
+    if (item.sis_id) {  
+      onChangePage("detailSS", item.sis_id);
     } else if (item.rci_id && isiPesan.includes("Quality Control Circle")) {
       onChangePage("detailQCC", item.rci_id);
     } else if (item.rci_id && isiPesan.includes("Quality Control Project")) {
