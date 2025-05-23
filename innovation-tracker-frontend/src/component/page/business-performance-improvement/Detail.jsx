@@ -149,7 +149,7 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
   if (isLoading) return <Loading />;
 
   return (
-    <>
+    <div className="container">
       <div
         className="row my-3"
         style={{ display: "flex", alignItems: "center" }}
@@ -444,6 +444,6 @@ export default function BusinessPerformanceImprovementDetail({ onChangePage, wit
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -39,7 +39,7 @@ export default function Submission() {
         if (data === "ERROR" || data.length === 0) {
           throw new Error("Terjadi kesalahan: Gagal mengambil data setting.");
         } else {
-          setCount(data[0].Value);
+          setCount(data[0].Value);  
         }
       } catch (error) {
         window.scrollTo(0, 0);

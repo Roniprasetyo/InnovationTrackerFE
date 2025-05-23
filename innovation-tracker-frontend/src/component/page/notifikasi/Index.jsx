@@ -21,6 +21,8 @@ const inisialisasiData = [
     No: null,
     Pesan: null,
     Waktu: null,
+    "Sistem Saran": null,
+    "Rencana Circle": null,
     Count: 0,
   },
 ];
@@ -101,21 +103,21 @@ export default function NotifikasiIndex({ onChangePage }) {
   }
 
   function handleOnClick(item) {
-      const isiPesan =
-    item.rawHTML ||
-    item.Pesan?.props?.dangerouslySetInnerHTML?.__html ||
-    "";
+    const isiPesan =
+      item.rawHTML ||
+      item.Pesan?.props?.dangerouslySetInnerHTML?.__html ||
+      "";
 
-    if (item.sis_id) {
-      onChangePage("detailSS", item.sis_id);
-    } else if (item.rci_id && isiPesan.includes("Quality Control Circle")) {
-      onChangePage("detailQCC", item.rci_id);
-    } else if (item.rci_id && isiPesan.includes("Quality Control Project")) {
-      onChangePage("detailQCP", item.rci_id);
-    } else if (item.rci_id && isiPesan.includes("Business Performance")) {
-      onChangePage("detailBPI", item.rci_id);
-    } else if (item.rci_id && isiPesan.includes("Value Chain Innovation")) {
-      onChangePage("detailVCI", item.rci_id);
+    if (item["Sistem Saran"]) {
+      onChangePage("detailSS", item["Sistem Saran"]);
+    } else if (item["Rencana Circle"] && isiPesan.includes("Quality Control Circle")) {
+      onChangePage("detailQCC", item["Rencana Circle"]);
+    } else if (item["Rencana Circle"] && isiPesan.includes("Quality Control Project")) {
+      onChangePage("detailQCP", item["Rencana Circle"]);
+    } else if (item["Rencana Circle"] && isiPesan.includes("Business Performance")) {
+      onChangePage("detailBPI", item["Rencana Circle"]);
+    } else if (item && isiPesan.includes("Value Chain Innovation")) {
+      onChangePage("detailVCI", item["Rencana Circle"]);
     } else {
       alert("Tidak ada detail terkait");
     }
@@ -131,6 +133,7 @@ export default function NotifikasiIndex({ onChangePage }) {
           currentFilter
         );
 
+        console.log("CURRENT DATA ", data);
         if (data === "ERROR") {
           setIsError(true);
         } else if (data.length === 0) {
@@ -266,15 +269,13 @@ export default function NotifikasiIndex({ onChangePage }) {
         ) : (
           <div className="d-flex flex-column">
             <Table
+              hiddenColumns={["Sistem Saran", "Rencana Circle"]}
               data={currentData.map((item) => ({
                 ...item,
                 Pesan: item.Pesan ? (
                   <a
                     href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleOnClick(item);
-                    }}
+                    onClick={() => handleOnClick(item)}
                     className="text-primary text-decoration-none"
                   >
                     {item.Pesan}
@@ -284,6 +285,7 @@ export default function NotifikasiIndex({ onChangePage }) {
                 ),
               }))}
             />
+
             <Paging
               pageSize={PAGE_SIZE}
               pageCurrent={currentFilter.page}

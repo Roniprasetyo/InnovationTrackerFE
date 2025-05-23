@@ -10,6 +10,10 @@ export default function Notifikasi() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
+  function handleSetPageMode(mode) {
+    setPageMode(mode);
+  }
+
   function handleSetPageMode(mode, withID = null) {
     setDataID(withID);
     setPageMode(mode);
@@ -18,7 +22,9 @@ export default function Notifikasi() {
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <NotifikasiIndex onChangePage={handleSetPageMode} />;
+        return <NotifikasiIndex
+          onChangePage={handleSetPageMode}
+        />;
       case "detailSS":
         return (
           <SuggestionSystemDetail

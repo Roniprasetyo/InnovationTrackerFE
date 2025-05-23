@@ -147,7 +147,7 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
   if (isLoading) return <Loading />;
 
   return (
-    <>
+    <div className="container">
       <div
         className="row my-3"
         style={{ display: "flex", alignItems: "center" }}
@@ -440,6 +440,6 @@ export default function QualityControlCircleDetail({ onChangePage, withID }) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

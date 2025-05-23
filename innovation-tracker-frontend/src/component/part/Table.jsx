@@ -298,7 +298,9 @@ export default function Table({
                   value !== "Key" &&
                   value !== "Count" &&
                   value !== "Alignment" &&
-                  value !== "IsBold"
+                  value !== "IsBold" && 
+                  value !== "Rencana Circle" &&
+                  value !== "Sistem Saran"
                 ) {
                   if (checkboxTable) colCount++;
                   colCount++;
@@ -363,7 +365,9 @@ export default function Table({
                         column !== "Key" &&
                         column !== "Count" &&
                         column !== "Alignment" &&
-                        column !== "IsBold"
+                        column !== "IsBold" &&
+                        column !== "Rencana Circle" &&
+                        column !== "Sistem Saran"
                       ) {
                         colPosition++;
                         return (

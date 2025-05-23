@@ -20,7 +20,7 @@ import BusinessPerformaceImprovement from "./component/page/business-performance
 import Scoring from "./component/page/suggestion-system/Scoring.jsx";
 import QCCScoring from "./component/page/quality-control-circle/Scoring.jsx";
 import EditScoring from "./component/page/suggestion-system/EditScoring.jsx";
-import NotifikasiIndex from "./component/page/notifikasi/Index.jsx";
+import NotifikasiIndex from "./component/page/notifikasi/Root.jsx";
 
 export default function App() {
   const [listMenu, setListMenu] = useState([]);
