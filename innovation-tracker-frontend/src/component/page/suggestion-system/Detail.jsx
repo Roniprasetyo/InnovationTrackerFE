@@ -1,6 +1,11 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, COLOR_PRIMARY, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
+import {
+  API_LINK,
+  COLOR_PRIMARY,
+  EMP_API_LINK,
+  FILE_LINK,
+} from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -51,9 +56,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     Status: "",
     "Alasan Penolakan": "",
   });
-
-  const formDataRef2 = useRef({});
-  const formDataRef3 = useRef({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,7 +127,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
       const userData = listEmployee.find(
         (value) => value.npk === formDataRef.current["NPK"]
       );
-      // console.log("Name", userData.name);
       setUserData(userData);
     }
   }, [listEmployee, userInfo]);
@@ -138,7 +139,8 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
           API_LINK + "MiniConvention/GetListKriteriaPenilaian"
         );
         const data2 = await UseFetch(
-          API_LINK + "RencanaSS/GetPenilaianForCoorById", {id: withID}
+          API_LINK + "RencanaSS/GetPenilaianForCoorById",
+          { id: withID }
         );
 
         if (data === "ERROR") {
@@ -196,25 +198,40 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
 
   useEffect(() => {
     const kepsek = listPenilaianForCoor.filter(
-      (item) => item["Jabatan Penilai"] === "Kepala Seksi" || item["Jabatan Penilai"] === "Sekretaris Prodi"
+      (item) =>
+        item["Jabatan Penilai"] === "Kepala Seksi" ||
+        item["Jabatan Penilai"] === "Sekretaris Prodi"
     );
     const kadept = listPenilaianForCoor.filter(
-      (item) => item["Jabatan Penilai"] === "Kepala Departemen" || item["Jabatan Penilai"] === "Kepala Jurusan"
+      (item) =>
+        item["Jabatan Penilai"] === "Kepala Departemen" ||
+        item["Jabatan Penilai"] === "Kepala Jurusan"
     );
     const wadir = listPenilaianForCoor.filter(
-      (item) => item["Jabatan Penilai"] === "Wakil Direktur" || item["Jabatan Penilai"] === "Direktur"
+      (item) =>
+        item["Jabatan Penilai"] === "Wakil Direktur" ||
+        item["Jabatan Penilai"] === "Direktur"
     );
 
-    const totalNilaiKepsek = kepsek.reduce((acc, curr) => acc + (parseFloat(curr.Nilai) || 0), 0);
-    const totalNilaiKadept = kadept.reduce((acc, curr) => acc + (parseFloat(curr.Nilai) || 0), 0);
-    const totalNilaiWadir = wadir.reduce((acc, curr) => acc + (parseFloat(curr.Nilai) || 0), 0);
+    const totalNilaiKepsek = kepsek.reduce(
+      (acc, curr) => acc + (parseFloat(curr.Nilai) || 0),
+      0
+    );
+    const totalNilaiKadept = kadept.reduce(
+      (acc, curr) => acc + (parseFloat(curr.Nilai) || 0),
+      0
+    );
+    const totalNilaiWadir = wadir.reduce(
+      (acc, curr) => acc + (parseFloat(curr.Nilai) || 0),
+      0
+    );
 
     setNilaiKepsek(totalNilaiKepsek);
     setNilaiKadept(totalNilaiKadept);
     setNilaiWadir(totalNilaiWadir);
   }, [listPenilaianForCoor]);
 
-  console.log("PPP ", listPenilaianForCoor);
+  // console.log("PPP ", userInfo.role);
   if (isLoading) return <Loading />;
 
   return (
@@ -461,8 +478,10 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
-                  <div className="card mb-3">
-                    <div className="card-body">
+
+                  {userInfo?.role?.trim() === "ROL36" && (
+                    <div className="card mb-3">
+                      <div className="card-body">
                         <div className="d-flex justify-content-center gap-5">
                           <div
                             className="card fw-medium text-center"
@@ -471,7 +490,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               minHeight: "150px",
                               backgroundColor: "white",
                               boxShadow: COLOR_PRIMARY,
-                              transform:"scale(1.05)",
+                              transform: "scale(1.05)",
                               transition:
                                 "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
                               display: "flex",
@@ -480,7 +499,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                             }}
                           >
                             <div className="card-header">Total Score</div>
- 
                             <div
                               style={{
                                 flexGrow: 1,
@@ -492,9 +510,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               }}
                             >
                               <div>Ka.Unit/Ka.UPT/SekProdi</div>
-                              <h1
-                                style={{ margin: 0, fontSize: "40px" }}
-                              >
+                              <h1 style={{ margin: 0, fontSize: "40px" }}>
                                 {nilaiKepsek || 0}
                               </h1>
                             </div>
@@ -505,7 +521,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               width: "200px",
                               minHeight: "150px",
                               boxShadow: COLOR_PRIMARY,
-                              transform:"scale(1.05)",
+                              transform: "scale(1.05)",
                               transition:
                                 "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
                               display: "flex",
@@ -525,9 +541,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               }}
                             >
                               <div>Ka.Prodi/Ka.Dept</div>
-                              <h1
-                                style={{ margin: 0, fontSize: "40px" }}
-                              >
+                              <h1 style={{ margin: 0, fontSize: "40px" }}>
                                 {nilaiKadept || 0}
                               </h1>
                             </div>
@@ -538,7 +552,7 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               width: "200px",
                               minHeight: "150px",
                               boxShadow: COLOR_PRIMARY,
-                              transform:"scale(1.05)",
+                              transform: "scale(1.05)",
                               transition:
                                 "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
                               display: "flex",
@@ -558,16 +572,16 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                               }}
                             >
                               <div>WaDIR/DIR</div>
-                              <h1
-                                style={{ margin: 0, fontSize: "40px" }}
-                              >
+                              <h1 style={{ margin: 0, fontSize: "40px" }}>
                                 {nilaiWadir || 0}
                               </h1>
                             </div>
                           </div>
                         </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />
