@@ -174,6 +174,19 @@ export default function QualityControlCircleIndex({
             rci: id,
           });
 
+          if (currentData.Status === "Draft Steps") {
+            
+          const notifikasiMessagee = `A new Quality Control Circle Scoring has been submitted by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
+
+          await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiNovKoor", {
+          from: userInfo.username,
+            to: "",
+            message: notifikasiMessagee,
+            sis: -1,
+            rci: id,
+          });
+        }
+
           SweetAlert(
             "Success",
             "Thank you for submitting your registration form. Please wait until the next update",

@@ -14,7 +14,6 @@ import Loading from "../../part/Loading";
 import Icon from "../../part/Icon";
 import Cookies from "js-cookie";
 import { decryptId } from "../../util/Encryptor";
-import { useNavigate } from "react-router-dom";
 
 const inisialisasiData = [
   {
@@ -22,6 +21,8 @@ const inisialisasiData = [
     No: null,
     Pesan: null,
     Waktu: null,
+    "Sistem Saran": null,
+    "Rencana Circle": null,
     Count: 0,
   },
 ];
@@ -106,46 +107,32 @@ export default function NotifikasiIndex({ onChangePage }) {
     item.rawHTML ||
     item.Pesan?.props?.dangerouslySetInnerHTML?.__html ||
     "";
-
-    if (item.sis_id) {
-      onChangePage("detailSS", item.sis_id);
-    } else if (item.rci_id && isiPesan.includes("Quality Control Circle")) {
-      onChangePage("detailQCC", item.rci_id);
-    } else if (item.rci_id && isiPesan.includes("Quality Control Project")) {
-      onChangePage("detailQCP", item.rci_id);
-    } else if (item.rci_id && isiPesan.includes("Business Performance")) {
-      onChangePage("detailBPI", item.rci_id);
-    } else if (item.rci_id && isiPesan.includes("Value Chain Innovation")) {
-      onChangePage("detailVCI", item.rci_id);
+    if (item["Sistem Saran"]) {
+      onChangePage("detailSS", item["Sistem Saran"]);
+    } else if (item["Rencana Circle"] && isiPesan.includes("Quality Control Circle")) {
+      onChangePage("detailQCC", item["Rencana Circle"]);
+    } else if (item["Rencana Circle"] && isiPesan.includes("Quality Control Project")) {
+      onChangePage("detailQCP", item["Rencana Circle"]);
+    } else if (item["Rencana Circle"] && isiPesan.includes("Business Performance")) {
+      onChangePage("detailBPI", item["Rencana Circle"]);
+    } else if (item && isiPesan.includes("Value Chain Innovation")) {
+      onChangePage("detailVCI", item["Rencana Circle"]);
     } else {
       alert("Tidak ada detail terkait");
     }
   }
+
   useEffect(() => {
-    const handleRedirect = (pesan) => {
-      if (pesan.includes("Suggestion System")) {  
-        navigate("/submission/ss");
-      } else if (pesan.includes("Control Circle")) {
-        navigate("/submission/qcc");
-      } else if (pesan.includes("Control Project")) {
-        navigate("/submission/qcp");
-      } else if (pesan.includes("Business Performance")) {
-        navigate("/submission/bpi");
-      } else if (pesan.includes("Value Chain Innovation")) {
-        navigate("/submission/vci");
-      }
-    };
-
-
     const fetchData = async () => {
       setIsError(false);
-
+      
       try {
         const data = await UseFetch(
           API_LINK + "Notifikasi/GetDataNotifikasi",
           currentFilter
         );
-
+        
+        console.log("CURRENT DATA ", data);
         if (data === "ERROR") {
           setIsError(true);
         } else if (data.length === 0) {
@@ -190,16 +177,8 @@ export default function NotifikasiIndex({ onChangePage }) {
                         key: value.Key,
                         application: userInfo.username,
                       });
-                      if (data === "ERROR" || data.length === 0) setIsError(true);
-                      else {
-                      SweetAlert(
-                        "Sukses",
-                        "Notifikasi ditandai sudah dibaca",
-                        "success"
-                      );
                       setCurrentFilter((prev) => ({ ...prev }));
                       setIsLoading(true);
-                      }
                     }
                   }}
                 />
@@ -219,7 +198,7 @@ export default function NotifikasiIndex({ onChangePage }) {
     };
 
     fetchData();
-  }, [currentFilter, navigate]); 
+  }, [currentFilter]);
 
   return (
     <div className="my-3 container">
@@ -294,10 +273,7 @@ export default function NotifikasiIndex({ onChangePage }) {
                 Pesan: item.Pesan ? (
                   <a
                     href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleOnClick(item);
-                    }}
+                    onClick={() => handleOnClick(item)}
                     className="text-primary text-decoration-none"
                   >
                     {item.Pesan}
