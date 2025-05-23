@@ -312,10 +312,13 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
             Count: value["Count"],
             IsBold:
               value["Creaby"] === userInfo.username
-                ? ["Draft Scoring", "Approved"].includes(value["Status"])
-                : ["Waiting Approval", "Draft Scoring"].includes(
-                    value["Status"]
-                  ),
+                ? ["Draft Steps", "Approved"].includes(value["Status"])
+                : [
+                    "Waiting Approval",
+                    "Draft Steps",
+                    "Draft Scoring",
+                    "Approved",
+                  ].includes(value["Status"]),
             Action:
               role === "ROL01" &&
               value["Status"] === "Draft" &&
@@ -325,8 +328,10 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
                   value["Status"] === "Waiting Approval" &&
                   value["Creaby"] !== userInfo.username
                 ? ["Detail", "Reject", "Approve"]
+                : inorole === "Facilitator" && value["Status"] === "Scoring"
+                ? ["Detail", "Scoring"]
                 : role === "ROL01" &&
-                  value["Status"] === "Draft Scoring" &&
+                  value["Status"] === "Draft Steps" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "EditFillTheStep", "Submit"]
                 : role === "ROL01" &&
@@ -335,10 +340,11 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
                 ? ["Detail", "Edit", "Submit"]
                 : role === "ROL36" && value["Status"] === "Approved"
                 ? ["Detail", "Submit"]
-                : value["Status"] === "Approved" &&
+                : (value["Status"] === "Approved" ||
+                    value["Status"] === "Phase 1 is Scored") &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "FillTheStep"]
-                : value["Status"] === "Draft Scoring" &&
+                : value["Status"] === "Draft Steps" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "EditFillTheStep", "Submit"]
                 : ["Detail"],
@@ -348,6 +354,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
               "left",
               "left",
               "right",
+              "center",
               "center",
               "center",
               "center",

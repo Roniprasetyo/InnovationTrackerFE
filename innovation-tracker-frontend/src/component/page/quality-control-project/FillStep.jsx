@@ -29,16 +29,10 @@ const inisialisasiData = [
   },
 ];
 
-const MetodologiArr = [
-  { Value: 51, Text: "PDCA (Plan-Do-Check-Act)" },
-  { Value: 50, Text: "DMAIC (Define-Measure-Analyze-Improve-Control)" },
-  { Value: 48, Text: "Kaizen" },
-  { Value: 37, Text: "Six Sigma" },
-  { Value: 60, Text: "Lean Manufacturing" },
-  { Value: 44, Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
-];
-
-export default function QualityControlProjectFillStep({ onChangePage, withID }) {
+export default function QualityControlProjectFillStep({
+  onChangePage,
+  withID,
+}) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   // console.log(withID);
@@ -80,7 +74,6 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
     Section: "",
   });
 
-  console.log("username", userInfo.username);
 
   const payloadRef = useRef({
     rci_id: withID,
@@ -95,6 +88,24 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
     fts_action: "",
     fts_action_file: "",
     fts_status: "",
+  });
+
+  const [idFts, setIdFts] = useState(0);
+  const [statusFTS, setstatusFTS] = useState(0);
+
+  const payloadEditRef = useRef({
+    Key: idFts,
+    rci_id: 0,
+    set_id: payloadRef.current.set_id,
+    fts_plan: payloadRef.current.plan,
+    fts_plan_file: payloadRef.current.fts_plan_file,
+    fts_do: payloadRef.current.fts_do,
+    fts_do_file: payloadRef.current.fts_do_file,
+    fts_check: payloadRef.current.fts_check,
+    fts_check_file: payloadRef.current.fts_check_file,
+    fts_action: payloadRef.current.fts_action,
+    fts_action_file: payloadRef.current.fts_action_file,
+    fts_modi_by: userInfo.username,
   });
 
   const planFileRef = useRef(null);
@@ -115,6 +126,21 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
     fts_action_file: string().nullable(),
     fts_status: string().nullable(),
     fts_created_by: string().required("required creaby"),
+  });
+
+  const payloadSchemaEdit = object({
+    Key: number().required("ID Required"),
+    rci_id: number().required("required"),
+    fts_action_file: string().nullable(),
+    set_id: number().required("The Section is Required"),
+    fts_plan: string().required("The Section is Required"),
+    fts_plan_file: string().nullable(),
+    fts_do: string().required("required"),
+    fts_do_file: string().nullable(),
+    fts_check: string().required("The Section is Required"),
+    fts_check_file: string().nullable(),
+    fts_action: string().required("The Section is Requires"),
+    fts_modi_by: string().required("required creaby"),
   });
 
   const [formDataMetodologiRef, setFormDataMetodRed] = useState("");
@@ -142,6 +168,60 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
           message: error.message,
         }));
         setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetFillTheStepByID",
+          {
+            id: withID,
+          }
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get FTS data");
+        } else {
+          
+          setstatusFTS(data[0].Status !== null? data[0].Status : "");
+          setIdFts(data[0].Key);
+          payloadRef.current = {
+            rci_id: data[0]["RCI ID"],
+            set_id: data[0]["SET ID"],
+            fts_plan: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Plan"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_plan_file: data[0]["Plan File"],
+            fts_do: decodeHtml(decodeHtml(decodeHtml(data[0]["Do"]))).replace(
+              /<\/?[^>]+(>|$)/g,
+              ""
+            ),
+            fts_do_file: data[0]["Do File"],
+            fts_check: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Check"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_check_file: data[0]["Check File"],
+            fts_action: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Action"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_action_file: data[0]["Action File"],
+          };
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -308,76 +388,134 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    const validationErrors = await validateAllInputs(
-      payloadRef.current,
-      payloadSchema,
-      setErrors
-    );
 
-    console.log("Payload", payloadRef.current);
+    const payloadEditRef = {
+      Key: idFts,
+      rci_id: payloadRef.current.rci_id,
+      set_id: payloadRef.current.set_id,
+      fts_plan: payloadRef.current.fts_plan,
+      fts_plan_file: payloadRef.current.fts_plan_file,
+      fts_do: payloadRef.current.fts_do,
+      fts_do_file: payloadRef.current.fts_do_file,
+      fts_check: payloadRef.current.fts_check,
+      fts_check_file: payloadRef.current.fts_check_file,
+      fts_action: payloadRef.current.fts_action,
+      fts_action_file: payloadRef.current.fts_action_file,
+      fts_modi_by: userInfo.username,
+    };
 
-    if (Object.values(validationErrors).every((error) => !error)) {
-      setIsLoading(true);
-      setIsError((prevError) => ({ ...prevError, error: false }));
-      setErrors({});
+    if (formDataRef.current.Status === "Phase 1 is Scored") {
+      const validationErrors = await validateAllInputs(
+        payloadEditRef,
+        payloadSchemaEdit,
+        setErrors
+      );
 
-      const uploadPromises = [];
+      console.log("PayloadEdit", payloadEditRef);
 
-      if (planFileRef.current?.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(planFileRef.current).then(
-            (data) => (payloadRef.current["fts_plan_file"] = data.Hasil)
-          )
-        );
-      }
-      if (doFileRef.current?.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(doFileRef.current).then(
-            (data) => (payloadRef.current["fts_do_file"] = data.Hasil)
-          )
-        );
-      }
-      if (checkFileRef.current?.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(checkFileRef.current).then(
-            (data) => (payloadRef.current["fts_check_file"] = data.Hasil)
-          )
-        );
-      }
-      if (actionFileRef.current?.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(actionFileRef.current).then(
-            (data) => (payloadRef.current["fts_action_file"] = data.Hasil)
-          )
-        );
-      }
-      
-      try {
-        await Promise.all(uploadPromises);
+      if (Object.values(validationErrors).every((error) => !error)) {
+        setIsLoading(true);
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        setErrors({});
 
-        const data = await UseFetch(
-          API_LINK + "RencanaCircle/CreateFillTheStep",
-          payloadRef.current
-        );
+        const uploadPromises = [];
 
-        console.log("Data", data);
-        if (data === "ERROR") {
-          throw new Error("Error: Failed to submit the data.");
-        } else {
-          SweetAlert("Success", "Data successfully submitted", "success");
-          onChangePage("index");
+        if (checkFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(checkFileRef.current).then(
+              (data) => (payloadEditRef["fts_check_file"] = data.Hasil)
+            )
+          );
         }
-      } catch (error) {
-        window.scrollTo(0, 0);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: error.message,
-        }));
-      } finally {
-        setIsLoading(false);
-      }
-    } else window.scrollTo(0, 0);
+        if (actionFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(actionFileRef.current).then(
+              (data) => (payloadEditRef["fts_action_file"] = data.Hasil)
+            )
+          );
+        }
+
+        try {
+          await Promise.all(uploadPromises);
+
+          const data = await UseFetch(
+            API_LINK + "RencanaCircle/UpdateFillTheStepCA",
+            payloadEditRef
+          );
+
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to submit the data.");
+          } else {
+            SweetAlert("Success", "Data successfully submitted", "success");
+            onChangePage("index");
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+        } finally {
+          setIsLoading(false);
+        }
+      } else window.scrollTo(0, 0);
+    } else {
+      const validationErrors = await validateAllInputs(
+        payloadRef.current,
+        payloadSchema,
+        setErrors
+      );
+
+      if (Object.values(validationErrors).every((error) => !error)) {
+        setIsLoading(true);
+        setIsError((prevError) => ({ ...prevError, error: false }));
+        setErrors({});
+
+        const uploadPromises = [];
+
+        if (planFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(planFileRef.current).then(
+              (data) => (payloadEditRef["fts_plan_file"] = data.Hasil)
+            )
+          );
+        }
+        if (doFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(doFileRef.current).then(
+              (data) => (payloadEditRef["fts_do_file"] = data.Hasil)
+            )
+          );
+        }
+
+        try {
+          await Promise.all(uploadPromises);
+
+          const data = await UseFetch(
+            API_LINK + "RencanaCircle/CreateFillTheStep",
+            payloadRef.current
+          );
+
+          console.log("Data", data);
+          if (data === "ERROR") {
+            throw new Error("Error: Failed to submit the data.");
+          } else {
+            SweetAlert("Success", "Data successfully submitted", "success");
+            onChangePage("index");
+          }
+        } catch (error) {
+          window.scrollTo(0, 0);
+          setIsError((prevError) => ({
+            ...prevError,
+            error: true,
+            message: error.message,
+          }));
+        } finally {
+          setIsLoading(false);
+        }
+      } else window.scrollTo(0, 0);
+    }
   };
 
   const filteredTypeMetodologi = typeSetting.filter(
@@ -415,7 +553,7 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">QCC REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (
@@ -669,6 +807,11 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                                   forInput="set_id"
                                   value={payloadRef.current.set_id}
                                   label="Metodologi"
+                                  isDisabled={
+                                   statusFTS === "Phase 1 is Scored"
+                                      ? true
+                                      : false
+                                  }
                                   onChange={handleInputChange}
                                   isRequired
                                   errorMessage={errors.set_id}
@@ -694,6 +837,12 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                                 isRequired
                                 placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented (menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)"
                                 value={payloadRef.current.fts_plan}
+                                isDisabled={
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
+                                    ? true
+                                    : false
+                                }
                                 onChange={handleInputChange}
                                 errorMessage={errors.fts_plan}
                               />
@@ -704,6 +853,12 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                                 label="Plan Document (.pdf)"
                                 formatFile=".pdf"
                                 ref={planFileRef}
+                                isDisabled={
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
+                                    ? true
+                                    : false
+                                }
                                 onChange={() =>
                                   handleFileChange(planFileRef, "pdf")
                                 }
@@ -716,6 +871,12 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                                 forInput="fts_do"
                                 label="Do"
                                 isRequired
+                                isDisabled={
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
+                                    ? true
+                                    : false
+                                }
                                 placeholder="Describe the steps taken to implement the plan and any resources used
 (Jelaskan langkah-langkah yang dilakukan untuk melaksanakan rencana serta sumber daya yang digunakan)"
                                 value={payloadRef.current.fts_do}
@@ -729,6 +890,12 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                                 label="Do Document (.pdf)"
                                 formatFile=".pdf"
                                 ref={doFileRef}
+                                isDisabled={
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
+                                    ? true
+                                    : false
+                                }
                                 onChange={() =>
                                   handleFileChange(doFileRef, "pdf")
                                 }
@@ -743,7 +910,8 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                               </label>
 
                               {/* Tampilkan informasi jika disabled */}
-                              {formDataRef.current.Status !== "Scoring" && (
+                              {formDataRef.current.Status !==
+                                "Phase 1 is Scored" && (
                                 <div className="alert alert-warning p-2 mb-2">
                                   This section is only editable during{" "}
                                   <strong>Scoring</strong> status.
@@ -751,13 +919,20 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                               )}
 
                               <TextArea
-                                forInput="pdcaCheck"
-                                isRequired
+                                forInput="fts_check"
+                                isRequired={
+                                  formDataRef.current.Status !==
+                                  "Phase 1 is Scored"
+                                    ? true
+                                    : false
+                                }
                                 isDisabled={
-                                  formDataRef.current.Status !== "Scoring"
+                                  formDataRef.current.Status !==
+                                  "Phase 1 is Scored"
                                 }
                                 placeholder={
-                                  formDataRef.current.Status === "Scoring"
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? "Explain how the outcomes were monitored or measured and whether the plan was successful\n(Jelaskan bagaimana hasil dievaluasi atau diukur serta apakah rencananya berhasil)"
                                     : "" // dikosongkan karena tidak muncul saat disabled
                                 }
@@ -768,9 +943,10 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                             </div>
 
                             <div className="col-lg-4">
-                              {formDataRef.current.Status === "Scoring" ? (
+                              {formDataRef.current.Status ===
+                              "Phase 1 is Scored" ? (
                                 <FileUpload
-                                  forInput="pdcaCheckFile"
+                                  forInput="fts_check_file"
                                   label="Check Document (.pdf)"
                                   formatFile=".pdf"
                                   ref={checkFileRef}
@@ -783,7 +959,7 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="File upload only available in Scoring status"
+                                  placeholder="File upload only available in Phase 1 is Scored status"
                                   disabled
                                 />
                               )}
@@ -796,21 +972,29 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                               </label>
 
                               {/* Tampilkan informasi jika disabled */}
-                              {formDataRef.current.Status !== "Scoring" && (
+                              {formDataRef.current.Status !==
+                                "Phase 1 is Scored" && (
                                 <div className="alert alert-warning p-2 mb-2">
                                   This section is only editable during{" "}
-                                  <strong>Scoring</strong> status.
+                                  <strong>Phase 1 is Scored</strong> status.
                                 </div>
                               )}
 
                               <TextArea
-                                forInput="pdcaAction"
-                                isRequired
+                                forInput="fts_action"
                                 isDisabled={
-                                  formDataRef.current.Status !== "Scoring"
+                                  formDataRef.current.Status !==
+                                  "Phase 1 is Scored"
+                                }
+                                isRequired={
+                                  formDataRef.current.Status !==
+                                  "Phase 1 is Scored"
+                                    ? true
+                                    : false
                                 }
                                 placeholder={
-                                  formDataRef.current.Status === "Scoring"
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? "Describe what actions were taken based on the evaluation and how the process can be improved\n(Jelaskan tindakan yang diambil berdasarkan evaluasi dan bagaimana prosesnya dapat ditingkatkan)"
                                     : "" // biarkan kosong karena tidak akan muncul
                                 }
@@ -821,9 +1005,10 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                             </div>
 
                             <div className="col-lg-4">
-                              {formDataRef.current.Status === "Scoring" ? (
+                              {formDataRef.current.Status ===
+                              "Phase 1 is Scored" ? (
                                 <FileUpload
-                                  forInput="pdcaActionFile"
+                                  forInput="fts_action_file"
                                   label="Action Document (.pdf)"
                                   formatFile=".pdf"
                                   ref={actionFileRef}
@@ -836,7 +1021,7 @@ export default function QualityControlProjectFillStep({ onChangePage, withID }) 
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="File upload only available in Scoring status"
+                                  placeholder="File upload only available in Phase 1 is Scored status"
                                   disabled
                                 />
                               )}
