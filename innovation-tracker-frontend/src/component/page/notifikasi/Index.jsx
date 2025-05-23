@@ -101,10 +101,12 @@ export default function NotifikasiIndex({ onChangePage }) {
   }
 
   function handleOnClick(item) {
-    const isiPesan = item.rawHTML || "";
+      const isiPesan =
+    item.rawHTML ||
+    item.Pesan?.props?.dangerouslySetInnerHTML?.__html ||
+    "";
 
-    console.log("dawd", item.sis_id)
-    if (item.sis_id) {  
+    if (item.sis_id) {
       onChangePage("detailSS", item.sis_id);
     } else if (item.rci_id && isiPesan.includes("Quality Control Circle")) {
       onChangePage("detailQCC", item.rci_id);
