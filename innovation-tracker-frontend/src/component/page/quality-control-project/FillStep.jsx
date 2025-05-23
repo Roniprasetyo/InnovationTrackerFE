@@ -74,7 +74,6 @@ export default function QualityControlProjectFillStep({
     Section: "",
   });
 
-  console.log("username", userInfo.username);
 
   const payloadRef = useRef({
     rci_id: withID,
@@ -92,6 +91,7 @@ export default function QualityControlProjectFillStep({
   });
 
   const [idFts, setIdFts] = useState(0);
+  const [statusFTS, setstatusFTS] = useState(0);
 
   const payloadEditRef = useRef({
     Key: idFts,
@@ -168,6 +168,60 @@ export default function QualityControlProjectFillStep({
           message: error.message,
         }));
         setListEmployee({});
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError((prevError) => ({ ...prevError, error: false }));
+      try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetFillTheStepByID",
+          {
+            id: withID,
+          }
+        );
+
+        if (data === "ERROR") {
+          throw new Error("Error: Failed to get FTS data");
+        } else {
+          
+          setstatusFTS(data[0].Status !== null? data[0].Status : "");
+          setIdFts(data[0].Key);
+          payloadRef.current = {
+            rci_id: data[0]["RCI ID"],
+            set_id: data[0]["SET ID"],
+            fts_plan: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Plan"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_plan_file: data[0]["Plan File"],
+            fts_do: decodeHtml(decodeHtml(decodeHtml(data[0]["Do"]))).replace(
+              /<\/?[^>]+(>|$)/g,
+              ""
+            ),
+            fts_do_file: data[0]["Do File"],
+            fts_check: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Check"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_check_file: data[0]["Check File"],
+            fts_action: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Action"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_action_file: data[0]["Action File"],
+          };
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -412,14 +466,28 @@ export default function QualityControlProjectFillStep({
         payloadSchema,
         setErrors
       );
-      console.log("TES P", payloadRef.current);
 
       if (Object.values(validationErrors).every((error) => !error)) {
         setIsLoading(true);
         setIsError((prevError) => ({ ...prevError, error: false }));
         setErrors({});
 
-        console.log("PayloadREF", payloadRef.current);
+        const uploadPromises = [];
+
+        if (planFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(planFileRef.current).then(
+              (data) => (payloadEditRef["fts_plan_file"] = data.Hasil)
+            )
+          );
+        }
+        if (doFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(doFileRef.current).then(
+              (data) => (payloadEditRef["fts_do_file"] = data.Hasil)
+            )
+          );
+        }
 
         try {
           await Promise.all(uploadPromises);
@@ -740,7 +808,7 @@ export default function QualityControlProjectFillStep({
                                   value={payloadRef.current.set_id}
                                   label="Metodologi"
                                   isDisabled={
-                                    payloadRef.current.set_id !== null
+                                   statusFTS === "Phase 1 is Scored"
                                       ? true
                                       : false
                                   }
@@ -770,7 +838,8 @@ export default function QualityControlProjectFillStep({
                                 placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented (menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)"
                                 value={payloadRef.current.fts_plan}
                                 isDisabled={
-                                  payloadRef.current.fts_plan !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }
@@ -785,7 +854,8 @@ export default function QualityControlProjectFillStep({
                                 formatFile=".pdf"
                                 ref={planFileRef}
                                 isDisabled={
-                                  payloadRef.current.fts_plan !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }
@@ -802,7 +872,8 @@ export default function QualityControlProjectFillStep({
                                 label="Do"
                                 isRequired
                                 isDisabled={
-                                  payloadRef.current.fts_do !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }
@@ -820,7 +891,8 @@ export default function QualityControlProjectFillStep({
                                 formatFile=".pdf"
                                 ref={doFileRef}
                                 isDisabled={
-                                  payloadRef.current.fts_do !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }

@@ -35,7 +35,6 @@ export default function BussinessPerformanceImprovementEditFillStep({
 }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
-  // console.log(withID);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -44,6 +43,7 @@ export default function BussinessPerformanceImprovementEditFillStep({
   const [listEmployee, setListEmployee] = useState([]);
   const [listMetodologi, setListMetodologi] = useState([]);
   const [typesSetting, setTypeSetting] = useState([]);
+  const [statusFTS, setStatusFTS] = useState("");
 
   const formDataRef = useRef({
     Key: "",
@@ -86,10 +86,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
     fts_check_file: "",
     fts_action: "",
     fts_action_file: "",
-    fts_modi_by: userInfo.username
+    fts_modi_by: userInfo.username,
   });
 
-  console.log("id", withID);
 
   const planFileRef = useRef(null);
   const doFileRef = useRef(null);
@@ -105,9 +104,17 @@ export default function BussinessPerformanceImprovementEditFillStep({
     fts_plan_file: string().nullable(),
     fts_do: string().required("required"),
     fts_do_file: string().nullable(),
-    fts_check: string().nullable(),
+    fts_check: string().when("$status", {
+      is: (val) => val === "Draft Genba 2",
+      then: (schema) => schema.required("The Section is Required"),
+      otherwise: (schema) => schema.nullable(),
+    }),
     fts_check_file: string().nullable(),
-    fts_action: string().nullable(),
+    fts_action: string().when("$status", {
+      is: (val) => val === "Draft Genba 2",
+      then: (schema) => schema.required("The Section is Required"),
+      otherwise: (schema) => schema.nullable(),
+    }),
     fts_modi_by: string().required("required creaby"),
   });
 
@@ -226,32 +233,32 @@ export default function BussinessPerformanceImprovementEditFillStep({
           }
         );
 
-        console.log("2355", data[0]["RCI ID"])
         if (data === "ERROR") {
           throw new Error("Error: Failed to get FTS data");
         } else {
+          setStatusFTS(data[0].Status);
           payloadRef.current = {
-              Key: data[0].Key,
-              rci_id: data[0]["RCI ID"],
-              set_id: data[0]["SET ID"],
-              fts_plan: decodeHtml(
-                decodeHtml(decodeHtml(data[0]["Plan"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              fts_plan_file: data[0]["Plan File"],
-              fts_do: decodeHtml(decodeHtml(decodeHtml(data[0]["Do"]))).replace(
-                /<\/?[^>]+(>|$)/g,
-                ""
-              ),
-              fts_do_file: data[0]["Do File"],
-              fts_check: decodeHtml(
-                decodeHtml(decodeHtml(data[0]["Check"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              fts_check_file: data[0]["Check File"],
-              fts_action: decodeHtml(
-                decodeHtml(decodeHtml(data[0]["Action"]))
-              ).replace(/<\/?[^>]+(>|$)/g, ""),
-              fts_action_file: data[0]["Action File"],
-            };
+            Key: data[0].Key,
+            rci_id: data[0]["RCI ID"],
+            set_id: data[0]["SET ID"],
+            fts_plan: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Plan"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_plan_file: data[0]["Plan File"],
+            fts_do: decodeHtml(decodeHtml(decodeHtml(data[0]["Do"]))).replace(
+              /<\/?[^>]+(>|$)/g,
+              ""
+            ),
+            fts_do_file: data[0]["Do File"],
+            fts_check: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Check"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_check_file: data[0]["Check File"],
+            fts_action: decodeHtml(
+              decodeHtml(decodeHtml(data[0]["Action"]))
+            ).replace(/<\/?[^>]+(>|$)/g, ""),
+            fts_action_file: data[0]["Action File"],
+          };
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -323,7 +330,6 @@ export default function BussinessPerformanceImprovementEditFillStep({
 
     fetchData();
   }, [withID, listEmployee]);
-  // console.log("currentData, ", currentData);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -333,11 +339,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
       ...prevErrors,
       [validationError.name]: validationError.error,
     }));
-    console.log((payloadRef.current[name] = name), " (Tes): ", (payloadRef.current[name] = value));
   };
 
   const handleOpenModal = (id) => {
-    console.log(id);
     if (id.length === 0) {
       window.scrollTo(0, 0);
       setIsError((prevError) => ({
@@ -353,13 +357,20 @@ export default function BussinessPerformanceImprovementEditFillStep({
   const handleAdd = async (e) => {
     e.preventDefault();
 
+    payloadRef.current.fts_modi_by = userInfo.username;
+
+    await payloadSchema.validate(payloadRef.current, {
+      context: {
+        status: statusFTS,
+      },
+      abortEarly: false,
+    });
+
     const validationErrors = await validateAllInputs(
       payloadRef.current,
       payloadSchema,
       setErrors
     );
-
-    console.log("Payload", payloadRef.current);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
@@ -430,11 +441,12 @@ export default function BussinessPerformanceImprovementEditFillStep({
   const filteredArrData = listMetodologi.filter(
     (detail) => detail.Type === filteredTypeMetodologi[0]?.Value
   );
-  const arrTextData = filteredArrData.map((item) => item.Value === payloadRef.current.set_id);
+  const arrTextData = filteredArrData.map(
+    (item) => item.Value === payloadRef.current.set_id
+  );
 
   if (isLoading) return <Loading />;
 
-  console.log("TES", arrTextData)
 
   return (
     <>
@@ -714,8 +726,10 @@ export default function BussinessPerformanceImprovementEditFillStep({
                                   arrData={filteredArrData}
                                   forInput="set_id"
                                   value={payloadRef.current.set_id}
-                                  // selectedValued={payloadRef.current.set_id} 
                                   label="Metodologi"
+                                  isDisabled={
+                                    statusFTS !== "Draft Genba 1" ? true : false
+                                  }
                                   onChange={handleInputChange}
                                   isRequired
                                   errorMessage={errors.set_id}
@@ -741,6 +755,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
                                 isRequired
                                 placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented (menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)"
                                 value={payloadRef.current.fts_plan}
+                                isDisabled={
+                                  statusFTS !== "Draft Genba 1" ? true : false
+                                }
                                 onChange={handleInputChange}
                                 errorMessage={errors.fts_plan}
                               />
@@ -751,6 +768,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
                                 label="Plan Document (.pdf)"
                                 formatFile=".pdf"
                                 ref={planFileRef}
+                                isDisabled={
+                                  statusFTS !== "Draft Genba 1" ? true : false
+                                }
                                 onChange={() =>
                                   handleFileChange(planFileRef, "pdf")
                                 }
@@ -763,6 +783,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
                                 forInput="fts_do"
                                 label="Do"
                                 isRequired
+                                isDisabled={
+                                  statusFTS !== "Draft Genba 1" ? true : false
+                                }
                                 placeholder="Describe the steps taken to implement the plan and any resources used
 (Jelaskan langkah-langkah yang dilakukan untuk melaksanakan rencana serta sumber daya yang digunakan)"
                                 value={payloadRef.current.fts_do}
@@ -776,6 +799,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
                                 label="Do Document (.pdf)"
                                 formatFile=".pdf"
                                 ref={doFileRef}
+                                isDisabled={
+                                  statusFTS !== "Draft Genba 1" ? true : false
+                                }
                                 onChange={() =>
                                   handleFileChange(doFileRef, "pdf")
                                 }
@@ -790,21 +816,21 @@ export default function BussinessPerformanceImprovementEditFillStep({
                               </label>
 
                               {/* Tampilkan informasi jika disabled */}
-                              {formDataRef.current.Status !== "Scoring" && (
+                              {statusFTS === "Draft Genba 1" && (
                                 <div className="alert alert-warning p-2 mb-2">
                                   This section is only editable during{" "}
-                                  <strong>Scoring</strong> status.
+                                  <strong>Phase 1 is Scored</strong> status.
                                 </div>
                               )}
 
                               <TextArea
-                                forInput="pdcaCheck"
-                                isRequired
-                                isDisabled={
-                                  formDataRef.current.Status !== "Scoring"
+                                forInput="fts_check"
+                                isRequired={
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
+                                isDisabled={statusFTS === "Draft Genba 1"}
                                 placeholder={
-                                  formDataRef.current.Status === "Scoring"
+                                  statusFTS !== "Draft Genba 1"
                                     ? "Explain how the outcomes were monitored or measured and whether the plan was successful\n(Jelaskan bagaimana hasil dievaluasi atau diukur serta apakah rencananya berhasil)"
                                     : "" // dikosongkan karena tidak muncul saat disabled
                                 }
@@ -815,9 +841,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
                             </div>
 
                             <div className="col-lg-4">
-                              {formDataRef.current.Status === "Scoring" ? (
+                              {statusFTS !== "Draft Genba 1" ? (
                                 <FileUpload
-                                  forInput="pdcaCheckFile"
+                                  forInput="fts_check_file"
                                   label="Check Document (.pdf)"
                                   formatFile=".pdf"
                                   ref={checkFileRef}
@@ -830,7 +856,7 @@ export default function BussinessPerformanceImprovementEditFillStep({
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="File upload only available in Scoring status"
+                                  placeholder="File upload only available in Phase 1 is Scored status"
                                   disabled
                                 />
                               )}
@@ -843,21 +869,21 @@ export default function BussinessPerformanceImprovementEditFillStep({
                               </label>
 
                               {/* Tampilkan informasi jika disabled */}
-                              {formDataRef.current.Status !== "Scoring" && (
+                              {statusFTS === "Draft Genba 1" && (
                                 <div className="alert alert-warning p-2 mb-2">
                                   This section is only editable during{" "}
-                                  <strong>Scoring</strong> status.
+                                  <strong>Phase 1 is Scored</strong> status.
                                 </div>
                               )}
 
                               <TextArea
-                                forInput="pdcaAction"
-                                isRequired
-                                isDisabled={
-                                  formDataRef.current.Status !== "Scoring"
+                                forInput="fts_action"
+                                isDisabled={statusFTS === "Draft Genba 1"}
+                                isRequired={
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
                                 placeholder={
-                                  formDataRef.current.Status === "Scoring"
+                                  statusFTS !== "Draft Genba 1"
                                     ? "Describe what actions were taken based on the evaluation and how the process can be improved\n(Jelaskan tindakan yang diambil berdasarkan evaluasi dan bagaimana prosesnya dapat ditingkatkan)"
                                     : "" // biarkan kosong karena tidak akan muncul
                                 }
@@ -868,9 +894,9 @@ export default function BussinessPerformanceImprovementEditFillStep({
                             </div>
 
                             <div className="col-lg-4">
-                              {formDataRef.current.Status === "Scoring" ? (
+                              {statusFTS !== "Draft Genba 1" ? (
                                 <FileUpload
-                                  forInput="pdcaActionFile"
+                                  forInput="fts_action_file"
                                   label="Action Document (.pdf)"
                                   formatFile=".pdf"
                                   ref={actionFileRef}
@@ -883,7 +909,7 @@ export default function BussinessPerformanceImprovementEditFillStep({
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="File upload only available in Scoring status"
+                                  placeholder="File upload only available in Phase 1 is Scored status"
                                   disabled
                                 />
                               )}

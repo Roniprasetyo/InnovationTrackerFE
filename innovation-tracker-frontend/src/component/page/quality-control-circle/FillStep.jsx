@@ -41,6 +41,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
   const [listEmployee, setListEmployee] = useState([]);
   const [listMetodologi, setListMetodologi] = useState([]);
   const [typeSetting, setTypeSetting] = useState([]);
+  const [statusFTS, setstatusFTS] = useState(0);
 
   const formDataRef = useRef({
     Key: "",
@@ -71,8 +72,6 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     Section: "",
   });
 
-  console.log("username", userInfo.username);
-
   const payloadRef = useRef({
     rci_id: withID,
     fts_created_by: userInfo.username,
@@ -88,21 +87,6 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     fts_status: "",
   });
   const [idFts, setIdFts] = useState(0);
-
-  const payloadEditRef = useRef({
-    Key: idFts,
-    rci_id: 0,
-    set_id: payloadRef.current.set_id,
-    fts_plan: payloadRef.current.plan,
-    fts_plan_file: payloadRef.current.fts_plan_file,
-    fts_do: payloadRef.current.fts_do,
-    fts_do_file: payloadRef.current.fts_do_file,
-    fts_check: payloadRef.current.fts_check,
-    fts_check_file: payloadRef.current.fts_check_file,
-    fts_action: payloadRef.current.fts_action,
-    fts_action_file: payloadRef.current.fts_action_file,
-    fts_modi_by: userInfo.username,
-  });
 
   const planFileRef = useRef(null);
   const doFileRef = useRef(null);
@@ -139,7 +123,6 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
     fts_modi_by: string().required("required creaby"),
   });
 
-  const [formDataMetodologiRef, setFormDataMetodRed] = useState("");
   const modalRef = useRef();
 
   useEffect(() => {
@@ -468,8 +451,22 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
         setIsError((prevError) => ({ ...prevError, error: false }));
         setErrors({});
 
-        console.log("PayloadREF", payloadRef.current);
+        const uploadPromises = [];
 
+        if (planFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(planFileRef.current).then(
+              (data) => (payloadEditRef["fts_plan_file"] = data.Hasil)
+            )
+          );
+        }
+        if (doFileRef.current?.files.length > 0) {
+          uploadPromises.push(
+            UploadFile(doFileRef.current).then(
+              (data) => (payloadEditRef["fts_do_file"] = data.Hasil)
+            )
+          );
+        }
         try {
           await Promise.all(uploadPromises);
 
@@ -789,7 +786,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                                   value={payloadRef.current.set_id}
                                   label="Metodologi"
                                   isDisabled={
-                                    payloadRef.current.set_id !== null
+                                    statusFTS === "Phase 1 is Scored"
                                       ? true
                                       : false
                                   }
@@ -819,7 +816,8 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                                 placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented (menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)"
                                 value={payloadRef.current.fts_plan}
                                 isDisabled={
-                                  payloadRef.current.fts_plan !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }
@@ -834,7 +832,8 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                                 formatFile=".pdf"
                                 ref={planFileRef}
                                 isDisabled={
-                                  payloadRef.current.fts_plan !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }
@@ -851,7 +850,8 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                                 label="Do"
                                 isRequired
                                 isDisabled={
-                                  payloadRef.current.fts_do !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }
@@ -869,7 +869,8 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
                                 formatFile=".pdf"
                                 ref={doFileRef}
                                 isDisabled={
-                                  payloadRef.current.fts_do !== null
+                                  formDataRef.current.Status ===
+                                  "Phase 1 is Scored"
                                     ? true
                                     : false
                                 }

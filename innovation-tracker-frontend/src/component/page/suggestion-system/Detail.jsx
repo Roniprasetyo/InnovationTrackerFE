@@ -568,12 +568,6 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                         </div>
                     </div>
                   </div>
-                  <Button
-                    iconName={"angle-left"}
-                    classType={"primary"}
-                    onClick={() => onChangePage("index")}
-                    label="Back"
-                  />
                   {formDataRef.current.Status === "Rejected" && (
                     <div>
                       <hr />

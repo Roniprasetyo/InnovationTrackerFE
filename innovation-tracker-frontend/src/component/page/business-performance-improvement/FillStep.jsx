@@ -29,19 +29,10 @@ const inisialisasiData = [
   },
 ];
 
-const MetodologiArr = [
-  { Value: 51, Text: "PDCA (Plan-Do-Check-Act)" },
-  { Value: 50, Text: "DMAIC (Define-Measure-Analyze-Improve-Control)" },
-  { Value: 48, Text: "Kaizen" },
-  { Value: 37, Text: "Six Sigma" },
-  { Value: 60, Text: "Lean Manufacturing" },
-  { Value: 44, Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
-];
 
 export default function BussinessPerformanceImprovementFillStep({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
-  // console.log(withID);
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -80,7 +71,6 @@ export default function BussinessPerformanceImprovementFillStep({ onChangePage, 
     Section: "",
   });
 
-  console.log("username", userInfo.username);
 
   const payloadRef = useRef({
     rci_id: withID,
@@ -285,15 +275,9 @@ export default function BussinessPerformanceImprovementFillStep({ onChangePage, 
       ...prevErrors,
       [validationError.name]: validationError.error,
     }));
-    console.log(
-      (payloadRef.current[name] = name),
-      ": ",
-      (payloadRef.current[name] = value)
-    );
   };
 
   const handleOpenModal = (id) => {
-    console.log(id);
     if (id.length === 0) {
       window.scrollTo(0, 0);
       setIsError((prevError) => ({
@@ -313,8 +297,6 @@ export default function BussinessPerformanceImprovementFillStep({ onChangePage, 
       payloadSchema,
       setErrors
     );
-
-    console.log("Payload", payloadRef.current);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
@@ -360,7 +342,6 @@ export default function BussinessPerformanceImprovementFillStep({ onChangePage, 
           payloadRef.current
         );
 
-        console.log("Data", data);
         if (data === "ERROR") {
           throw new Error("Error: Failed to submit the data.");
         } else {

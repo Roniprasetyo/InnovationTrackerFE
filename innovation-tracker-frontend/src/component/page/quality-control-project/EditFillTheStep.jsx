@@ -44,6 +44,7 @@ export default function QualityControlProjectEditFillStep({
   const [listEmployee, setListEmployee] = useState([]);
   const [listMetodologi, setListMetodologi] = useState([]);
   const [typesSetting, setTypeSetting] = useState([]);
+  const [statusFTS, setStatusFTS] = useState("");
 
   const formDataRef = useRef({
     Key: "",
@@ -104,20 +105,19 @@ export default function QualityControlProjectEditFillStep({
     fts_do: string().required("required"),
     fts_do_file: string().nullable(),
     fts_check: string().when("$status", {
-      is: (val) => val !== "Phase 1 is Scored" && val !== "Draft Steps",
+      is: (val) => val === "Draft Genba 2",
       then: (schema) => schema.required("The Section is Required"),
       otherwise: (schema) => schema.nullable(),
     }),
     fts_check_file: string().nullable(),
     fts_action: string().when("$status", {
-      is: (val) => val !== "Phase 1 is Scored" && val !== "Draft Steps",
+      is: (val) => val === "Draft Genba 2",
       then: (schema) => schema.required("The Section is Required"),
       otherwise: (schema) => schema.nullable(),
     }),
     fts_modi_by: string().required("required creaby"),
   });
 
-  const [formDataMetodologiRef, setFormDataMetodRed] = useState("");
   const modalRef = useRef();
 
   useEffect(() => {
@@ -236,6 +236,7 @@ export default function QualityControlProjectEditFillStep({
         if (data === "ERROR") {
           throw new Error("Error: Failed to get FTS data");
         } else {
+          setStatusFTS(data[0].Status);
           payloadRef.current = {
             Key: data[0].Key,
             rci_id: data[0]["RCI ID"],
@@ -367,7 +368,7 @@ export default function QualityControlProjectEditFillStep({
 
     await payloadSchema.validate(payloadRef.current, {
       context: {
-        status: formDataRef.current.Status,
+        status: statusFTS,
       },
       abortEarly: false,
     });
@@ -377,8 +378,6 @@ export default function QualityControlProjectEditFillStep({
       payloadSchema,
       setErrors
     );
-
-    console.log("Payload", payloadRef.current);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
@@ -454,8 +453,6 @@ export default function QualityControlProjectEditFillStep({
   );
 
   if (isLoading) return <Loading />;
-
-  console.log("TES", arrTextData);
 
   return (
     <>
@@ -737,9 +734,7 @@ export default function QualityControlProjectEditFillStep({
                                   value={payloadRef.current.set_id}
                                   label="Metodologi"
                                   isDisabled={
-                                    payloadRef.current.set_id !== null
-                                      ? true
-                                      : false
+                                    statusFTS !== "Draft Genba 1" ? true : false
                                   }
                                   onChange={handleInputChange}
                                   isRequired
@@ -767,9 +762,7 @@ export default function QualityControlProjectEditFillStep({
                                 placeholder="Explains how the benefits of a project outweigh the costs and why the project should be implemented (menjelaskan bagaimana manfaat suatu proyek lebih besar daripada biayanya dan mengapa proyek tersebut harus dilaksanakan)"
                                 value={payloadRef.current.fts_plan}
                                 isDisabled={
-                                  payloadRef.current.fts_plan !== null
-                                    ? true
-                                    : false
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
                                 onChange={handleInputChange}
                                 errorMessage={errors.fts_plan}
@@ -782,9 +775,7 @@ export default function QualityControlProjectEditFillStep({
                                 formatFile=".pdf"
                                 ref={planFileRef}
                                 isDisabled={
-                                  payloadRef.current.fts_plan !== null
-                                    ? true
-                                    : false
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
                                 onChange={() =>
                                   handleFileChange(planFileRef, "pdf")
@@ -799,9 +790,7 @@ export default function QualityControlProjectEditFillStep({
                                 label="Do"
                                 isRequired
                                 isDisabled={
-                                  payloadRef.current.fts_do !== null
-                                    ? true
-                                    : false
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
                                 placeholder="Describe the steps taken to implement the plan and any resources used
 (Jelaskan langkah-langkah yang dilakukan untuk melaksanakan rencana serta sumber daya yang digunakan)"
@@ -817,9 +806,7 @@ export default function QualityControlProjectEditFillStep({
                                 formatFile=".pdf"
                                 ref={doFileRef}
                                 isDisabled={
-                                  payloadRef.current.fts_do !== null
-                                    ? true
-                                    : false
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
                                 onChange={() =>
                                   handleFileChange(doFileRef, "pdf")
@@ -835,34 +822,21 @@ export default function QualityControlProjectEditFillStep({
                               </label>
 
                               {/* Tampilkan informasi jika disabled */}
-                              {formDataRef.current.Status !==
-                                "Phase 1 is Scored" &&
-                                formDataRef.current.Status !==
-                                  "Draft Steps" && (
-                                  <div className="alert alert-warning p-2 mb-2">
-                                    This section is only editable during{" "}
-                                    <strong>Phase 1 is Scored</strong> status.
-                                  </div>
-                                )}
+                              {statusFTS === "Draft Genba 1" && (
+                                <div className="alert alert-warning p-2 mb-2">
+                                  This section is only editable during{" "}
+                                  <strong>Phase 1 is Scored</strong> status.
+                                </div>
+                              )}
 
                               <TextArea
                                 forInput="fts_check"
                                 isRequired={
-                                  formDataRef.current.Status !==
-                                    "Phase 1 is Scored" &&
-                                  formDataRef.current.Status !== "Draft Steps"
-                                    ? true
-                                    : false
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
-                                isDisabled={
-                                  formDataRef.current.Status !==
-                                    "Phase 1 is Scored" &&
-                                  formDataRef.current.Status !== "Draft Steps"
-                                }
+                                isDisabled={statusFTS === "Draft Genba 1"}
                                 placeholder={
-                                  formDataRef.current.Status ===
-                                    "Phase 1 is Scored" ||
-                                  formDataRef.current.Status === "Draft Steps"
+                                  statusFTS !== "Draft Genba 1"
                                     ? "Explain how the outcomes were monitored or measured and whether the plan was successful\n(Jelaskan bagaimana hasil dievaluasi atau diukur serta apakah rencananya berhasil)"
                                     : "" // dikosongkan karena tidak muncul saat disabled
                                 }
@@ -873,9 +847,7 @@ export default function QualityControlProjectEditFillStep({
                             </div>
 
                             <div className="col-lg-4">
-                              {formDataRef.current.Status ===
-                                "Phase 1 is Scored" ||
-                              formDataRef.current.Status === "Draft Steps" ? (
+                              {statusFTS !== "Draft Genba 1" ? (
                                 <FileUpload
                                   forInput="fts_check_file"
                                   label="Check Document (.pdf)"
@@ -903,34 +875,21 @@ export default function QualityControlProjectEditFillStep({
                               </label>
 
                               {/* Tampilkan informasi jika disabled */}
-                              {formDataRef.current.Status !==
-                                "Phase 1 is Scored" &&
-                                formDataRef.current.Status !==
-                                  "Draft Steps" && (
-                                  <div className="alert alert-warning p-2 mb-2">
-                                    This section is only editable during{" "}
-                                    <strong>Phase 1 is Scored</strong> status.
-                                  </div>
-                                )}
+                              {statusFTS === "Draft Genba 1" && (
+                                <div className="alert alert-warning p-2 mb-2">
+                                  This section is only editable during{" "}
+                                  <strong>Phase 1 is Scored</strong> status.
+                                </div>
+                              )}
 
                               <TextArea
                                 forInput="fts_action"
-                                isDisabled={
-                                  formDataRef.current.Status !==
-                                    "Phase 1 is Scored" &&
-                                  formDataRef.current.Status !== "Draft Steps"
-                                }
+                                isDisabled={statusFTS === "Draft Genba 1"}
                                 isRequired={
-                                  formDataRef.current.Status !==
-                                    "Phase 1 is Scored" &&
-                                  formDataRef.current.Status !== "Draft Steps"
-                                    ? true
-                                    : false
+                                  statusFTS !== "Draft Genba 1" ? true : false
                                 }
                                 placeholder={
-                                  formDataRef.current.Status ===
-                                    "Phase 1 is Scored" ||
-                                  formDataRef.current.Status === "Draft Steps"
+                                  statusFTS !== "Draft Genba 1"
                                     ? "Describe what actions were taken based on the evaluation and how the process can be improved\n(Jelaskan tindakan yang diambil berdasarkan evaluasi dan bagaimana prosesnya dapat ditingkatkan)"
                                     : "" // biarkan kosong karena tidak akan muncul
                                 }
@@ -941,9 +900,7 @@ export default function QualityControlProjectEditFillStep({
                             </div>
 
                             <div className="col-lg-4">
-                              {formDataRef.current.Status ===
-                                "Phase 1 is Scored" ||
-                              formDataRef.current.Status === "Draft Steps" ? (
+                              {statusFTS !== "Draft Genba 1" ? (
                                 <FileUpload
                                   forInput="fts_action_file"
                                   label="Action Document (.pdf)"
