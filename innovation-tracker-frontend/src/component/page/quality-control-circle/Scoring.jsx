@@ -489,15 +489,15 @@ export default function QCCScoring({ onChangePage, WithID }) {
             Deskripsi: item.Deskripsi,
           }));
 
-          const dataDetail = data3.map((item) => ({
-            Text: `(Poin: ${item.Score})`,
-            Value: item.Value,
-            Score: item.Score
-          }));
+          // const dataDetail = data3.map((item) => ({
+          //   Text: `(Poin: ${item.Score})`,
+          //   Value: item.Value,
+          //   Score: item.Score
+          // }));
 
           setListKriteria(data);
           setListNilaiDetailKriteria(nilaiDetail);
-          setListPenilaianRencanaCircle(dataDetail);
+          // setListPenilaianRencanaCircle(dataDetail);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -1001,9 +1001,9 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                       const nilai = listNilaiDetailKriteria.filter(
                                         (n) => n.Deskripsi === detail.Deskripsi
                                       );
-                                      const nilaiAfterPenilaian = listPenilaianRencanaCircle.find(
-                                        (n) => n.Value === nilai.Value
-                                      );
+                                      // const nilaiAfterPenilaian = listPenilaianRencanaCircle.find(
+                                      //   (n) => n.Value === nilai.Value
+                                      // );
 
                                       return (
                                         <div className="row mb-2" key={index}>
@@ -1021,7 +1021,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                               isRound
                                               isPlaceHolder={false}
                                               arrData={nilai}
-                                              value={formDataRef2.current[nilaiAfterPenilaian.Value]}
+                                              value={formDataRef2.current[detail.Value]}
                                               onChange={handleInputChange}
                                               />
                                             )}
