@@ -317,8 +317,8 @@ export default function QualityControlCircleIndex({
             Count: value["Count"],
             IsBold:
               value["Creaby"] === userInfo.username
-                ? ["Draft Scoring", "Approved"].includes(value["Status"])
-                : ["Waiting Approval", "Draft Scoring", "Approved"].includes(
+                ? ["Draft Steps", "Approved"].includes(value["Status"])
+                : ["Waiting Approval", "Draft Steps","Draft Scoring", "Approved"].includes(
                     value["Status"]
                   ),
             Action:
@@ -334,7 +334,7 @@ export default function QualityControlCircleIndex({
                   value["Status"] === "Scoring"
                 ? ["Detail", "Scoring"]
                 : role === "ROL01" &&
-                  value["Status"] === "Draft Scoring" &&
+                  value["Status"] === "Draft Steps" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "EditFillTheStep", "Submit"]
                 : role === "ROL01" &&
@@ -343,10 +343,10 @@ export default function QualityControlCircleIndex({
                 ? ["Detail", "Edit", "Submit"]
                 : role === "ROL36" && value["Status"] === "Approved"
                 ? ["Detail", "Submit"]
-                : value["Status"] === "Approved" &&
+                : (value["Status"] === "Approved" || value["Status"] === "Phase 1 is Scored") &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "FillTheStep"]
-                : value["Status"] === "Draft Scoring" &&
+                : value["Status"] === "Draft Steps" &&
                   value["Creaby"] === userInfo.username
                 ? ["Detail", "EditFillTheStep", "Submit"]
                 : ["Detail"],

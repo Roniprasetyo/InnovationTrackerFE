@@ -29,15 +29,6 @@ const inisialisasiData = [
   },
 ];
 
-const MetodologiArr = [
-  { Value: 51, Text: "PDCA (Plan-Do-Check-Act)" },
-  { Value: 50, Text: "DMAIC (Define-Measure-Analyze-Improve-Control)" },
-  { Value: 48, Text: "Kaizen" },
-  { Value: 37, Text: "Six Sigma" },
-  { Value: 60, Text: "Lean Manufacturing" },
-  { Value: 44, Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
-];
-
 export default function BussinessPerformanceImprovementEditFillStep({
   onChangePage,
   withID,
@@ -97,6 +88,8 @@ export default function BussinessPerformanceImprovementEditFillStep({
     fts_action_file: "",
     fts_modi_by: userInfo.username
   });
+
+  console.log("id", withID);
 
   const planFileRef = useRef(null);
   const doFileRef = useRef(null);
