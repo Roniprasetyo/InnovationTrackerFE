@@ -331,8 +331,11 @@ export default function QualityControlCircleIndex({
                   value["Creaby"] !== userInfo.username
                 ? ["Detail", "Reject", "Approve"]
                 : (inorole === "Facilitator" || role === "ROL36") &&
-                  value["Status"] === "Scoring"
+                  (value["Status"] === "Scoring" || value["Status"] === "Phase 1 is Scored")
                 ? ["Detail", "Scoring"]
+                : (inorole === "Facilitator") &&
+                  value["Status"] === "Draft Scoring"
+                ? ["Detail", "Edit", "Submit"]
                 : role === "ROL01" &&
                   value["Status"] === "Draft Scoring" &&
                   value["Creaby"] === userInfo.username

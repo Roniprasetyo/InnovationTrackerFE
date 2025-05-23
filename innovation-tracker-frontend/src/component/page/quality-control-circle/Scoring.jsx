@@ -65,6 +65,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
   const [listAllDepartment, setAllListDepartment] = useState([]);
   const [listKriteria, setListKriteria] = useState([]);
   const [listNilaiDetailKriteria, setListNilaiDetailKriteria] = useState([]);
+  const [listPenilaianRencanaCircle, setListPenilaianRencanaCircle] = useState([]);
   const [scoringPosition, setScoringPosition] = useState([]);
   const [scoringPositionRole, setScoringPositionRole] = useState([]);
   const [activeTab, setActiveTab] = useState(false);
@@ -121,6 +122,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
 
   const formDataRef2 = useRef({});
   const formDataRef3 = useRef({});
+  const formDataCommentRef = useRef({});
   const [formCommentFase1, setFormCommentFase1] = useState("");
   const [formCommentFase2, setFormCommentFase2] = useState("");
   const [formCommentFase3, setFormCommentFase3] = useState("");
@@ -301,39 +303,21 @@ export default function QCCScoring({ onChangePage, WithID }) {
 
     const payload = {
       dkp_id: Object.values(formDataRef2.current).join(", "),
-      sis_id: id,
-      pen_nilai: Object.values(formDataRef3.current).join(", "),
-      jabatan: userInfo.jabatan,
-      statusPN: "-",
-      created: userInfo.username,
-      pen_comment: `${comment} - ${userInfo.username}`,
+      rci_id: id,
+      pns_nilai: Object.values(formDataRef3.current).join(", "),
+      pns_comment: Object.values(formDataCommentRef.current).join(", ")
     };
 
     const payloadSchema = Yup.object().shape({
       dkp_id: Yup.string()
-        .required("dkp_id is required")
+        .nullable()
         .matches(
           /^(\d+\s*,\s*)*\d+$/,
           "dkp_id must be a comma-separated list of numbers"
-        )
-        .test(
-          "length-9",
-          "All Assessment Schemes must be filled!",
-          function (value) {
-            if (!value) return false;
-            const items = value
-              .split(",")
-              .map((v) => v.trim())
-              .filter((v) => v !== "");
-            return items.length === listKriteriaPenilaian.length;
-          }
         ),
-      sis_id: Yup.string().required("sis_id is required"),
-      pen_nilai: Yup.string().required("pen_nilai is required"),
-      jabatan: Yup.string().required("jabatan is required"),
-      statusPN: Yup.string().required("statusPN is required"),
-      created: Yup.string().required("created is required"),
-      pen_comment: Yup.string().nullable(),
+      rci_id: Yup.string().nullable(),
+      pns_nilai: Yup.string().nullable(),
+      pns_comment: Yup.string().nullable(),
     });
 
     const validationErrors = await validateAllInputs(
@@ -349,9 +333,11 @@ export default function QCCScoring({ onChangePage, WithID }) {
 
       try {
         const data = await UseFetch(
-          API_LINK + "RencanaSS/CreatePenilaian",
+          API_LINK + "RencanaCircle/CreatePenilaianRencanaCircle",
           payload
         );
+
+        console.log("RESPONSE:", data);
         if (!data) {
           throw new Error("Error: Failed to Submit the data.");
         } else {
@@ -380,17 +366,11 @@ export default function QCCScoring({ onChangePage, WithID }) {
     }
   };
 
-  const handleComment1 = (e) => {
-    setFormCommentFase1(e.target.value);
+  const handleCommentChange = (e, key) => {
+    const { value } = e.target;
+    formDataCommentRef.current[key] = value;
   };
 
-  const handleComment2 = (e) => {
-    setFormCommentFase2(e.target.value);
-  };
-
-  const handleComment3 = (e) => {
-    setFormCommentFase3(e.target.value);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -494,19 +474,30 @@ export default function QCCScoring({ onChangePage, WithID }) {
       try {
         const data = await UseFetch(API_LINK + "RencanaCircle/GetDeskripsiDetailkriteriaById");
         const data2 = await UseFetch(API_LINK + "RencanaCircle/GetNilaiDetailkriteriaById");
+        const data3 = await UseFetch(API_LINK + "RencanaCircle/GetPenilaianRencanaCircleById", 
+          {
+            id: WithID
+          });
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the Penilaian KA UPT data.");
         } else {
-          const dataDetail = data2.map((item) => ({
+          const nilaiDetail = data2.map((item) => ({
             Text: `(Poin: ${item.Score})`,
             Value: item.Value,
             Score: item.Score,
             Deskripsi: item.Deskripsi,
           }));
 
+          const dataDetail = data3.map((item) => ({
+            Text: `(Poin: ${item.Score})`,
+            Value: item.Value,
+            Score: item.Score
+          }));
+
           setListKriteria(data);
-          setListNilaiDetailKriteria(dataDetail);
+          setListNilaiDetailKriteria(nilaiDetail);
+          setListPenilaianRencanaCircle(dataDetail);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -999,9 +990,6 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                   const matchingKriteria = listKriteria.filter(
                                     (detail) => detail.Kriteria === item.Value
                                   );
-                                  const matchingListNilai = listNilaiDetailKriteria.filter((detail) =>
-                                    matchingKriteria.length > 0 && detail.Deskripsi === matchingKriteria[0].Deskripsi
-                                  );
 
                                   console.log("MATCHING KRITERIA", listKriteriaPenilaian);
 
@@ -1012,6 +1000,9 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                     matchingKriteria.map((detail, index) => {
                                       const nilai = listNilaiDetailKriteria.filter(
                                         (n) => n.Deskripsi === detail.Deskripsi
+                                      );
+                                      const nilaiAfterPenilaian = listPenilaianRencanaCircle.find(
+                                        (n) => n.Value === nilai.Value
                                       );
 
                                       return (
@@ -1029,13 +1020,8 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                               forInput={detail.Value}
                                               isRound
                                               isPlaceHolder={false}
-                                              selectedValued={
-                                                arrTextData[
-                                                  detail.Text - 1
-                                                ]
-                                              }
                                               arrData={nilai}
-                                              value={formDataRef2.current[detail.Value]}
+                                              value={formDataRef2.current[nilaiAfterPenilaian.Value]}
                                               onChange={handleInputChange}
                                               />
                                             )}
@@ -1091,13 +1077,13 @@ export default function QCCScoring({ onChangePage, WithID }) {
                                               </div>
                                             ) : (
                                               <Input
-                                              isDisabled={false}
-                                              type="textarea"
-                                              forInput="commentFase1"
-                                              onChange={handleComment1}
-                                              value={formCommentFase1}
-                                              errorMessage={errors.formCommentFase1}
-                                            />
+                                                isDisabled={false}
+                                                type="textarea"
+                                                forInput="commentFase1"
+                                                onChange={(e) => handleCommentChange(e, item.Value)}
+                                                value={formDataCommentRef.current[item.Value]}
+                                                errorMessage={errors.formDataCommentRef}
+                                              />
                                             )}
                                           </div>
                                           </div>
@@ -1170,7 +1156,7 @@ export default function QCCScoring({ onChangePage, WithID }) {
                       </div>
                     </div>
                     <div className="col-lg-12">
-                      {activeTab && !submitOnly ? (
+                      {role === "ROL36" && activeTab || !submitOnly ? (
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="flex-grow-1 m-2">
                             <Button
