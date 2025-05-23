@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { decodeHtml, formatDate, separator } from "../../util/Formatting";
-import { API_LINK, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
+import { API_LINK, COLOR_PRIMARY, EMP_API_LINK, FILE_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
@@ -15,8 +15,12 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
   let userInfo = "";
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [listEmployee, setListEmployee] = useState([]);
+  const [nilaiKepsek, setNilaiKepsek] = useState([]);
+  const [nilaiKadept, setNilaiKadept] = useState([]);
+  const [nilaiWadir, setNilaiWadir] = useState([]);
   const [userData, setUserData] = useState({});
   const [listKriteriaPenilaian, setListKriteriaPenilaian] = useState([]);
+  const [listPenilaianForCoor, setListPenilaianForCoor] = useState([]);
   const [listDetailKriteriaPenilaian, setListDetailKriteriaPenilaian] =
     useState([]);
   const [errors, setErrors] = useState({});
@@ -133,11 +137,15 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
         const data = await UseFetch(
           API_LINK + "MiniConvention/GetListKriteriaPenilaian"
         );
+        const data2 = await UseFetch(
+          API_LINK + "RencanaSS/GetPenilaianForCoorById", {id: withID}
+        );
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
         } else {
           setListKriteriaPenilaian(data);
+          setListPenilaianForCoor(data2);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -186,10 +194,42 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const kepsek = listPenilaianForCoor.filter(
+      (item) => item["Jabatan Penilai"] === "Kepala Seksi" || item["Jabatan Penilai"] === "Sekretaris Prodi"
+    );
+    const kadept = listPenilaianForCoor.filter(
+      (item) => item["Jabatan Penilai"] === "Kepala Departemen" || item["Jabatan Penilai"] === "Kepala Jurusan"
+    );
+    const wadir = listPenilaianForCoor.filter(
+      (item) => item["Jabatan Penilai"] === "Wakil Direktur" || item["Jabatan Penilai"] === "Direktur"
+    );
+
+    const totalNilaiKepsek = kepsek.reduce((acc, curr) => acc + (parseFloat(curr.Nilai) || 0), 0);
+    const totalNilaiKadept = kadept.reduce((acc, curr) => acc + (parseFloat(curr.Nilai) || 0), 0);
+    const totalNilaiWadir = wadir.reduce((acc, curr) => acc + (parseFloat(curr.Nilai) || 0), 0);
+
+    setNilaiKepsek(totalNilaiKepsek);
+    setNilaiKadept(totalNilaiKadept);
+    setNilaiWadir(totalNilaiWadir);
+  }, [listPenilaianForCoor]);
+
+  console.log("PPP ", listPenilaianForCoor);
   if (isLoading) return <Loading />;
 
   return (
     <>
+      <div
+        className="row my-3"
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <h2
+          className="fw-bold"
+          style={{ color: "rgb(0, 89, 171)", margin: "0" }}
+        >
+          Detail Data
+        </h2>
+      </div>
       <div className="mt-3">
         {isError.error && (
           <div className="flex-fill ">
@@ -421,6 +461,113 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                       </div>
                     </div>
                   </div>
+                  <div className="card mb-3">
+                    <div className="card-body">
+                        <div className="d-flex justify-content-center gap-5">
+                          <div
+                            className="card fw-medium text-center"
+                            style={{
+                              width: "200px",
+                              minHeight: "150px",
+                              backgroundColor: "white",
+                              boxShadow: COLOR_PRIMARY,
+                              transform:"scale(1.05)",
+                              transition:
+                                "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <div className="card-header">Total Score</div>
+ 
+                            <div
+                              style={{
+                                flexGrow: 1,
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                fontSize: "16px",
+                              }}
+                            >
+                              <div>Ka.Unit/Ka.UPT/SekProdi</div>
+                              <h1
+                                style={{ margin: 0, fontSize: "40px" }}
+                              >
+                                {nilaiKepsek || 0}
+                              </h1>
+                            </div>
+                          </div>
+                          <div
+                            className="card fw-medium text-center"
+                            style={{
+                              width: "200px",
+                              minHeight: "150px",
+                              boxShadow: COLOR_PRIMARY,
+                              transform:"scale(1.05)",
+                              transition:
+                                "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <div className="card-header">Total Score</div>
+                            <div
+                              style={{
+                                flexGrow: 1,
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                fontSize: "16px",
+                              }}
+                            >
+                              <div>Ka.Prodi/Ka.Dept</div>
+                              <h1
+                                style={{ margin: 0, fontSize: "40px" }}
+                              >
+                                {nilaiKadept || 0}
+                              </h1>
+                            </div>
+                          </div>
+                          <div
+                            className="card fw-medium text-center"
+                            style={{
+                              width: "200px",
+                              minHeight: "150px",
+                              boxShadow: COLOR_PRIMARY,
+                              transform:"scale(1.05)",
+                              transition:
+                                "all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <div className="card-header">Total Score</div>
+                            <div
+                              style={{
+                                flexGrow: 1,
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                fontSize: "16px",
+                              }}
+                            >
+                              <div>WaDIR/DIR</div>
+                              <h1
+                                style={{ margin: 0, fontSize: "40px" }}
+                              >
+                                {nilaiWadir || 0}
+                              </h1>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
                   <Button
                     iconName={"angle-left"}
                     classType={"primary"}
@@ -505,6 +652,14 @@ export default function SuggestionSystemDetail({ onChangePage, withID }) {
                     </div>
                   </div>
                 )}
+                <div className="col-lg-2">
+                  <Button
+                    iconName={"angle-left"}
+                    classType={"primary"}
+                    onClick={() => onChangePage("index")}
+                    label="Back"
+                  />
+                </div>
 
                 <div className="d-flex justify-content-end pe-3 mb-3">
                   <sub>

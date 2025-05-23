@@ -4,6 +4,7 @@ import QualityControlCircleAdd from "./Add";
 import QualityControlCircleEdit from "./Edit";
 import QualityControlCircleDetail from "./Detail";
 import QualityControlCircleFillStep from "./FillStep";
+import QualityControlCircleEditFillStep from "./EditFillTheStep";
 
 export default function QualityControlCircle() {
   const [pageMode, setPageMode] = useState("index");
@@ -12,12 +13,22 @@ export default function QualityControlCircle() {
   function getPageMode() {
     switch (pageMode) {
       case "index":
-        return <QualityControlCircleIndex onChangePage={handleSetPageMode} />;
+        return <QualityControlCircleIndex 
+        onChangePage={handleSetPageMode} 
+        onScoring={handleScoring}
+        />;
       case "add":
         return <QualityControlCircleAdd onChangePage={handleSetPageMode} />;
       case "edit":
         return (
           <QualityControlCircleEdit
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+      case "editfts":
+        return (
+          <QualityControlCircleEditFillStep
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
@@ -37,6 +48,28 @@ export default function QualityControlCircle() {
           />
         );
     }
+  }
+
+  function generateRandomString(length) {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  function obfuscateId(id) {
+    const randomPrefix = generateRandomString(5); // acak 5 karakter
+    const base64Id = btoa(id.toString());
+    return `${randomPrefix}.${base64Id}`;
+  }
+
+  function handleScoring(_, id) {
+    const obfuscatedId = obfuscateId(id);
+    const scoringUrl = `/QCCScoring?id=${encodeURIComponent(obfuscatedId)}`;
+    window.open(scoringUrl, "_blank");
   }
 
   function handleSetPageMode(mode) {

@@ -15,6 +15,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
     onChange,
     isDisabled = false,
     selectedValued = null,
+    isPlaceHolder = false,
     ...props
   },
   ref
@@ -83,11 +84,9 @@ const SearchDropdown = forwardRef(function SearchDropdown(
         <div className="mb-3 position-relative">
           <label htmlFor={forInput} className="form-label fw-bold">
             {label}
-            {isRequired ? <span className="text-danger"> *</span> : ""}
-            {errorMessage ? (
+            {isRequired && <span className="text-danger"> *</span>}
+            {errorMessage && (
               <span className="fw-normal text-danger"> {errorMessage}</span>
-            ) : (
-              ""
             )}
           </label>
 
@@ -176,7 +175,7 @@ const SearchDropdown = forwardRef(function SearchDropdown(
               className={`form-control ${isRound ? "rounded-5" : ""} ${
                 errorMessage ? "is-invalid" : ""
               }`}
-              placeholder={`-- Choose ${placeHolder} --`}
+              placeholder={isPlaceHolder ? `-- Choose ${placeHolder} --` : ""}
               value={searchTerm}
               onChange={handleInputChange}
               onFocus={() => setDropdownOpen(true)}

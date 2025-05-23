@@ -38,7 +38,7 @@ const MetodologiArr = [
   { Value: 44, Text: "5S (Sort, Set in Order, Shine, Standardize, Sustain)" },
 ];
 
-export default function QualityControlCircleFillStep({ onChangePage, withID }) {
+export default function QualityControlProjectFillStep({ onChangePage, withID }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   // console.log(withID);
@@ -351,8 +351,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
           )
         );
       }
-      payloadRef.current.set_id = 51;
-
+      
       try {
         await Promise.all(uploadPromises);
 
@@ -416,7 +415,7 @@ export default function QualityControlCircleFillStep({ onChangePage, withID }) {
         )}
         <div className="card mb-5">
           <div className="card-header">
-            <h3 className="fw-bold text-center">QCC REGISTRATION DETAIL</h3>
+            <h3 className="fw-bold text-center">QCP REGISTRATION DETAIL</h3>
           </div>
           <div className="card-body p-3">
             {isLoading ? (

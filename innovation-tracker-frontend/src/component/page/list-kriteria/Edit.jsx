@@ -195,8 +195,8 @@ export default function ListKriteriaEdit({ onChangePage, withID }) {
                   <div className="col-lg-6">
                     <SearchDropdown
                       forInput="kriId"
-                      label="Knowledge Category"
-                      placeHolder="Knowledge Category"
+                      label="Criteria"
+                      placeHolder="Criteria"
                       arrData={listKriteria}
                       isRequired
                       isRound
@@ -209,7 +209,7 @@ export default function ListKriteriaEdit({ onChangePage, withID }) {
                     <Input
                       type="number"
                       forInput="kriScore"
-                      label="Name"
+                      label="Score"
                       isRequired
                       value={formDataRef.current.kriScore}
                       onChange={handleInputChange}

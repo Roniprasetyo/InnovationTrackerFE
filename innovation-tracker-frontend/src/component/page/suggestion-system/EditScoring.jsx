@@ -240,7 +240,10 @@ export default function EditScoring({ onChangePage }) {
       ) {
         status1 = "Draft Scoring";
       }
-    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
+    } else if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
       if (
         formDataRef.current.Status === "Approved" ||
         formDataRef.current.Status.includes("Draft Scoring")
@@ -373,7 +376,8 @@ export default function EditScoring({ onChangePage }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
         const data = await UseFetch(
-          API_LINK + "MiniConvention/GetListKriteriaPenilaian"
+          API_LINK + "MiniConvention/GetListKriteriaPenilaian",
+          { category: "Suggestion System (SS)" }
         );
 
         if (data === "ERROR") {
@@ -426,7 +430,7 @@ export default function EditScoring({ onChangePage }) {
                 userInfo.jabatan === "Sekretaris Prodi"
                   ? item.Komment1
                   : userInfo.jabatan === "Kepala Departemen" ||
-                  userInfo.jabatan === "Kepala Jurusan" 
+                    userInfo.jabatan === "Kepala Jurusan"
                   ? item.Komment2
                   : userInfo.jabatan === "Wakil Direktur" ||
                     userInfo.jabatan === "Direktur"

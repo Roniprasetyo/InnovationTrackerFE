@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, Navigate  } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
 import { PAGE_SIZE, API_LINK, EMP_API_LINK } from "../../util/Constants";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
@@ -78,14 +78,11 @@ export default function SuggestionSytemIndex({
     return (
       <div>
         <div className="mt-3 flex-fill">
-            <Alert
-              type="danger"
-              message="Your session has expired."
-            />
-          </div>
+          <Alert type="danger" message="Your session has expired." />
+        </div>
         <NotFound />
       </div>
-    ) ;
+    );
   }
 
   const location = useLocation();
@@ -99,6 +96,7 @@ export default function SuggestionSytemIndex({
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [currentData, setCurrentData] = useState(inisialisasiData);
   const [penJabatan, setPenJabatan] = useState([]);
+  const [selectedId, setSelectedId] = useState("");
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
@@ -109,7 +107,6 @@ export default function SuggestionSytemIndex({
     npk: userInfo.npk,
     upt: userInfo.upt,
   });
-  console.log(userInfo);
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
@@ -134,18 +131,18 @@ export default function SuggestionSytemIndex({
   function handleSearch() {
     setIsLoading(true);
     let p2 = "";
-    if (convertToDateString(searchQuery.current.value) !== null) {
-      p2 = convertToDateString(searchQuery.current.value);
+    if (convertToDateString(searchQuery.current?.Value) !== null) {
+      p2 = convertToDateString(searchQuery.current?.Value);
     } else {
-      p2 = searchQuery.current.value;
+      p2 = searchQuery.current?.Value;
     }
     setCurrentFilter((prevFilter) => {
       return {
         ...prevFilter,
         page: 1,
         query: p2,
-        sort: searchFilterSort.current.value,
-        status: searchFilterStatus.current.value,
+        sort: searchFilterSort.current?.Value,
+        status: searchFilterStatus.current?.Value,
       };
     });
   }
@@ -216,6 +213,11 @@ export default function SuggestionSytemIndex({
   }, []);
 
   const handleSubmit = async (id) => {
+    // const selectedItem = currentData.find(item => item.Key === id);
+    // const facil = selectedItem?.Category;
+
+    // console.log("FACIL", facil);
+    // setSelectedId(id);
     setIsError(false);
     setIsError((prevError) => ({ ...prevError, error: false }));
 
@@ -258,7 +260,7 @@ export default function SuggestionSytemIndex({
             return {
               Keys: item.Key,
               Deskripsi: `${deskripsiPendek}`,
-              Value: item.Value,
+              Value: item?.Value,
               Nilai: item.Nilai,
               Kriteria: item.Kriteria,
               jab: item["Jabatan Penilai"],
@@ -288,7 +290,10 @@ export default function SuggestionSytemIndex({
           tempTotal1 += parseFloat(item.Nilai) || 0;
         }
       });
-    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
+    } else if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
       try {
         const data = await UseFetch(
           API_LINK + "RencanaSS/GetPenilaianByIDScoring",
@@ -310,7 +315,7 @@ export default function SuggestionSytemIndex({
             return {
               Keys: item.Key,
               Deskripsi: `${deskripsiPendek}`,
-              Value: item.Value,
+              Value: item?.Value,
               Nilai: item.Nilai,
               Kriteria: item.Kriteria,
               jab: item["Jabatan Penilai"],
@@ -318,7 +323,6 @@ export default function SuggestionSytemIndex({
               Creadate: item.Creadate,
             };
           });
-
           statusKdept = dataDetail;
         }
       } catch (error) {
@@ -334,7 +338,7 @@ export default function SuggestionSytemIndex({
       }
 
       statusKdept.forEach((item) => {
-        if (item.jab !== "Kepala Departemen") {
+        if (item.jab !== "Kepala Departemen" && item.jab !== "Kepala Jurusan") {
           tempTotal2 = 0;
         } else {
           tempTotal2 += parseFloat(item.Nilai) || 0;
@@ -365,7 +369,7 @@ export default function SuggestionSytemIndex({
             return {
               Keys: item.Key,
               Deskripsi: `${deskripsiPendek}`,
-              Value: item.Value,
+              Value: item?.Value,
               Nilai: item.Nilai,
               Kriteria: item.Kriteria,
               jab: item["Jabatan Penilai"],
@@ -373,7 +377,6 @@ export default function SuggestionSytemIndex({
               Creadate: item.Creadate,
             };
           });
-
           statusDir = dataDetail;
         }
       } catch (error) {
@@ -442,7 +445,10 @@ export default function SuggestionSytemIndex({
       } else {
         status1 = "Scoring";
       }
-    } else if (userInfo.jabatan === "Kepala Departemen" || userInfo.jabatan === "Kepala Jurusan") {
+    } else if (
+      userInfo.jabatan === "Kepala Departemen" ||
+      userInfo.jabatan === "Kepala Jurusan"
+    ) {
       const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
       if (item && item.Range) {
         const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
@@ -466,7 +472,7 @@ export default function SuggestionSytemIndex({
 
     const confirm = await SweetAlert(
       "Confirm",
-      "Are you sure about this value?",
+      "  sure about this value?",
       "info",
       "Submit",
       null,
@@ -476,29 +482,95 @@ export default function SuggestionSytemIndex({
 
     if (confirm) {
       if (tempStatus !== "Approved") {
-        UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
-          id: id,
-          status: status1,
-        })
-          .then((data) => {
-            if (!data) {
-              setIsError(true);
-            } else {
-              SweetAlert(
-                "Success",
-                "Thank you for your submission. Please wait until the next update",
-                "success"
-              );
-              handleSetCurrentPage(currentFilter.page);
+        setIsLoading(true);
+
+        try {
+          const updateResult = await UseFetch(API_LINK + "RencanaSS/UpdateStatusPenilaian", {
+            id: id,
+            status: status1,
+          });
+
+          if (!updateResult) {
+            setIsError(true);
+            setIsLoading(false);
+            return;
+          }
+
+          const nilaiData = await UseFetch(API_LINK + "RencanaSS/GetPenilaianByIDScoring", {
+            id: id,
+            jab: userInfo.jabatan,
+          });
+
+          console.log("Data penilaian yang diambil:", nilaiData);
+
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          const decodedNama = decodeHtml(
+            decodeHtml(decodeHtml(userInfo.nama))
+          ).replace(/<\/?[^>]+(>|$)/g, "'");
+
+          let ranking = 0;
+          let isSpecialRole = false;
+          let notifikasiEndpoint = "Notifikasi/CreateNotifikasi";
+          let notifikasiMessage = `A new Suggestion System submission has been created by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
+
+          if (
+            userInfo.jabatan === "Kepala Seksi" ||
+            userInfo.jabatan === "Sekretaris Prodi"
+          ) {
+            const item = listSettingRanking.find((s) => s.Ranking === "Ranking 5");
+            if (item && item.Range) {
+              const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+              ranking = parts.length > 1 ? parts[1] : parts[0];
+              isSpecialRole = true;
+              notifikasiEndpoint = "Notifikasi/CreateNotifikasi3";
+              notifikasiMessage = `Suggestion System Requires Further Evaluation. A Suggestion System submission titled ${decodedTitle} is now pending your evaluation. Please review and score the submission accordingly.`;
             }
-          })
-          .then(() => setIsLoading(false));
+          }
+
+          if (userInfo.jabatan === "Kepala Departemen") {
+            const item = listSettingRanking.find((s) => s.Ranking === "Ranking 4");
+            if (item && item.Range) {
+              const parts = item.Range.split("-").map((p) => parseInt(p.trim(), 10));
+              ranking = parts.length > 1 ? parts[1] : parts[0];
+              isSpecialRole = true;
+              notifikasiEndpoint = "Notifikasi/CreateNotifikasi4";
+              notifikasiMessage = `Suggestion System Requires Final Evaluation. A Suggestion System submission titled ${decodedTitle} is now pending your evaluation. Please review and score the submission accordingly.`;
+            }
+          }
+
+          if (status1 !== "Final") {
+            await UseFetch(API_LINK + notifikasiEndpoint, {
+              from: userInfo.username,
+              to: "",
+              message: notifikasiMessage,
+              sis: id,
+              rci: -1,
+            });
+          }
+
+          SweetAlert(
+            "Success",
+            "Thank you for your submission. Please wait until the next update",
+            "success"
+          );
+
+          handleSetCurrentPage(currentFilter.page);
+        } catch (error) {
+          console.error("Terjadi error saat submit:", error);
+          setIsError(true);
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
   };
 
   const handleApprove = async (id) => {
     setIsError(false);
+
     const confirm = await SweetAlert(
       "Confirm",
       "Are you sure you want to approve this submission?",
@@ -510,20 +582,65 @@ export default function SuggestionSytemIndex({
     );
 
     if (confirm) {
+      setIsLoading(true);
+
       UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Approved",
         reason: null,
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+        .then(async () => {
+          try {
+            const detailResponse = await UseFetch(API_LINK + "RencanaSS/GetRencanaSSByIdV2", {
+              id: id,
+            });
+
+            if (detailResponse === "ERROR" || !Array.isArray(detailResponse) || detailResponse.length === 0) {
+              throw new Error("Error: Failed to get the GetRencanaSSByIdV2.");
+            }
+
+            const detailSS = detailResponse[0];
+            const decodedTitle = decodeHtml(
+              decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+            ).replace(/<\/?[^>]+(>|$)/g, "");
+
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveReject", {
+              from: userInfo.username,
+              to: "",
+              message: `Suggestion System Submission Approved. Your Suggestion System submission titled ${decodedTitle} has been approved and will proceed to the evaluation stage.`,
+              sis: id,
+              rci: -1,
+            });
+
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasi2", {
+              from: userInfo.username,
+              to: userInfo.username,
+              message: `Suggestion System Requires Evaluation. A Suggestion System submission titled ${decodedTitle}, submitted by ${detailSS.Creaby} - ${detailSS.NPK}, is ready for your evaluation. Please review and score the submission accordingly.`,
+              sis: id,
+              rci: -1,
+            });
+
             handleSetCurrentPage(currentFilter.page);
+          } catch (error) {
+            window.scrollTo(0, 0);
+            setIsError({
+              error: true,
+              message: error.message,
+            });
+            setListCategory({});
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => {
+          setIsError({ error: true, message: "Approval request failed." });
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
+
   };
+
+
   const handleSubmitBatch = (id) => {
     setIsError(false);
     setIsLoading(true);
@@ -532,7 +649,7 @@ export default function SuggestionSytemIndex({
       arrId.push(value.Key);
     });
     const param = {
-      id: Object.values(arrId).join(","),
+      id: Object?.Values(arrId).join(","),
       batch: batchRef.current,
     };
     UseFetch(API_LINK + "RencanaSS/SetBatchRencanaSS", param)
@@ -609,18 +726,33 @@ export default function SuggestionSytemIndex({
     );
 
     if (confirm) {
+      setIsLoading(true);
       UseFetch(API_LINK + "RencanaSS/SetApproveRencanaSS", {
         id: id,
         set: "Rejected",
         reason: confirm,
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+        .then(async (data) => {
+
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData[0]["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          if (data === "ERROR" || data.length === 0) {
+            setIsError(true);
+          } else {
+            await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiApproveReject", {
+              from: userInfo.username,
+              to: "",
+              message: `Suggestion System Submission Reject. Your Suggestion System submission titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
+              sis: id,
+              rci: -1,
+            });
             handleSetCurrentPage(currentFilter.page);
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -638,7 +770,6 @@ export default function SuggestionSytemIndex({
     );
 
     if (confirm) {
-      // setIsLoading(true);
       UseFetch(API_LINK + "RencanaSS/SetNonActiveRencanaSS", {
         id: id,
       }).then(() => {
@@ -770,9 +901,7 @@ export default function SuggestionSytemIndex({
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
       try {
-        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting", {
-          p1: "Innovation Category",
-        });
+        const data = await UseFetch(API_LINK + "MasterSetting/GetListSetting");
 
         if (data === "ERROR") {
           throw new Error("Error: Failed to get the category data.");
@@ -781,7 +910,7 @@ export default function SuggestionSytemIndex({
             item.Text.includes("Convention")
           );
           setListCategory(dataTemp);
-          batchRef.current = dataTemp[0].Value;
+          batchRef.current = dataTemp[0]?.Value;
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -823,7 +952,6 @@ export default function SuggestionSytemIndex({
             const foundEmployee = listEmployee.find(
               (emp) => emp.username === value["Creaby"]
             );
-            console.log("tesa", foundEmployee);
 
             const jabatanTarget =
               userInfo.upt === "Pusat Sistem Informasi"
@@ -856,7 +984,7 @@ export default function SuggestionSytemIndex({
                   "Waiting Approval",
                   "Draft Scoring",
                   "Approved",
-                ].includes(value["Status"]),
+                ].includes(value["Status"]) && value["Status"] !== "Rejected",
                 Action: ["Waiting Approval"].includes(value["Status"])
                   ? ["Detail", "Delete"]
                   : ["Detail"],
@@ -875,8 +1003,8 @@ export default function SuggestionSytemIndex({
                 ],
               };
             } else if (
-              (userInfo.jabatan === "Kepala Departemen"
-                || userInfo.jabatan === "Kepala Jurusan" ||
+              (userInfo.jabatan === "Kepala Departemen" ||
+                userInfo.jabatan === "Kepala Jurusan" ||
                 userInfo.jabatan === "Sekretaris Prodi" ||
                 userInfo.jabatan === "Direktur" ||
                 userInfo.jabatan === "Wakil Direktur" ||
@@ -936,8 +1064,9 @@ export default function SuggestionSytemIndex({
                       (value["Status"] === "Approved" ||
                         value["Status"] === "Awaiting Scoring")
                     ? ["Detail", "Scoring"]
-                    : (userInfo.jabatan === "Kepala Departemen" && userInfo.jabatan === "Kepala Jurusan") &&
-                      value["Status"] === "Draft Scoring"
+                    : (userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Kepala Jurusan")  &&
+                        value["Status"] === "Draft Scoring"
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Wakil Direktur" ||
                         userInfo.jabatan === "Direktur") &&
@@ -948,8 +1077,8 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "EditScoring", "Submit"]
                     : (userInfo.jabatan === "Kepala Seksi" ||
                         userInfo.jabatan === "Sekretaris Prodi" ||
-                        userInfo.jabatan === "Kepala Departemen"
-                        || userInfo.jabatan === "Kepala Jurusan"||
+                        userInfo.jabatan === "Kepala Departemen" ||
+                        userInfo.jabatan === "Kepala Jurusan" ||
                         userInfo.jabatan === "Wakil Direktur" ||
                         userInfo.jabatan === "Direktur") &&
                       (value["Status"] === "Scoring" ||
@@ -962,9 +1091,10 @@ export default function SuggestionSytemIndex({
                     ? ["Detail", "Scoring"]
                     : userInfo.upt === foundEmployee.upt &&
                       userInfo.jabatan === "Kepala Seksi" &&
-                      value["Status"] === "Draft Scoring"
+                      value["Status"] === "Draft Scoring" 
                     ? ["Detail", "EditScoring", "Submit"]
-                    : (userInfo.jabatan === "Kepala Departemen" && userInfo.jabatan === "Kepala Jurusan") &&
+                    : (userInfo.jabatan === "Kepala Departemen" ||
+                      userInfo.jabatan === "Kepala Jurusan") &&
                       value["Status"] === "Waiting Approval"
                     ? ["Detail", "Reject", "Approve"]
                     : (userInfo.jabatan === "Wakil Direktur" ||
@@ -1079,6 +1209,8 @@ export default function SuggestionSytemIndex({
     fetchData();
   }, [currentFilter, listEmployee]);
 
+  console.log("dawawd", userInfo)
+
   useEffect(() => {
     const shouldRefresh = localStorage.getItem("refreshAfterSubmit");
 
@@ -1170,7 +1302,7 @@ export default function SuggestionSytemIndex({
               type="semua"
               arrData={
                 userInfo.role.slice(0, 5) === "ROL36"
-                  ? dataFilterStatus.filter((item) => item.Value != "Draft")
+                  ? dataFilterStatus.filter((item) => item?.Value != "Draft")
                   : dataFilterStatus
               }
               defaultValue=""
@@ -1263,7 +1395,7 @@ export default function SuggestionSytemIndex({
           arrData={listCategory}
           forInput="batch"
           value={batchRef.current}
-          onChange={(e) => (batchRef.current = e.target.value)}
+          onChange={(e) => (batchRef.current = e.target?.Value)}
           showLabel={false}
         />
       </Modal>

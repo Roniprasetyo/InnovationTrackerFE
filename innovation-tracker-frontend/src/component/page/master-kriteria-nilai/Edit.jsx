@@ -9,6 +9,12 @@ import Input from "../../part/Input";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
 import Icon from "../../part/Icon";
+import SearchDropdown from "../../part/SearchDropdown";
+
+const listCategory = [
+  { Value: "Suggestion System (SS)", Text: "Suggestion System (SS)" },
+  { Value: "QCC/QCP/BPI/VCI", Text: "QCC/QCP/BPI/VCI" },
+];
 
 export default function MasterKriteriaNilaiEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
@@ -19,12 +25,14 @@ export default function MasterKriteriaNilaiEdit({ onChangePage, withID }) {
     kriId: "",
     kriNama: "",
     kriDesk: "",
+    kriCateg: "",
   });
 
   const userSchema = object({
     kriId: number(),
     kriNama: string().max(50, "maksimum 50 karakter").required("harus diisi"),
-    kriDesk: string().max(100, "maksimum 100 karakter"),
+    kriDesk: string().nullable(),
+    kriCateg: string().max(100, "maksimum 100 karakter"),
   });
 
   useEffect(() => {
@@ -47,6 +55,7 @@ export default function MasterKriteriaNilaiEdit({ onChangePage, withID }) {
             kriId: withID,
             kriNama: data[0].Name,
             kriDesk: data[0].Description,
+            kriCateg: data[0].Category,
           };
 
           // Update formDataRef dengan data yang sudah diformat
@@ -170,6 +179,19 @@ export default function MasterKriteriaNilaiEdit({ onChangePage, withID }) {
                       errorMessage={errors.kriNama}
                     />
                   </div>
+                  <div className="col-lg-6">
+                  <SearchDropdown
+                    forInput="kriCateg"
+                    label="Category"
+                    placeHolder="Category"
+                    arrData={listCategory}
+                    isRequired
+                    isRound
+                    value={formDataRef.current.kriCateg}
+                    onChange={handleInputChange}
+                    errorMessage={errors.kriCateg}
+                  />
+                </div>
                   <div className="col-lg-12">
                     <Input
                       type="textarea"

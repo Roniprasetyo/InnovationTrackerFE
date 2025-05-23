@@ -63,26 +63,23 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
   const cookie = Cookies.get("activeUser");
   let userInfo = "";
   if (cookie) {
-      try {
-        userInfo = JSON.parse(decryptId(cookie));
-      } catch (e) {
-        userInfo = "";
-      }
+    try {
+      userInfo = JSON.parse(decryptId(cookie));
+    } catch (e) {
+      userInfo = "";
     }
-  
-    if (!userInfo) {
-      return (
-        <div>
-          <div className="mt-3 flex-fill">
-              <Alert
-                type="danger"
-                message="Your session has expired."
-              />
-            </div>
-          <NotFound />
+  }
+
+  if (!userInfo) {
+    return (
+      <div>
+        <div className="mt-3 flex-fill">
+          <Alert type="danger" message="Your session has expired." />
         </div>
-      ) ;
-    }
+        <NotFound />
+      </div>
+    );
+  }
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -123,34 +120,73 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
     });
   }
 
+  const getStatusByKey = (key) => {
+    const data = currentData.find((item) => item.Key === key);
+    return data ? data.Status : null;
+  };
+
   const handleSubmit = async (id) => {
     setIsError(false);
+    setIsLoading(true);
+
+    const tempStatus = getStatusByKey(id);
+
     const confirm = await SweetAlert(
       "Confirm",
-      "Are you sure you want to submit this registration form? Once submitted, the form will be final and cannot be changed.",
-      "warning",
-      "SUBMIT",
+      "Are you sure about this value?",
+      "info",
+      "Submit",
       null,
       "",
       true
     );
 
     if (confirm) {
-      UseFetch(API_LINK + "RencanaCircle/SentRencanaCircle", {
-        id: id,
-      })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert(
-              "Success",
-              "Thank you for submitting your registration form. Please wait until the next update",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
+      try {
+        const updateResult = await UseFetch(
+          API_LINK + "RencanaCircle/SentRencanaCircle",
+          {
+            id: id,
           }
-        })
-        .then(() => setIsLoading(false));
+        );
+
+        if (updateResult === "ERROR" || updateResult.length === 0) {
+          setIsError(true);
+        } else {
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          const decodedNama = decodeHtml(
+            decodeHtml(decodeHtml(userInfo.nama))
+          ).replace(/<\/?[^>]+(>|$)/g, "'");
+
+          const notifikasiMessage = `A new Value Chain Innovation registration has been submitted by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
+
+          await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiQCC1", {
+            from: userInfo.username,
+            to: "",
+            message: notifikasiMessage,
+            sis: -1,
+            rci: id,
+          });
+
+          SweetAlert(
+            "Success",
+            "Thank you for submitting your registration form. Please wait until the next update",
+            "success"
+          );
+
+          handleSetCurrentPage(currentFilter.page);
+        }
+      } catch (error) {
+        console.error("Terjadi error saat submit:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
     }
   };
 
@@ -171,13 +207,29 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
         id: id,
         set: "Approved",
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+        .then(async (data) => {
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          if (data === "ERROR" || data.length === 0) {
+            setIsError(true);
+          } else {
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Value Chain Innovation Approve. Your Value Chain Innovation titled ${decodedTitle} has been approved and please continue to fill in the next form`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -199,13 +251,29 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
         set: "Rejected",
         reason: confirm,
       })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
+        .then(async (data) => {
+          const decodedTitle = decodeHtml(
+            decodeHtml(decodeHtml(currentData["Project Title"]))
+          ).replace(/<\/?[^>]+(>|$)/g, "");
+
+          if (data === "ERROR" || data.length === 0) {
+            setIsError(true);
+          } else {
+            await UseFetch(
+              API_LINK + "Notifikasi/CreateNotifikasiApproveRejectQCC",
+              {
+                from: userInfo.username,
+                to: "",
+                message: `Value Chain Innovation Reject. Your Value Chain Innovation titled ${decodedTitle} has been rejected. Please check the provided reason for further details.`,
+                sis: -1,
+                rci: id,
+              }
+            );
             handleSetCurrentPage(currentFilter.page);
           }
         })
-        .then(() => setIsLoading(false));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -242,26 +310,44 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
             Period: value["Period"],
             Status: value["Status"],
             Count: value["Count"],
+            IsBold:
+              value["Creaby"] === userInfo.username
+                ? ["Draft Scoring", "Approved"].includes(value["Status"])
+                : ["Waiting Approval", "Draft Scoring"].includes(
+                    value["Status"]
+                  ),
             Action:
               role === "ROL01" &&
               value["Status"] === "Draft" &&
               value["Creaby"] === userInfo.username
                 ? ["Detail", "Edit", "Submit"]
-                : inorole === "Facilitator" &&
-                  value["Status"] === "Waiting Approval"
+                : role === "ROL01" &&
+                  value["Status"] === "Waiting Approval" &&
+                  value["Creaby"] !== userInfo.username
                 ? ["Detail", "Reject", "Approve"]
                 : role === "ROL01" &&
-                value["Status"] === "Rejected" &&
-                value["Creaby"] === userInfo.username
-                  ? ["Detail", "Edit", "Submit"]
-                  : ["Detail"],
+                  value["Status"] === "Draft Scoring" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "EditFillTheStep", "Submit"]
+                : role === "ROL01" &&
+                  value["Status"] === "Rejected" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "Edit", "Submit"]
+                : role === "ROL36" && value["Status"] === "Approved"
+                ? ["Detail", "Submit"]
+                : value["Status"] === "Approved" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "FillTheStep"]
+                : value["Status"] === "Draft Scoring" &&
+                  value["Creaby"] === userInfo.username
+                ? ["Detail", "EditFillTheStep", "Submit"]
+                : ["Detail"],
             Alignment: [
               "center",
               "left",
               "left",
+              "left",
               "right",
-              "center",
-              "center",
               "center",
               "center",
               "center",
@@ -363,6 +449,7 @@ export default function ValueChainInnovationIndex({ onChangePage }) {
             onApprove={handleApprove}
             onReject={handleReject}
             onEdit={onChangePage}
+            onFillStep={onChangePage}
           />
           <Paging
             pageSize={PAGE_SIZE}

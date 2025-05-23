@@ -93,7 +93,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciLeader: "",
     rciPerusahaan1: "",
     rciPerusahaan2: "",
-    rciReasonforRejection: ""
   });
 
   const memberDataRef = useRef({
@@ -133,8 +132,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
     rciFacil: string().required("required"),
     rciPerusahaan1: string().required("required"),
     rciPerusahaan2: string(),
-    rciStatus: string().required("required"),
-    rciReasonforRejection: string().required("required"),
   });
 
   const memberSchema = object({
@@ -189,8 +186,8 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
           const selected = data.find(
             (item) => item.Text === new Date().getFullYear()
           );
-          formDataRef.current.perId = selected.Value;
-          setSelectedPeriod(selected.Value);
+          formDataRef.current.perId = selected?.Value;
+          setSelectedPeriod(selected?.Value);
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -303,8 +300,6 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
               .Npk,
             rciPerusahaan1: data["Company 1"],
             rciPerusahaan2: data["Company 2"] || "",
-            rciStatus: data["Status"],
-            rciReasonforRejection: data["Alasan Penolakan"]
           };
           const members = data["member"].filter(
             (item) => item.Position === "Member"
@@ -1048,7 +1043,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                         </div>
                       </div>
                     </div>
-                    {formDataRef.current.rciStatus === "Rejected" && (
+                    {/* {formDataRef.current.rciStatus === "Rejected" && (
                       <>
                         <hr />
                         <h5 className="fw-medium fw-bold">Reason for Rejection</h5>
@@ -1056,7 +1051,7 @@ export default function ValueChainInnovationEdit({ onChangePage, withID }) {
                         data={formDataRef.current.rciReasonforRejection}/>
                         <hr />
                       </>
-                    )}
+                    )} */}
                   </div>
                 </div>
               )}
