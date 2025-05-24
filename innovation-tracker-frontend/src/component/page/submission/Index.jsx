@@ -12,7 +12,9 @@ export default function Submission() {
   if (cookie) userInfo = JSON.parse(decryptId(cookie));
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [count, setCount] = useState(0);
+  const [countSS, setCountSS] = useState(0);
+  const [countQCC, setCountQCC] = useState(0);
+  const [countQCP, setCountQCP] = useState(0);
   const navigate = useNavigate();
 
   const formDataRef = useRef({
@@ -25,22 +27,40 @@ export default function Submission() {
   useEffect(() => {
     const fetchData = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
+      setIsLoading(true);
 
       try {
-        const data = await UseFetch(
-          API_LINK + "RencanaSS/GetCountSSNeedAction",
-          {
+        const [dataSS, dataQCC, dataQCP] = await Promise.all([
+          UseFetch(API_LINK + "RencanaSS/GetCountSSNeedAction", {
             id: userInfo.npk,
             role: userInfo.role.slice(0, 5),
             jabatan: userInfo.jabatan,
-          }
-        );
+          }),
+          UseFetch(API_LINK + "RencanaCircle/GetCountQCCNeedAction", {
+            id: userInfo.npk,
+            role: userInfo.role.slice(0, 5),
+            jabatan: userInfo.jabatan,
+          }),
+          UseFetch(API_LINK + "RencanaCircle/GetCountQCPNeedAction", {
+            id: userInfo.npk,
+            role: userInfo.role.slice(0, 5),
+            jabatan: userInfo.jabatan,
+          }),
+        ]);
 
-        if (data === "ERROR" || data.length === 0) {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data setting.");
-        } else {
-          setCount(data[0].Value);  
+        if (dataSS === "ERROR" || dataSS.length === 0) {
+          throw new Error("Gagal mengambil data SS.");
         }
+        if (dataQCC === "ERROR" || dataQCC.length === 0) {
+          throw new Error("Gagal mengambil data QCC.");
+        }
+        if (dataQCP === "ERROR" || dataQCP.length === 0) {
+          throw new Error("Gagal mengambil data QCP.");
+        }
+
+        setCountSS(dataSS[0].Value);
+        setCountQCC(dataQCC[0].Value);
+        setCountQCP(dataQCP.setCountQCP[0].Value);
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -132,13 +152,13 @@ export default function Submission() {
                                 fontSize: ".8em",
                               }}
                             >
-                              {count > 0 ? count : ""}
+                              {countSS > 0 ? countSS : ""}
                             </span>
                           </small>
                         </p>
                       </div>
                     </div>
-                  ): ""}
+                  ) : ""}
                   {userInfo.role.slice(0, 5) !== "ROL36" && (
                     <div
                       className="col-sm-3 bg-success rounded-5"
@@ -183,7 +203,7 @@ export default function Submission() {
                   Study Program/UPT/Unit, where the target project is relate
                   with the KPIs of each Study Program/UPT/Unit.
                 </p>
-                
+
                 <div className="row gap-2">
                   {[
                     "Facilitator",
@@ -206,13 +226,13 @@ export default function Submission() {
                                 fontSize: ".8em",
                               }}
                             >
-                              {count > 0 ? count : ""}
+                              {countQCC > 0 ? countQCC : ""}
                             </span>
                           </small>
                         </p>
                       </div>
                     </div>
-                  ): ""}
+                  ) : ""}
                   {userInfo.role.slice(0, 5) !== "ROL36" && (
                     <div
                       className="col-sm-4 bg-success rounded-5"
@@ -251,21 +271,53 @@ export default function Submission() {
                   across Study Programs/UPTs/Units where the project target is
                   in accordance with the KPIs of each WaDir.
                 </p>
-                <div
-                  className="col-sm-4 bg-success rounded-5"
-                  onClick={() => navigate("/submission/qcp")}
-                >
-                  <div
-                    className="d-flex align-items-center mx-3"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <p className="fw-small text-white my-1">
-                      <small>
-                        <Icon name="plus me-2 text-white" />
-                        <i>Quality Control Project</i>
-                      </small>
-                    </p>
-                  </div>
+                <div className="row gap-2">
+                  {[
+                    "Facilitator",
+                  ].includes(userInfo.inorole) || userInfo.role.slice(0, 5) === "ROL36" ? (
+                    <div
+                      className="col-sm-3 bg-success rounded-5"
+                      onClick={() => navigate("/submission/qcp")}
+                    >
+                      <div
+                        className="d-flex align-items-center"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <p className="fw-small text-white my-1">
+                          <small>
+                            <Icon name="memo-circle-check me-2 text-white" />
+                            <i>Submission need Action </i>
+                            <span
+                              className="badge rounded-pill bg-danger ms-1"
+                              style={{
+                                fontSize: ".8em",
+                              }}
+                            >
+                              {countQCP > 0 ? countQCP : ""}
+                            </span>
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  ) : ""}
+                  {userInfo.role.slice(0, 5) !== "ROL36" && (
+                    <div
+                      className="col-sm-4 bg-success rounded-5"
+                      onClick={() => navigate("/submission/qcp")}
+                    >
+                      <div
+                        className="d-flex align-items-center mx-3"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <p className="fw-small text-white my-1">
+                          <small>
+                            <Icon name="plus me-2 text-white" />
+                            <i>Quality Control Project</i>
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
