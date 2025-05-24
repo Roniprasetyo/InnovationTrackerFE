@@ -143,8 +143,33 @@ export default function QualityControlCircleIndex({
       "",
       true
     );
+    let Status = "";
+
+     try {
+        const data = await UseFetch(
+          API_LINK + "RencanaCircle/GetRencanaQCPById",
+          {
+            id: id,
+          }
+        );
+
+        if (data === "ERROR" || data.length === 0) {
+          throw new Error("Error: Failed to get QCP data");
+        } else {
+          Status = data.Status;
+          console.log ("hahhahah", data);
+        }
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } 
 
     if (confirm) {
+      
       try {
         const updateResult = await UseFetch(
           API_LINK + "RencanaCircle/SentRencanaCircle",
@@ -174,9 +199,18 @@ export default function QualityControlCircleIndex({
             rci: id,
           });
 
-          if (currentData.Status === "Draft Steps") {
-            
+          
+          console.log("ppppppp:", currentData);
+          if (Status === "Draft Steps"){
           const notifikasiMessagee = `A new Quality Control Circle Scoring has been submitted by ${decodedNama} - ${userInfo.npk} with the title: ${decodedTitle}. Please review and take the appropriate action.`;
+
+           await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiQCC1", {
+            from: userInfo.username,
+            to: "",
+            message: notifikasiMessagee,
+            sis: -1,
+            rci: id,
+          });
 
           await UseFetch(API_LINK + "Notifikasi/CreateNotifikasiNovKoor", {
           from: userInfo.username,
@@ -186,6 +220,7 @@ export default function QualityControlCircleIndex({
             rci: id,
           });
         }
+        
 
           SweetAlert(
             "Success",

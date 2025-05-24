@@ -74,6 +74,7 @@ export default function QualityControlCircleEditFillStep({
     Section: "",
   });
 
+  console.log("STATUS", statusFTS);
   const payloadRef = useRef({
     Key: 0,
     rci_id: withID,
